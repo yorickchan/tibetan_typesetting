@@ -133,9 +133,22 @@ class PdfService {
     // missing from the primary font (e.g. 瓔 U+74D4, 珞 U+73DE).
     final fontFallback = await _fontService.loadCjkFallbackFonts();
 
+    // Title page fonts (fall back to body fonts)
+    final titleTibConfig = ps.titleTibetanFont ?? tibConfig;
+    final titleChiConfig = ps.titleChineseFont ?? transConfig;
+
+    pw.Font? titleChiPdfFont;
+    try {
+      if (titleChiConfig.fontPath.isNotEmpty) {
+        titleChiPdfFont = await _fontService.loadFontForPdf(titleChiConfig);
+      }
+    } catch (_) {}
+    final titleChiFont = titleChiPdfFont ?? tranFont;
+
     // Font families for pre-rendered text (Tibetan through HarfBuzz)
     final tibFamily = tibConfig.fontFamily;
     final transFamily = transConfig.fontFamily;
+    final titleTibFamily = titleTibConfig.fontFamily;
 
     final pageW = ps.pageWidthMm * PdfPageFormat.mm;
     final pageH = ps.pageHeightMm * PdfPageFormat.mm;
@@ -191,10 +204,10 @@ class PdfService {
           'title_tib',
           _render(
             ps.titleTibetan,
-            16,
+            titleTibConfig.fontSize,
             _blackUi,
             titleTextW,
-            fontFamily: tibFamily,
+            fontFamily: titleTibFamily,
             lineHeight: 1.4,
           ),
         ),
@@ -301,7 +314,8 @@ class PdfService {
           build: (_) => _buildTitlePage(
             ps: ps,
             projectName: project.name,
-            chiFont: tranFont,
+            chiFont: titleChiFont,
+            chiFontSize: titleChiConfig.fontSize,
             fontFallback: fontFallback,
             outerW: outerW,
             outerH: outerH,
@@ -357,6 +371,7 @@ class PdfService {
     required PageSetup ps,
     required String projectName,
     required pw.Font chiFont,
+    required double chiFontSize,
     required List<pw.Font> fontFallback,
     required double outerW,
     required double outerH,
@@ -418,14 +433,14 @@ class PdfService {
               if (tibImg != null)
                 pw.Image(tibImg.provider, width: tibImg.w, height: tibImg.h),
               if (tibImg == null)
-                pw.Text(' ', style: pw.TextStyle(font: chiFont, fontFallback: fontFallback, fontSize: 16)),
+                pw.Text(' ', style: pw.TextStyle(font: chiFont, fontFallback: fontFallback, fontSize: chiFontSize)),
               pw.SizedBox(height: 6),
               pw.Text(
                 titleChinese.isEmpty ? ' ' : titleChinese,
                 style: pw.TextStyle(
                   font: chiFont,
                   fontFallback: fontFallback,
-                  fontSize: 12,
+                  fontSize: chiFontSize,
                   color: PdfColors.black,
                 ),
                 textAlign: pw.TextAlign.center,

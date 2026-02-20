@@ -53,6 +53,8 @@ class PageSetup {
   FontConfig? tibetanFont;
   FontConfig? pronunciationFont;
   FontConfig? translationFont;
+  FontConfig? titleTibetanFont;
+  FontConfig? titleChineseFont;
 
   PageSetup({
     this.pageWidthMm = 300,
@@ -68,6 +70,8 @@ class PageSetup {
     this.tibetanFont,
     this.pronunciationFont,
     this.translationFont,
+    this.titleTibetanFont,
+    this.titleChineseFont,
   }) : marginMm = marginMm ?? MarginMm();
 
   PageSetup copyWith({
@@ -84,9 +88,13 @@ class PageSetup {
     FontConfig? tibetanFont,
     FontConfig? pronunciationFont,
     FontConfig? translationFont,
+    FontConfig? titleTibetanFont,
+    FontConfig? titleChineseFont,
     bool clearTibetanFont = false,
     bool clearPronunciationFont = false,
     bool clearTranslationFont = false,
+    bool clearTitleTibetanFont = false,
+    bool clearTitleChineseFont = false,
   }) {
     return PageSetup(
       pageWidthMm: pageWidthMm ?? this.pageWidthMm,
@@ -107,6 +115,12 @@ class PageSetup {
       translationFont: clearTranslationFont
           ? null
           : (translationFont ?? this.translationFont),
+      titleTibetanFont: clearTitleTibetanFont
+          ? null
+          : (titleTibetanFont ?? this.titleTibetanFont),
+      titleChineseFont: clearTitleChineseFont
+          ? null
+          : (titleChineseFont ?? this.titleChineseFont),
     );
   }
 
@@ -126,6 +140,10 @@ class PageSetup {
       'pronunciationFont': pronunciationFont!.toJson(),
     if (translationFont != null)
       'translationFont': translationFont!.toJson(),
+    if (titleTibetanFont != null)
+      'titleTibetanFont': titleTibetanFont!.toJson(),
+    if (titleChineseFont != null)
+      'titleChineseFont': titleChineseFont!.toJson(),
   };
 
   factory PageSetup.fromJson(Map<String, dynamic> json) => PageSetup(
@@ -151,6 +169,14 @@ class PageSetup {
     translationFont: json['translationFont'] != null
         ? FontConfig.fromJson(
             json['translationFont'] as Map<String, dynamic>)
+        : null,
+    titleTibetanFont: json['titleTibetanFont'] != null
+        ? FontConfig.fromJson(
+            json['titleTibetanFont'] as Map<String, dynamic>)
+        : null,
+    titleChineseFont: json['titleChineseFont'] != null
+        ? FontConfig.fromJson(
+            json['titleChineseFont'] as Map<String, dynamic>)
         : null,
   );
 }

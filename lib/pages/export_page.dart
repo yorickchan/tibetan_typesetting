@@ -5,13 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../models/app_settings.dart';
-import '../models/font_config.dart';
 import '../models/project.dart';
 import '../services/database_service.dart';
+import '../services/font_service.dart';
 import '../services/pdf_service.dart';
 import '../services/settings_service.dart';
 import '../utils/colors.dart';
-import '../utils/font_utils.dart' as font_utils;
 import '../widgets/app_shell.dart';
 import '../widgets/sample_pages.dart';
 
@@ -27,6 +26,7 @@ class _ExportPageState extends State<ExportPage> {
   final _db = DatabaseService();
   final _pdfService = PdfService();
   final _settingsService = SettingsService();
+  final _fontService = FontService();
   final _focusNode = FocusNode();
   final _txController = TransformationController();
   Project? _project;
@@ -75,6 +75,21 @@ class _ExportPageState extends State<ExportPage> {
     setState(() => _loading = true);
     try {
       final project = await _db.getProject(widget.projectId);
+      if (!mounted) return;
+
+      if (project != null) {
+        final ps = project.pageSetup;
+        for (final c in [
+          ps.tibetanFont,
+          ps.pronunciationFont,
+          ps.translationFont,
+          ps.titleTibetanFont,
+          ps.titleChineseFont,
+        ]) {
+          if (c != null) await _fontService.loadFontForPreview(c);
+        }
+      }
+
       if (!mounted) return;
       setState(() {
         _project = project;
@@ -471,61 +486,6 @@ class _ExportPageState extends State<ExportPage> {
                     style: TextStyle(color: AppColors.slate200, fontSize: 13),
                   ),
                 ],
-              ),
-              const SizedBox(height: 12),
-
-              // Title page
-              Row(
-                children: [
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: Checkbox(
-                      value: ps.showTitlePage,
-                      onChanged: (v) =>
-                          _updateSetup((s) => s.copyWith(showTitlePage: v)),
-                      activeColor: AppColors.sky500,
-                      side: const BorderSide(color: AppColors.slate500),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  const Text(
-                    'Title page',
-                    style: TextStyle(color: AppColors.slate200, fontSize: 13),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                initialValue: ps.titleTibetan,
-                style: TextStyle(
-                  fontFamily: font_utils.effectiveFont(
-                    ps.tibetanFont,
-                    _appSettings.tibetanFont,
-                    const FontConfig(fontFamily: 'BabelStoneTibetan', fontPath: '', fontSize: 10),
-                  ).fontFamily,
-                  fontSize: 13,
-                  color: AppColors.slate100,
-                ),
-                decoration: _numberDecor('Title (Tibetan)'),
-                onChanged: (v) =>
-                    _updateSetup((s) => s.copyWith(titleTibetan: v)),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                initialValue: ps.titleChinese,
-                style: TextStyle(
-                  fontFamily: font_utils.effectiveFont(
-                    ps.translationFont,
-                    _appSettings.translationFont,
-                    const FontConfig(fontFamily: 'STHeiti', fontPath: '', fontSize: 8),
-                  ).fontFamily,
-                  fontSize: 13,
-                  color: AppColors.slate100,
-                ),
-                decoration: _numberDecor('Title (Chinese)'),
-                onChanged: (v) =>
-                    _updateSetup((s) => s.copyWith(titleChinese: v)),
               ),
               const SizedBox(height: 12),
 

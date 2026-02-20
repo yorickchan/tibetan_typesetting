@@ -74,6 +74,22 @@ class _EditorPageState extends State<EditorPage> {
     try {
       final project = await _db.getProject(widget.projectId);
       if (!mounted) return;
+
+      if (project != null) {
+        final ps = project.pageSetup;
+        final fontService = FontService();
+        for (final c in [
+          ps.tibetanFont,
+          ps.pronunciationFont,
+          ps.translationFont,
+          ps.titleTibetanFont,
+          ps.titleChineseFont,
+        ]) {
+          if (c != null) await fontService.loadFontForPreview(c);
+        }
+      }
+
+      if (!mounted) return;
       setState(() {
         _project = project;
         _loading = false;
@@ -635,11 +651,11 @@ class _TitlePageSettings extends StatelessWidget {
                     label: 'Tibetan',
                     value: pageSetup.titleTibetan,
                     placeholder: 'Title (Tibetan)',
-                    fontFamily: font_utils.effectiveFont(
+                    fontFamily: (pageSetup.titleTibetanFont ?? font_utils.effectiveFont(
                       pageSetup.tibetanFont,
                       appSettings.tibetanFont,
                       const FontConfig(fontFamily: 'BabelStoneTibetan', fontPath: '', fontSize: 10),
-                    ).fontFamily,
+                    )).fontFamily,
                     onChanged: (v) =>
                         onUpdateSetup((s) => s.copyWith(titleTibetan: v)),
                   ),
@@ -648,13 +664,89 @@ class _TitlePageSettings extends StatelessWidget {
                     label: 'Chinese',
                     value: pageSetup.titleChinese,
                     placeholder: 'Title (Chinese)',
-                    fontFamily: font_utils.effectiveFont(
+                    fontFamily: (pageSetup.titleChineseFont ?? font_utils.effectiveFont(
                       pageSetup.translationFont,
                       appSettings.translationFont,
                       const FontConfig(fontFamily: 'STHeiti', fontPath: '', fontSize: 8),
-                    ).fontFamily,
+                    )).fontFamily,
                     onChanged: (v) =>
                         onUpdateSetup((s) => s.copyWith(titleChinese: v)),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(height: 1, color: AppColors.slate800),
+                  const SizedBox(height: 12),
+                  _titleFontRow(
+                    label: 'TITLE TIBETAN FONT',
+                    current: pageSetup.titleTibetanFont,
+                    fallback: font_utils.effectiveFont(
+                      pageSetup.tibetanFont,
+                      appSettings.tibetanFont,
+                      const FontConfig(fontFamily: 'BabelStoneTibetan', fontPath: '', fontSize: 10),
+                    ),
+                    defaultSize: 10,
+                    onSelected: (info) {
+                      FontService().loadFontForPreview(FontConfig(
+                        fontFamily: info.familyName,
+                        fontPath: info.filePath,
+                        fontSize: 10,
+                      ));
+                      onUpdateSetup((s) => s.copyWith(
+                        titleTibetanFont: FontConfig(
+                          fontFamily: info.familyName,
+                          fontPath: info.filePath,
+                          fontSize: pageSetup.titleTibetanFont?.fontSize ?? 10,
+                        ),
+                      ));
+                    },
+                    onSizeChanged: (v) {
+                      final n = double.tryParse(v);
+                      if (n == null || n <= 0) return;
+                      final cur = pageSetup.titleTibetanFont;
+                      if (cur == null) return;
+                      onUpdateSetup(
+                        (s) => s.copyWith(titleTibetanFont: cur.copyWith(fontSize: n)),
+                      );
+                    },
+                    onReset: () => onUpdateSetup(
+                      (s) => s.copyWith(clearTitleTibetanFont: true),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  _titleFontRow(
+                    label: 'TITLE CHINESE FONT',
+                    current: pageSetup.titleChineseFont,
+                    fallback: font_utils.effectiveFont(
+                      pageSetup.translationFont,
+                      appSettings.translationFont,
+                      const FontConfig(fontFamily: 'STHeiti', fontPath: '', fontSize: 8),
+                    ),
+                    defaultSize: 8,
+                    onSelected: (info) {
+                      FontService().loadFontForPreview(FontConfig(
+                        fontFamily: info.familyName,
+                        fontPath: info.filePath,
+                        fontSize: 8,
+                      ));
+                      onUpdateSetup((s) => s.copyWith(
+                        titleChineseFont: FontConfig(
+                          fontFamily: info.familyName,
+                          fontPath: info.filePath,
+                          fontSize: pageSetup.titleChineseFont?.fontSize ?? 8,
+                        ),
+                      ));
+                    },
+                    onSizeChanged: (v) {
+                      final n = double.tryParse(v);
+                      if (n == null || n <= 0) return;
+                      final cur = pageSetup.titleChineseFont;
+                      if (cur == null) return;
+                      onUpdateSetup(
+                        (s) => s.copyWith(titleChineseFont: cur.copyWith(fontSize: n)),
+                      );
+                    },
+                    onReset: () => onUpdateSetup(
+                      (s) => s.copyWith(clearTitleChineseFont: true),
+                    ),
                   ),
                 ],
               ),
@@ -662,6 +754,112 @@ class _TitlePageSettings extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+
+  Widget _titleFontRow({
+    required String label,
+    required FontConfig? current,
+    required FontConfig fallback,
+    required double defaultSize,
+    required ValueChanged<SystemFontInfo> onSelected,
+    required ValueChanged<String> onSizeChanged,
+    required VoidCallback onReset,
+  }) {
+    final hasOverride = current != null;
+    final effectiveName = current?.fontFamily ?? fallback.fontFamily;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.slate500,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.0,
+              ),
+            ),
+            const Spacer(),
+            if (!hasOverride)
+              Text(
+                'Default: $effectiveName',
+                style: const TextStyle(
+                  color: AppColors.slate600,
+                  fontSize: 10,
+                ),
+              ),
+            if (hasOverride)
+              GestureDetector(
+                onTap: onReset,
+                child: const Text(
+                  'Reset to default',
+                  style: TextStyle(
+                    color: AppColors.sky500,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: FontPicker(
+                label: '',
+                selectedPath: current?.fontPath,
+                onSelected: onSelected,
+              ),
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 70,
+              child: TextFormField(
+                initialValue: (current?.fontSize ?? defaultSize)
+                    .toStringAsFixed(1),
+                keyboardType: TextInputType.number,
+                onChanged: onSizeChanged,
+                style: const TextStyle(
+                  color: AppColors.slate100,
+                  fontSize: 13,
+                ),
+                decoration: InputDecoration(
+                  labelText: 'Size',
+                  labelStyle: const TextStyle(
+                    color: AppColors.slate500,
+                    fontSize: 10,
+                  ),
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 8,
+                  ),
+                  filled: true,
+                  fillColor: AppColors.slate950.withValues(alpha: 0.4),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: AppColors.slate700),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: AppColors.slate700),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: AppColors.sky500),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

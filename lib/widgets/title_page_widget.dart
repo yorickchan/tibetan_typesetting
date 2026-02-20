@@ -36,10 +36,13 @@ class TitlePageWidget extends StatelessWidget {
     final pageW = setup.pageWidthMm * kMmToPx;
     final pageH = setup.pageHeightMm * kMmToPx;
 
-    final tibFont = font_utils.effectiveFont(
+    final bodyTibFont = font_utils.effectiveFont(
         setup.tibetanFont, appSettings?.tibetanFont, _fallbackTibetan);
-    final transFont = font_utils.effectiveFont(
+    final bodyTransFont = font_utils.effectiveFont(
         setup.translationFont, appSettings?.translationFont, _fallbackChinese);
+
+    final tibFont = setup.titleTibetanFont ?? bodyTibFont;
+    final transFont = setup.titleChineseFont ?? bodyTransFont;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
@@ -94,6 +97,8 @@ class TitlePageWidget extends StatelessWidget {
                               titleChinese: titleChinese,
                               tibetanFontFamily: tibFont.fontFamily,
                               chineseFontFamily: transFont.fontFamily,
+                              tibetanFontSize: font_utils.previewFontSize(tibFont.fontSize),
+                              chineseFontSize: font_utils.previewFontSize(transFont.fontSize),
                             ),
                           ),
                         ),
@@ -113,7 +118,7 @@ class TitlePageWidget extends StatelessWidget {
                         child: Text(
                           pageNumber ?? setup.pageNumber,
                           style: TextStyle(
-                            fontFamily: transFont.fontFamily,
+                            fontFamily: bodyTransFont.fontFamily,
                             fontSize: 11,
                             color: Colors.black87,
                           ),
@@ -160,12 +165,16 @@ class _TitleBox extends StatelessWidget {
   final String titleChinese;
   final String tibetanFontFamily;
   final String chineseFontFamily;
+  final double tibetanFontSize;
+  final double chineseFontSize;
 
   const _TitleBox({
     required this.titleTibetan,
     required this.titleChinese,
     required this.tibetanFontFamily,
     required this.chineseFontFamily,
+    required this.tibetanFontSize,
+    required this.chineseFontSize,
   });
 
   @override
@@ -188,7 +197,7 @@ class _TitleBox extends StatelessWidget {
               titleTibetan.isEmpty ? ' ' : titleTibetan,
               style: TextStyle(
                 fontFamily: tibetanFontFamily,
-                fontSize: 18,
+                fontSize: tibetanFontSize,
                 color: Colors.black87,
                 height: 1.4,
               ),
@@ -199,7 +208,7 @@ class _TitleBox extends StatelessWidget {
               titleChinese.isEmpty ? ' ' : titleChinese,
               style: TextStyle(
                 fontFamily: chineseFontFamily,
-                fontSize: 13,
+                fontSize: chineseFontSize,
                 color: Colors.black87,
                 height: 1.5,
               ),
