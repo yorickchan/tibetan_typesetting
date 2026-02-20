@@ -189,7 +189,6 @@ class PdfService {
       final page = pages[pi];
       final pageCols = page.colCount < 1 ? 1 : page.colCount;
       final cellW = contentW / pageCols;
-      final textMaxW = cellW - padX * 2;
 
       final showMark = pi % 2 == 0;
       for (var ri = 0; ri < page.rows.length; ri++) {
@@ -212,6 +211,11 @@ class PdfService {
           final small = block.smallText;
           final hSize = tibFontSize * 0.9 * (small ? 0.75 : 1.0);
           final bSize = tibFontSize * (small ? 0.75 : 1.0);
+
+          // Small text extends from its column position to the right edge
+          final textMaxW = small
+              ? (contentW - ci * cellW - padX * 2)
+              : (cellW - padX * 2);
 
           tasks.add(put(
               '${key}_h',
@@ -538,12 +542,16 @@ class PdfService {
           final block = (ci < row.length) ? row[ci] : null;
           if (block == null) continue;
           final key = '${pageIdx}_${ri}_$ci';
+          // Small text extends from its column position to the right edge
+          final blockW = block.smallText
+              ? (cW - ci * cellW - padX * 2)
+              : (cellW - padX * 2);
           positioned.add(
             pw.Positioned(
               left: ci * cellW + padX,
               top: ri * rowH + padY,
               child: pw.SizedBox(
-                width: cellW - padX * 2,
+                width: blockW,
                 child: buildBlock(key, block),
               ),
             ),
