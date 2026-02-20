@@ -1,5 +1,7 @@
 # Tibetan Typesetting
 
+[繁體中文](README.zh-TW.md) | English
+
 A Flutter desktop application for creating and exporting Tibetan text documents with Chinese translations in a traditional layout format.
 
 ![Main Screen](screenshot/main%20screen.png)

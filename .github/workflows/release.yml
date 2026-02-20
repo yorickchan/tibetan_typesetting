@@ -1,0 +1,136 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          
+      - name: Install dependencies
+        run: flutter pub get
+        
+      - name: Build macOS
+        run: flutter build macos --release
+        
+      - name: Create DMG
+        run: |
+          brew install create-dmg
+          create-dmg \
+            --volname "Tibetan Typesetting" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 100 \
+            --app-drop-link 450 185 \
+            --hide-extension "tibetan_typesetting.app" \
+            tibetan-typesetting-macos.dmg \
+            build/macos/Build/Products/Release/tibetan_typesetting.app \
+            || cp -r build/macos/Build/Products/Release/tibetan_typesetting.app tibetan_typesetting.app
+        
+      - name: Create ZIP (fallback)
+        if: failure()
+        run: |
+          cd build/macos/Build/Products/Release
+          zip -r ../../../../../tibetan-typesetting-macos.zip tibetan_typesetting.app
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: |
+            tibetan-typesetting-macos.dmg
+            tibetan-typesetting-macos.zip
+          if-no-files-found: ignore
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          
+      - name: Install dependencies
+        run: flutter pub get
+        
+      - name: Build Windows
+        run: flutter build windows --release
+        
+      - name: Create ZIP
+        run: |
+          cd build/windows/x64/runner/Release
+          Compress-Archive -Path * -DestinationPath ../../../../../tibetan-typesetting-windows.zip
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: tibetan-typesetting-windows.zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
+          
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          
+      - name: Install dependencies
+        run: flutter pub get
+        
+      - name: Build Linux
+        run: flutter build linux --release
+        
+      - name: Create tarball
+        run: |
+          cd build/linux/x64/release/bundle
+          tar -czf ../../../../../tibetan-typesetting-linux.tar.gz *
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: tibetan-typesetting-linux.tar.gz
+
+  create-release:
+    needs: [build-macos, build-windows, build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            macos-build/*
+            windows-build/*
+            linux-build/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
