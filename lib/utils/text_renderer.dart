@@ -7,16 +7,19 @@ class RenderedText {
   final Uint8List pngBytes;
   final double width;
   final double height;
-  RenderedText(
-      {required this.pngBytes, required this.width, required this.height});
+  RenderedText({
+    required this.pngBytes,
+    required this.width,
+    required this.height,
+  });
 }
 
 /// Render text using Flutter's HarfBuzz-powered text engine (which fully
 /// supports OpenType GSUB/GPOS for complex scripts like Tibetan) and return
 /// a high-resolution PNG suitable for embedding in a PDF.
 ///
-/// [scale] controls pixel density. 4× gives ~288 DPI in a 72-DPI PDF —
-/// sharp enough for print.
+/// [scale] controls pixel density. 460/72 ≈ 6.389× gives exactly 460 DPI
+/// in a 72-DPI PDF coordinate space.
 Future<RenderedText?> renderTextToPng(
   String text, {
   required String fontFamily,
@@ -24,7 +27,7 @@ Future<RenderedText?> renderTextToPng(
   required double fontSize,
   required Color color,
   required double maxWidth,
-  double scale = 4.0,
+  double scale = 460 / 72,
   double? lineHeight,
 }) async {
   if (text.trim().isEmpty) return null;
