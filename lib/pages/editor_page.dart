@@ -438,12 +438,14 @@ class _EditorPageState extends State<EditorPage> {
 
         // Title page preview
         if (project.pageSetup.showTitlePage) ...[
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: TitlePageWidget(
-              project: project,
-              appSettings: _appSettings,
-              pageNumber: '',
+          Center(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: TitlePageWidget(
+                project: project,
+                appSettings: _appSettings,
+                pageNumber: '',
+              ),
             ),
           ),
           const SizedBox(height: 12),

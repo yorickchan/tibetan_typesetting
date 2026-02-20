@@ -255,7 +255,7 @@ class _ContentGrid extends StatelessWidget {
 
             final smallFactor = isSmall ? 0.75 : 1.0;
             final headingSize =
-                font_utils.previewFontSize(tibSize * 0.9) * smallFactor;
+                font_utils.previewFontSize(tibSize) * smallFactor;
             final bodySize = font_utils.previewFontSize(tibSize) * smallFactor;
             final chineseSize =
                 font_utils.previewFontSize(chiSize) * smallFactor;
@@ -269,13 +269,15 @@ class _ContentGrid extends StatelessWidget {
                 width: blockW,
                 height: rowHs[ri],
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 4,
-                  ),
+                  padding: const EdgeInsets.only(top: 16, left: 6, right: 6),
                   decoration: isHL
                       ? BoxDecoration(
-                          color: Colors.amber.shade100.withValues(alpha: 0.6),
+                          color: const Color.fromARGB(
+                            255,
+                            183,
+                            179,
+                            255,
+                          ).withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(4),
                         )
                       : null,
@@ -301,7 +303,7 @@ class _ContentGrid extends StatelessWidget {
                             fontFamily: tibFamily,
                             fontSize: headingSize,
                             color: AppColors.rose600,
-                            height: 1.4,
+                            height: 0.75,
                           ),
                           maxLines: isSmall ? null : 2,
                           overflow: isSmall ? null : TextOverflow.ellipsis,
@@ -315,7 +317,7 @@ class _ContentGrid extends StatelessWidget {
                               fontFamily: tibFamily,
                               fontSize: bodySize,
                               color: Colors.black87,
-                              height: 1.5,
+                              height: 0.75,
                             ),
                             maxLines: isSmall ? null : 3,
                             overflow: isSmall ? null : TextOverflow.ellipsis,
@@ -330,7 +332,7 @@ class _ContentGrid extends StatelessWidget {
                               fontFamily: pronFamily,
                               fontSize: chineseSize,
                               color: Colors.black87,
-                              height: 1.2,
+                              height: 1,
                             ),
                             maxLines: isSmall ? null : 2,
                             overflow: isSmall ? null : TextOverflow.ellipsis,
@@ -345,7 +347,7 @@ class _ContentGrid extends StatelessWidget {
                               fontFamily: transFamily,
                               fontSize: chineseSize,
                               color: Colors.black87,
-                              height: 1.2,
+                              height: 1,
                             ),
                             maxLines: isSmall ? null : 2,
                             overflow: isSmall ? null : TextOverflow.ellipsis,
