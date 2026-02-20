@@ -9,10 +9,16 @@ import '../utils/sample_layout.dart';
 
 const double kMmToPx = 3.78;
 
-const _fallbackTibetan =
-    FontConfig(fontFamily: 'BabelStoneTibetan', fontPath: '', fontSize: 10);
-const _fallbackChinese =
-    FontConfig(fontFamily: 'STHeiti', fontPath: '', fontSize: 8);
+const _fallbackTibetan = FontConfig(
+  fontFamily: 'BabelStoneTibetan',
+  fontPath: '',
+  fontSize: 10,
+);
+const _fallbackChinese = FontConfig(
+  fontFamily: 'STHeiti',
+  fontPath: '',
+  fontSize: 8,
+);
 
 class SamplePageWidget extends StatelessWidget {
   final Project project;
@@ -48,11 +54,20 @@ class SamplePageWidget extends StatelessWidget {
     final pageH = setup.pageHeightMm * kMmToPx;
 
     final tibFont = font_utils.effectiveFont(
-        setup.tibetanFont, appSettings?.tibetanFont, _fallbackTibetan);
+      setup.tibetanFont,
+      appSettings?.tibetanFont,
+      _fallbackTibetan,
+    );
     final pronFont = font_utils.effectiveFont(
-        setup.pronunciationFont, appSettings?.pronunciationFont, _fallbackChinese);
+      setup.pronunciationFont,
+      appSettings?.pronunciationFont,
+      _fallbackChinese,
+    );
     final transFont = font_utils.effectiveFont(
-        setup.translationFont, appSettings?.translationFont, _fallbackChinese);
+      setup.translationFont,
+      appSettings?.translationFont,
+      _fallbackChinese,
+    );
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
@@ -184,139 +199,168 @@ class _ContentGrid extends StatelessWidget {
     final tibSize = tibetanFont.fontSize;
     final chiSize = pronunciationFont.fontSize;
 
-    return LayoutBuilder(builder: (context, constraints) {
-      final totalW = constraints.maxWidth;
-      final totalH = constraints.maxHeight;
-      final rowH = totalH / rows.length;
-      final cellW = totalW / colCount;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalW = constraints.maxWidth;
+        final totalH = constraints.maxHeight;
+        final cellW = totalW / colCount;
+        final rowCount = rows.length;
+        const smallRowShrink = 4 * kMmToPx;
 
-      final children = <Widget>[];
-
-      for (var ri = 0; ri < rows.length; ri++) {
-        final row = rows[ri];
-        for (var ci = 0; ci < colCount; ci++) {
-          final block = (ci < row.length) ? row[ci] : null;
-          if (block == null) continue;
-
-          final isHL = highlightBlockId == block.id;
-          final isSmall = block.smallText;
-
-          final tibLines = splitLines(block.tibetan);
-          final heading = tibLines.isNotEmpty ? tibLines[0] : '';
-          final body =
-              tibLines.length > 1 ? tibLines.sublist(1).join(' ') : '';
-          final pron = splitLines(block.chinesePronunciation).join(' ');
-          final trans = splitLines(block.chineseTranslation).join(' ');
-          final doShowMark = showMark && ri == 0 && ci == 0;
-
-          final smallFactor = isSmall ? 0.75 : 1.0;
-          final headingSize =
-              font_utils.previewFontSize(tibSize * 0.9) * smallFactor;
-          final bodySize =
-              font_utils.previewFontSize(tibSize) * smallFactor;
-          final chineseSize =
-              font_utils.previewFontSize(chiSize) * smallFactor;
-
-          // Small text blocks extend from their column to the right edge;
-          // normal blocks stay within their column.
-          final blockW = isSmall ? (totalW - ci * cellW) : cellW;
-
-          children.add(Positioned(
-            left: ci * cellW,
-            top: ri * rowH,
-            width: blockW,
-            height: rowH,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-              decoration: isHL
-                  ? BoxDecoration(
-                      color: Colors.amber.shade100.withValues(alpha: 0.6),
-                      borderRadius: BorderRadius.circular(4),
-                    )
-                  : null,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (heading.isNotEmpty || doShowMark)
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          if (doShowMark)
-                            TextSpan(
-                              text: '༄༅།།   ',
-                              style: TextStyle(
-                                fontFamily: tibFamily,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          TextSpan(text: heading),
-                        ],
-                      ),
-                      style: TextStyle(
-                        fontFamily: tibFamily,
-                        fontSize: headingSize,
-                        color: AppColors.rose600,
-                        height: 1.4,
-                      ),
-                      maxLines: isSmall ? null : 2,
-                      overflow: isSmall ? null : TextOverflow.ellipsis,
-                    ),
-                  if (body.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 1),
-                      child: Text(
-                        body,
-                        style: TextStyle(
-                          fontFamily: tibFamily,
-                          fontSize: bodySize,
-                          color: Colors.black87,
-                          height: 1.5,
-                        ),
-                        maxLines: isSmall ? null : 3,
-                        overflow: isSmall ? null : TextOverflow.ellipsis,
-                      ),
-                    ),
-                  if (pron.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        pron,
-                        style: TextStyle(
-                          fontFamily: pronFamily,
-                          fontSize: chineseSize,
-                          color: Colors.black87,
-                          height: 1.4,
-                        ),
-                        maxLines: isSmall ? null : 2,
-                        overflow: isSmall ? null : TextOverflow.ellipsis,
-                      ),
-                    ),
-                  if (trans.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 1),
-                      child: Text(
-                        trans,
-                        style: TextStyle(
-                          fontFamily: transFamily,
-                          fontSize: chineseSize,
-                          color: Colors.black87,
-                          height: 1.4,
-                        ),
-                        maxLines: isSmall ? null : 2,
-                        overflow: isSmall ? null : TextOverflow.ellipsis,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ));
+        bool isShortRow(List<TextBlock?> row) {
+          for (final b in row) {
+            if (b != null && b.smallText) {
+              final trans = splitLines(b.chineseTranslation).join('');
+              if (trans.isEmpty) return true;
+            }
+          }
+          return false;
         }
-      }
 
-      return Stack(
-        clipBehavior: Clip.none,
-        children: children,
-      );
-    });
+        final baseRowH = totalH / rowCount;
+        final shortRowH = baseRowH - smallRowShrink;
+        final normalRowH = baseRowH;
+
+        final rowYs = <double>[];
+        final rowHs = <double>[];
+        double yAccum = 0;
+        for (var ri = 0; ri < rowCount; ri++) {
+          rowYs.add(yAccum);
+          final h = isShortRow(rows[ri]) ? shortRowH : normalRowH;
+          rowHs.add(h);
+          yAccum += h;
+        }
+
+        final children = <Widget>[];
+
+        for (var ri = 0; ri < rows.length; ri++) {
+          final row = rows[ri];
+          for (var ci = 0; ci < colCount; ci++) {
+            final block = (ci < row.length) ? row[ci] : null;
+            if (block == null) continue;
+
+            final isHL = highlightBlockId == block.id;
+            final isSmall = block.smallText;
+
+            final tibLines = splitLines(block.tibetan);
+            final heading = tibLines.isNotEmpty ? tibLines[0] : '';
+            final body = tibLines.length > 1
+                ? tibLines.sublist(1).join(' ')
+                : '';
+            final pron = splitLines(block.chinesePronunciation).join(' ');
+            final trans = isSmall
+                ? ''
+                : splitLines(block.chineseTranslation).join(' ');
+            final doShowMark = showMark && ri == 0 && ci == 0;
+
+            final smallFactor = isSmall ? 0.75 : 1.0;
+            final headingSize =
+                font_utils.previewFontSize(tibSize * 0.9) * smallFactor;
+            final bodySize = font_utils.previewFontSize(tibSize) * smallFactor;
+            final chineseSize =
+                font_utils.previewFontSize(chiSize) * smallFactor;
+
+            final blockW = isSmall ? (totalW - ci * cellW) : cellW;
+
+            children.add(
+              Positioned(
+                left: ci * cellW,
+                top: rowYs[ri],
+                width: blockW,
+                height: rowHs[ri],
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 4,
+                  ),
+                  decoration: isHL
+                      ? BoxDecoration(
+                          color: Colors.amber.shade100.withValues(alpha: 0.6),
+                          borderRadius: BorderRadius.circular(4),
+                        )
+                      : null,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (heading.isNotEmpty || doShowMark)
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              if (doShowMark)
+                                TextSpan(
+                                  text: '༄༅།།   ',
+                                  style: TextStyle(
+                                    fontFamily: tibFamily,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              TextSpan(text: heading),
+                            ],
+                          ),
+                          style: TextStyle(
+                            fontFamily: tibFamily,
+                            fontSize: headingSize,
+                            color: AppColors.rose600,
+                            height: 1.4,
+                          ),
+                          maxLines: isSmall ? null : 2,
+                          overflow: isSmall ? null : TextOverflow.ellipsis,
+                        ),
+                      if (body.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 1),
+                          child: Text(
+                            body,
+                            style: TextStyle(
+                              fontFamily: tibFamily,
+                              fontSize: bodySize,
+                              color: Colors.black87,
+                              height: 1.5,
+                            ),
+                            maxLines: isSmall ? null : 3,
+                            overflow: isSmall ? null : TextOverflow.ellipsis,
+                          ),
+                        ),
+                      if (pron.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            pron,
+                            style: TextStyle(
+                              fontFamily: pronFamily,
+                              fontSize: chineseSize,
+                              color: Colors.black87,
+                              height: 1.2,
+                            ),
+                            maxLines: isSmall ? null : 2,
+                            overflow: isSmall ? null : TextOverflow.ellipsis,
+                          ),
+                        ),
+                      if (trans.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 1),
+                          child: Text(
+                            trans,
+                            style: TextStyle(
+                              fontFamily: transFamily,
+                              fontSize: chineseSize,
+                              color: Colors.black87,
+                              height: 1.2,
+                            ),
+                            maxLines: isSmall ? null : 2,
+                            overflow: isSmall ? null : TextOverflow.ellipsis,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+        }
+
+        return Stack(clipBehavior: Clip.none, children: children);
+      },
+    );
   }
 }
