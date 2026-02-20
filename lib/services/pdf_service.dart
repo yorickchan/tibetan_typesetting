@@ -360,7 +360,7 @@ class PdfService {
             border: pw.Border.all(color: _rose, width: 1.5),
           ),
           child: pw.Column(
-            mainAxisAlignment: pw.MainAxisAlignment.center,
+            mainAxisSize: pw.MainAxisSize.min,
             children: [
               if (tibImg != null)
                 pw.Image(tibImg.provider,

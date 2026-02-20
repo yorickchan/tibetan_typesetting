@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:printing/printing.dart';
 
 import '../models/app_settings.dart';
 import '../models/font_config.dart';
@@ -172,17 +171,6 @@ class _ExportPageState extends State<ExportPage> {
     }
   }
 
-  Future<void> _printPdf() async {
-    if (_project == null) return;
-    try {
-      final bytes = await _pdfService.generatePdf(_project!,
-          appSettings: _appSettings);
-      await Printing.layoutPdf(onLayout: (_) => bytes);
-    } catch (e) {
-      _showSnack(e.toString(), error: true);
-    }
-  }
-
   InputDecoration _numberDecor(String label) {
     return InputDecoration(
       labelText: label,
@@ -260,26 +248,6 @@ class _ExportPageState extends State<ExportPage> {
                 ),
               ),
             ),
-          Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: TextButton.icon(
-              icon: const Icon(Icons.print,
-                  size: 16, color: AppColors.slate100),
-              label: const Text('Print...',
-                  style:
-                      TextStyle(color: AppColors.slate100, fontSize: 13)),
-              style: TextButton.styleFrom(
-                backgroundColor: AppColors.cardBg,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  side: const BorderSide(color: AppColors.slate800),
-                ),
-              ),
-              onPressed: _project == null ? null : _printPdf,
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: TextButton.icon(
