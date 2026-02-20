@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../models/project.dart';
 import '../services/database_service.dart';
+import '../services/settings_service.dart';
 import '../utils/colors.dart';
 import '../widgets/app_shell.dart';
 import 'editor_page.dart';
@@ -103,9 +104,14 @@ class _ProjectsPageState extends State<ProjectsPage> {
     );
     if (result == null) return;
     try {
+      final settings = await SettingsService().getSettings();
       final project = await _db.createProject(
         name: result['name'] as String,
         tags: result['tags'] as List<String>,
+        pageSetup: PageSetup(
+          pageWidthMm: settings.defaultPageWidthMm,
+          pageHeightMm: settings.defaultPageHeightMm,
+        ),
       );
       _showSnack('Project created');
       if (mounted) _openProject(project.id);

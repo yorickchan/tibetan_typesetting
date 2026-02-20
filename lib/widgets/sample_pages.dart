@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/app_settings.dart';
 import '../models/project.dart';
 import '../utils/sample_layout.dart';
 import 'sample_page.dart';
@@ -16,12 +17,14 @@ String _resolvePageNumber(String base, int index) {
 /// Renders page previews at a fixed pixel size based on mm dimensions.
 class SamplePagesWidget extends StatelessWidget {
   final Project project;
+  final AppSettings? appSettings;
   final String? highlightBlockId;
   final bool skipTitlePage;
 
   const SamplePagesWidget({
     super.key,
     required this.project,
+    this.appSettings,
     this.highlightBlockId,
     this.skipTitlePage = false,
   });
@@ -37,12 +40,17 @@ class SamplePagesWidget extends StatelessWidget {
     final pageWidgets = <Widget>[];
 
     if (showTitlePage) {
-      pageWidgets.add(TitlePageWidget(project: project, pageNumber: ''));
+      pageWidgets.add(TitlePageWidget(
+        project: project,
+        appSettings: appSettings,
+        pageNumber: '',
+      ));
     }
 
     for (var index = 0; index < pages.length; index++) {
       pageWidgets.add(SamplePageWidget(
         project: project,
+        appSettings: appSettings,
         rows: pages[index].rows,
         colCount: pages[index].colCount,
         highlightBlockId: highlightBlockId,

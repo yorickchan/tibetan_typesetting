@@ -3,13 +3,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
+import '../models/app_settings.dart';
+import '../models/font_config.dart';
 import '../models/project.dart';
 import '../services/database_service.dart';
+import '../services/font_service.dart';
+import '../services/settings_service.dart';
 import '../utils/colors.dart';
+import '../utils/font_utils.dart' as font_utils;
 import '../utils/sample_layout.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/block_editor.dart';
 import '../widgets/block_strip.dart';
+import '../widgets/font_picker.dart';
 import '../widgets/sample_page.dart';
 import '../widgets/title_page_widget.dart';
 import 'export_page.dart';
@@ -34,11 +40,14 @@ class EditorPage extends StatefulWidget {
 
 class _EditorPageState extends State<EditorPage> {
   final _db = DatabaseService();
+  final _settingsService = SettingsService();
   Project? _project;
+  AppSettings _appSettings = AppSettings();
   bool _loading = true;
   String? _error;
   String? _selectedId;
   bool _titleOpen = false;
+  bool _fontOpen = false;
   Timer? _saveTimer;
   String _saveState = 'idle'; // idle, saving, saved, error
 
@@ -46,6 +55,12 @@ class _EditorPageState extends State<EditorPage> {
   void initState() {
     super.initState();
     _loadProject();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final s = await _settingsService.getSettings();
+    if (mounted) setState(() => _appSettings = s);
   }
 
   @override
@@ -266,8 +281,9 @@ class _EditorPageState extends State<EditorPage> {
   }
 
   void _selectNext() {
-    if (_project == null || _selectedIndex >= _project!.blocks.length - 1)
+    if (_project == null || _selectedIndex >= _project!.blocks.length - 1) {
       return;
+    }
     setState(() => _selectedId = _project!.blocks[_selectedIndex + 1].id);
   }
 
@@ -387,8 +403,19 @@ class _EditorPageState extends State<EditorPage> {
         // Title page settings
         _TitlePageSettings(
           pageSetup: project.pageSetup,
+          appSettings: _appSettings,
           isOpen: _titleOpen,
           onToggle: () => setState(() => _titleOpen = !_titleOpen),
+          onUpdateSetup: _updateSetup,
+        ),
+        const SizedBox(height: 8),
+
+        // Font settings
+        _FontSettingsPanel(
+          pageSetup: project.pageSetup,
+          appSettings: _appSettings,
+          isOpen: _fontOpen,
+          onToggle: () => setState(() => _fontOpen = !_fontOpen),
           onUpdateSetup: _updateSetup,
         ),
         const SizedBox(height: 12),
@@ -397,7 +424,11 @@ class _EditorPageState extends State<EditorPage> {
         if (project.pageSetup.showTitlePage) ...[
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: TitlePageWidget(project: project, pageNumber: ''),
+            child: TitlePageWidget(
+              project: project,
+              appSettings: _appSettings,
+              pageNumber: '',
+            ),
           ),
           const SizedBox(height: 12),
         ],
@@ -408,6 +439,22 @@ class _EditorPageState extends State<EditorPage> {
           final pageBlockIds = pageData.blocks.map((b) => b.id).toSet();
           final selectedOnThisPage =
               _selectedId != null && pageBlockIds.contains(_selectedId);
+
+          final tibFont = font_utils.effectiveFont(
+            project.pageSetup.tibetanFont,
+            _appSettings.tibetanFont,
+            const FontConfig(fontFamily: 'BabelStoneTibetan', fontPath: '', fontSize: 10),
+          );
+          final pronFont = font_utils.effectiveFont(
+            project.pageSetup.pronunciationFont,
+            _appSettings.pronunciationFont,
+            const FontConfig(fontFamily: 'STHeiti', fontPath: '', fontSize: 8),
+          );
+          final transFont = font_utils.effectiveFont(
+            project.pageSetup.translationFont,
+            _appSettings.translationFont,
+            const FontConfig(fontFamily: 'STHeiti', fontPath: '', fontSize: 8),
+          );
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
@@ -421,6 +468,8 @@ class _EditorPageState extends State<EditorPage> {
                   onAdd: _addBlock,
                   onAddPage: _addPage,
                   pageIndex: pageIdx,
+                  tibetanFontFamily: tibFont.fontFamily,
+                  translationFontFamily: transFont.fontFamily,
                 ),
                 if (selectedOnThisPage) ...[
                   const SizedBox(height: 8),
@@ -436,6 +485,9 @@ class _EditorPageState extends State<EditorPage> {
                     onToggleSmallText: _toggleSmallText,
                     onSelectPrev: _selectPrev,
                     onSelectNext: _selectNext,
+                    tibetanFontFamily: tibFont.fontFamily,
+                    pronunciationFontFamily: pronFont.fontFamily,
+                    translationFontFamily: transFont.fontFamily,
                   ),
                 ],
                 const SizedBox(height: 8),
@@ -443,6 +495,7 @@ class _EditorPageState extends State<EditorPage> {
                   scrollDirection: Axis.horizontal,
                   child: SamplePageWidget(
                     project: project,
+                    appSettings: _appSettings,
                     rows: pageData.page.rows,
                     colCount: pageData.page.colCount,
                     highlightBlockId: _selectedId,
@@ -470,12 +523,14 @@ class _PageWithBlocks {
 
 class _TitlePageSettings extends StatelessWidget {
   final PageSetup pageSetup;
+  final AppSettings appSettings;
   final bool isOpen;
   final VoidCallback onToggle;
   final void Function(PageSetup Function(PageSetup)) onUpdateSetup;
 
   const _TitlePageSettings({
     required this.pageSetup,
+    required this.appSettings,
     required this.isOpen,
     required this.onToggle,
     required this.onUpdateSetup,
@@ -580,7 +635,11 @@ class _TitlePageSettings extends StatelessWidget {
                     label: 'Tibetan',
                     value: pageSetup.titleTibetan,
                     placeholder: 'Title (Tibetan)',
-                    fontFamily: 'BabelStoneTibetan',
+                    fontFamily: font_utils.effectiveFont(
+                      pageSetup.tibetanFont,
+                      appSettings.tibetanFont,
+                      const FontConfig(fontFamily: 'BabelStoneTibetan', fontPath: '', fontSize: 10),
+                    ).fontFamily,
                     onChanged: (v) =>
                         onUpdateSetup((s) => s.copyWith(titleTibetan: v)),
                   ),
@@ -589,7 +648,11 @@ class _TitlePageSettings extends StatelessWidget {
                     label: 'Chinese',
                     value: pageSetup.titleChinese,
                     placeholder: 'Title (Chinese)',
-                    fontFamily: 'STHeiti',
+                    fontFamily: font_utils.effectiveFont(
+                      pageSetup.translationFont,
+                      appSettings.translationFont,
+                      const FontConfig(fontFamily: 'STHeiti', fontPath: '', fontSize: 8),
+                    ).fontFamily,
                     onChanged: (v) =>
                         onUpdateSetup((s) => s.copyWith(titleChinese: v)),
                   ),
@@ -653,6 +716,305 @@ class _TitlePageSettings extends StatelessWidget {
               ),
             ),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Project-level font overrides panel
+// ---------------------------------------------------------------------------
+
+class _FontSettingsPanel extends StatelessWidget {
+  final PageSetup pageSetup;
+  final AppSettings appSettings;
+  final bool isOpen;
+  final VoidCallback onToggle;
+  final void Function(PageSetup Function(PageSetup)) onUpdateSetup;
+
+  const _FontSettingsPanel({
+    required this.pageSetup,
+    required this.appSettings,
+    required this.isOpen,
+    required this.onToggle,
+    required this.onUpdateSetup,
+  });
+
+  bool get _hasOverrides =>
+      pageSetup.tibetanFont != null ||
+      pageSetup.pronunciationFont != null ||
+      pageSetup.translationFont != null;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.cardBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: onToggle,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.font_download_outlined,
+                      size: 14, color: AppColors.slate400),
+                  const SizedBox(width: 6),
+                  const Text(
+                    'Project fonts',
+                    style: TextStyle(
+                      color: AppColors.slate300,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  if (_hasOverrides)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: AppColors.sky500.withValues(alpha: 0.15),
+                      ),
+                      child: const Text(
+                        'CUSTOM',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.sky400,
+                        ),
+                      ),
+                    ),
+                  const Spacer(),
+                  Icon(
+                    isOpen ? Icons.expand_less : Icons.expand_more,
+                    size: 14,
+                    color: AppColors.slate500,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (isOpen) ...[
+            Container(height: 1, color: AppColors.slate800),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  _fontOverrideRow(
+                    label: 'TIBETAN',
+                    current: pageSetup.tibetanFont,
+                    appDefault: appSettings.tibetanFont,
+                    onSelected: (info) {
+                      final existing = pageSetup.tibetanFont;
+                      onUpdateSetup((s) => s.copyWith(
+                            tibetanFont: FontConfig(
+                              fontFamily: info.familyName,
+                              fontPath: info.filePath,
+                              fontSize: existing?.fontSize ??
+                                  appSettings.tibetanFont?.fontSize ??
+                                  10,
+                            ),
+                          ));
+                      FontService().loadFontForPreview(FontConfig(
+                        fontFamily: info.familyName,
+                        fontPath: info.filePath,
+                        fontSize: 10,
+                      ));
+                    },
+                    onSizeChanged: (v) {
+                      final n = double.tryParse(v);
+                      if (n == null || n <= 0) return;
+                      final cur = pageSetup.tibetanFont;
+                      if (cur == null) return;
+                      onUpdateSetup(
+                          (s) => s.copyWith(tibetanFont: cur.copyWith(fontSize: n)));
+                    },
+                    onReset: () =>
+                        onUpdateSetup((s) => s.copyWith(clearTibetanFont: true)),
+                  ),
+                  const SizedBox(height: 10),
+                  _fontOverrideRow(
+                    label: 'PRONUNCIATION',
+                    current: pageSetup.pronunciationFont,
+                    appDefault: appSettings.pronunciationFont,
+                    onSelected: (info) {
+                      final existing = pageSetup.pronunciationFont;
+                      onUpdateSetup((s) => s.copyWith(
+                            pronunciationFont: FontConfig(
+                              fontFamily: info.familyName,
+                              fontPath: info.filePath,
+                              fontSize: existing?.fontSize ??
+                                  appSettings.pronunciationFont?.fontSize ??
+                                  8,
+                            ),
+                          ));
+                      FontService().loadFontForPreview(FontConfig(
+                        fontFamily: info.familyName,
+                        fontPath: info.filePath,
+                        fontSize: 8,
+                      ));
+                    },
+                    onSizeChanged: (v) {
+                      final n = double.tryParse(v);
+                      if (n == null || n <= 0) return;
+                      final cur = pageSetup.pronunciationFont;
+                      if (cur == null) return;
+                      onUpdateSetup((s) =>
+                          s.copyWith(pronunciationFont: cur.copyWith(fontSize: n)));
+                    },
+                    onReset: () => onUpdateSetup(
+                        (s) => s.copyWith(clearPronunciationFont: true)),
+                  ),
+                  const SizedBox(height: 10),
+                  _fontOverrideRow(
+                    label: 'TRANSLATION',
+                    current: pageSetup.translationFont,
+                    appDefault: appSettings.translationFont,
+                    onSelected: (info) {
+                      final existing = pageSetup.translationFont;
+                      onUpdateSetup((s) => s.copyWith(
+                            translationFont: FontConfig(
+                              fontFamily: info.familyName,
+                              fontPath: info.filePath,
+                              fontSize: existing?.fontSize ??
+                                  appSettings.translationFont?.fontSize ??
+                                  8,
+                            ),
+                          ));
+                      FontService().loadFontForPreview(FontConfig(
+                        fontFamily: info.familyName,
+                        fontPath: info.filePath,
+                        fontSize: 8,
+                      ));
+                    },
+                    onSizeChanged: (v) {
+                      final n = double.tryParse(v);
+                      if (n == null || n <= 0) return;
+                      final cur = pageSetup.translationFont;
+                      if (cur == null) return;
+                      onUpdateSetup((s) =>
+                          s.copyWith(translationFont: cur.copyWith(fontSize: n)));
+                    },
+                    onReset: () => onUpdateSetup(
+                        (s) => s.copyWith(clearTranslationFont: true)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _fontOverrideRow({
+    required String label,
+    required FontConfig? current,
+    required FontConfig? appDefault,
+    required ValueChanged<SystemFontInfo> onSelected,
+    required ValueChanged<String> onSizeChanged,
+    required VoidCallback onReset,
+  }) {
+    final hasOverride = current != null;
+    final effectiveName = current?.fontFamily ??
+        appDefault?.fontFamily ??
+        '(not set)';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.slate500,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.0,
+              ),
+            ),
+            const Spacer(),
+            if (!hasOverride)
+              Text(
+                'Default: $effectiveName',
+                style: const TextStyle(
+                    color: AppColors.slate600, fontSize: 10),
+              ),
+            if (hasOverride)
+              GestureDetector(
+                onTap: onReset,
+                child: const Text(
+                  'Reset to default',
+                  style: TextStyle(
+                    color: AppColors.sky500,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: FontPicker(
+                label: '',
+                selectedPath: current?.fontPath,
+                onSelected: onSelected,
+              ),
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 70,
+              child: TextFormField(
+                initialValue: (current?.fontSize ??
+                        appDefault?.fontSize ??
+                        10)
+                    .toStringAsFixed(1),
+                keyboardType: TextInputType.number,
+                onChanged: onSizeChanged,
+                style: const TextStyle(
+                    color: AppColors.slate100, fontSize: 13),
+                decoration: InputDecoration(
+                  labelText: 'Size',
+                  labelStyle: const TextStyle(
+                      color: AppColors.slate500, fontSize: 10),
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 8),
+                  filled: true,
+                  fillColor: AppColors.slate950.withValues(alpha: 0.4),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide:
+                        const BorderSide(color: AppColors.slate700),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide:
+                        const BorderSide(color: AppColors.slate700),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide:
+                        const BorderSide(color: AppColors.sky500),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );

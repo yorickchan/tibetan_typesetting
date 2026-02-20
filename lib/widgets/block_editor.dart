@@ -15,6 +15,9 @@ class BlockEditorWidget extends StatelessWidget {
   final VoidCallback onToggleSmallText;
   final VoidCallback onSelectPrev;
   final VoidCallback onSelectNext;
+  final String tibetanFontFamily;
+  final String pronunciationFontFamily;
+  final String translationFontFamily;
 
   const BlockEditorWidget({
     super.key,
@@ -29,6 +32,9 @@ class BlockEditorWidget extends StatelessWidget {
     required this.onToggleSmallText,
     required this.onSelectPrev,
     required this.onSelectNext,
+    this.tibetanFontFamily = 'BabelStoneTibetan',
+    this.pronunciationFontFamily = 'STHeiti',
+    this.translationFontFamily = 'STHeiti',
   });
 
   @override
@@ -74,6 +80,9 @@ class BlockEditorWidget extends StatelessWidget {
           _EditorFields(
             block: selectedBlock!,
             onUpdateBlock: onUpdateBlock,
+            tibetanFontFamily: tibetanFontFamily,
+            pronunciationFontFamily: pronunciationFontFamily,
+            translationFontFamily: translationFontFamily,
           ),
         ],
       ),
@@ -250,8 +259,17 @@ class _Toolbar extends StatelessWidget {
 class _EditorFields extends StatefulWidget {
   final TextBlock block;
   final ValueChanged<Map<String, dynamic>> onUpdateBlock;
+  final String tibetanFontFamily;
+  final String pronunciationFontFamily;
+  final String translationFontFamily;
 
-  const _EditorFields({required this.block, required this.onUpdateBlock});
+  const _EditorFields({
+    required this.block,
+    required this.onUpdateBlock,
+    required this.tibetanFontFamily,
+    required this.pronunciationFontFamily,
+    required this.translationFontFamily,
+  });
 
   @override
   State<_EditorFields> createState() => _EditorFieldsState();
@@ -355,8 +373,10 @@ class _EditorFieldsState extends State<_EditorFields> {
     return TextField(
       controller: _tibetanCtrl,
       onChanged: (v) => widget.onUpdateBlock({'tibetan': v}),
-      style: const TextStyle(
-          fontFamily: 'BabelStoneTibetan', fontSize: 13, color: AppColors.slate100),
+      style: TextStyle(
+          fontFamily: widget.tibetanFontFamily,
+          fontSize: 13,
+          color: AppColors.slate100),
       maxLines: null,
       minLines: 3,
       decoration: _fieldDecoration('TIBETAN', 'Tibetan text'),
@@ -367,8 +387,10 @@ class _EditorFieldsState extends State<_EditorFields> {
     return TextField(
       controller: _pronCtrl,
       onChanged: (v) => widget.onUpdateBlock({'chinesePronunciation': v}),
-      style: const TextStyle(
-          fontFamily: 'STHeiti', fontSize: 13, color: AppColors.slate100),
+      style: TextStyle(
+          fontFamily: widget.pronunciationFontFamily,
+          fontSize: 13,
+          color: AppColors.slate100),
       maxLines: null,
       minLines: 3,
       decoration: _fieldDecoration('PRONUNCIATION', 'Chinese pronunciation'),
@@ -379,8 +401,10 @@ class _EditorFieldsState extends State<_EditorFields> {
     return TextField(
       controller: _transCtrl,
       onChanged: (v) => widget.onUpdateBlock({'chineseTranslation': v}),
-      style: const TextStyle(
-          fontFamily: 'STHeiti', fontSize: 13, color: AppColors.slate100),
+      style: TextStyle(
+          fontFamily: widget.translationFontFamily,
+          fontSize: 13,
+          color: AppColors.slate100),
       maxLines: null,
       minLines: 3,
       decoration: _fieldDecoration('TRANSLATION', 'Chinese translation'),

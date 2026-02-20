@@ -5,10 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:printing/printing.dart';
 
+import '../models/app_settings.dart';
+import '../models/font_config.dart';
 import '../models/project.dart';
 import '../services/database_service.dart';
 import '../services/pdf_service.dart';
+import '../services/settings_service.dart';
 import '../utils/colors.dart';
+import '../utils/font_utils.dart' as font_utils;
 import '../widgets/app_shell.dart';
 import '../widgets/sample_pages.dart';
 
@@ -23,9 +27,11 @@ class ExportPage extends StatefulWidget {
 class _ExportPageState extends State<ExportPage> {
   final _db = DatabaseService();
   final _pdfService = PdfService();
+  final _settingsService = SettingsService();
   final _focusNode = FocusNode();
   final _txController = TransformationController();
   Project? _project;
+  AppSettings _appSettings = AppSettings();
   bool _loading = true;
   String? _error;
   bool _pdfBusy = false;
@@ -40,6 +46,12 @@ class _ExportPageState extends State<ExportPage> {
   void initState() {
     super.initState();
     _loadProject();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final s = await _settingsService.getSettings();
+    if (mounted) setState(() => _appSettings = s);
   }
 
   @override
@@ -125,8 +137,9 @@ class _ExportPageState extends State<ExportPage> {
       if (!mounted) return;
       setState(() => _saveState = 'saved');
       Future.delayed(const Duration(seconds: 1), () {
-        if (mounted && _saveState == 'saved')
+        if (mounted && _saveState == 'saved') {
           setState(() => _saveState = 'idle');
+        }
       });
     } catch (_) {
       if (!mounted) return;
@@ -138,7 +151,8 @@ class _ExportPageState extends State<ExportPage> {
     if (_project == null) return;
     setState(() => _pdfBusy = true);
     try {
-      final bytes = await _pdfService.generatePdf(_project!);
+      final bytes = await _pdfService.generatePdf(_project!,
+          appSettings: _appSettings);
       final path = await FilePicker.platform.saveFile(
         dialogTitle: 'Save PDF',
         fileName: '${_project!.name}.pdf',
@@ -161,7 +175,8 @@ class _ExportPageState extends State<ExportPage> {
   Future<void> _printPdf() async {
     if (_project == null) return;
     try {
-      final bytes = await _pdfService.generatePdf(_project!);
+      final bytes = await _pdfService.generatePdf(_project!,
+          appSettings: _appSettings);
       await Printing.layoutPdf(onLayout: (_) => bytes);
     } catch (e) {
       _showSnack(e.toString(), error: true);
@@ -515,8 +530,12 @@ class _ExportPageState extends State<ExportPage> {
               const SizedBox(height: 8),
               TextFormField(
                 initialValue: ps.titleTibetan,
-                style: const TextStyle(
-                  fontFamily: 'BabelStoneTibetan',
+                style: TextStyle(
+                  fontFamily: font_utils.effectiveFont(
+                    ps.tibetanFont,
+                    _appSettings.tibetanFont,
+                    const FontConfig(fontFamily: 'BabelStoneTibetan', fontPath: '', fontSize: 10),
+                  ).fontFamily,
                   fontSize: 13,
                   color: AppColors.slate100,
                 ),
@@ -527,8 +546,12 @@ class _ExportPageState extends State<ExportPage> {
               const SizedBox(height: 8),
               TextFormField(
                 initialValue: ps.titleChinese,
-                style: const TextStyle(
-                  fontFamily: 'STHeiti',
+                style: TextStyle(
+                  fontFamily: font_utils.effectiveFont(
+                    ps.translationFont,
+                    _appSettings.translationFont,
+                    const FontConfig(fontFamily: 'STHeiti', fontPath: '', fontSize: 8),
+                  ).fontFamily,
                   fontSize: 13,
                   color: AppColors.slate100,
                 ),
@@ -624,7 +647,10 @@ class _ExportPageState extends State<ExportPage> {
                     scaleEnabled: false,
                     constrained: false,
                     boundaryMargin: const EdgeInsets.all(300),
-                    child: SamplePagesWidget(project: project),
+                    child: SamplePagesWidget(
+                      project: project,
+                      appSettings: _appSettings,
+                    ),
                   ),
                 ),
               ),

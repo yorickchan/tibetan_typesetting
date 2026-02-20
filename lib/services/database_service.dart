@@ -25,23 +25,42 @@ class DatabaseService {
     final path = '$dbPath/tibetan_typesetting.db';
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE IF NOT EXISTS projects (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            tags_json TEXT NOT NULL,
-            project_json TEXT NOT NULL,
-            created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL
-          )
-        ''');
-        await db.execute(
-          'CREATE INDEX IF NOT EXISTS idx_projects_updated_at ON projects(updated_at)',
-        );
+        await _createProjectsTable(db);
+        await _createAppSettingsTable(db);
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await _createAppSettingsTable(db);
+        }
       },
     );
+  }
+
+  Future<void> _createProjectsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS projects (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        tags_json TEXT NOT NULL,
+        project_json TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_projects_updated_at ON projects(updated_at)',
+    );
+  }
+
+  Future<void> _createAppSettingsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS app_settings (
+        key TEXT PRIMARY KEY,
+        value_json TEXT NOT NULL
+      )
+    ''');
   }
 
   Future<List<ProjectListItem>> listProjects({String? query, String? tag}) async {
@@ -81,7 +100,11 @@ class DatabaseService {
     return items;
   }
 
-  Future<Project> createProject({required String name, List<String>? tags}) async {
+  Future<Project> createProject({
+    required String name,
+    List<String>? tags,
+    PageSetup? pageSetup,
+  }) async {
     final db = await database;
     final now = nowIso();
     final projectId = _uuid.v4().replaceAll('-', '');
@@ -91,6 +114,7 @@ class DatabaseService {
       name: name,
       tags: projectTags,
       blocks: [TextBlock(id: _uuid.v4().replaceAll('-', ''))],
+      pageSetup: pageSetup,
       updatedAt: now,
       createdAt: now,
     );

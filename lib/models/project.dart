@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'font_config.dart';
+
 class MarginMm {
   double top;
   double right;
@@ -48,6 +50,9 @@ class PageSetup {
   bool showTitlePage;
   String titleTibetan;
   String titleChinese;
+  FontConfig? tibetanFont;
+  FontConfig? pronunciationFont;
+  FontConfig? translationFont;
 
   PageSetup({
     this.pageWidthMm = 300,
@@ -60,6 +65,9 @@ class PageSetup {
     this.showTitlePage = true,
     this.titleTibetan = '',
     this.titleChinese = '',
+    this.tibetanFont,
+    this.pronunciationFont,
+    this.translationFont,
   }) : marginMm = marginMm ?? MarginMm();
 
   PageSetup copyWith({
@@ -73,6 +81,12 @@ class PageSetup {
     bool? showTitlePage,
     String? titleTibetan,
     String? titleChinese,
+    FontConfig? tibetanFont,
+    FontConfig? pronunciationFont,
+    FontConfig? translationFont,
+    bool clearTibetanFont = false,
+    bool clearPronunciationFont = false,
+    bool clearTranslationFont = false,
   }) {
     return PageSetup(
       pageWidthMm: pageWidthMm ?? this.pageWidthMm,
@@ -85,6 +99,14 @@ class PageSetup {
       showTitlePage: showTitlePage ?? this.showTitlePage,
       titleTibetan: titleTibetan ?? this.titleTibetan,
       titleChinese: titleChinese ?? this.titleChinese,
+      tibetanFont:
+          clearTibetanFont ? null : (tibetanFont ?? this.tibetanFont),
+      pronunciationFont: clearPronunciationFont
+          ? null
+          : (pronunciationFont ?? this.pronunciationFont),
+      translationFont: clearTranslationFont
+          ? null
+          : (translationFont ?? this.translationFont),
     );
   }
 
@@ -99,6 +121,11 @@ class PageSetup {
     'showTitlePage': showTitlePage,
     'titleTibetan': titleTibetan,
     'titleChinese': titleChinese,
+    if (tibetanFont != null) 'tibetanFont': tibetanFont!.toJson(),
+    if (pronunciationFont != null)
+      'pronunciationFont': pronunciationFont!.toJson(),
+    if (translationFont != null)
+      'translationFont': translationFont!.toJson(),
   };
 
   factory PageSetup.fromJson(Map<String, dynamic> json) => PageSetup(
@@ -114,6 +141,17 @@ class PageSetup {
     showTitlePage: json['showTitlePage'] as bool? ?? true,
     titleTibetan: json['titleTibetan'] as String? ?? '',
     titleChinese: json['titleChinese'] as String? ?? '',
+    tibetanFont: json['tibetanFont'] != null
+        ? FontConfig.fromJson(json['tibetanFont'] as Map<String, dynamic>)
+        : null,
+    pronunciationFont: json['pronunciationFont'] != null
+        ? FontConfig.fromJson(
+            json['pronunciationFont'] as Map<String, dynamic>)
+        : null,
+    translationFont: json['translationFont'] != null
+        ? FontConfig.fromJson(
+            json['translationFont'] as Map<String, dynamic>)
+        : null,
   );
 }
 

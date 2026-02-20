@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 
+import '../models/app_settings.dart';
+import '../models/font_config.dart';
 import '../models/project.dart';
 import '../utils/colors.dart';
+import '../utils/font_utils.dart' as font_utils;
 import '../utils/sample_layout.dart';
 
 const double kMmToPx = 3.78;
 
+const _fallbackTibetan =
+    FontConfig(fontFamily: 'BabelStoneTibetan', fontPath: '', fontSize: 10);
+const _fallbackChinese =
+    FontConfig(fontFamily: 'STHeiti', fontPath: '', fontSize: 8);
+
 class SamplePageWidget extends StatelessWidget {
   final Project project;
+  final AppSettings? appSettings;
   final List<List<TextBlock?>>? rows;
   final int? colCount;
   final bool showMark;
@@ -17,6 +26,7 @@ class SamplePageWidget extends StatelessWidget {
   const SamplePageWidget({
     super.key,
     required this.project,
+    this.appSettings,
     this.rows,
     this.colCount,
     this.showMark = false,
@@ -36,6 +46,13 @@ class SamplePageWidget extends StatelessWidget {
 
     final pageW = setup.pageWidthMm * kMmToPx;
     final pageH = setup.pageHeightMm * kMmToPx;
+
+    final tibFont = font_utils.effectiveFont(
+        setup.tibetanFont, appSettings?.tibetanFont, _fallbackTibetan);
+    final pronFont = font_utils.effectiveFont(
+        setup.pronunciationFont, appSettings?.pronunciationFont, _fallbackChinese);
+    final transFont = font_utils.effectiveFont(
+        setup.translationFont, appSettings?.translationFont, _fallbackChinese);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
@@ -64,6 +81,7 @@ class SamplePageWidget extends StatelessWidget {
                 _SidePanel(
                   text: setup.leftVerticalTitle,
                   showFrame: setup.showFrame,
+                  fontFamily: transFont.fontFamily,
                 ),
                 Expanded(
                   child: Container(
@@ -76,12 +94,16 @@ class SamplePageWidget extends StatelessWidget {
                       colCount: effectiveColCount,
                       showMark: showMark,
                       highlightBlockId: highlightBlockId,
+                      tibetanFont: tibFont,
+                      pronunciationFont: pronFont,
+                      translationFont: transFont,
                     ),
                   ),
                 ),
                 _SidePanel(
                   text: pageNumber ?? setup.pageNumber,
                   showFrame: setup.showFrame,
+                  fontFamily: transFont.fontFamily,
                 ),
               ],
             ),
@@ -95,8 +117,13 @@ class SamplePageWidget extends StatelessWidget {
 class _SidePanel extends StatelessWidget {
   final String text;
   final bool showFrame;
+  final String fontFamily;
 
-  const _SidePanel({required this.text, required this.showFrame});
+  const _SidePanel({
+    required this.text,
+    required this.showFrame,
+    required this.fontFamily,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -114,8 +141,8 @@ class _SidePanel extends StatelessWidget {
           quarterTurns: 1,
           child: Text(
             text,
-            style: const TextStyle(
-              fontFamily: 'STHeiti',
+            style: TextStyle(
+              fontFamily: fontFamily,
               fontSize: 11,
               color: AppColors.rose600,
             ),
@@ -133,17 +160,29 @@ class _ContentGrid extends StatelessWidget {
   final int colCount;
   final bool showMark;
   final String? highlightBlockId;
+  final FontConfig tibetanFont;
+  final FontConfig pronunciationFont;
+  final FontConfig translationFont;
 
   const _ContentGrid({
     required this.rows,
     required this.colCount,
     required this.showMark,
     this.highlightBlockId,
+    required this.tibetanFont,
+    required this.pronunciationFont,
+    required this.translationFont,
   });
 
   @override
   Widget build(BuildContext context) {
     if (rows.isEmpty) return const SizedBox.expand();
+
+    final tibFamily = tibetanFont.fontFamily;
+    final pronFamily = pronunciationFont.fontFamily;
+    final transFamily = translationFont.fontFamily;
+    final tibSize = tibetanFont.fontSize;
+    final chiSize = pronunciationFont.fontSize;
 
     return Column(
       children: List.generate(rows.length, (ri) {
@@ -165,9 +204,13 @@ class _ContentGrid extends StatelessWidget {
               final trans = splitLines(block.chineseTranslation).join(' ');
               final doShowMark = showMark && ri == 0 && ci == 0;
 
-              final headingSize = block.smallText ? 8.0 : 11.0;
-              final bodySize = block.smallText ? 9.0 : 12.0;
-              final chineseSize = block.smallText ? 8.0 : 10.0;
+              final smallFactor = block.smallText ? 0.75 : 1.0;
+              final headingSize =
+                  font_utils.previewFontSize(tibSize * 0.9) * smallFactor;
+              final bodySize =
+                  font_utils.previewFontSize(tibSize) * smallFactor;
+              final chineseSize =
+                  font_utils.previewFontSize(chiSize) * smallFactor;
 
               return Expanded(
                 child: Container(
@@ -189,10 +232,10 @@ class _ContentGrid extends StatelessWidget {
                           TextSpan(
                             children: [
                               if (doShowMark)
-                                const TextSpan(
+                                TextSpan(
                                   text: '༄༅།།   ',
                                   style: TextStyle(
-                                    fontFamily: 'BabelStoneTibetan',
+                                    fontFamily: tibFamily,
                                     color: Colors.black87,
                                   ),
                                 ),
@@ -200,7 +243,7 @@ class _ContentGrid extends StatelessWidget {
                             ],
                           ),
                           style: TextStyle(
-                            fontFamily: 'BabelStoneTibetan',
+                            fontFamily: tibFamily,
                             fontSize: headingSize,
                             color: AppColors.rose600,
                             height: 1.4,
@@ -214,7 +257,7 @@ class _ContentGrid extends StatelessWidget {
                           child: Text(
                             body,
                             style: TextStyle(
-                              fontFamily: 'BabelStoneTibetan',
+                              fontFamily: tibFamily,
                               fontSize: bodySize,
                               color: Colors.black87,
                               height: 1.5,
@@ -229,7 +272,7 @@ class _ContentGrid extends StatelessWidget {
                           child: Text(
                             pron,
                             style: TextStyle(
-                              fontFamily: 'STHeiti',
+                              fontFamily: pronFamily,
                               fontSize: chineseSize,
                               color: Colors.black87,
                               height: 1.4,
@@ -244,7 +287,7 @@ class _ContentGrid extends StatelessWidget {
                           child: Text(
                             trans,
                             style: TextStyle(
-                              fontFamily: 'STHeiti',
+                              fontFamily: transFamily,
                               fontSize: chineseSize,
                               color: Colors.black87,
                               height: 1.4,

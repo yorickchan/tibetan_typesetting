@@ -1,17 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../models/app_settings.dart';
+import '../models/font_config.dart';
 import '../models/project.dart';
 import '../utils/colors.dart';
+import '../utils/font_utils.dart' as font_utils;
 import 'sample_page.dart' show kMmToPx;
+
+const _fallbackTibetan =
+    FontConfig(fontFamily: 'BabelStoneTibetan', fontPath: '', fontSize: 10);
+const _fallbackChinese =
+    FontConfig(fontFamily: 'STHeiti', fontPath: '', fontSize: 8);
 
 class TitlePageWidget extends StatelessWidget {
   final Project project;
+  final AppSettings? appSettings;
   final String? pageNumber;
 
   const TitlePageWidget({
     super.key,
     required this.project,
+    this.appSettings,
     this.pageNumber,
   });
 
@@ -25,6 +35,11 @@ class TitlePageWidget extends StatelessWidget {
 
     final pageW = setup.pageWidthMm * kMmToPx;
     final pageH = setup.pageHeightMm * kMmToPx;
+
+    final tibFont = font_utils.effectiveFont(
+        setup.tibetanFont, appSettings?.tibetanFont, _fallbackTibetan);
+    final transFont = font_utils.effectiveFont(
+        setup.translationFont, appSettings?.translationFont, _fallbackChinese);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
@@ -77,6 +92,8 @@ class TitlePageWidget extends StatelessWidget {
                             child: _TitleBox(
                               titleTibetan: titleTibetan,
                               titleChinese: titleChinese,
+                              tibetanFontFamily: tibFont.fontFamily,
+                              chineseFontFamily: transFont.fontFamily,
                             ),
                           ),
                         ),
@@ -95,8 +112,8 @@ class TitlePageWidget extends StatelessWidget {
                         quarterTurns: 1,
                         child: Text(
                           pageNumber ?? setup.pageNumber,
-                          style: const TextStyle(
-                            fontFamily: 'STHeiti',
+                          style: TextStyle(
+                            fontFamily: transFont.fontFamily,
                             fontSize: 11,
                             color: Colors.black87,
                           ),
@@ -141,10 +158,14 @@ class _CrestPanel extends StatelessWidget {
 class _TitleBox extends StatelessWidget {
   final String titleTibetan;
   final String titleChinese;
+  final String tibetanFontFamily;
+  final String chineseFontFamily;
 
   const _TitleBox({
     required this.titleTibetan,
     required this.titleChinese,
+    required this.tibetanFontFamily,
+    required this.chineseFontFamily,
   });
 
   @override
@@ -165,8 +186,8 @@ class _TitleBox extends StatelessWidget {
           children: [
             Text(
               titleTibetan.isEmpty ? ' ' : titleTibetan,
-              style: const TextStyle(
-                fontFamily: 'BabelStoneTibetan',
+              style: TextStyle(
+                fontFamily: tibetanFontFamily,
                 fontSize: 18,
                 color: Colors.black87,
                 height: 1.4,
@@ -176,8 +197,8 @@ class _TitleBox extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               titleChinese.isEmpty ? ' ' : titleChinese,
-              style: const TextStyle(
-                fontFamily: 'STHeiti',
+              style: TextStyle(
+                fontFamily: chineseFontFamily,
                 fontSize: 13,
                 color: Colors.black87,
                 height: 1.5,

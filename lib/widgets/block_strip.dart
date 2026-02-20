@@ -12,6 +12,8 @@ class BlockStripWidget extends StatelessWidget {
   final VoidCallback onAdd;
   final VoidCallback onAddPage;
   final int pageIndex;
+  final String tibetanFontFamily;
+  final String translationFontFamily;
 
   const BlockStripWidget({
     super.key,
@@ -22,6 +24,8 @@ class BlockStripWidget extends StatelessWidget {
     required this.onAdd,
     required this.onAddPage,
     required this.pageIndex,
+    this.tibetanFontFamily = 'BabelStoneTibetan',
+    this.translationFontFamily = 'STHeiti',
   });
 
   @override
@@ -131,7 +135,7 @@ class BlockStripWidget extends StatelessWidget {
                           child: Text(
                             tibetanLine.isEmpty ? 'empty' : tibetanLine,
                             style: TextStyle(
-                              fontFamily: 'BabelStoneTibetan',
+                              fontFamily: tibetanFontFamily,
                               fontSize: 10,
                               height: 1.2,
                               color: tibetanLine.isEmpty
@@ -147,8 +151,8 @@ class BlockStripWidget extends StatelessWidget {
                         if (chineseLine.isNotEmpty)
                           Text(
                             chineseLine,
-                            style: const TextStyle(
-                              fontFamily: 'STHeiti',
+                            style: TextStyle(
+                              fontFamily: translationFontFamily,
                               fontSize: 9,
                               color: AppColors.slate500,
                             ),

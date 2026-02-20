@@ -72,12 +72,5 @@ flutter:
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
 
-  fonts:
-    - family: BabelStoneTibetan
-      fonts:
-        - asset: assets/fonts/BabelStoneTibetan.ttf
-    - family: STHeiti
-      fonts:
-        - asset: assets/fonts/STHeitiLight.ttc
-        - asset: assets/fonts/STHeitiMedium.ttc
-          weight: 500
+  # Fonts are now loaded dynamically from system fonts via Settings.
+  # See lib/services/font_service.dart
