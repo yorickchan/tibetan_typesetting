@@ -129,6 +129,10 @@ class PdfService {
     final chiFont = pronPdfFont ?? transPdfFont ?? pw.Font.helvetica();
     final tranFont = transPdfFont ?? pronPdfFont ?? pw.Font.helvetica();
 
+    // Load broad-coverage CJK fallback fonts from system for characters
+    // missing from the primary font (e.g. 瓔 U+74D4, 珞 U+73DE).
+    final fontFallback = await _fontService.loadCjkFallbackFonts();
+
     // Font families for pre-rendered text (Tibetan through HarfBuzz)
     final tibFamily = tibConfig.fontFamily;
     final transFamily = transConfig.fontFamily;
@@ -298,6 +302,7 @@ class PdfService {
             ps: ps,
             projectName: project.name,
             chiFont: tranFont,
+            fontFallback: fontFallback,
             outerW: outerW,
             outerH: outerH,
             sideW: sideW,
@@ -327,6 +332,7 @@ class PdfService {
             pageIdx: pageIdx,
             pronFont: chiFont,
             transFont: tranFont,
+            fontFallback: fontFallback,
             pronFontSize: pronConfig.fontSize,
             transFontSize: transConfig.fontSize,
             outerW: outerW,
@@ -351,6 +357,7 @@ class PdfService {
     required PageSetup ps,
     required String projectName,
     required pw.Font chiFont,
+    required List<pw.Font> fontFallback,
     required double outerW,
     required double outerH,
     required double sideW,
@@ -411,12 +418,13 @@ class PdfService {
               if (tibImg != null)
                 pw.Image(tibImg.provider, width: tibImg.w, height: tibImg.h),
               if (tibImg == null)
-                pw.Text(' ', style: pw.TextStyle(font: chiFont, fontSize: 16)),
+                pw.Text(' ', style: pw.TextStyle(font: chiFont, fontFallback: fontFallback, fontSize: 16)),
               pw.SizedBox(height: 6),
               pw.Text(
                 titleChinese.isEmpty ? ' ' : titleChinese,
                 style: pw.TextStyle(
                   font: chiFont,
+                  fontFallback: fontFallback,
                   fontSize: 12,
                   color: PdfColors.black,
                 ),
@@ -480,6 +488,7 @@ class PdfService {
     required int pageIdx,
     required pw.Font pronFont,
     required pw.Font transFont,
+    required List<pw.Font> fontFallback,
     required double pronFontSize,
     required double transFontSize,
     required double outerW,
@@ -503,7 +512,7 @@ class PdfService {
           angle: 1.5708,
           child: pw.Text(
             text,
-            style: pw.TextStyle(font: transFont, fontSize: 9, color: _rose),
+            style: pw.TextStyle(font: transFont, fontFallback: fontFallback, fontSize: 9, color: _rose),
             textAlign: pw.TextAlign.center,
           ),
         );
@@ -582,6 +591,7 @@ class PdfService {
                   pron,
                   style: pw.TextStyle(
                     font: pronFont,
+                    fontFallback: fontFallback,
                     fontSize: pronSize,
                     color: PdfColors.black,
                     lineSpacing: pronSize * 0.4,
@@ -595,6 +605,7 @@ class PdfService {
                   trans,
                   style: pw.TextStyle(
                     font: transFont,
+                    fontFallback: fontFallback,
                     fontSize: transSize,
                     color: PdfColors.black,
                     lineSpacing: transSize * 0.4,

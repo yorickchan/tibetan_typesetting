@@ -38,11 +38,23 @@ class FontService {
   final _loadedPreviewFamilies = <String>{};
   final _pdfFontCache = <String, pw.Font>{};
 
-  /// macOS system font directories.
-  static const _fontDirs = [
-    '/System/Library/Fonts',
-    '/Library/Fonts',
-  ];
+  static List<String> get _fontDirs {
+    if (Platform.isMacOS) {
+      return const [
+        '/System/Library/Fonts',
+        '/Library/Fonts',
+      ];
+    } else if (Platform.isWindows) {
+      final winDir = Platform.environment['WINDIR'] ?? r'C:\Windows';
+      return ['$winDir\\Fonts'];
+    } else if (Platform.isLinux) {
+      return const [
+        '/usr/share/fonts',
+        '/usr/local/share/fonts',
+      ];
+    }
+    return const [];
+  }
 
   static const _supportedExtensions = {'.ttf', '.otf', '.ttc'};
 
@@ -58,10 +70,14 @@ class FontService {
     final fonts = <SystemFontInfo>[];
     final seen = <String>{};
 
-    final homeDir = Platform.environment['HOME'] ?? '';
+    final homeDir = Platform.environment['HOME'] ??
+        Platform.environment['USERPROFILE'] ??
+        '';
     final dirs = [
       ..._fontDirs,
-      if (homeDir.isNotEmpty) '$homeDir/Library/Fonts',
+      if (homeDir.isNotEmpty && Platform.isMacOS) '$homeDir/Library/Fonts',
+      if (homeDir.isNotEmpty && Platform.isLinux) '$homeDir/.local/share/fonts',
+      if (homeDir.isNotEmpty && Platform.isLinux) '$homeDir/.fonts',
     ];
 
     for (final dirPath in dirs) {
@@ -96,6 +112,54 @@ class FontService {
 
   /// Force a re-scan next time [scanSystemFonts] is called.
   void invalidateCache() => _cachedFonts = null;
+
+  /// Well-known font families with broad CJK coverage, checked in priority order.
+  static const _cjkFallbackPatterns = [
+    'arial unicode',
+    'noto sans cjk',
+    'noto serif cjk',
+    'droid sans fallback',
+    'wenquanyi',
+    'microsoft yahei',
+    'simsun',
+    'nsimsun',
+    'simhei',
+    'kaiti',
+    'songti',
+    'stheiti',
+    'stsong',
+    'pingfang',
+    'hiragino sans gb',
+    'hiragino sans',
+  ];
+
+  /// Search scanned system fonts for CJK-capable fallback fonts and load them
+  /// for PDF use. Returns up to [maxFonts] fonts.
+  Future<List<pw.Font>> loadCjkFallbackFonts({int maxFonts = 3}) async {
+    final systemFonts = await scanSystemFonts();
+    final loaded = <pw.Font>[];
+    final usedPaths = <String>{};
+
+    for (final pattern in _cjkFallbackPatterns) {
+      if (loaded.length >= maxFonts) break;
+      for (final info in systemFonts) {
+        if (loaded.length >= maxFonts) break;
+        if (usedPaths.contains(info.filePath)) continue;
+        if (info.familyName.toLowerCase().contains(pattern)) {
+          try {
+            final font = await loadFontForPdf(FontConfig(
+              fontFamily: info.familyName,
+              fontPath: info.filePath,
+              fontSize: 10,
+            ));
+            loaded.add(font);
+            usedPaths.add(info.filePath);
+          } catch (_) {}
+        }
+      }
+    }
+    return loaded;
+  }
 
   // ---------------------------------------------------------------------------
   // Dynamic font loading for Flutter preview
