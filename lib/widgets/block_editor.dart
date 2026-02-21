@@ -378,6 +378,7 @@ class _EditorFieldsState extends State<_EditorFields> {
   }
 
   Future<void> _autoFillPronunciation(String tibetanText) async {
+    if (widget.block.smallText) return;
     if (_isAutoFilling) return;
     _isAutoFilling = true;
 
