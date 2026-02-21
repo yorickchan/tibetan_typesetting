@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../models/project.dart';
+import '../services/pronunciation_service.dart';
 import '../utils/colors.dart';
 import '../utils/font_constants.dart';
+import '../utils/tibetan_segmenter.dart';
 
 class BlockEditorWidget extends StatelessWidget {
   final TextBlock? selectedBlock;
@@ -340,6 +344,9 @@ class _EditorFieldsState extends State<_EditorFields> {
   late TextEditingController _pronCtrl;
   late TextEditingController _transCtrl;
   String? _lastBlockId;
+  Timer? _debounce;
+  final _pronunciationService = PronunciationService();
+  bool _isAutoFilling = false;
 
   @override
   void initState() {
@@ -363,10 +370,78 @@ class _EditorFieldsState extends State<_EditorFields> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _tibetanCtrl.dispose();
     _pronCtrl.dispose();
     _transCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _autoFillPronunciation(String tibetanText) async {
+    if (_isAutoFilling) return;
+    _isAutoFilling = true;
+
+    try {
+      final syllables = extractSyllables(tibetanText);
+      if (syllables.isEmpty) {
+        return;
+      }
+
+      final List<String> pronunciations = [];
+
+      for (final syllable in syllables) {
+        final pron = await _pronunciationService.getPronunciation(syllable);
+        if (pron != null && pron.isNotEmpty) {
+          pronunciations.add(pron);
+        } else {
+          pronunciations.add('X');
+        }
+      }
+
+      if (!mounted) return;
+
+      final newPron = pronunciations.join(' ');
+      if (newPron != _pronCtrl.text) {
+        _pronCtrl.text = newPron;
+        widget.onUpdateBlock({'chinesePronunciation': newPron});
+      }
+    } finally {
+      _isAutoFilling = false;
+    }
+  }
+
+  void _onTibetanChanged(String v) {
+    widget.onUpdateBlock({'tibetan': v});
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      _autoFillPronunciation(v);
+    });
+  }
+
+  void _onPronunciationChanged(String v) {
+    widget.onUpdateBlock({'chinesePronunciation': v});
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      _savePronunciationToDictionary(v);
+    });
+  }
+
+  Future<void> _savePronunciationToDictionary(String pronunciation) async {
+    if (widget.block.smallText) return;
+    final tibetan = _tibetanCtrl.text;
+    if (tibetan.isEmpty || pronunciation.isEmpty) return;
+
+    final syllables = extractSyllables(tibetan);
+    final prons = pronunciation.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+
+    if (syllables.isEmpty || prons.isEmpty) return;
+
+    for (int i = 0; i < syllables.length && i < prons.length; i++) {
+      final pron = prons[i];
+      if (pron.isNotEmpty && pron != 'X') {
+        await _pronunciationService.savePronunciation(syllables[i], pron);
+      }
+    }
   }
 
   InputDecoration _fieldDecoration(String label, String placeholder) {
@@ -436,7 +511,7 @@ class _EditorFieldsState extends State<_EditorFields> {
   Widget _tibetanField() {
     return TextField(
       controller: _tibetanCtrl,
-      onChanged: (v) => widget.onUpdateBlock({'tibetan': v}),
+      onChanged: _onTibetanChanged,
       style: TextStyle(
         fontFamily: widget.tibetanFontFamily,
         fontSize: 13,
@@ -451,7 +526,7 @@ class _EditorFieldsState extends State<_EditorFields> {
   Widget _pronField() {
     return TextField(
       controller: _pronCtrl,
-      onChanged: (v) => widget.onUpdateBlock({'chinesePronunciation': v}),
+      onChanged: _onPronunciationChanged,
       style: TextStyle(
         fontFamily: widget.pronunciationFontFamily,
         fontSize: 13,

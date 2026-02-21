@@ -25,14 +25,18 @@ class DatabaseService {
     final path = '$dbPath/tibetan_typesetting.db';
     return openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: (db, version) async {
         await _createProjectsTable(db);
         await _createAppSettingsTable(db);
+        await _createPronunciationDictionaryTable(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
           await _createAppSettingsTable(db);
+        }
+        if (oldVersion < 3) {
+          await _createPronunciationDictionaryTable(db);
         }
       },
     );
@@ -59,6 +63,17 @@ class DatabaseService {
       CREATE TABLE IF NOT EXISTS app_settings (
         key TEXT PRIMARY KEY,
         value_json TEXT NOT NULL
+      )
+    ''');
+  }
+
+  Future<void> _createPronunciationDictionaryTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS pronunciation_dictionary (
+        tibetan_syllable TEXT PRIMARY KEY,
+        chinese_pronunciation TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
       )
     ''');
   }

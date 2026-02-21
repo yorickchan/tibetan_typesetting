@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../models/app_settings.dart';
 import '../models/font_config.dart';
+import '../pages/dictionary_page.dart';
 import '../services/font_service.dart';
 import '../services/settings_service.dart';
 import '../utils/colors.dart';
@@ -282,6 +283,41 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
             ],
+          ),
+
+          const SizedBox(height: 24),
+
+          _sectionLabel('DICTIONARY'),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const DictionaryPage(),
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.cardBg,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.book, size: 16, color: AppColors.textCaption),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Pronunciation Dictionary',
+                    style: TextStyle(color: AppColors.textBody, fontSize: 13),
+                  ),
+                  const Spacer(),
+                  Icon(Icons.chevron_right, size: 16, color: AppColors.textMuted),
+                ],
+              ),
+            ),
           ),
 
           const SizedBox(height: 24),
