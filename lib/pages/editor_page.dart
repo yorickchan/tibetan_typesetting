@@ -379,7 +379,7 @@ class _EditorPageState extends State<EditorPage> {
                 border: Border.all(
                   color: _saveState == 'error'
                       ? AppColors.rose600.withValues(alpha: 0.5)
-                      : AppColors.slate800,
+                      : AppColors.borderSubtle,
                 ),
                 color: _saveState == 'error'
                     ? AppColors.rose600.withValues(alpha: 0.15)
@@ -390,7 +390,7 @@ class _EditorPageState extends State<EditorPage> {
                 style: TextStyle(
                   color: _saveState == 'error'
                       ? AppColors.rose300
-                      : AppColors.slate200,
+                      : AppColors.textSecondary,
                   fontSize: 11,
                 ),
               ),
@@ -451,7 +451,6 @@ class _EditorPageState extends State<EditorPage> {
 
     return ListView(
       children: [
-        // Title page settings
         _TitlePageSettings(
           pageSetup: project.pageSetup,
           appSettings: _appSettings,
@@ -462,7 +461,6 @@ class _EditorPageState extends State<EditorPage> {
         ),
         const SizedBox(height: 8),
 
-        // Font settings
         _FontSettingsPanel(
           pageSetup: project.pageSetup,
           appSettings: _appSettings,
@@ -473,7 +471,6 @@ class _EditorPageState extends State<EditorPage> {
         ),
         const SizedBox(height: 12),
 
-        // Title page preview
         if (project.pageSetup.showTitlePage) ...[
           Center(
             child: SingleChildScrollView(
@@ -488,7 +485,6 @@ class _EditorPageState extends State<EditorPage> {
           const SizedBox(height: 12),
         ],
 
-        // Per-page sections
         ...List.generate(pagesWithBlocks.length, (pageIdx) {
           final pageData = pagesWithBlocks[pageIdx];
           final pageBlockIds = pageData.blocks.map((b) => b.id).toSet();
@@ -610,16 +606,16 @@ class _TitlePageSettings extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.description_outlined,
                     size: 14,
-                    color: AppColors.slate400,
+                    color: AppColors.textCaption,
                   ),
                   const SizedBox(width: 6),
                   Text(
                     l10n.titlePage,
                     style: TextStyle(
-                      color: AppColors.slate300,
+                      color: AppColors.textBody,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -634,7 +630,7 @@ class _TitlePageSettings extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                       color: pageSetup.showTitlePage
                           ? AppColors.emerald400.withValues(alpha: 0.15)
-                          : AppColors.slate700.withValues(alpha: 0.4),
+                          : AppColors.border.withValues(alpha: 0.4),
                     ),
                     child: Text(
                       pageSetup.showTitlePage ? 'ON' : 'OFF',
@@ -643,7 +639,7 @@ class _TitlePageSettings extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                         color: pageSetup.showTitlePage
                             ? AppColors.emerald400
-                            : AppColors.slate500,
+                            : AppColors.textMuted,
                       ),
                     ),
                   ),
@@ -651,14 +647,14 @@ class _TitlePageSettings extends StatelessWidget {
                   Icon(
                     isOpen ? Icons.expand_less : Icons.expand_more,
                     size: 14,
-                    color: AppColors.slate500,
+                    color: AppColors.textMuted,
                   ),
                 ],
               ),
             ),
           ),
           if (isOpen) ...[
-            Container(height: 1, color: AppColors.slate800),
+            Container(height: 1, color: AppColors.divider),
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -674,14 +670,14 @@ class _TitlePageSettings extends StatelessWidget {
                             (s) => s.copyWith(showTitlePage: v),
                           ),
                           activeColor: AppColors.sky500,
-                          side: const BorderSide(color: AppColors.slate500),
+                          side: BorderSide(color: AppColors.textMuted),
                         ),
                       ),
                       const SizedBox(width: 6),
                       Text(
                         l10n.showTitlePage,
                         style: TextStyle(
-                          color: AppColors.slate200,
+                          color: AppColors.textSecondary,
                           fontSize: 11,
                         ),
                       ),
@@ -714,7 +710,7 @@ class _TitlePageSettings extends StatelessWidget {
                         onUpdateSetup((s) => s.copyWith(titleChinese: v)),
                   ),
                   const SizedBox(height: 12),
-                  Container(height: 1, color: AppColors.slate800),
+                  Container(height: 1, color: AppColors.divider),
                   const SizedBox(height: 12),
                   _titleFontRow(
                     label: 'TITLE TIBETAN FONT',
@@ -817,8 +813,8 @@ class _TitlePageSettings extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(
-                color: AppColors.slate500,
+              style: TextStyle(
+                color: AppColors.textMuted,
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 1.0,
@@ -828,8 +824,8 @@ class _TitlePageSettings extends StatelessWidget {
             if (!hasOverride)
               Text(
                 'Default: $effectiveName',
-                style: const TextStyle(
-                  color: AppColors.slate600,
+                style: TextStyle(
+                  color: AppColors.textFaint,
                   fontSize: 10,
                 ),
               ),
@@ -866,14 +862,14 @@ class _TitlePageSettings extends StatelessWidget {
                     .toStringAsFixed(1),
                 keyboardType: TextInputType.number,
                 onChanged: onSizeChanged,
-                style: const TextStyle(
-                  color: AppColors.slate100,
+                style: TextStyle(
+                  color: AppColors.textPrimary,
                   fontSize: 13,
                 ),
                 decoration: InputDecoration(
                   labelText: l10n.size,
-                  labelStyle: const TextStyle(
-                    color: AppColors.slate500,
+                  labelStyle: TextStyle(
+                    color: AppColors.textMuted,
                     fontSize: 10,
                   ),
                   isDense: true,
@@ -882,14 +878,14 @@ class _TitlePageSettings extends StatelessWidget {
                     vertical: 8,
                   ),
                   filled: true,
-                  fillColor: AppColors.slate950.withValues(alpha: 0.4),
+                  fillColor: AppColors.inputFill,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.slate700),
+                    borderSide: BorderSide(color: AppColors.border),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.slate700),
+                    borderSide: BorderSide(color: AppColors.border),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -917,7 +913,7 @@ class _TitlePageSettings extends StatelessWidget {
           width: 60,
           child: Text(
             label,
-            style: const TextStyle(color: AppColors.slate400, fontSize: 10),
+            style: TextStyle(color: AppColors.textCaption, fontSize: 10),
           ),
         ),
         Expanded(
@@ -927,12 +923,12 @@ class _TitlePageSettings extends StatelessWidget {
             style: TextStyle(
               fontFamily: fontFamily,
               fontSize: 13,
-              color: AppColors.slate100,
+              color: AppColors.textPrimary,
             ),
             decoration: InputDecoration(
               hintText: placeholder,
               hintStyle: TextStyle(
-                color: AppColors.slate500.withValues(alpha: 0.5),
+                color: AppColors.textMuted.withValues(alpha: 0.5),
               ),
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(
@@ -940,14 +936,14 @@ class _TitlePageSettings extends StatelessWidget {
                 vertical: 8,
               ),
               filled: true,
-              fillColor: AppColors.slate950.withValues(alpha: 0.4),
+              fillColor: AppColors.inputFill,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.slate800),
+                borderSide: BorderSide(color: AppColors.borderSubtle),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.slate800),
+                borderSide: BorderSide(color: AppColors.borderSubtle),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -1005,13 +1001,13 @@ class _FontSettingsPanel extends StatelessWidget {
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Row(
                 children: [
-                  const Icon(Icons.font_download_outlined,
-                      size: 14, color: AppColors.slate400),
+                  Icon(Icons.font_download_outlined,
+                      size: 14, color: AppColors.textCaption),
                   const SizedBox(width: 6),
                   Text(
                     l10n.projectFonts,
                     style: TextStyle(
-                      color: AppColors.slate300,
+                      color: AppColors.textBody,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1038,14 +1034,14 @@ class _FontSettingsPanel extends StatelessWidget {
                   Icon(
                     isOpen ? Icons.expand_less : Icons.expand_more,
                     size: 14,
-                    color: AppColors.slate500,
+                    color: AppColors.textMuted,
                   ),
                 ],
               ),
             ),
           ),
           if (isOpen) ...[
-            Container(height: 1, color: AppColors.slate800),
+            Container(height: 1, color: AppColors.divider),
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -1177,8 +1173,8 @@ class _FontSettingsPanel extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(
-                color: AppColors.slate500,
+              style: TextStyle(
+                color: AppColors.textMuted,
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 1.0,
@@ -1188,8 +1184,8 @@ class _FontSettingsPanel extends StatelessWidget {
             if (!hasOverride)
               Text(
                 'Default: $effectiveName',
-                style: const TextStyle(
-                    color: AppColors.slate600, fontSize: 10),
+                style: TextStyle(
+                    color: AppColors.textFaint, fontSize: 10),
               ),
             if (hasOverride)
               GestureDetector(
@@ -1226,26 +1222,26 @@ class _FontSettingsPanel extends StatelessWidget {
                     .toStringAsFixed(1),
                 keyboardType: TextInputType.number,
                 onChanged: onSizeChanged,
-                style: const TextStyle(
-                    color: AppColors.slate100, fontSize: 13),
+                style: TextStyle(
+                    color: AppColors.textPrimary, fontSize: 13),
                 decoration: InputDecoration(
                   labelText: l10n.size,
-                  labelStyle: const TextStyle(
-                      color: AppColors.slate500, fontSize: 10),
+                  labelStyle: TextStyle(
+                      color: AppColors.textMuted, fontSize: 10),
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 8),
                   filled: true,
-                  fillColor: AppColors.slate950.withValues(alpha: 0.4),
+                  fillColor: AppColors.inputFill,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide:
-                        const BorderSide(color: AppColors.slate700),
+                        BorderSide(color: AppColors.border),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide:
-                        const BorderSide(color: AppColors.slate700),
+                        BorderSide(color: AppColors.border),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),

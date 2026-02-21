@@ -76,11 +76,11 @@ class BlockStripWidget extends StatelessWidget {
                       border: Border.all(
                         color: selected
                             ? AppColors.sky500.withValues(alpha: 0.6)
-                            : AppColors.slate700.withValues(alpha: 0.6),
+                            : AppColors.border.withValues(alpha: 0.6),
                       ),
                       color: selected
                           ? AppColors.sky500.withValues(alpha: 0.1)
-                          : AppColors.slate800.withValues(alpha: 0.4),
+                          : AppColors.borderSubtle.withValues(alpha: 0.4),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,7 +93,7 @@ class BlockStripWidget extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold,
-                                color: selected ? AppColors.sky400 : AppColors.slate500,
+                                color: selected ? AppColors.sky400 : AppColors.textMuted,
                               ),
                             ),
                             Row(
@@ -139,8 +139,8 @@ class BlockStripWidget extends StatelessWidget {
                               fontSize: 10,
                               height: 1.2,
                               color: tibetanLine.isEmpty
-                                  ? AppColors.slate600
-                                  : (selected ? AppColors.sky400 : AppColors.slate300),
+                                  ? AppColors.textFaint
+                                  : (selected ? AppColors.sky400 : AppColors.textBody),
                               fontStyle:
                                   tibetanLine.isEmpty ? FontStyle.italic : null,
                             ),
@@ -154,7 +154,7 @@ class BlockStripWidget extends StatelessWidget {
                             style: TextStyle(
                               fontFamily: translationFontFamily,
                               fontSize: 9,
-                              color: AppColors.slate500,
+                              color: AppColors.textMuted,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -166,22 +166,22 @@ class BlockStripWidget extends StatelessWidget {
               },
             ),
           ),
-          Container(height: 1, color: AppColors.slate800),
+          Container(height: 1, color: AppColors.divider),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             child: Row(
               children: [
                 Text(
                   '${blocks.length} block${blocks.length != 1 ? 's' : ''}',
-                  style: const TextStyle(color: AppColors.slate600, fontSize: 10),
+                  style: TextStyle(color: AppColors.textFaint, fontSize: 10),
                 ),
                 const SizedBox(width: 4),
-                const Text('·',
-                    style: TextStyle(color: AppColors.slate700, fontSize: 10)),
+                Text('·',
+                    style: TextStyle(color: AppColors.border, fontSize: 10)),
                 const SizedBox(width: 4),
                 Text(
                   'page ${pageIndex + 1}',
-                  style: const TextStyle(color: AppColors.slate600, fontSize: 10),
+                  style: TextStyle(color: AppColors.textFaint, fontSize: 10),
                 ),
               ],
             ),
@@ -211,23 +211,23 @@ class _AddButton extends StatelessWidget {
         height: 32,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
-          color: outlined ? null : AppColors.slate100,
+          color: outlined ? null : AppColors.buttonMutedBg,
           borderRadius: BorderRadius.circular(8),
-          border: outlined ? Border.all(color: AppColors.slate700) : null,
+          border: outlined ? Border.all(color: AppColors.border) : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.add,
                 size: 12,
-                color: outlined ? AppColors.slate300 : AppColors.slate900),
+                color: outlined ? AppColors.textBody : AppColors.buttonMutedFg),
             const SizedBox(width: 2),
             Text(
               label,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
-                color: outlined ? AppColors.slate300 : AppColors.slate900,
+                color: outlined ? AppColors.textBody : AppColors.buttonMutedFg,
               ),
             ),
           ],

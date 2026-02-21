@@ -192,18 +192,18 @@ class _ExportPageState extends State<ExportPage> {
   InputDecoration _numberDecor(String label) {
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: AppColors.slate200, fontSize: 11),
+      labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 11),
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       filled: true,
-      fillColor: AppColors.slate950.withValues(alpha: 0.4),
+      fillColor: AppColors.inputFill,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: AppColors.slate800),
+        borderSide: BorderSide(color: AppColors.borderSubtle),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: AppColors.slate800),
+        borderSide: BorderSide(color: AppColors.borderSubtle),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
@@ -262,7 +262,7 @@ class _ExportPageState extends State<ExportPage> {
               child: Center(
                 child: Text(
                   _l10n.saving,
-                  style: const TextStyle(color: AppColors.slate400, fontSize: 11),
+                  style: TextStyle(color: AppColors.textCaption, fontSize: 11),
                 ),
               ),
             ),
@@ -312,7 +312,6 @@ class _ExportPageState extends State<ExportPage> {
 
     return ListView(
       children: [
-        // Page setup panel
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -325,23 +324,22 @@ class _ExportPageState extends State<ExportPage> {
             children: [
               Text(
                 _l10n.pageSetup,
-                style: const TextStyle(
-                  color: AppColors.slate100,
+                style: TextStyle(
+                  color: AppColors.textPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 16),
 
-              // Page size
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
                       initialValue: ps.pageWidthMm.toStringAsFixed(0),
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(
-                        color: AppColors.slate100,
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
                         fontSize: 13,
                       ),
                       decoration: _numberDecor(_l10n.pageWidth),
@@ -358,8 +356,8 @@ class _ExportPageState extends State<ExportPage> {
                     child: TextFormField(
                       initialValue: ps.pageHeightMm.toStringAsFixed(0),
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(
-                        color: AppColors.slate100,
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
                         fontSize: 13,
                       ),
                       decoration: _numberDecor(_l10n.pageHeight),
@@ -375,11 +373,10 @@ class _ExportPageState extends State<ExportPage> {
               ),
               const SizedBox(height: 16),
 
-              // Columns
               Text(
                 _l10n.columns,
-                style: const TextStyle(
-                  color: AppColors.slate200,
+                style: TextStyle(
+                  color: AppColors.textSecondary,
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                 ),
@@ -396,13 +393,13 @@ class _ExportPageState extends State<ExportPage> {
                         (s) => s.copyWith(columnCount: v == true ? 0 : 5),
                       ),
                       activeColor: AppColors.sky500,
-                      side: const BorderSide(color: AppColors.slate500),
+                      side: BorderSide(color: AppColors.textMuted),
                     ),
                   ),
                   const SizedBox(width: 6),
                   Text(
                     _l10n.autoPerPage,
-                    style: const TextStyle(color: AppColors.slate300, fontSize: 11),
+                    style: TextStyle(color: AppColors.textBody, fontSize: 11),
                   ),
                 ],
               ),
@@ -418,7 +415,7 @@ class _ExportPageState extends State<ExportPage> {
                       max: 8,
                       divisions: 7,
                       activeColor: AppColors.sky500,
-                      inactiveColor: AppColors.slate700,
+                      inactiveColor: AppColors.border,
                       onChanged: ps.columnCount <= 0
                           ? null
                           : (v) => _updateSetup(
@@ -428,8 +425,8 @@ class _ExportPageState extends State<ExportPage> {
                   ),
                   Text(
                     ps.columnCount <= 0 ? 'Auto' : '${ps.columnCount}',
-                    style: const TextStyle(
-                      color: AppColors.slate400,
+                    style: TextStyle(
+                      color: AppColors.textCaption,
                       fontSize: 11,
                     ),
                   ),
@@ -437,7 +434,6 @@ class _ExportPageState extends State<ExportPage> {
               ),
               const SizedBox(height: 12),
 
-              // Margins
               Row(
                 children: [
                   ...[
@@ -452,8 +448,8 @@ class _ExportPageState extends State<ExportPage> {
                         child: TextFormField(
                           initialValue: _getMargin(e.$1).toStringAsFixed(0),
                           keyboardType: TextInputType.number,
-                          style: const TextStyle(
-                            color: AppColors.slate100,
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
                             fontSize: 13,
                           ),
                           decoration: _numberDecor('${e.$2} (mm)'),
@@ -469,7 +465,6 @@ class _ExportPageState extends State<ExportPage> {
               ),
               const SizedBox(height: 12),
 
-              // Show frame
               Row(
                 children: [
                   SizedBox(
@@ -480,22 +475,21 @@ class _ExportPageState extends State<ExportPage> {
                       onChanged: (v) =>
                           _updateSetup((s) => s.copyWith(showFrame: v)),
                       activeColor: AppColors.sky500,
-                      side: const BorderSide(color: AppColors.slate500),
+                      side: BorderSide(color: AppColors.textMuted),
                     ),
                   ),
                   const SizedBox(width: 6),
                   Text(
                     _l10n.showFrame,
-                    style: const TextStyle(color: AppColors.slate200, fontSize: 13),
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
 
-              // Vertical title & page number
               TextFormField(
                 initialValue: ps.leftVerticalTitle,
-                style: const TextStyle(fontSize: 13, color: AppColors.slate100),
+                style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
                 decoration: _numberDecor(_l10n.leftVerticalTitle),
                 onChanged: (v) =>
                     _updateSetup((s) => s.copyWith(leftVerticalTitle: v)),
@@ -503,7 +497,7 @@ class _ExportPageState extends State<ExportPage> {
               const SizedBox(height: 8),
               TextFormField(
                 initialValue: ps.pageNumber,
-                style: const TextStyle(fontSize: 13, color: AppColors.slate100),
+                style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
                 decoration: _numberDecor(_l10n.pageNumberLabel),
                 onChanged: (v) =>
                     _updateSetup((s) => s.copyWith(pageNumber: v)),
@@ -513,7 +507,6 @@ class _ExportPageState extends State<ExportPage> {
         ),
         const SizedBox(height: 16),
 
-        // Print preview
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -532,8 +525,8 @@ class _ExportPageState extends State<ExportPage> {
                     children: [
                       Text(
                         _l10n.preview,
-                        style: const TextStyle(
-                          color: AppColors.slate100,
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -541,8 +534,8 @@ class _ExportPageState extends State<ExportPage> {
                       const SizedBox(height: 2),
                       Text(
                         _l10n.exportPdfHint,
-                        style: const TextStyle(
-                          color: AppColors.slate500,
+                        style: TextStyle(
+                          color: AppColors.textMuted,
                           fontSize: 11,
                         ),
                       ),
@@ -555,8 +548,8 @@ class _ExportPageState extends State<ExportPage> {
                         padding: const EdgeInsets.symmetric(horizontal: 6),
                         child: Text(
                           '${(_zoom * 100).round()}%',
-                          style: const TextStyle(
-                            color: AppColors.slate300,
+                          style: TextStyle(
+                            color: AppColors.textBody,
                             fontSize: 11,
                             fontFamily: 'monospace',
                           ),
@@ -600,9 +593,9 @@ class _ExportPageState extends State<ExportPage> {
       child: IconButton(
         padding: EdgeInsets.zero,
         iconSize: 16,
-        icon: Icon(icon, color: AppColors.slate300),
+        icon: Icon(icon, color: AppColors.textBody),
         style: IconButton.styleFrom(
-          backgroundColor: AppColors.slate800,
+          backgroundColor: AppColors.surfaceContainer,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6),
           ),

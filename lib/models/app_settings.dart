@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'font_config.dart';
 
+enum AppTheme { system, light, dark }
+
 class AppSettings {
   FontConfig? tibetanFont;
   FontConfig? pronunciationFont;
@@ -9,6 +11,7 @@ class AppSettings {
   double defaultPageWidthMm;
   double defaultPageHeightMm;
   String? locale;
+  AppTheme theme;
 
   AppSettings({
     this.tibetanFont,
@@ -17,6 +20,7 @@ class AppSettings {
     this.defaultPageWidthMm = 300,
     this.defaultPageHeightMm = 120,
     this.locale,
+    this.theme = AppTheme.dark,
   });
 
   bool get hasFontsConfigured =>
@@ -31,6 +35,7 @@ class AppSettings {
     double? defaultPageWidthMm,
     double? defaultPageHeightMm,
     String? locale,
+    AppTheme? theme,
     bool clearTibetanFont = false,
     bool clearPronunciationFont = false,
     bool clearTranslationFont = false,
@@ -48,6 +53,7 @@ class AppSettings {
       defaultPageWidthMm: defaultPageWidthMm ?? this.defaultPageWidthMm,
       defaultPageHeightMm: defaultPageHeightMm ?? this.defaultPageHeightMm,
       locale: clearLocale ? null : (locale ?? this.locale),
+      theme: theme ?? this.theme,
     );
   }
 
@@ -58,6 +64,7 @@ class AppSettings {
         'defaultPageWidthMm': defaultPageWidthMm,
         'defaultPageHeightMm': defaultPageHeightMm,
         'locale': locale,
+        'theme': theme.name,
       };
 
   factory AppSettings.fromJson(Map<String, dynamic> json) => AppSettings(
@@ -77,6 +84,12 @@ class AppSettings {
         defaultPageHeightMm:
             (json['defaultPageHeightMm'] as num?)?.toDouble() ?? 120,
         locale: json['locale'] as String?,
+        theme: json['theme'] != null
+            ? AppTheme.values.firstWhere(
+                (e) => e.name == json['theme'],
+                orElse: () => AppTheme.dark,
+              )
+            : AppTheme.dark,
       );
 
   String toJsonString() => jsonEncode(toJson());

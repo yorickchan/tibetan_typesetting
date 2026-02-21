@@ -18,22 +18,24 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.slate950,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.slate950.withValues(alpha: 0.7),
+        backgroundColor: theme.scaffoldBackgroundColor.withValues(alpha: 0.7),
         surfaceTintColor: Colors.transparent,
         leading: leading ??
             (Navigator.canPop(context)
                 ? IconButton(
-                    icon: const Icon(Icons.arrow_back, color: AppColors.slate200),
+                    icon: Icon(Icons.arrow_back, color: AppColors.textCaption),
                     onPressed: () => Navigator.pop(context),
                   )
                 : null),
         title: Text(
           title,
-          style: const TextStyle(
-            color: AppColors.slate200,
+          style: TextStyle(
+            color: AppColors.textCaption,
             fontSize: 14,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
@@ -42,7 +44,7 @@ class AppShell extends StatelessWidget {
         actions: actions,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.slate800),
+          child: Container(height: 1, color: AppColors.divider),
         ),
       ),
       body: SafeArea(

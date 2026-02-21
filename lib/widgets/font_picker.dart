@@ -67,8 +67,8 @@ class _FontPickerState extends State<FontPicker> {
       children: [
         Text(
           widget.label,
-          style: const TextStyle(
-            color: AppColors.slate400,
+          style: TextStyle(
+            color: AppColors.textCaption,
             fontSize: 10,
             fontWeight: FontWeight.w600,
             letterSpacing: 1.0,
@@ -80,9 +80,9 @@ class _FontPickerState extends State<FontPicker> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.slate950.withValues(alpha: 0.4),
+              color: AppColors.inputFill,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.slate700),
+              border: Border.all(color: AppColors.border),
             ),
             child: Row(
               children: [
@@ -93,15 +93,15 @@ class _FontPickerState extends State<FontPicker> {
                         : (_selectedName ?? 'Select a font...'),
                     style: TextStyle(
                       color: _selectedName != null
-                          ? AppColors.slate100
-                          : AppColors.slate500,
+                          ? AppColors.textPrimary
+                          : AppColors.textMuted,
                       fontSize: 13,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Icon(Icons.unfold_more,
-                    size: 16, color: AppColors.slate500),
+                Icon(Icons.unfold_more,
+                    size: 16, color: AppColors.textMuted),
               ],
             ),
           ),
@@ -163,7 +163,7 @@ class _FontPickerDialogState extends State<_FontPickerDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: AppColors.slate900,
+      backgroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: SizedBox(
         width: 420,
@@ -176,26 +176,25 @@ class _FontPickerDialogState extends State<_FontPickerDialog> {
                 controller: _searchCtrl,
                 onChanged: _filter,
                 autofocus: true,
-                style:
-                    const TextStyle(color: AppColors.slate100, fontSize: 13),
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
                 decoration: InputDecoration(
                   hintText: 'Search fonts...',
                   hintStyle: TextStyle(
-                      color: AppColors.slate500.withValues(alpha: 0.6)),
-                  prefixIcon: const Icon(Icons.search,
-                      size: 18, color: AppColors.slate500),
+                      color: AppColors.textMuted.withValues(alpha: 0.6)),
+                  prefixIcon: Icon(Icons.search,
+                      size: 18, color: AppColors.textMuted),
                   isDense: true,
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   filled: true,
-                  fillColor: AppColors.slate950.withValues(alpha: 0.5),
+                  fillColor: AppColors.inputFill,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.slate700),
+                    borderSide: BorderSide(color: AppColors.border),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.slate700),
+                    borderSide: BorderSide(color: AppColors.border),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -208,8 +207,7 @@ class _FontPickerDialogState extends State<_FontPickerDialog> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 '${_filtered.length} font${_filtered.length == 1 ? '' : 's'}',
-                style:
-                    const TextStyle(color: AppColors.slate500, fontSize: 10),
+                style: TextStyle(color: AppColors.textMuted, fontSize: 10),
               ),
             ),
             const SizedBox(height: 4),
@@ -233,15 +231,15 @@ class _FontPickerDialogState extends State<_FontPickerDialog> {
                       style: TextStyle(
                         color: selected
                             ? AppColors.sky400
-                            : AppColors.slate200,
+                            : AppColors.textSecondary,
                         fontSize: 13,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
                     trailing: Text(
                       font.fileType.toUpperCase(),
-                      style: const TextStyle(
-                          color: AppColors.slate600, fontSize: 9),
+                      style: TextStyle(
+                          color: AppColors.textFaint, fontSize: 9),
                     ),
                     onTap: () => widget.onSelected(font),
                   );
@@ -255,8 +253,8 @@ class _FontPickerDialogState extends State<_FontPickerDialog> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel',
-                      style: TextStyle(color: AppColors.slate400)),
+                  child: Text('Cancel',
+                      style: TextStyle(color: AppColors.textCaption)),
                 ),
               ),
             ),

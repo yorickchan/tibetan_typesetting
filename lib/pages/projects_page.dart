@@ -152,17 +152,17 @@ class _ProjectsPageState extends State<ProjectsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.slate900,
+        backgroundColor: AppColors.surface,
         title: Text(
           l10n.deleteProject,
-          style: TextStyle(color: AppColors.slate100),
+          style: TextStyle(color: AppColors.textPrimary),
         ),
         content: Text.rich(
           TextSpan(
             children: [
               TextSpan(
                 text: l10n.areYouSureDelete(item.name),
-                style: const TextStyle(color: AppColors.slate300),
+                style: TextStyle(color: AppColors.textBody),
               ),
             ],
           ),
@@ -172,7 +172,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
               l10n.cancel,
-              style: const TextStyle(color: AppColors.slate400),
+              style: TextStyle(color: AppColors.textCaption),
             ),
           ),
           TextButton(
@@ -259,31 +259,31 @@ class _ProjectsPageState extends State<ProjectsPage> {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.slate900,
-        title: Text(title, style: const TextStyle(color: AppColors.slate100)),
+        backgroundColor: AppColors.surface,
+        title: Text(title, style: TextStyle(color: AppColors.textPrimary)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameCtrl,
               autofocus: true,
-              style: const TextStyle(color: AppColors.slate100, fontSize: 14),
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
               decoration: InputDecoration(
                 labelText: effectiveL10n.name,
-                labelStyle: const TextStyle(color: AppColors.slate400),
+                labelStyle: TextStyle(color: AppColors.textCaption),
                 hintText: effectiveL10n.projectName,
                 hintStyle: TextStyle(
-                  color: AppColors.slate500.withValues(alpha: 0.5),
+                  color: AppColors.textMuted.withValues(alpha: 0.5),
                 ),
                 filled: true,
-                fillColor: AppColors.slate800,
+                fillColor: AppColors.surfaceContainer,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: AppColors.slate700),
+                  borderSide: BorderSide(color: AppColors.border),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: AppColors.slate700),
+                  borderSide: BorderSide(color: AppColors.border),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -294,23 +294,23 @@ class _ProjectsPageState extends State<ProjectsPage> {
             const SizedBox(height: 12),
             TextField(
               controller: tagsCtrl,
-              style: const TextStyle(color: AppColors.slate100, fontSize: 14),
+              style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
               decoration: InputDecoration(
                 labelText: effectiveL10n.tags,
-                labelStyle: const TextStyle(color: AppColors.slate400),
+                labelStyle: TextStyle(color: AppColors.textCaption),
                 hintText: effectiveL10n.tagsHint,
                 hintStyle: TextStyle(
-                  color: AppColors.slate500.withValues(alpha: 0.5),
+                  color: AppColors.textMuted.withValues(alpha: 0.5),
                 ),
                 filled: true,
-                fillColor: AppColors.slate800,
+                fillColor: AppColors.surfaceContainer,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: AppColors.slate700),
+                  borderSide: BorderSide(color: AppColors.border),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: AppColors.slate700),
+                  borderSide: BorderSide(color: AppColors.border),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -325,7 +325,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               effectiveL10n.cancel,
-              style: const TextStyle(color: AppColors.slate400),
+              style: TextStyle(color: AppColors.textCaption),
             ),
           ),
           TextButton(
@@ -403,19 +403,19 @@ class _ProjectsPageState extends State<ProjectsPage> {
                 child: TextField(
                   controller: _searchCtrl,
                   onChanged: (_) => setState(() {}),
-                  style: const TextStyle(
-                    color: AppColors.slate100,
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
                     fontSize: 13,
                   ),
                   decoration: InputDecoration(
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.search,
-                      color: AppColors.slate500,
+                      color: AppColors.textMuted,
                       size: 18,
                     ),
                     hintText: _l10n.searchProjects,
-                    hintStyle: const TextStyle(
-                      color: AppColors.slate500,
+                    hintStyle: TextStyle(
+                      color: AppColors.textMuted,
                       fontSize: 13,
                     ),
                     filled: true,
@@ -426,11 +426,11 @@ class _ProjectsPageState extends State<ProjectsPage> {
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: AppColors.slate800),
+                      borderSide: BorderSide(color: AppColors.borderSubtle),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: AppColors.slate800),
+                      borderSide: BorderSide(color: AppColors.borderSubtle),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -441,14 +441,14 @@ class _ProjectsPageState extends State<ProjectsPage> {
               ),
               const SizedBox(width: 8),
               TextButton.icon(
-                icon: const Icon(
+                icon: Icon(
                   Icons.upload_file,
                   size: 16,
-                  color: AppColors.slate100,
+                  color: AppColors.textPrimary,
                 ),
                 label: Text(
                   _l10n.importJson,
-                  style: TextStyle(color: AppColors.slate100, fontSize: 13),
+                  style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
                 ),
                 style: TextButton.styleFrom(
                   backgroundColor: AppColors.cardBg,
@@ -458,7 +458,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
-                    side: const BorderSide(color: AppColors.slate800),
+                    side: BorderSide(color: AppColors.borderSubtle),
                   ),
                 ),
                 onPressed: _importJson,
@@ -511,7 +511,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
           children: [
             Text(
               _l10n.noProjectsYet,
-              style: const TextStyle(color: AppColors.slate400, fontSize: 13),
+              style: TextStyle(color: AppColors.textCaption, fontSize: 13),
             ),
             const SizedBox(height: 16),
             TextButton.icon(
@@ -619,8 +619,8 @@ class _ProjectCard extends StatelessWidget {
                   children: [
                     Text(
                       item.name,
-                      style: const TextStyle(
-                        color: AppColors.slate100,
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -630,8 +630,8 @@ class _ProjectCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       'Updated ${formatDate(item.updatedAt)}',
-                      style: const TextStyle(
-                        color: AppColors.slate500,
+                      style: TextStyle(
+                        color: AppColors.textMuted,
                         fontSize: 11,
                       ),
                     ),
@@ -666,13 +666,13 @@ class _ProjectCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.slate800),
-                        color: AppColors.slate900.withValues(alpha: 0.3),
+                        border: Border.all(color: AppColors.borderSubtle),
+                        color: AppColors.surface.withValues(alpha: 0.3),
                       ),
                       child: Text(
                         t,
-                        style: const TextStyle(
-                          color: AppColors.slate300,
+                        style: TextStyle(
+                          color: AppColors.textBody,
                           fontSize: 10,
                         ),
                       ),
@@ -686,21 +686,21 @@ class _ProjectCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TextButton.icon(
-                icon: const Icon(
+                icon: Icon(
                   Icons.folder_open,
                   size: 16,
-                  color: AppColors.slate900,
+                  color: AppColors.buttonMutedFg,
                 ),
                 label: Text(
                   l10n.open,
                   style: TextStyle(
-                    color: AppColors.slate900,
+                    color: AppColors.buttonMutedFg,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 style: TextButton.styleFrom(
-                  backgroundColor: AppColors.slate100,
+                  backgroundColor: AppColors.buttonMutedBg,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 6,
@@ -726,16 +726,16 @@ class _ProjectCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.download,
                           size: 14,
-                          color: AppColors.slate300,
+                          color: AppColors.textBody,
                         ),
                         const SizedBox(width: 2),
                         Text(
                           l10n.exportJson,
                           style: TextStyle(
-                            color: AppColors.slate300,
+                            color: AppColors.textBody,
                             fontSize: 12,
                           ),
                         ),
@@ -754,8 +754,9 @@ class _ProjectCard extends StatelessWidget {
   Widget _cardIconBtn(
     IconData icon,
     VoidCallback onTap, {
-    Color color = AppColors.slate200,
+    Color? color,
   }) {
+    final c = color ?? AppColors.textSecondary;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -764,10 +765,10 @@ class _ProjectCard extends StatelessWidget {
         margin: const EdgeInsets.only(left: 2),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.slate800),
-          color: AppColors.slate900.withValues(alpha: 0.2),
+          border: Border.all(color: AppColors.borderSubtle),
+          color: AppColors.surface.withValues(alpha: 0.2),
         ),
-        child: Icon(icon, size: 14, color: color),
+        child: Icon(icon, size: 14, color: c),
       ),
     );
   }

@@ -47,10 +47,10 @@ class BlockEditorWidget extends StatelessWidget {
           border: Border.all(color: AppColors.cardBorder),
         ),
         padding: const EdgeInsets.all(24),
-        child: const Center(
+        child: Center(
           child: Text(
             'Select a block above to start editing.',
-            style: TextStyle(color: AppColors.slate500, fontSize: 13),
+            style: TextStyle(color: AppColors.textMuted, fontSize: 13),
           ),
         ),
       );
@@ -76,7 +76,7 @@ class BlockEditorWidget extends StatelessWidget {
             onToggleSmallText: onToggleSmallText,
             onDeleteBlock: onDeleteBlock,
           ),
-          Container(height: 1, color: AppColors.slate800),
+          Container(height: 1, color: AppColors.divider),
           _EditorFields(
             block: selectedBlock!,
             onUpdateBlock: onUpdateBlock,
@@ -127,12 +127,12 @@ class _Toolbar extends StatelessWidget {
                 enabled: selectedIndex > 0, size: 18),
             Text(
               'Block ${selectedIndex + 1}',
-              style: const TextStyle(
-                  color: AppColors.slate300, fontSize: 11, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                  color: AppColors.textBody, fontSize: 11, fontWeight: FontWeight.w600),
             ),
             Text(
               ' / $totalBlocks',
-              style: const TextStyle(color: AppColors.slate600, fontSize: 11),
+              style: TextStyle(color: AppColors.textFaint, fontSize: 11),
             ),
             _iconBtn(Icons.arrow_downward, onSelectNext,
                 enabled: selectedIndex < totalBlocks - 1, size: 18),
@@ -171,19 +171,20 @@ class _Toolbar extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 6),
       width: 1,
       height: 14,
-      color: AppColors.slate700,
+      color: AppColors.border,
     );
   }
 
   Widget _iconBtn(IconData icon, VoidCallback onPressed,
-      {bool enabled = true, Color color = AppColors.slate400, double size = 16}) {
+      {bool enabled = true, Color? color, double size = 16}) {
+    final c = color ?? AppColors.textCaption;
     return SizedBox(
       width: 28,
       height: 28,
       child: IconButton(
         padding: EdgeInsets.zero,
         iconSize: size,
-        icon: Icon(icon, color: enabled ? color : color.withValues(alpha: 0.3)),
+        icon: Icon(icon, color: enabled ? c : c.withValues(alpha: 0.3)),
         onPressed: enabled ? onPressed : null,
       ),
     );
@@ -197,7 +198,7 @@ class _Toolbar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: AppColors.slate700),
+          border: Border.all(color: AppColors.border),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -205,15 +206,15 @@ class _Toolbar extends StatelessWidget {
             Icon(icon,
                 size: 10,
                 color: enabled
-                    ? AppColors.slate400
-                    : AppColors.slate400.withValues(alpha: 0.3)),
+                    ? AppColors.textCaption
+                    : AppColors.textCaption.withValues(alpha: 0.3)),
             const SizedBox(width: 2),
             Text(
               label,
               style: TextStyle(
                   color: enabled
-                      ? AppColors.slate400
-                      : AppColors.slate400.withValues(alpha: 0.3),
+                      ? AppColors.textCaption
+                      : AppColors.textCaption.withValues(alpha: 0.3),
                   fontSize: 10),
             ),
           ],
@@ -231,7 +232,7 @@ class _Toolbar extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
-            color: active ? activeColor.withValues(alpha: 0.4) : AppColors.slate700,
+            color: active ? activeColor.withValues(alpha: 0.4) : AppColors.border,
           ),
           color: active ? activeColor.withValues(alpha: 0.15) : null,
         ),
@@ -240,12 +241,12 @@ class _Toolbar extends StatelessWidget {
           children: [
             Icon(icon,
                 size: 10,
-                color: active ? activeColor.withValues(alpha: 0.8) : AppColors.slate500),
+                color: active ? activeColor.withValues(alpha: 0.8) : AppColors.textMuted),
             const SizedBox(width: 2),
             Text(
               label,
               style: TextStyle(
-                  color: active ? activeColor.withValues(alpha: 0.8) : AppColors.slate500,
+                  color: active ? activeColor.withValues(alpha: 0.8) : AppColors.textMuted,
                   fontSize: 10,
                   fontWeight: FontWeight.w500),
             ),
@@ -312,23 +313,23 @@ class _EditorFieldsState extends State<_EditorFields> {
   InputDecoration _fieldDecoration(String label, String placeholder) {
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(
-          color: AppColors.slate500,
+      labelStyle: TextStyle(
+          color: AppColors.textMuted,
           fontSize: 10,
           fontWeight: FontWeight.w600,
           letterSpacing: 1.2),
       hintText: placeholder,
-      hintStyle: TextStyle(color: AppColors.slate500.withValues(alpha: 0.5), fontSize: 13),
+      hintStyle: TextStyle(color: AppColors.textMuted.withValues(alpha: 0.5), fontSize: 13),
       filled: true,
-      fillColor: AppColors.slate950.withValues(alpha: 0.5),
+      fillColor: AppColors.inputFill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: AppColors.slate700),
+        borderSide: BorderSide(color: AppColors.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: AppColors.slate700),
+        borderSide: BorderSide(color: AppColors.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
@@ -376,7 +377,7 @@ class _EditorFieldsState extends State<_EditorFields> {
       style: TextStyle(
           fontFamily: widget.tibetanFontFamily,
           fontSize: 13,
-          color: AppColors.slate100),
+          color: AppColors.textPrimary),
       maxLines: null,
       minLines: 3,
       decoration: _fieldDecoration('TIBETAN', 'Tibetan text'),
@@ -390,7 +391,7 @@ class _EditorFieldsState extends State<_EditorFields> {
       style: TextStyle(
           fontFamily: widget.pronunciationFontFamily,
           fontSize: 13,
-          color: AppColors.slate100),
+          color: AppColors.textPrimary),
       maxLines: null,
       minLines: 3,
       decoration: _fieldDecoration('PRONUNCIATION', 'Chinese pronunciation'),
@@ -404,7 +405,7 @@ class _EditorFieldsState extends State<_EditorFields> {
       style: TextStyle(
           fontFamily: widget.translationFontFamily,
           fontSize: 13,
-          color: AppColors.slate100),
+          color: AppColors.textPrimary),
       maxLines: null,
       minLines: 3,
       decoration: _fieldDecoration('TRANSLATION', 'Chinese translation'),

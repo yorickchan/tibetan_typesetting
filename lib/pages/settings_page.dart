@@ -78,7 +78,6 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() => _saving = true);
     await _settingsService.updateSettings(_settings!);
 
-    // Pre-load fonts for preview rendering
     final configs = [
       _settings!.tibetanFont,
       _settings!.pronunciationFont,
@@ -170,7 +169,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: AppColors.slate900,
+      backgroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: SizedBox(
         width: 520,
@@ -198,8 +197,8 @@ class _SettingsPageState extends State<SettingsPage> {
               Expanded(
                 child: Text(
                   _l10n.applicationSettings,
-                  style: const TextStyle(
-                    color: AppColors.slate100,
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -207,8 +206,8 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               if (!widget.requireFonts)
                 IconButton(
-                  icon: const Icon(Icons.close,
-                      size: 18, color: AppColors.slate400),
+                  icon: Icon(Icons.close,
+                      size: 18, color: AppColors.textCaption),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
             ],
@@ -217,12 +216,11 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 4),
             Text(
               _l10n.configureFonts,
-              style: const TextStyle(color: AppColors.slate400, fontSize: 12),
+              style: TextStyle(color: AppColors.textCaption, fontSize: 12),
             ),
           ],
           const SizedBox(height: 20),
 
-          // --- Fonts section ---
           _sectionLabel(_l10n.defaultFonts),
           const SizedBox(height: 12),
 
@@ -252,7 +250,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const SizedBox(height: 24),
 
-          // --- Page defaults section ---
           _sectionLabel(_l10n.defaultPageSize),
           const SizedBox(height: 12),
           Row(
@@ -289,14 +286,18 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const SizedBox(height: 24),
 
-          // --- Language section ---
           _sectionLabel(_l10n.language.toUpperCase()),
           const SizedBox(height: 12),
           _buildLanguageSelector(),
 
           const SizedBox(height: 24),
 
-          // --- Actions ---
+          _sectionLabel(_l10n.theme.toUpperCase()),
+          const SizedBox(height: 12),
+          _buildThemeSelector(),
+
+          const SizedBox(height: 24),
+
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -304,7 +305,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(_l10n.cancel,
-                      style: TextStyle(color: AppColors.slate400)),
+                      style: TextStyle(color: AppColors.textCaption)),
                 ),
               const SizedBox(width: 8),
               TextButton(
@@ -312,7 +313,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 style: TextButton.styleFrom(
                   backgroundColor: _canSave
                       ? AppColors.sky500
-                      : AppColors.slate700,
+                      : AppColors.border,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   shape: RoundedRectangleBorder(
@@ -322,7 +323,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Text(
                   _saving ? _l10n.saving : _l10n.save,
                   style: TextStyle(
-                    color: _canSave ? Colors.white : AppColors.slate500,
+                    color: _canSave ? Colors.white : AppColors.textMuted,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -337,8 +338,8 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _sectionLabel(String text) {
     return Text(
       text,
-      style: const TextStyle(
-        color: AppColors.slate500,
+      style: TextStyle(
+        color: AppColors.textMuted,
         fontSize: 10,
         fontWeight: FontWeight.w600,
         letterSpacing: 1.2,
@@ -387,8 +388,8 @@ class _SettingsPageState extends State<SettingsPage> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: AppColors.slate400,
+          style: TextStyle(
+            color: AppColors.textCaption,
             fontSize: 10,
             fontWeight: FontWeight.w600,
             letterSpacing: 1.0,
@@ -399,20 +400,20 @@ class _SettingsPageState extends State<SettingsPage> {
           controller: controller,
           onChanged: onChanged,
           keyboardType: TextInputType.number,
-          style: const TextStyle(color: AppColors.slate100, fontSize: 13),
+          style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
           decoration: InputDecoration(
             isDense: true,
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             filled: true,
-            fillColor: AppColors.slate950.withValues(alpha: 0.4),
+            fillColor: AppColors.inputFill,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.slate700),
+              borderSide: BorderSide(color: AppColors.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.slate700),
+              borderSide: BorderSide(color: AppColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -439,22 +440,22 @@ class _SettingsPageState extends State<SettingsPage> {
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         filled: true,
-        fillColor: AppColors.slate950.withValues(alpha: 0.4),
+        fillColor: AppColors.inputFill,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.slate700),
+          borderSide: BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.slate700),
+          borderSide: BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.sky500),
         ),
       ),
-      dropdownColor: AppColors.slate800,
-      style: const TextStyle(color: AppColors.slate100, fontSize: 13),
+      dropdownColor: AppColors.surfaceContainer,
+      style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
       items: languages.map((lang) {
         return DropdownMenuItem<String>(
           value: lang.$1,
@@ -468,6 +469,51 @@ class _SettingsPageState extends State<SettingsPage> {
             clearLocale: value == null,
           );
         });
+      },
+    );
+  }
+
+  Widget _buildThemeSelector() {
+    final themes = [
+      (AppTheme.system, _l10n.themeSystem),
+      (AppTheme.light, _l10n.themeLight),
+      (AppTheme.dark, _l10n.themeDark),
+    ];
+
+    return DropdownButtonFormField<AppTheme>(
+      initialValue: _settings?.theme ?? AppTheme.dark,
+      decoration: InputDecoration(
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        filled: true,
+        fillColor: AppColors.inputFill,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: AppColors.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: AppColors.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppColors.sky500),
+        ),
+      ),
+      dropdownColor: AppColors.surfaceContainer,
+      style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
+      items: themes.map((t) {
+        return DropdownMenuItem<AppTheme>(
+          value: t.$1,
+          child: Text(t.$2),
+        );
+      }).toList(),
+      onChanged: (value) {
+        if (value != null) {
+          setState(() {
+            _settings = _settings!.copyWith(theme: value);
+          });
+        }
       },
     );
   }

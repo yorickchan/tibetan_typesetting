@@ -20,6 +20,11 @@ flutter analyze
 
 # Run tests
 flutter test
+
+# Build for release
+flutter build macos    # macOS
+flutter build windows  # Windows
+flutter build linux    # Linux
 ```
 
 ## Architecture
@@ -27,27 +32,34 @@ flutter test
 ### Directory Structure
 ```
 lib/
-├── main.dart                 # App entry point
+├── main.dart                    # App entry point
 ├── models/
-│   └── project.dart          # Data models: Project, TextBlock, PageSetup
+│   ├── project.dart             # Project, TextBlock, PageSetup, MarginMm
+│   ├── app_settings.dart        # Application settings
+│   └── font_config.dart         # Font configuration
 ├── pages/
-│   ├── projects_page.dart    # Project list/management
-│   ├── editor_page.dart      # Main text editor
-│   └── export_page.dart      # PDF export with preview
+│   ├── projects_page.dart       # Project list/management
+│   ├── editor_page.dart         # Main text editor
+│   ├── export_page.dart         # PDF export with preview
+│   └── settings_page.dart       # App settings
 ├── services/
-│   ├── database_service.dart # SQLite persistence (singleton)
-│   └── pdf_service.dart      # PDF generation (singleton)
+│   ├── database_service.dart    # SQLite persistence (singleton)
+│   ├── pdf_service.dart         # PDF generation (singleton)
+│   ├── font_service.dart        # System font discovery (singleton)
+│   └── settings_service.dart     # Settings persistence (singleton)
 ├── utils/
-│   ├── colors.dart           # App color palette
-│   ├── sample_layout.dart    # Pagination logic
-│   └── text_renderer.dart    # Rasterize text via Flutter
+│   ├── colors.dart              # App color palette
+│   ├── sample_layout.dart       # Pagination logic
+│   ├── text_renderer.dart       # Rasterize text to PNG via Flutter
+│   └── font_utils.dart          # Font utilities (TTC extraction)
 └── widgets/
-    ├── app_shell.dart        # Common scaffold
-    ├── block_editor.dart     # TextBlock editor panel
-    ├── block_strip.dart      # Block navigation strip
-    ├── sample_page.dart      # Single page preview
-    ├── sample_pages.dart     # Multi-page preview for export
-    └── title_page_widget.dart # Title page preview
+    ├── app_shell.dart           # Common scaffold
+    ├── block_editor.dart        # TextBlock editor panel
+    ├── block_strip.dart         # Block navigation strip
+    ├── font_picker.dart         # Font selection widget
+    ├── sample_page.dart         # Single page preview
+    ├── sample_pages.dart        # Multi-page preview for export
+    └── title_page_widget.dart   # Title page preview
 ```
 
 ### Data Model
@@ -75,11 +87,20 @@ lib/
 - Includes TTC (TrueType Collection) extractor to get TTF from STHeiti fonts
 - Two-pass: first pre-render all text images, then build PDF pages
 
+**FontService** (`lib/services/font_service.dart`):
+- Singleton for system font discovery
+- Methods: `listFonts`, `getFontFile`, `getTibetanFonts`, `getChineseFonts`
+
+**SettingsService** (`lib/services/settings_service.dart`):
+- Singleton for application settings persistence
+- Stores font preferences, window size, recent projects
+
 ### Page Flow
 
 1. **ProjectsPage** → Create/select project
 2. **EditorPage** → Edit text blocks with live preview
 3. **ExportPage** → Configure page setup, preview, export/print PDF
+4. **SettingsPage** → Configure fonts and app preferences
 
 ### Key Utilities
 
@@ -92,11 +113,15 @@ lib/
 - `renderTextToPng()`: Uses `TextPainter` + `PictureRecorder` to rasterize text at 4x scale (~288 DPI)
 - Returns PNG bytes + dimensions
 
+**font_utils.dart**:
+- TTC (TrueType Collection) file extraction
+- Methods to extract individual TTF fonts from .ttc files
+
 ### Styling
 
 - Dark theme with slate/sky color scheme (see `lib/utils/colors.dart`)
-- Tibetan font: BabelStoneTibetan
-- Chinese font: STHeiti (from .ttc files)
+- Tibetan font: BabelStoneTibetan (or other Tibetan Unicode fonts)
+- Chinese font: STHeiti (from .ttc files, typically on macOS)
 
 ## Important Implementation Notes
 
@@ -116,3 +141,16 @@ Editor uses debounced save (800ms delay after last edit) via `_bumpSave()` → `
 - Default: 300mm × 120mm (landscape, traditional Tibetan text format)
 - 4 rows per page, configurable columns (1-8)
 - Content area with side panels for vertical text and page numbers
+
+### Keyboard Shortcuts
+
+- `Ctrl+N`: Add new block
+- `Ctrl+S`: Save project
+- `Delete`: Delete selected block
+- `Alt+Up/Down`: Move block up/down
+
+### Internationalization
+
+- Supports English (en), Chinese Simplified (zh), and Chinese Traditional (zh_TW)
+- Localization files in `lib/l10n/app_*.arb`
+- Use `AppLocalizations.of(context)` to get translated strings
