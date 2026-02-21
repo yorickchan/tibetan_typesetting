@@ -25,10 +25,23 @@ class PronunciationService {
     return rows.first['chinese_pronunciation'] as String;
   }
 
+  Future<int?> getWordCount(String tibetanSyllable) async {
+    final db = await _db.database;
+    final rows = await db.query(
+      'pronunciation_dictionary',
+      columns: ['word_count'],
+      where: 'tibetan_syllable = ?',
+      whereArgs: [tibetanSyllable],
+    );
+    if (rows.isEmpty) return null;
+    return (rows.first['word_count'] as int?) ?? 1;
+  }
+
   Future<void> savePronunciation(
     String tibetanSyllable,
-    String chinesePronunciation,
-  ) async {
+    String chinesePronunciation, {
+    int wordCount = 1,
+  }) async {
     if (tibetanSyllable.trim().isEmpty || chinesePronunciation.trim().isEmpty) {
       return;
     }
@@ -40,6 +53,7 @@ class PronunciationService {
     await db.insert('pronunciation_dictionary', {
       'tibetan_syllable': tibetanSyllable.trim(),
       'chinese_pronunciation': chinesePronunciation.trim(),
+      'word_count': wordCount.clamp(1, 10),
       'created_at': now,
       'updated_at': now,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
@@ -47,8 +61,9 @@ class PronunciationService {
 
   Future<void> updatePronunciation(
     String tibetanSyllable,
-    String chinesePronunciation,
-  ) async {
+    String chinesePronunciation, {
+    int? wordCount,
+  }) async {
     if (tibetanSyllable.trim().isEmpty || chinesePronunciation.trim().isEmpty) {
       return;
     }
@@ -57,9 +72,16 @@ class PronunciationService {
       RegExp(r'\.\d+'),
       '',
     );
+    final updates = <String, dynamic>{
+      'chinese_pronunciation': chinesePronunciation.trim(),
+      'updated_at': now,
+    };
+    if (wordCount != null) {
+      updates['word_count'] = wordCount.clamp(1, 10);
+    }
     await db.update(
       'pronunciation_dictionary',
-      {'chinese_pronunciation': chinesePronunciation.trim(), 'updated_at': now},
+      updates,
       where: 'tibetan_syllable = ?',
       whereArgs: [tibetanSyllable.trim()],
     );
@@ -76,6 +98,7 @@ class PronunciationService {
           (row) => PronunciationEntry(
             tibetanSyllable: row['tibetan_syllable'] as String,
             chinesePronunciation: row['chinese_pronunciation'] as String,
+            wordCount: (row['word_count'] as int?) ?? 1,
             createdAt: row['created_at'] as String? ?? '',
             updatedAt: row['updated_at'] as String? ?? '',
           ),
@@ -99,6 +122,7 @@ class PronunciationService {
           (e) => {
             'tibetanSyllable': e.tibetanSyllable,
             'chinesePronunciation': e.chinesePronunciation,
+            'wordCount': e.wordCount,
           },
         )
         .toList();
@@ -112,6 +136,7 @@ class PronunciationService {
       final map = item as Map<String, dynamic>;
       final syllable = map['tibetanSyllable'] as String?;
       final pronunciation = map['chinesePronunciation'] as String?;
+      final wordCount = (map['wordCount'] as int?) ?? 1;
       if (syllable == null || pronunciation == null) continue;
       if (syllable.trim().isEmpty || pronunciation.trim().isEmpty) continue;
 
@@ -119,7 +144,7 @@ class PronunciationService {
         final existing = await getPronunciation(syllable);
         if (existing != null) continue;
       }
-      await savePronunciation(syllable, pronunciation);
+      await savePronunciation(syllable, pronunciation, wordCount: wordCount);
       imported++;
     }
     return imported;

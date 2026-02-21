@@ -25,7 +25,7 @@ class DatabaseService {
     final path = '$dbPath/tibetan_typesetting.db';
     return openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: (db, version) async {
         await _createProjectsTable(db);
         await _createAppSettingsTable(db);
@@ -37,6 +37,11 @@ class DatabaseService {
         }
         if (oldVersion < 3) {
           await _createPronunciationDictionaryTable(db);
+        }
+        if (oldVersion < 4) {
+          await db.execute(
+            'ALTER TABLE pronunciation_dictionary ADD COLUMN word_count INTEGER NOT NULL DEFAULT 1',
+          );
         }
       },
     );
@@ -72,6 +77,7 @@ class DatabaseService {
       CREATE TABLE IF NOT EXISTS pronunciation_dictionary (
         tibetan_syllable TEXT PRIMARY KEY,
         chinese_pronunciation TEXT NOT NULL,
+        word_count INTEGER NOT NULL DEFAULT 1,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       )

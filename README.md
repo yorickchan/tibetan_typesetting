@@ -22,8 +22,11 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - Auto-fills Chinese pronunciation as you type Tibetan text
 - Unknown syllables are highlighted in yellow in the Tibetan field and shown as `X` in the pronunciation field
 - Pronunciation entries are auto-saved to the dictionary when you type
+- Supports multi-character pronunciations for abbreviated syllables (e.g. པདྨ → 2 characters)
 - Dictionary management page with search, edit, and delete
 - Export and import dictionary as JSON for sharing
+
+![Auto Pronunciation](screenshot/auto%20pronunciation.png)
 
 ![Edit Screen](screenshot/edit%20screen.png)
 
@@ -100,6 +103,8 @@ Make sure these fonts are installed on your system for proper text rendering.
 5. **Preview**: View live preview of your document layout
 6. **Export**: Generate PDF or print directly from the app
 7. **Manage Dictionary**: Open the Pronunciation Dictionary page to view, search, edit, or delete saved syllable entries and export/import the dictionary as JSON
+
+![Pronunciation Dictionary](screenshot/pronunciation%20dictionary.png)
 
 ## Project Structure
 

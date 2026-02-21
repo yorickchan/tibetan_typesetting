@@ -102,62 +102,142 @@ class _DictionaryPageState extends State<DictionaryPage> {
 
   Future<void> _editEntry(PronunciationEntry entry) async {
     final ctrl = TextEditingController(text: entry.chinesePronunciation);
+    int wordCount = entry.wordCount;
     final result = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text(
-          entry.tibetanSyllable,
-          style: TextStyle(color: AppColors.textPrimary),
-        ),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
-          decoration: InputDecoration(
-            labelText: _l10n.chinesePronunciation,
-            labelStyle: TextStyle(color: AppColors.textCaption),
-            filled: true,
-            fillColor: AppColors.surfaceContainer,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.sky500),
-            ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: AppColors.surface,
+          title: Text(
+            entry.tibetanSyllable,
+            style: TextStyle(color: AppColors.textPrimary),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              _l10n.cancel,
-              style: TextStyle(color: AppColors.textCaption),
-            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: ctrl,
+                autofocus: true,
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                decoration: InputDecoration(
+                  labelText: _l10n.chinesePronunciation,
+                  labelStyle: TextStyle(color: AppColors.textCaption),
+                  filled: true,
+                  fillColor: AppColors.surfaceContainer,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: AppColors.sky500),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Text(
+                    'Characters in pronunciation:',
+                    style: TextStyle(
+                      color: AppColors.textCaption,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const Spacer(),
+                  SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      iconSize: 16,
+                      icon: Icon(
+                        Icons.remove,
+                        color: wordCount > 1
+                            ? AppColors.textCaption
+                            : AppColors.textFaint,
+                      ),
+                      onPressed: wordCount > 1
+                          ? () => setDialogState(() => wordCount--)
+                          : null,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 28,
+                    child: Text(
+                      '$wordCount',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      iconSize: 16,
+                      icon: Icon(
+                        Icons.add,
+                        color: wordCount < 10
+                            ? AppColors.textCaption
+                            : AppColors.textFaint,
+                      ),
+                      onPressed: wordCount < 10
+                          ? () => setDialogState(() => wordCount++)
+                          : null,
+                    ),
+                  ),
+                ],
+              ),
+              if (wordCount > 1)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    'This syllable maps to $wordCount Chinese characters when auto-filling.',
+                    style: TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              _l10n.save,
-              style: const TextStyle(
-                color: AppColors.sky500,
-                fontWeight: FontWeight.w600,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(
+                _l10n.cancel,
+                style: TextStyle(color: AppColors.textCaption),
               ),
             ),
-          ),
-        ],
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(
+                _l10n.save,
+                style: const TextStyle(
+                  color: AppColors.sky500,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
     if (result != true) return;
     await _pronunciationService.updatePronunciation(
       entry.tibetanSyllable,
       ctrl.text,
+      wordCount: wordCount,
     );
     _showSnack(_l10n.saved);
     _loadEntries();
@@ -317,17 +397,45 @@ class _EntryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(
+              Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  entry.tibetanSyllable,
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      entry.tibetanSyllable,
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (entry.wordCount > 1) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5,
+                          vertical: 1,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.sky500.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: AppColors.sky500.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Text(
+                          '×${entry.wordCount}',
+                          style: const TextStyle(
+                            color: AppColors.sky500,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 2),
                 Text(

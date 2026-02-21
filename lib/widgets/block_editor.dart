@@ -433,17 +433,29 @@ class _EditorFieldsState extends State<_EditorFields> {
     if (tibetan.isEmpty || pronunciation.isEmpty) return;
 
     final syllables = extractSyllables(tibetan);
-    final prons = pronunciation.runes
+    final chars = pronunciation.runes
         .map(String.fromCharCode)
         .where((c) => c.trim().isNotEmpty)
         .toList();
 
-    if (syllables.isEmpty || prons.isEmpty) return;
+    if (syllables.isEmpty || chars.isEmpty) return;
 
-    for (int i = 0; i < syllables.length && i < prons.length; i++) {
-      final pron = prons[i];
-      if (pron.isNotEmpty && pron != 'X') {
-        await _pronunciationService.savePronunciation(syllables[i], pron);
+    int charIdx = 0;
+    for (final syllable in syllables) {
+      if (charIdx >= chars.length) break;
+
+      final wordCount =
+          (await _pronunciationService.getWordCount(syllable)) ?? 1;
+      final end = (charIdx + wordCount).clamp(0, chars.length);
+      final pron = chars.sublist(charIdx, end).join();
+      charIdx += wordCount;
+
+      if (pron.isNotEmpty && !pron.contains('X')) {
+        await _pronunciationService.savePronunciation(
+          syllable,
+          pron,
+          wordCount: wordCount,
+        );
       }
     }
   }
