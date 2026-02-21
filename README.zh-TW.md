@@ -15,6 +15,14 @@
 - 視覺化的區塊導航和管理
 - 自動儲存功能
 
+### 🔤 讀音詞典
+- 本地音節級藏文轉中文讀音詞典
+- 輸入藏文時自動填入中文讀音
+- 未知音節在藏文欄位以黃色高亮顯示，在讀音欄位顯示為 `X`
+- 輸入讀音時自動儲存至詞典
+- 詞典管理頁面，支援搜尋、編輯和刪除
+- 支援將詞典匯出／匯入為 JSON 格式以便分享
+
 ![編輯畫面](screenshot/edit%20screen.png)
 
 ### 📄 傳統排版格式
@@ -85,9 +93,11 @@ flutter run
 
 1. **創建專案**：從主畫面開始創建新專案
 2. **新增內容**：新增包含藏文文字、讀音和翻譯的文字區塊
-3. **編輯排版**：設定頁面設定、邊距和欄數
-4. **預覽**：即時預覽您的文檔排版
-5. **匯出**：生成 PDF 或直接從應用程式列印
+3. **讀音自動填入**：輸入藏文時，編輯器會自動從詞典填入讀音；未知音節以高亮和 `X` 標示
+4. **編輯排版**：設定頁面設定、邊距和欄數
+5. **預覽**：即時預覽您的文檔排版
+6. **匯出**：生成 PDF 或直接從應用程式列印
+7. **管理詞典**：開啟讀音詞典頁面，檢視、搜尋、編輯或刪除已儲存的音節項目，並可匯出／匯入 JSON
 
 ## 專案結構
 
@@ -97,22 +107,26 @@ lib/
 ├── models/                      # 資料模型
 │   ├── project.dart            # Project、TextBlock、PageSetup
 │   ├── app_settings.dart       # 應用程式設定
-│   └── font_config.dart        # 字型設定
+│   ├── font_config.dart        # 字型設定
+│   └── pronunciation_entry.dart # 讀音詞典項目
 ├── pages/                       # 主要應用程式頁面
 │   ├── projects_page.dart      # 專案管理
 │   ├── editor_page.dart        # 文字編輯器
 │   ├── export_page.dart        # PDF 匯出和預覽
-│   └── settings_page.dart      # 應用程式設定
+│   ├── settings_page.dart      # 應用程式設定
+│   └── dictionary_page.dart    # 讀音詞典管理
 ├── services/                    # 業務邏輯
 │   ├── database_service.dart   # SQLite 持久化
 │   ├── pdf_service.dart        # PDF 生成
 │   ├── font_service.dart       # 字型管理
-│   └── settings_service.dart   # 設定管理
+│   ├── settings_service.dart   # 設定管理
+│   └── pronunciation_service.dart # 讀音詞典 CRUD
 ├── utils/                       # 工具程式
 │   ├── colors.dart             # 色彩配置
 │   ├── sample_layout.dart      # 分頁邏輯
 │   ├── text_renderer.dart      # 文字轉圖片渲染
-│   └── font_utils.dart         # 字型工具
+│   ├── font_utils.dart         # 字型工具
+│   └── tibetan_segmenter.dart  # 藏文音節切分（基於 tsheg）
 └── widgets/                     # 可重複使用的 UI 元件
     ├── app_shell.dart          # 通用架構
     ├── block_editor.dart       # 區塊編輯面板
@@ -160,6 +174,8 @@ flutter build linux
 - **PdfService**：處理 PDF 生成的單例服務，包含藏文文字預渲染
 - **FontService**：系統字型探測和管理
 - **SettingsService**：應用程式設定持久化
+- **PronunciationService**：本地讀音詞典的 CRUD 單例服務
+- **TibetanSegmenter**：藏文音節切分工具，基於 tsheg（་）分割
 
 ### 頁面排版演算法
 

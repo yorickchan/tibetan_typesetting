@@ -17,6 +17,14 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - Visual block navigation and management
 - Auto-save functionality
 
+### 🔤 Pronunciation Dictionary
+- Local syllable-level Tibetan-to-Chinese pronunciation dictionary
+- Auto-fills Chinese pronunciation as you type Tibetan text
+- Unknown syllables are highlighted in yellow in the Tibetan field and shown as `X` in the pronunciation field
+- Pronunciation entries are auto-saved to the dictionary when you type
+- Dictionary management page with search, edit, and delete
+- Export and import dictionary as JSON for sharing
+
 ![Edit Screen](screenshot/edit%20screen.png)
 
 ### 📄 Traditional Layout
@@ -87,9 +95,11 @@ Make sure these fonts are installed on your system for proper text rendering.
 
 1. **Create a Project**: Start from the main screen by creating a new project
 2. **Add Content**: Add text blocks with Tibetan text, pronunciation, and translation
-3. **Edit Layout**: Configure page setup, margins, and column count
-4. **Preview**: View live preview of your document layout
-5. **Export**: Generate PDF or print directly from the app
+3. **Pronunciation Auto-fill**: The editor auto-fills pronunciation from the dictionary as you type; unknown syllables are highlighted and shown as `X`
+4. **Edit Layout**: Configure page setup, margins, and column count
+5. **Preview**: View live preview of your document layout
+6. **Export**: Generate PDF or print directly from the app
+7. **Manage Dictionary**: Open the Pronunciation Dictionary page to view, search, edit, or delete saved syllable entries and export/import the dictionary as JSON
 
 ## Project Structure
 
@@ -99,22 +109,26 @@ lib/
 ├── models/                      # Data models
 │   ├── project.dart            # Project, TextBlock, PageSetup
 │   ├── app_settings.dart       # Application settings
-│   └── font_config.dart        # Font configuration
+│   ├── font_config.dart        # Font configuration
+│   └── pronunciation_entry.dart # Pronunciation dictionary entry
 ├── pages/                       # Main application pages
 │   ├── projects_page.dart      # Project management
 │   ├── editor_page.dart        # Text editor
 │   ├── export_page.dart        # PDF export and preview
-│   └── settings_page.dart      # Application settings
+│   ├── settings_page.dart      # Application settings
+│   └── dictionary_page.dart    # Pronunciation dictionary management
 ├── services/                    # Business logic
 │   ├── database_service.dart   # SQLite persistence
 │   ├── pdf_service.dart        # PDF generation
 │   ├── font_service.dart       # Font management
-│   └── settings_service.dart   # Settings management
+│   ├── settings_service.dart   # Settings management
+│   └── pronunciation_service.dart # Pronunciation dictionary CRUD
 ├── utils/                       # Utilities
 │   ├── colors.dart             # Color palette
 │   ├── sample_layout.dart      # Pagination logic
 │   ├── text_renderer.dart      # Text to image rendering
-│   └── font_utils.dart         # Font utilities
+│   ├── font_utils.dart         # Font utilities
+│   └── tibetan_segmenter.dart  # Tsheg-based syllable extraction
 └── widgets/                     # Reusable UI components
     ├── app_shell.dart          # Common scaffold
     ├── block_editor.dart       # Block editing panel
@@ -162,6 +176,8 @@ flutter build linux
 - **PdfService**: Singleton handling PDF generation with Tibetan text pre-rendering
 - **FontService**: System font discovery and management
 - **SettingsService**: Application settings persistence
+- **PronunciationService**: Singleton CRUD service for the local pronunciation dictionary
+- **TibetanSegmenter**: Utility for splitting Tibetan text into syllables by tsheg (་)
 
 ### Page Layout Algorithm
 
