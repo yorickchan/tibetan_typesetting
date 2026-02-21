@@ -432,7 +432,10 @@ class _EditorFieldsState extends State<_EditorFields> {
     if (tibetan.isEmpty || pronunciation.isEmpty) return;
 
     final syllables = extractSyllables(tibetan);
-    final prons = pronunciation.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+    final prons = pronunciation.runes
+        .map(String.fromCharCode)
+        .where((c) => c.trim().isNotEmpty)
+        .toList();
 
     if (syllables.isEmpty || prons.isEmpty) return;
 
