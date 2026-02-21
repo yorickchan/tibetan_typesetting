@@ -346,6 +346,7 @@ class PdfService {
             fontFallback: fontFallback,
             pronFontSize: pronConfig.fontSize,
             transFontSize: transConfig.fontSize,
+            tibFontSize: tibFontSize,
             outerW: outerW,
             outerH: outerH,
             sideW: sideW,
@@ -510,6 +511,7 @@ class PdfService {
     required List<pw.Font> fontFallback,
     required double pronFontSize,
     required double transFontSize,
+    required double tibFontSize,
     required double outerW,
     required double outerH,
     required double sideW,
@@ -584,10 +586,12 @@ class PdfService {
         yAccum += isShortRow(rows[ri]) ? shortRowH : normalRowH;
       }
 
-      pw.Widget buildBlock(String key, TextBlock block) {
+      pw.Widget buildBlock(String key, TextBlock block, bool hasMark) {
         final small = block.smallText;
+        final hSize = tibFontSize * 0.9 * (small ? 0.75 : 1.0);
         final pronSize = pronFontSize * (small ? 0.75 : 1.0);
         final transSize = transFontSize * (small ? 0.75 : 1.0);
+        final markPad = hasMark ? hSize * 3.5 : 0.0;
 
         final pron = splitLines(block.chinesePronunciation).join('\n');
         final trans = small
@@ -610,7 +614,7 @@ class PdfService {
               ),
             if (pron.isNotEmpty)
               pw.Padding(
-                padding: const pw.EdgeInsets.only(top: 2),
+                padding: pw.EdgeInsets.only(top: 2, left: markPad),
                 child: pw.Text(
                   pron,
                   style: pw.TextStyle(
@@ -624,7 +628,7 @@ class PdfService {
               ),
             if (trans.isNotEmpty)
               pw.Padding(
-                padding: const pw.EdgeInsets.only(top: 1),
+                padding: pw.EdgeInsets.only(top: 1, left: markPad),
                 child: pw.Text(
                   trans,
                   style: pw.TextStyle(
@@ -641,6 +645,7 @@ class PdfService {
       }
 
       final positioned = <pw.Widget>[];
+      final showMark = pageIdx % 2 == 0;
       for (var ri = 0; ri < rows.length; ri++) {
         final row = rows[ri];
         for (var ci = 0; ci < pageCols; ci++) {
@@ -650,11 +655,12 @@ class PdfService {
           final blockW = block.smallText
               ? (cW - ci * cellW - padX * 2)
               : (cellW - padX * 2);
+          final hasMark = showMark && ri == 0 && ci == 0;
           positioned.add(
             pw.Positioned(
               left: ci * cellW + padX,
               top: rowYs[ri] + padY,
-              child: pw.SizedBox(width: blockW, child: buildBlock(key, block)),
+              child: pw.SizedBox(width: blockW, child: buildBlock(key, block, hasMark)),
             ),
           );
         }

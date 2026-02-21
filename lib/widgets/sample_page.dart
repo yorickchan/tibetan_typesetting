@@ -283,7 +283,7 @@ class _ContentGrid extends StatelessWidget {
                                   text: '༄༅།།   ',
                                   style: TextStyle(
                                     fontFamily: tibFamily,
-                                    color: Colors.black87,
+                                    color: AppColors.rose600,
                                   ),
                                 ),
                               TextSpan(text: heading),
@@ -315,7 +315,10 @@ class _ContentGrid extends StatelessWidget {
                         ),
                       if (pron.isNotEmpty)
                         Padding(
-                          padding: const EdgeInsets.only(top: 2),
+                          padding: EdgeInsets.only(
+                            top: 2,
+                            left: doShowMark ? headingSize * 3.5 : 0,
+                          ),
                           child: Text(
                             pron,
                             style: TextStyle(
@@ -330,7 +333,10 @@ class _ContentGrid extends StatelessWidget {
                         ),
                       if (trans.isNotEmpty)
                         Padding(
-                          padding: const EdgeInsets.only(top: 1),
+                          padding: EdgeInsets.only(
+                            top: 1,
+                            left: doShowMark ? headingSize * 3.5 : 0,
+                          ),
                           child: Text(
                             trans,
                             style: TextStyle(
