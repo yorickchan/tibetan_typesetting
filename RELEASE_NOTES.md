@@ -1,6 +1,16 @@
 # Release Notes
 
-## [Unreleased]
+## [1.1.1] - 2026-02-22
+
+### ✨ New Features
+
+#### Pronunciation Dictionary
+- **Local syllable-level pronunciation dictionary** — automatically maps Tibetan syllables to Chinese pronunciations using a local SQLite database
+- **Auto-fill** — pronunciation field fills automatically as you type Tibetan text; unknown syllables appear as `X`
+- **Auto-save** — typing a pronunciation in the editor saves it to the dictionary immediately
+- **Multi-character pronunciation support** — special/abbreviated syllables (e.g. པདྨ) can be configured to span 2 or more Chinese characters via a stepper in the edit dialog; a `×N` badge appears on the entry card
+- **Dictionary management page** — searchable list of all entries with inline edit and delete
+- **Export / Import** — save and load the full dictionary as JSON for sharing between devices
 
 ---
 
