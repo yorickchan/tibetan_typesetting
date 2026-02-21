@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'l10n/app_localizations.dart';
 import 'models/app_settings.dart';
 import 'pages/projects_page.dart';
 import 'pages/settings_page.dart';
@@ -47,6 +48,16 @@ class _TibetanTypesettingAppState extends State<TibetanTypesettingApp> {
   void initState() {
     super.initState();
     _settings = widget.initialSettings;
+  }
+
+  Locale? get _locale {
+    final loc = _settings.locale;
+    if (loc == null) return null;
+    if (loc.contains('_')) {
+      final parts = loc.split('_');
+      return Locale(parts[0], parts[1]);
+    }
+    return Locale(loc);
   }
 
   void _openSettings({bool require = false}) async {
@@ -187,6 +198,9 @@ class _TibetanTypesettingAppState extends State<TibetanTypesettingApp> {
       child: MaterialApp(
         navigatorKey: rootNavigatorKey,
         title: 'Tibetan Typesetting',
+        locale: _locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           brightness: Brightness.dark,

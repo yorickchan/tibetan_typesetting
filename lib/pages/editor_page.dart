@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/app_settings.dart';
 import '../models/font_config.dart';
 import '../models/project.dart';
@@ -51,6 +53,8 @@ class _EditorPageState extends State<EditorPage> {
   Timer? _saveTimer;
   String _saveState = 'idle'; // idle, saving, saved, error
 
+  AppLocalizations get _l10n => AppLocalizations.of(context)!;
+
   @override
   void initState() {
     super.initState();
@@ -93,7 +97,7 @@ class _EditorPageState extends State<EditorPage> {
       setState(() {
         _project = project;
         _loading = false;
-        _error = project == null ? 'Project not found' : null;
+        _error = project == null ? _l10n.projectNotFound : null;
         if (project != null &&
             _selectedId == null &&
             project.blocks.isNotEmpty) {
@@ -328,14 +332,42 @@ class _EditorPageState extends State<EditorPage> {
   @override
   Widget build(BuildContext context) {
     final savePill = switch (_saveState) {
-      'saving' => 'Saving...',
-      'saved' => 'Saved',
-      'error' => 'Save failed',
+      'saving' => _l10n.saving,
+      'saved' => _l10n.saved,
+      'error' => _l10n.saveError,
       _ => null,
     };
 
-    return AppShell(
-      title: _project?.name ?? 'Editor',
+    return Shortcuts(
+      shortcuts: <ShortcutActivator, Intent>{
+        const SingleActivator(LogicalKeyboardKey.keyN, control: true): const _AddBlockIntent(),
+        const SingleActivator(LogicalKeyboardKey.keyS, control: true): const _SaveIntent(),
+        const SingleActivator(LogicalKeyboardKey.delete): const _DeleteBlockIntent(),
+        const SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): const _MoveBlockUpIntent(),
+        const SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): const _MoveBlockDownIntent(),
+      },
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          _AddBlockIntent: CallbackAction<_AddBlockIntent>(
+            onInvoke: (_) => _addPage(),
+          ),
+          _SaveIntent: CallbackAction<_SaveIntent>(
+            onInvoke: (_) => _saveCurrent(),
+          ),
+          _DeleteBlockIntent: CallbackAction<_DeleteBlockIntent>(
+            onInvoke: (_) => _deleteBlock(),
+          ),
+          _MoveBlockUpIntent: CallbackAction<_MoveBlockUpIntent>(
+            onInvoke: (_) => _moveBlock(-1),
+          ),
+          _MoveBlockDownIntent: CallbackAction<_MoveBlockDownIntent>(
+            onInvoke: (_) => _moveBlock(1),
+          ),
+        },
+        child: Focus(
+          autofocus: true,
+          child: AppShell(
+      title: _project?.name ?? _l10n.editor,
       actions: [
         if (savePill != null)
           Padding(
@@ -384,9 +416,9 @@ class _EditorPageState extends State<EditorPage> {
                       ),
                     );
                   },
-            child: const Text(
-              'Export PDF',
-              style: TextStyle(
+            child: Text(
+              _l10n.exportPdf,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
@@ -407,6 +439,9 @@ class _EditorPageState extends State<EditorPage> {
               ),
             )
           : _buildEditor(),
+        ),
+      ),
+    ),
     );
   }
 
@@ -423,6 +458,7 @@ class _EditorPageState extends State<EditorPage> {
           isOpen: _titleOpen,
           onToggle: () => setState(() => _titleOpen = !_titleOpen),
           onUpdateSetup: _updateSetup,
+          l10n: _l10n,
         ),
         const SizedBox(height: 8),
 
@@ -433,6 +469,7 @@ class _EditorPageState extends State<EditorPage> {
           isOpen: _fontOpen,
           onToggle: () => setState(() => _fontOpen = !_fontOpen),
           onUpdateSetup: _updateSetup,
+          l10n: _l10n,
         ),
         const SizedBox(height: 12),
 
@@ -545,6 +582,7 @@ class _TitlePageSettings extends StatelessWidget {
   final bool isOpen;
   final VoidCallback onToggle;
   final void Function(PageSetup Function(PageSetup)) onUpdateSetup;
+  final AppLocalizations l10n;
 
   const _TitlePageSettings({
     required this.pageSetup,
@@ -552,6 +590,7 @@ class _TitlePageSettings extends StatelessWidget {
     required this.isOpen,
     required this.onToggle,
     required this.onUpdateSetup,
+    required this.l10n,
   });
 
   @override
@@ -577,8 +616,8 @@ class _TitlePageSettings extends StatelessWidget {
                     color: AppColors.slate400,
                   ),
                   const SizedBox(width: 6),
-                  const Text(
-                    'Title page',
+                  Text(
+                    l10n.titlePage,
                     style: TextStyle(
                       color: AppColors.slate300,
                       fontSize: 11,
@@ -639,8 +678,8 @@ class _TitlePageSettings extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      const Text(
-                        'Show title page',
+                      Text(
+                        l10n.showTitlePage,
                         style: TextStyle(
                           color: AppColors.slate200,
                           fontSize: 11,
@@ -650,9 +689,9 @@ class _TitlePageSettings extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   _settingsField(
-                    label: 'Tibetan',
+                    label: l10n.tibetanLabel,
                     value: pageSetup.titleTibetan,
-                    placeholder: 'Title (Tibetan)',
+                    placeholder: l10n.titleTibetanLabel,
                     fontFamily: (pageSetup.titleTibetanFont ?? font_utils.effectiveFont(
                       pageSetup.tibetanFont,
                       appSettings.tibetanFont,
@@ -663,9 +702,9 @@ class _TitlePageSettings extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   _settingsField(
-                    label: 'Chinese',
+                    label: l10n.chineseLabel,
                     value: pageSetup.titleChinese,
-                    placeholder: 'Title (Chinese)',
+                    placeholder: l10n.titleChineseLabel,
                     fontFamily: (pageSetup.titleChineseFont ?? font_utils.effectiveFont(
                       pageSetup.translationFont,
                       appSettings.translationFont,
@@ -797,8 +836,8 @@ class _TitlePageSettings extends StatelessWidget {
             if (hasOverride)
               GestureDetector(
                 onTap: onReset,
-                child: const Text(
-                  'Reset to default',
+                child: Text(
+                  l10n.resetToDefault,
                   style: TextStyle(
                     color: AppColors.sky500,
                     fontSize: 10,
@@ -832,7 +871,7 @@ class _TitlePageSettings extends StatelessWidget {
                   fontSize: 13,
                 ),
                 decoration: InputDecoration(
-                  labelText: 'Size',
+                  labelText: l10n.size,
                   labelStyle: const TextStyle(
                     color: AppColors.slate500,
                     fontSize: 10,
@@ -932,6 +971,7 @@ class _FontSettingsPanel extends StatelessWidget {
   final bool isOpen;
   final VoidCallback onToggle;
   final void Function(PageSetup Function(PageSetup)) onUpdateSetup;
+  final AppLocalizations l10n;
 
   const _FontSettingsPanel({
     required this.pageSetup,
@@ -939,6 +979,7 @@ class _FontSettingsPanel extends StatelessWidget {
     required this.isOpen,
     required this.onToggle,
     required this.onUpdateSetup,
+    required this.l10n,
   });
 
   bool get _hasOverrides =>
@@ -967,8 +1008,8 @@ class _FontSettingsPanel extends StatelessWidget {
                   const Icon(Icons.font_download_outlined,
                       size: 14, color: AppColors.slate400),
                   const SizedBox(width: 6),
-                  const Text(
-                    'Project fonts',
+                  Text(
+                    l10n.projectFonts,
                     style: TextStyle(
                       color: AppColors.slate300,
                       fontSize: 11,
@@ -1153,8 +1194,8 @@ class _FontSettingsPanel extends StatelessWidget {
             if (hasOverride)
               GestureDetector(
                 onTap: onReset,
-                child: const Text(
-                  'Reset to default',
+                child: Text(
+                  l10n.resetToDefault,
                   style: TextStyle(
                     color: AppColors.sky500,
                     fontSize: 10,
@@ -1188,7 +1229,7 @@ class _FontSettingsPanel extends StatelessWidget {
                 style: const TextStyle(
                     color: AppColors.slate100, fontSize: 13),
                 decoration: InputDecoration(
-                  labelText: 'Size',
+                  labelText: l10n.size,
                   labelStyle: const TextStyle(
                       color: AppColors.slate500, fontSize: 10),
                   isDense: true,
@@ -1219,4 +1260,25 @@ class _FontSettingsPanel extends StatelessWidget {
       ],
     );
   }
+}
+
+// Keyboard shortcut intents
+class _AddBlockIntent extends Intent {
+  const _AddBlockIntent();
+}
+
+class _SaveIntent extends Intent {
+  const _SaveIntent();
+}
+
+class _DeleteBlockIntent extends Intent {
+  const _DeleteBlockIntent();
+}
+
+class _MoveBlockUpIntent extends Intent {
+  const _MoveBlockUpIntent();
+}
+
+class _MoveBlockDownIntent extends Intent {
+  const _MoveBlockDownIntent();
 }

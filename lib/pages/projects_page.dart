@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/project.dart';
 import '../services/database_service.dart';
 import '../services/settings_service.dart';
@@ -25,6 +26,8 @@ class _ProjectsPageState extends State<ProjectsPage> {
   List<ProjectListItem> _projects = [];
   bool _loading = true;
   String? _error;
+
+  AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
   @override
   void initState() {
@@ -69,7 +72,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
         .toList();
   }
 
-  void _showSnack(String msg, {bool error = false}) {
+  void _showSnackMsg(String msg, {bool error = false}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -98,9 +101,11 @@ class _ProjectsPageState extends State<ProjectsPage> {
   }
 
   Future<void> _createProject() async {
+    final l10n = _l10n;
     final result = await _showNameTagsDialog(
-      title: 'New Project',
-      initialName: 'Untitled',
+      title: l10n.newProject,
+      initialName: l10n.untitled,
+      l10n: l10n,
     );
     if (result == null) return;
     try {
@@ -113,18 +118,20 @@ class _ProjectsPageState extends State<ProjectsPage> {
           pageHeightMm: settings.defaultPageHeightMm,
         ),
       );
-      _showSnack('Project created');
+      _showSnackMsg(_l10n.projectCreated);
       if (mounted) _openProject(project.id);
     } catch (e) {
-      _showSnack('Failed to create project', error: true);
+      _showSnackMsg(_l10n.failedToCreateProject, error: true);
     }
   }
 
   Future<void> _renameProject(ProjectListItem item) async {
+    final l10n = _l10n;
     final result = await _showNameTagsDialog(
-      title: 'Rename Project',
+      title: l10n.renameProject,
       initialName: item.name,
       initialTags: item.tags.join(', '),
+      l10n: l10n,
     );
     if (result == null) return;
     try {
@@ -133,39 +140,29 @@ class _ProjectsPageState extends State<ProjectsPage> {
       project.name = result['name'] as String;
       project.tags = result['tags'] as List<String>;
       await _db.updateProject(project);
-      _showSnack('Project updated');
+      _showSnackMsg(_l10n.projectUpdated);
       _loadProjects();
     } catch (e) {
-      _showSnack('Failed to update project', error: true);
+      _showSnackMsg(_l10n.failedToUpdateProject, error: true);
     }
   }
 
   Future<void> _deleteProject(ProjectListItem item) async {
+    final l10n = _l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.slate900,
-        title: const Text(
-          'Delete Project',
+        title: Text(
+          l10n.deleteProject,
           style: TextStyle(color: AppColors.slate100),
         ),
         content: Text.rich(
           TextSpan(
             children: [
-              const TextSpan(
-                text: 'Are you sure you want to delete ',
-                style: TextStyle(color: AppColors.slate300),
-              ),
               TextSpan(
-                text: item.name,
-                style: const TextStyle(
-                  color: AppColors.slate100,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const TextSpan(
-                text: '? This cannot be undone.',
-                style: TextStyle(color: AppColors.slate300),
+                text: l10n.areYouSureDelete(item.name),
+                style: const TextStyle(color: AppColors.slate300),
               ),
             ],
           ),
@@ -173,15 +170,15 @@ class _ProjectsPageState extends State<ProjectsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: AppColors.slate400),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(color: AppColors.slate400),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text(
-              'Delete',
+            child: Text(
+              l10n.delete,
               style: TextStyle(color: AppColors.rose400),
             ),
           ),
@@ -191,20 +188,20 @@ class _ProjectsPageState extends State<ProjectsPage> {
     if (confirmed != true) return;
     try {
       await _db.deleteProject(item.id);
-      _showSnack('Project deleted');
+      _showSnackMsg(_l10n.projectDeleted);
       _loadProjects();
     } catch (e) {
-      _showSnack('Failed to delete project', error: true);
+      _showSnackMsg(_l10n.failedToDeleteProject, error: true);
     }
   }
 
   Future<void> _duplicateProject(String projectId) async {
     try {
       final copy = await _db.duplicateProject(projectId);
-      _showSnack('Project duplicated');
+      _showSnackMsg(_l10n.projectDuplicated);
       if (mounted) _openProject(copy.id);
     } catch (e) {
-      _showSnack('Failed to duplicate project', error: true);
+      _showSnackMsg(_l10n.failedToDuplicateProject, error: true);
     }
   }
 
@@ -224,9 +221,9 @@ class _ProjectsPageState extends State<ProjectsPage> {
       );
       if (path == null) return;
       await File(path).writeAsString(jsonStr);
-      _showSnack('Project exported');
+      _showSnackMsg(_l10n.projectExported);
     } catch (e) {
-      _showSnack('Failed to export project', error: true);
+      _showSnackMsg(_l10n.failedToExportProject, error: true);
     }
   }
 
@@ -242,10 +239,10 @@ class _ProjectsPageState extends State<ProjectsPage> {
       final parsed = jsonDecode(text) as Map<String, dynamic>;
       final project = Project.fromJson(parsed);
       final imported = await _db.importProject(project);
-      _showSnack('Project imported');
+      _showSnackMsg(_l10n.projectImported);
       if (mounted) _openProject(imported.id);
     } catch (e) {
-      _showSnack('Failed to import project', error: true);
+      _showSnackMsg(_l10n.failedToImportProject, error: true);
     }
   }
 
@@ -253,9 +250,11 @@ class _ProjectsPageState extends State<ProjectsPage> {
     required String title,
     String initialName = '',
     String initialTags = '',
+    AppLocalizations? l10n,
   }) async {
     final nameCtrl = TextEditingController(text: initialName);
     final tagsCtrl = TextEditingController(text: initialTags);
+    final effectiveL10n = l10n ?? _l10n;
 
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
@@ -270,9 +269,9 @@ class _ProjectsPageState extends State<ProjectsPage> {
               autofocus: true,
               style: const TextStyle(color: AppColors.slate100, fontSize: 14),
               decoration: InputDecoration(
-                labelText: 'Name',
+                labelText: effectiveL10n.name,
                 labelStyle: const TextStyle(color: AppColors.slate400),
-                hintText: 'Project name',
+                hintText: effectiveL10n.projectName,
                 hintStyle: TextStyle(
                   color: AppColors.slate500.withValues(alpha: 0.5),
                 ),
@@ -297,9 +296,9 @@ class _ProjectsPageState extends State<ProjectsPage> {
               controller: tagsCtrl,
               style: const TextStyle(color: AppColors.slate100, fontSize: 14),
               decoration: InputDecoration(
-                labelText: 'Tags',
+                labelText: effectiveL10n.tags,
                 labelStyle: const TextStyle(color: AppColors.slate400),
-                hintText: 'Comma-separated tags',
+                hintText: effectiveL10n.tagsHint,
                 hintStyle: TextStyle(
                   color: AppColors.slate500.withValues(alpha: 0.5),
                 ),
@@ -324,9 +323,9 @@ class _ProjectsPageState extends State<ProjectsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: AppColors.slate400),
+            child: Text(
+              effectiveL10n.cancel,
+              style: const TextStyle(color: AppColors.slate400),
             ),
           ),
           TextButton(
@@ -341,7 +340,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
               Navigator.pop(ctx, {'name': name, 'tags': tags});
             },
             child: Text(
-              title.contains('New') ? 'Create' : 'Save',
+              title.contains('New') ? effectiveL10n.create : effectiveL10n.save,
               style: const TextStyle(
                 color: AppColors.sky500,
                 fontWeight: FontWeight.w600,
@@ -370,15 +369,15 @@ class _ProjectsPageState extends State<ProjectsPage> {
     final filtered = _filtered;
 
     return AppShell(
-      title: 'Projects',
+      title: _l10n.projects,
       leading: const SizedBox(width: 0),
       actions: [
         Padding(
           padding: const EdgeInsets.only(right: 8),
           child: TextButton.icon(
             icon: const Icon(Icons.add, size: 18, color: Colors.white),
-            label: const Text(
-              'New Project',
+            label: Text(
+              _l10n.newProject,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 13,
@@ -414,7 +413,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                       color: AppColors.slate500,
                       size: 18,
                     ),
-                    hintText: 'Search projects',
+                    hintText: _l10n.searchProjects,
                     hintStyle: const TextStyle(
                       color: AppColors.slate500,
                       fontSize: 13,
@@ -447,8 +446,8 @@ class _ProjectsPageState extends State<ProjectsPage> {
                   size: 16,
                   color: AppColors.slate100,
                 ),
-                label: const Text(
-                  'Import JSON',
+                label: Text(
+                  _l10n.importJson,
                   style: TextStyle(color: AppColors.slate100, fontSize: 13),
                 ),
                 style: TextButton.styleFrom(
@@ -510,16 +509,16 @@ class _ProjectsPageState extends State<ProjectsPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'No projects yet. Create one to start.',
-              style: TextStyle(color: AppColors.slate400, fontSize: 13),
+            Text(
+              _l10n.noProjectsYet,
+              style: const TextStyle(color: AppColors.slate400, fontSize: 13),
             ),
             const SizedBox(height: 16),
             TextButton.icon(
               icon: const Icon(Icons.add, size: 18, color: Colors.white),
-              label: const Text(
-                'New Project',
-                style: TextStyle(
+              label: Text(
+                _l10n.newProject,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
@@ -568,6 +567,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
             onExportJson: () => _exportJson(items[index]),
             onExportPrint: () => _openExport(items[index].id),
             formatDate: _formatDate,
+            l10n: _l10n,
           ),
         );
       },
@@ -584,6 +584,7 @@ class _ProjectCard extends StatelessWidget {
   final VoidCallback onExportJson;
   final VoidCallback onExportPrint;
   final String Function(String) formatDate;
+  final AppLocalizations l10n;
 
   const _ProjectCard({
     required this.item,
@@ -594,6 +595,7 @@ class _ProjectCard extends StatelessWidget {
     required this.onExportJson,
     required this.onExportPrint,
     required this.formatDate,
+    required this.l10n,
   });
 
   @override
@@ -689,8 +691,8 @@ class _ProjectCard extends StatelessWidget {
                   size: 16,
                   color: AppColors.slate900,
                 ),
-                label: const Text(
-                  'Open',
+                label: Text(
+                  l10n.open,
                   style: TextStyle(
                     color: AppColors.slate900,
                     fontSize: 12,
@@ -713,8 +715,8 @@ class _ProjectCard extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: onExportPrint,
-                    child: const Text(
-                      'Export PDF',
+                    child: Text(
+                      l10n.exportPdf,
                       style: TextStyle(color: AppColors.sky400, fontSize: 12),
                     ),
                   ),
@@ -723,15 +725,15 @@ class _ProjectCard extends StatelessWidget {
                     onTap: onExportJson,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(
+                      children: [
+                        const Icon(
                           Icons.download,
                           size: 14,
                           color: AppColors.slate300,
                         ),
-                        SizedBox(width: 2),
+                        const SizedBox(width: 2),
                         Text(
-                          'JSON',
+                          l10n.exportJson,
                           style: TextStyle(
                             color: AppColors.slate300,
                             fontSize: 12,

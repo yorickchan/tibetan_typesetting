@@ -1,0 +1,168 @@
+{
+  "@@locale": "en",
+  "appTitle": "Tibetan Typesetting",
+  "projects": "Projects",
+  "newProject": "New Project",
+  "searchProjects": "Search projects",
+  "noProjectsYet": "No projects yet. Create one to start.",
+  "open": "Open",
+  "exportPdf": "Export PDF",
+  "exportJson": "JSON",
+  "importJson": "Import JSON",
+  "deleteProject": "Delete Project",
+  "areYouSureDelete": "Are you sure you want to delete {name}? This cannot be undone.",
+  "@areYouSureDelete": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "create": "Create",
+  "save": "Save",
+  "projectCreated": "Project created",
+  "projectUpdated": "Project updated",
+  "projectDeleted": "Project deleted",
+  "projectDuplicated": "Project duplicated",
+  "projectExported": "Project exported",
+  "projectImported": "Project imported",
+  "failedToCreateProject": "Failed to create project",
+  "failedToUpdateProject": "Failed to update project",
+  "failedToDeleteProject": "Failed to delete project",
+  "failedToDuplicateProject": "Failed to duplicate project",
+  "failedToExportProject": "Failed to export project",
+  "failedToImportProject": "Failed to import project",
+  "renameProject": "Rename Project",
+  "name": "Name",
+  "tags": "Tags",
+  "tagsHint": "Comma-separated tags",
+  "projectName": "Project name",
+  "updated": "Updated {date}",
+  "@updated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "editor": "Editor",
+  "addBlock": "Add Block",
+  "deleteBlock": "Delete Block",
+  "moveBlockUp": "Move Up",
+  "moveBlockDown": "Move Down",
+  "lineBreak": "Line break",
+  "newPage": "New page",
+  "smallText": "Small",
+  "tibetanText": "Tibetan text",
+  "chinesePronunciation": "Chinese pronunciation",
+  "chineseTranslation": "Chinese translation",
+  "selectBlockToEdit": "Select a block above to start editing.",
+  "blockNumber": "Block {current} of {total}",
+  "@blockNumber": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "pageSetup": "Page Setup",
+  "pageWidth": "Width (mm)",
+  "pageHeight": "Height (mm)",
+  "margins": "Margins",
+  "top": "Top",
+  "bottom": "Bottom",
+  "left": "Left",
+  "right": "Right",
+  "columns": "Columns",
+  "autoPerPage": "Auto per page",
+  "showFrame": "Show frame",
+  "leftVerticalTitle": "Left vertical title",
+  "pageNumberLabel": "Page number",
+  "exportPdfHint": "Use Export PDF to output. Zoom: Cmd +/−/0",
+  "titlePage": "Title page",
+  "showTitlePage": "Show title page",
+  "titleTibetanLabel": "Title (Tibetan)",
+  "titleChineseLabel": "Title (Chinese)",
+  "projectFonts": "Project fonts",
+  "resetToDefault": "Reset to default",
+  "tibetanLabel": "Tibetan",
+  "chineseLabel": "Chinese",
+  "titleTibetanFont": "Title Tibetan Font",
+  "titleChineseFont": "Title Chinese Font",
+  "defaultValueWithName": "Default: {name}",
+  "@defaultValueWithName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "titlePage": "Title Page",
+  "showTitlePage": "Show title page",
+  "titleTibetan": "Title (Tibetan)",
+  "titleChinese": "Title (Chinese)",
+  "dharmaWheel": "Dharma Wheel",
+  "fonts": "Fonts",
+  "tibetanFont": "Tibetan Font",
+  "pronunciationFont": "Pronunciation Font",
+  "translationFont": "Translation Font",
+  "titleTibetanFont": "Title Tibetan Font",
+  "titleChineseFont": "Title Chinese Font",
+  "defaultValue": "Default",
+  "defaultFont": "Default value: {name}",
+  "@defaultFont": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reset": "Reset",
+  "fontSize": "Size",
+  "preferences": "Preferences",
+  "settings": "Settings",
+  "export": "Export",
+  "exportSettings": "Export Settings",
+  "preview": "Preview",
+  "printing": "Printing",
+  "print": "Print",
+  "savePdf": "Save PDF",
+  "pageNumber": "Page {number}",
+  "@pageNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "projectNotFound": "Project not found",
+  "saving": "Saving...",
+  "saved": "Saved",
+  "saveError": "Save failed",
+  "undo": "Undo",
+  "redo": "Redo",
+  "cut": "Cut",
+  "copy": "Copy",
+  "paste": "Paste",
+  "selectAll": "Select All",
+  "about": "About Tibetan Typesetting",
+  "language": "Language",
+  "systemDefault": "System Default",
+  "untitled": "Untitled",
+  "exportProjectJson": "Export Project JSON",
+  "applicationSettings": "Application Settings",
+  "configureFonts": "Please configure your default fonts to get started.",
+  "defaultFonts": "DEFAULT FONTS",
+  "defaultPageSize": "DEFAULT PAGE SIZE",
+  "tibetan": "Tibetan",
+  "pronunciation": "Pronunciation",
+  "translation": "Translation",
+  "width": "Width",
+  "height": "Height",
+  "size": "Size"
+}

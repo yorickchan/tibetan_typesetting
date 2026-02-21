@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/app_settings.dart';
 import '../models/project.dart';
 import '../services/database_service.dart';
@@ -36,6 +37,8 @@ class _ExportPageState extends State<ExportPage> {
   bool _pdfBusy = false;
   String _saveState = 'idle';
   double _zoom = 1.0;
+
+  AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
   static const _zoomMin = 0.2;
   static const _zoomMax = 3.0;
@@ -94,7 +97,7 @@ class _ExportPageState extends State<ExportPage> {
       setState(() {
         _project = project;
         _loading = false;
-        _error = project == null ? 'Project not found' : null;
+        _error = project == null ? _l10n.projectNotFound : null;
       });
     } catch (e) {
       if (!mounted) return;
@@ -178,7 +181,7 @@ class _ExportPageState extends State<ExportPage> {
         return;
       }
       await File(path).writeAsBytes(bytes);
-      _showSnack('PDF saved to $path');
+      _showSnack(_l10n.projectExported);
     } catch (e) {
       _showSnack(e.toString(), error: true);
     } finally {
@@ -251,15 +254,15 @@ class _ExportPageState extends State<ExportPage> {
       autofocus: true,
       onKeyEvent: _handleKey,
       child: AppShell(
-        title: 'Export PDF',
+        title: _l10n.exportPdf,
         actions: [
           if (_saveState == 'saving')
-            const Padding(
-              padding: EdgeInsets.only(right: 8),
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
               child: Center(
                 child: Text(
-                  'Saving...',
-                  style: TextStyle(color: AppColors.slate400, fontSize: 11),
+                  _l10n.saving,
+                  style: const TextStyle(color: AppColors.slate400, fontSize: 11),
                 ),
               ),
             ),
@@ -268,7 +271,7 @@ class _ExportPageState extends State<ExportPage> {
             child: TextButton.icon(
               icon: const Icon(Icons.download, size: 16, color: Colors.white),
               label: Text(
-                _pdfBusy ? 'Exporting...' : 'Export PDF',
+                _pdfBusy ? _l10n.printing : _l10n.exportPdf,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 13,
@@ -320,9 +323,9 @@ class _ExportPageState extends State<ExportPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Page setup',
-                style: TextStyle(
+              Text(
+                _l10n.pageSetup,
+                style: const TextStyle(
                   color: AppColors.slate100,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -341,7 +344,7 @@ class _ExportPageState extends State<ExportPage> {
                         color: AppColors.slate100,
                         fontSize: 13,
                       ),
-                      decoration: _numberDecor('Page width (mm)'),
+                      decoration: _numberDecor(_l10n.pageWidth),
                       onChanged: (v) {
                         final n = double.tryParse(v);
                         if (n != null && n >= 50) {
@@ -359,7 +362,7 @@ class _ExportPageState extends State<ExportPage> {
                         color: AppColors.slate100,
                         fontSize: 13,
                       ),
-                      decoration: _numberDecor('Page height (mm)'),
+                      decoration: _numberDecor(_l10n.pageHeight),
                       onChanged: (v) {
                         final n = double.tryParse(v);
                         if (n != null && n >= 50) {
@@ -373,9 +376,9 @@ class _ExportPageState extends State<ExportPage> {
               const SizedBox(height: 16),
 
               // Columns
-              const Text(
-                'Columns',
-                style: TextStyle(
+              Text(
+                _l10n.columns,
+                style: const TextStyle(
                   color: AppColors.slate200,
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
@@ -397,9 +400,9 @@ class _ExportPageState extends State<ExportPage> {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  const Text(
-                    'Auto per page',
-                    style: TextStyle(color: AppColors.slate300, fontSize: 11),
+                  Text(
+                    _l10n.autoPerPage,
+                    style: const TextStyle(color: AppColors.slate300, fontSize: 11),
                   ),
                 ],
               ),
@@ -438,10 +441,10 @@ class _ExportPageState extends State<ExportPage> {
               Row(
                 children: [
                   ...[
-                    ('top', 'Top'),
-                    ('bottom', 'Bottom'),
-                    ('left', 'Left'),
-                    ('right', 'Right'),
+                    ('top', _l10n.top),
+                    ('bottom', _l10n.bottom),
+                    ('left', _l10n.left),
+                    ('right', _l10n.right),
                   ].map(
                     (e) => Expanded(
                       child: Padding(
@@ -481,9 +484,9 @@ class _ExportPageState extends State<ExportPage> {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  const Text(
-                    'Show frame',
-                    style: TextStyle(color: AppColors.slate200, fontSize: 13),
+                  Text(
+                    _l10n.showFrame,
+                    style: const TextStyle(color: AppColors.slate200, fontSize: 13),
                   ),
                 ],
               ),
@@ -493,7 +496,7 @@ class _ExportPageState extends State<ExportPage> {
               TextFormField(
                 initialValue: ps.leftVerticalTitle,
                 style: const TextStyle(fontSize: 13, color: AppColors.slate100),
-                decoration: _numberDecor('Left vertical title'),
+                decoration: _numberDecor(_l10n.leftVerticalTitle),
                 onChanged: (v) =>
                     _updateSetup((s) => s.copyWith(leftVerticalTitle: v)),
               ),
@@ -501,7 +504,7 @@ class _ExportPageState extends State<ExportPage> {
               TextFormField(
                 initialValue: ps.pageNumber,
                 style: const TextStyle(fontSize: 13, color: AppColors.slate100),
-                decoration: _numberDecor('Page number'),
+                decoration: _numberDecor(_l10n.pageNumberLabel),
                 onChanged: (v) =>
                     _updateSetup((s) => s.copyWith(pageNumber: v)),
               ),
@@ -526,19 +529,19 @@ class _ExportPageState extends State<ExportPage> {
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
-                        'Print preview',
-                        style: TextStyle(
+                        _l10n.preview,
+                        style: const TextStyle(
                           color: AppColors.slate100,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
-                        'Use Export PDF to output. Zoom: Cmd +/−/0',
-                        style: TextStyle(
+                        _l10n.exportPdfHint,
+                        style: const TextStyle(
                           color: AppColors.slate500,
                           fontSize: 11,
                         ),

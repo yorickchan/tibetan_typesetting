@@ -8,6 +8,7 @@ class AppSettings {
   FontConfig? translationFont;
   double defaultPageWidthMm;
   double defaultPageHeightMm;
+  String? locale;
 
   AppSettings({
     this.tibetanFont,
@@ -15,6 +16,7 @@ class AppSettings {
     this.translationFont,
     this.defaultPageWidthMm = 300,
     this.defaultPageHeightMm = 120,
+    this.locale,
   });
 
   bool get hasFontsConfigured =>
@@ -28,9 +30,11 @@ class AppSettings {
     FontConfig? translationFont,
     double? defaultPageWidthMm,
     double? defaultPageHeightMm,
+    String? locale,
     bool clearTibetanFont = false,
     bool clearPronunciationFont = false,
     bool clearTranslationFont = false,
+    bool clearLocale = false,
   }) {
     return AppSettings(
       tibetanFont:
@@ -43,6 +47,7 @@ class AppSettings {
           : (translationFont ?? this.translationFont),
       defaultPageWidthMm: defaultPageWidthMm ?? this.defaultPageWidthMm,
       defaultPageHeightMm: defaultPageHeightMm ?? this.defaultPageHeightMm,
+      locale: clearLocale ? null : (locale ?? this.locale),
     );
   }
 
@@ -52,6 +57,7 @@ class AppSettings {
         'translationFont': translationFont?.toJson(),
         'defaultPageWidthMm': defaultPageWidthMm,
         'defaultPageHeightMm': defaultPageHeightMm,
+        'locale': locale,
       };
 
   factory AppSettings.fromJson(Map<String, dynamic> json) => AppSettings(
@@ -70,6 +76,7 @@ class AppSettings {
             (json['defaultPageWidthMm'] as num?)?.toDouble() ?? 300,
         defaultPageHeightMm:
             (json['defaultPageHeightMm'] as num?)?.toDouble() ?? 120,
+        locale: json['locale'] as String?,
       );
 
   String toJsonString() => jsonEncode(toJson());
