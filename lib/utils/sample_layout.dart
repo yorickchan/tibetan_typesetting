@@ -1,5 +1,13 @@
 import '../models/project.dart';
 
+String resolvePageNumber(String base, int index) {
+  final trimmed = base.trim();
+  if (trimmed.isEmpty) return '${index + 1}';
+  final num = int.tryParse(trimmed);
+  if (num != null) return '${num + index}';
+  return trimmed;
+}
+
 List<String> splitLines(String s) {
   return s
       .split(RegExp(r'\r?\n'))
@@ -63,16 +71,15 @@ List<List<TextBlock?>> blocksToRows(List<TextBlock> blocks, int colCount) {
   }).toList();
 }
 
-List<PageLayout> paginateBlocks(List<TextBlock> blocks, int colCount, [int maxRows = 4]) {
+List<PageLayout> paginateBlocks(
+  List<TextBlock> blocks,
+  int colCount, [
+  int maxRows = 4,
+]) {
   final rowsPerPage = maxRows < 1 ? 1 : maxRows;
 
   if (blocks.isEmpty) {
-    return [
-      PageLayout(
-        colCount: colCount < 1 ? 1 : colCount,
-        rows: [],
-      ),
-    ];
+    return [PageLayout(colCount: colCount < 1 ? 1 : colCount, rows: [])];
   }
 
   final rows = _buildRows(blocks, colCount);

@@ -6,31 +6,24 @@ import 'package:uuid/uuid.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/app_settings.dart';
-import '../models/font_config.dart';
 import '../models/project.dart';
 import '../services/database_service.dart';
 import '../services/font_service.dart';
 import '../services/settings_service.dart';
 import '../utils/colors.dart';
+import '../utils/font_constants.dart';
 import '../utils/font_utils.dart' as font_utils;
 import '../utils/sample_layout.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/block_editor.dart';
 import '../widgets/block_strip.dart';
-import '../widgets/font_picker.dart';
+import '../widgets/font_settings_panel.dart';
 import '../widgets/sample_page.dart';
+import '../widgets/title_page_settings_panel.dart';
 import '../widgets/title_page_widget.dart';
 import 'export_page.dart';
 
 const _uuid = Uuid();
-
-String _resolvePageNumber(String base, int index) {
-  final trimmed = base.trim();
-  if (trimmed.isEmpty) return '${index + 1}';
-  final num = int.tryParse(trimmed);
-  if (num != null) return '${num + index}';
-  return trimmed;
-}
 
 class EditorPage extends StatefulWidget {
   final String projectId;
@@ -340,11 +333,16 @@ class _EditorPageState extends State<EditorPage> {
 
     return Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
-        const SingleActivator(LogicalKeyboardKey.keyN, control: true): const _AddBlockIntent(),
-        const SingleActivator(LogicalKeyboardKey.keyS, control: true): const _SaveIntent(),
-        const SingleActivator(LogicalKeyboardKey.delete): const _DeleteBlockIntent(),
-        const SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): const _MoveBlockUpIntent(),
-        const SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): const _MoveBlockDownIntent(),
+        const SingleActivator(LogicalKeyboardKey.keyN, control: true):
+            const _AddBlockIntent(),
+        const SingleActivator(LogicalKeyboardKey.keyS, control: true):
+            const _SaveIntent(),
+        const SingleActivator(LogicalKeyboardKey.delete):
+            const _DeleteBlockIntent(),
+        const SingleActivator(LogicalKeyboardKey.arrowUp, alt: true):
+            const _MoveBlockUpIntent(),
+        const SingleActivator(LogicalKeyboardKey.arrowDown, alt: true):
+            const _MoveBlockDownIntent(),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
@@ -367,81 +365,88 @@ class _EditorPageState extends State<EditorPage> {
         child: Focus(
           autofocus: true,
           child: AppShell(
-      title: _project?.name ?? _l10n.editor,
-      actions: [
-        if (savePill != null)
-          Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: _saveState == 'error'
-                      ? AppColors.rose600.withValues(alpha: 0.5)
-                      : AppColors.borderSubtle,
-                ),
-                color: _saveState == 'error'
-                    ? AppColors.rose600.withValues(alpha: 0.15)
-                    : AppColors.cardBg,
-              ),
-              child: Text(
-                savePill,
-                style: TextStyle(
-                  color: _saveState == 'error'
-                      ? AppColors.rose300
-                      : AppColors.textSecondary,
-                  fontSize: 11,
-                ),
-              ),
-            ),
-          ),
-        Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: TextButton(
-            style: TextButton.styleFrom(
-              backgroundColor: AppColors.sky500,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            onPressed: _project == null
-                ? null
-                : () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ExportPage(projectId: widget.projectId),
+            title: _project?.name ?? _l10n.editor,
+            actions: [
+              if (savePill != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _saveState == 'error'
+                            ? AppColors.rose600.withValues(alpha: 0.5)
+                            : AppColors.borderSubtle,
                       ),
-                    );
-                  },
-            child: Text(
-              _l10n.exportPdf,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
+                      color: _saveState == 'error'
+                          ? AppColors.rose600.withValues(alpha: 0.15)
+                          : AppColors.cardBg,
+                    ),
+                    child: Text(
+                      savePill,
+                      style: TextStyle(
+                        color: _saveState == 'error'
+                            ? AppColors.rose300
+                            : AppColors.textSecondary,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: AppColors.sky500,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: _project == null
+                      ? null
+                      : () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ExportPage(projectId: widget.projectId),
+                            ),
+                          );
+                        },
+                  child: Text(
+                    _l10n.exportPdf,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
               ),
-            ),
+            ],
+            child: _loading
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.sky500),
+                  )
+                : _error != null
+                ? Center(
+                    child: Text(
+                      _error!,
+                      style: const TextStyle(color: AppColors.rose300),
+                    ),
+                  )
+                : _buildEditor(),
           ),
-        ),
-      ],
-      child: _loading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.sky500),
-            )
-          : _error != null
-          ? Center(
-              child: Text(
-                _error!,
-                style: const TextStyle(color: AppColors.rose300),
-              ),
-            )
-          : _buildEditor(),
         ),
       ),
-    ),
     );
   }
 
@@ -451,7 +456,7 @@ class _EditorPageState extends State<EditorPage> {
 
     return ListView(
       children: [
-        _TitlePageSettings(
+        TitlePageSettingsPanel(
           pageSetup: project.pageSetup,
           appSettings: _appSettings,
           isOpen: _titleOpen,
@@ -461,7 +466,7 @@ class _EditorPageState extends State<EditorPage> {
         ),
         const SizedBox(height: 8),
 
-        _FontSettingsPanel(
+        FontSettingsPanel(
           pageSetup: project.pageSetup,
           appSettings: _appSettings,
           isOpen: _fontOpen,
@@ -494,17 +499,17 @@ class _EditorPageState extends State<EditorPage> {
           final tibFont = font_utils.effectiveFont(
             project.pageSetup.tibetanFont,
             _appSettings.tibetanFont,
-            const FontConfig(fontFamily: 'BabelStoneTibetan', fontPath: '', fontSize: 10),
+            fallbackTibetanFont,
           );
           final pronFont = font_utils.effectiveFont(
             project.pageSetup.pronunciationFont,
             _appSettings.pronunciationFont,
-            const FontConfig(fontFamily: 'STHeiti', fontPath: '', fontSize: 8),
+            fallbackChineseFont,
           );
           final transFont = font_utils.effectiveFont(
             project.pageSetup.translationFont,
             _appSettings.translationFont,
-            const FontConfig(fontFamily: 'STHeiti', fontPath: '', fontSize: 8),
+            fallbackChineseFont,
           );
 
           return Padding(
@@ -551,7 +556,7 @@ class _EditorPageState extends State<EditorPage> {
                     colCount: pageData.page.colCount,
                     highlightBlockId: _selectedId,
                     showMark: pageIdx % 2 == 0,
-                    pageNumber: _resolvePageNumber(
+                    pageNumber: resolvePageNumber(
                       project.pageSetup.pageNumber,
                       pageIdx,
                     ),
@@ -570,692 +575,6 @@ class _PageWithBlocks {
   final PageLayout page;
   final List<TextBlock> blocks;
   _PageWithBlocks({required this.page, required this.blocks});
-}
-
-class _TitlePageSettings extends StatelessWidget {
-  final PageSetup pageSetup;
-  final AppSettings appSettings;
-  final bool isOpen;
-  final VoidCallback onToggle;
-  final void Function(PageSetup Function(PageSetup)) onUpdateSetup;
-  final AppLocalizations l10n;
-
-  const _TitlePageSettings({
-    required this.pageSetup,
-    required this.appSettings,
-    required this.isOpen,
-    required this.onToggle,
-    required this.onUpdateSetup,
-    required this.l10n,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: onToggle,
-            behavior: HitTestBehavior.opaque,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.description_outlined,
-                    size: 14,
-                    color: AppColors.textCaption,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    l10n.titlePage,
-                    style: TextStyle(
-                      color: AppColors.textBody,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      color: pageSetup.showTitlePage
-                          ? AppColors.emerald400.withValues(alpha: 0.15)
-                          : AppColors.border.withValues(alpha: 0.4),
-                    ),
-                    child: Text(
-                      pageSetup.showTitlePage ? 'ON' : 'OFF',
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w500,
-                        color: pageSetup.showTitlePage
-                            ? AppColors.emerald400
-                            : AppColors.textMuted,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Icon(
-                    isOpen ? Icons.expand_less : Icons.expand_more,
-                    size: 14,
-                    color: AppColors.textMuted,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (isOpen) ...[
-            Container(height: 1, color: AppColors.divider),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Checkbox(
-                          value: pageSetup.showTitlePage,
-                          onChanged: (v) => onUpdateSetup(
-                            (s) => s.copyWith(showTitlePage: v),
-                          ),
-                          activeColor: AppColors.sky500,
-                          side: BorderSide(color: AppColors.textMuted),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        l10n.showTitlePage,
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  _settingsField(
-                    label: l10n.tibetanLabel,
-                    value: pageSetup.titleTibetan,
-                    placeholder: l10n.titleTibetanLabel,
-                    fontFamily: (pageSetup.titleTibetanFont ?? font_utils.effectiveFont(
-                      pageSetup.tibetanFont,
-                      appSettings.tibetanFont,
-                      const FontConfig(fontFamily: 'BabelStoneTibetan', fontPath: '', fontSize: 10),
-                    )).fontFamily,
-                    onChanged: (v) =>
-                        onUpdateSetup((s) => s.copyWith(titleTibetan: v)),
-                  ),
-                  const SizedBox(height: 8),
-                  _settingsField(
-                    label: l10n.chineseLabel,
-                    value: pageSetup.titleChinese,
-                    placeholder: l10n.titleChineseLabel,
-                    fontFamily: (pageSetup.titleChineseFont ?? font_utils.effectiveFont(
-                      pageSetup.translationFont,
-                      appSettings.translationFont,
-                      const FontConfig(fontFamily: 'STHeiti', fontPath: '', fontSize: 8),
-                    )).fontFamily,
-                    onChanged: (v) =>
-                        onUpdateSetup((s) => s.copyWith(titleChinese: v)),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(height: 1, color: AppColors.divider),
-                  const SizedBox(height: 12),
-                  _titleFontRow(
-                    label: 'TITLE TIBETAN FONT',
-                    current: pageSetup.titleTibetanFont,
-                    fallback: font_utils.effectiveFont(
-                      pageSetup.tibetanFont,
-                      appSettings.tibetanFont,
-                      const FontConfig(fontFamily: 'BabelStoneTibetan', fontPath: '', fontSize: 10),
-                    ),
-                    defaultSize: 10,
-                    onSelected: (info) {
-                      FontService().loadFontForPreview(FontConfig(
-                        fontFamily: info.familyName,
-                        fontPath: info.filePath,
-                        fontSize: 10,
-                      ));
-                      onUpdateSetup((s) => s.copyWith(
-                        titleTibetanFont: FontConfig(
-                          fontFamily: info.familyName,
-                          fontPath: info.filePath,
-                          fontSize: pageSetup.titleTibetanFont?.fontSize ?? 10,
-                        ),
-                      ));
-                    },
-                    onSizeChanged: (v) {
-                      final n = double.tryParse(v);
-                      if (n == null || n <= 0) return;
-                      final cur = pageSetup.titleTibetanFont;
-                      if (cur == null) return;
-                      onUpdateSetup(
-                        (s) => s.copyWith(titleTibetanFont: cur.copyWith(fontSize: n)),
-                      );
-                    },
-                    onReset: () => onUpdateSetup(
-                      (s) => s.copyWith(clearTitleTibetanFont: true),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _titleFontRow(
-                    label: 'TITLE CHINESE FONT',
-                    current: pageSetup.titleChineseFont,
-                    fallback: font_utils.effectiveFont(
-                      pageSetup.translationFont,
-                      appSettings.translationFont,
-                      const FontConfig(fontFamily: 'STHeiti', fontPath: '', fontSize: 8),
-                    ),
-                    defaultSize: 8,
-                    onSelected: (info) {
-                      FontService().loadFontForPreview(FontConfig(
-                        fontFamily: info.familyName,
-                        fontPath: info.filePath,
-                        fontSize: 8,
-                      ));
-                      onUpdateSetup((s) => s.copyWith(
-                        titleChineseFont: FontConfig(
-                          fontFamily: info.familyName,
-                          fontPath: info.filePath,
-                          fontSize: pageSetup.titleChineseFont?.fontSize ?? 8,
-                        ),
-                      ));
-                    },
-                    onSizeChanged: (v) {
-                      final n = double.tryParse(v);
-                      if (n == null || n <= 0) return;
-                      final cur = pageSetup.titleChineseFont;
-                      if (cur == null) return;
-                      onUpdateSetup(
-                        (s) => s.copyWith(titleChineseFont: cur.copyWith(fontSize: n)),
-                      );
-                    },
-                    onReset: () => onUpdateSetup(
-                      (s) => s.copyWith(clearTitleChineseFont: true),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _titleFontRow({
-    required String label,
-    required FontConfig? current,
-    required FontConfig fallback,
-    required double defaultSize,
-    required ValueChanged<SystemFontInfo> onSelected,
-    required ValueChanged<String> onSizeChanged,
-    required VoidCallback onReset,
-  }) {
-    final hasOverride = current != null;
-    final effectiveName = current?.fontFamily ?? fallback.fontFamily;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: AppColors.textMuted,
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.0,
-              ),
-            ),
-            const Spacer(),
-            if (!hasOverride)
-              Text(
-                'Default: $effectiveName',
-                style: TextStyle(
-                  color: AppColors.textFaint,
-                  fontSize: 10,
-                ),
-              ),
-            if (hasOverride)
-              GestureDetector(
-                onTap: onReset,
-                child: Text(
-                  l10n.resetToDefault,
-                  style: TextStyle(
-                    color: AppColors.sky500,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            Expanded(
-              flex: 3,
-              child: FontPicker(
-                label: '',
-                selectedPath: current?.fontPath,
-                onSelected: onSelected,
-              ),
-            ),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 70,
-              child: TextFormField(
-                initialValue: (current?.fontSize ?? defaultSize)
-                    .toStringAsFixed(1),
-                keyboardType: TextInputType.number,
-                onChanged: onSizeChanged,
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 13,
-                ),
-                decoration: InputDecoration(
-                  labelText: l10n.size,
-                  labelStyle: TextStyle(
-                    color: AppColors.textMuted,
-                    fontSize: 10,
-                  ),
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 8,
-                  ),
-                  filled: true,
-                  fillColor: AppColors.inputFill,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.sky500),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _settingsField({
-    required String label,
-    required String value,
-    required String placeholder,
-    String? fontFamily,
-    required ValueChanged<String> onChanged,
-  }) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 60,
-          child: Text(
-            label,
-            style: TextStyle(color: AppColors.textCaption, fontSize: 10),
-          ),
-        ),
-        Expanded(
-          child: TextFormField(
-            initialValue: value,
-            onChanged: onChanged,
-            style: TextStyle(
-              fontFamily: fontFamily,
-              fontSize: 13,
-              color: AppColors.textPrimary,
-            ),
-            decoration: InputDecoration(
-              hintText: placeholder,
-              hintStyle: TextStyle(
-                color: AppColors.textMuted.withValues(alpha: 0.5),
-              ),
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 8,
-              ),
-              filled: true,
-              fillColor: AppColors.inputFill,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: AppColors.borderSubtle),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: AppColors.borderSubtle),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.sky500),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Project-level font overrides panel
-// ---------------------------------------------------------------------------
-
-class _FontSettingsPanel extends StatelessWidget {
-  final PageSetup pageSetup;
-  final AppSettings appSettings;
-  final bool isOpen;
-  final VoidCallback onToggle;
-  final void Function(PageSetup Function(PageSetup)) onUpdateSetup;
-  final AppLocalizations l10n;
-
-  const _FontSettingsPanel({
-    required this.pageSetup,
-    required this.appSettings,
-    required this.isOpen,
-    required this.onToggle,
-    required this.onUpdateSetup,
-    required this.l10n,
-  });
-
-  bool get _hasOverrides =>
-      pageSetup.tibetanFont != null ||
-      pageSetup.pronunciationFont != null ||
-      pageSetup.translationFont != null;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: onToggle,
-            behavior: HitTestBehavior.opaque,
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Row(
-                children: [
-                  Icon(Icons.font_download_outlined,
-                      size: 14, color: AppColors.textCaption),
-                  const SizedBox(width: 6),
-                  Text(
-                    l10n.projectFonts,
-                    style: TextStyle(
-                      color: AppColors.textBody,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  if (_hasOverrides)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4),
-                        color: AppColors.sky500.withValues(alpha: 0.15),
-                      ),
-                      child: const Text(
-                        'CUSTOM',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.sky400,
-                        ),
-                      ),
-                    ),
-                  const Spacer(),
-                  Icon(
-                    isOpen ? Icons.expand_less : Icons.expand_more,
-                    size: 14,
-                    color: AppColors.textMuted,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (isOpen) ...[
-            Container(height: 1, color: AppColors.divider),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  _fontOverrideRow(
-                    label: 'TIBETAN',
-                    current: pageSetup.tibetanFont,
-                    appDefault: appSettings.tibetanFont,
-                    onSelected: (info) {
-                      final existing = pageSetup.tibetanFont;
-                      onUpdateSetup((s) => s.copyWith(
-                            tibetanFont: FontConfig(
-                              fontFamily: info.familyName,
-                              fontPath: info.filePath,
-                              fontSize: existing?.fontSize ??
-                                  appSettings.tibetanFont?.fontSize ??
-                                  10,
-                            ),
-                          ));
-                      FontService().loadFontForPreview(FontConfig(
-                        fontFamily: info.familyName,
-                        fontPath: info.filePath,
-                        fontSize: 10,
-                      ));
-                    },
-                    onSizeChanged: (v) {
-                      final n = double.tryParse(v);
-                      if (n == null || n <= 0) return;
-                      final cur = pageSetup.tibetanFont;
-                      if (cur == null) return;
-                      onUpdateSetup(
-                          (s) => s.copyWith(tibetanFont: cur.copyWith(fontSize: n)));
-                    },
-                    onReset: () =>
-                        onUpdateSetup((s) => s.copyWith(clearTibetanFont: true)),
-                  ),
-                  const SizedBox(height: 10),
-                  _fontOverrideRow(
-                    label: 'PRONUNCIATION',
-                    current: pageSetup.pronunciationFont,
-                    appDefault: appSettings.pronunciationFont,
-                    onSelected: (info) {
-                      final existing = pageSetup.pronunciationFont;
-                      onUpdateSetup((s) => s.copyWith(
-                            pronunciationFont: FontConfig(
-                              fontFamily: info.familyName,
-                              fontPath: info.filePath,
-                              fontSize: existing?.fontSize ??
-                                  appSettings.pronunciationFont?.fontSize ??
-                                  8,
-                            ),
-                          ));
-                      FontService().loadFontForPreview(FontConfig(
-                        fontFamily: info.familyName,
-                        fontPath: info.filePath,
-                        fontSize: 8,
-                      ));
-                    },
-                    onSizeChanged: (v) {
-                      final n = double.tryParse(v);
-                      if (n == null || n <= 0) return;
-                      final cur = pageSetup.pronunciationFont;
-                      if (cur == null) return;
-                      onUpdateSetup((s) =>
-                          s.copyWith(pronunciationFont: cur.copyWith(fontSize: n)));
-                    },
-                    onReset: () => onUpdateSetup(
-                        (s) => s.copyWith(clearPronunciationFont: true)),
-                  ),
-                  const SizedBox(height: 10),
-                  _fontOverrideRow(
-                    label: 'TRANSLATION',
-                    current: pageSetup.translationFont,
-                    appDefault: appSettings.translationFont,
-                    onSelected: (info) {
-                      final existing = pageSetup.translationFont;
-                      onUpdateSetup((s) => s.copyWith(
-                            translationFont: FontConfig(
-                              fontFamily: info.familyName,
-                              fontPath: info.filePath,
-                              fontSize: existing?.fontSize ??
-                                  appSettings.translationFont?.fontSize ??
-                                  8,
-                            ),
-                          ));
-                      FontService().loadFontForPreview(FontConfig(
-                        fontFamily: info.familyName,
-                        fontPath: info.filePath,
-                        fontSize: 8,
-                      ));
-                    },
-                    onSizeChanged: (v) {
-                      final n = double.tryParse(v);
-                      if (n == null || n <= 0) return;
-                      final cur = pageSetup.translationFont;
-                      if (cur == null) return;
-                      onUpdateSetup((s) =>
-                          s.copyWith(translationFont: cur.copyWith(fontSize: n)));
-                    },
-                    onReset: () => onUpdateSetup(
-                        (s) => s.copyWith(clearTranslationFont: true)),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _fontOverrideRow({
-    required String label,
-    required FontConfig? current,
-    required FontConfig? appDefault,
-    required ValueChanged<SystemFontInfo> onSelected,
-    required ValueChanged<String> onSizeChanged,
-    required VoidCallback onReset,
-  }) {
-    final hasOverride = current != null;
-    final effectiveName = current?.fontFamily ??
-        appDefault?.fontFamily ??
-        '(not set)';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: AppColors.textMuted,
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.0,
-              ),
-            ),
-            const Spacer(),
-            if (!hasOverride)
-              Text(
-                'Default: $effectiveName',
-                style: TextStyle(
-                    color: AppColors.textFaint, fontSize: 10),
-              ),
-            if (hasOverride)
-              GestureDetector(
-                onTap: onReset,
-                child: Text(
-                  l10n.resetToDefault,
-                  style: TextStyle(
-                    color: AppColors.sky500,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            Expanded(
-              flex: 3,
-              child: FontPicker(
-                label: '',
-                selectedPath: current?.fontPath,
-                onSelected: onSelected,
-              ),
-            ),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 70,
-              child: TextFormField(
-                initialValue: (current?.fontSize ??
-                        appDefault?.fontSize ??
-                        10)
-                    .toStringAsFixed(1),
-                keyboardType: TextInputType.number,
-                onChanged: onSizeChanged,
-                style: TextStyle(
-                    color: AppColors.textPrimary, fontSize: 13),
-                decoration: InputDecoration(
-                  labelText: l10n.size,
-                  labelStyle: TextStyle(
-                      color: AppColors.textMuted, fontSize: 10),
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 8),
-                  filled: true,
-                  fillColor: AppColors.inputFill,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        BorderSide(color: AppColors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide:
-                        const BorderSide(color: AppColors.sky500),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 }
 
 // Keyboard shortcut intents

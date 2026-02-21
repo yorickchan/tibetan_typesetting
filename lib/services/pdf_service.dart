@@ -1,13 +1,13 @@
-import 'dart:typed_data';
 import 'dart:ui' show Color;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../models/app_settings.dart';
-import '../models/font_config.dart';
 import '../models/project.dart';
+import '../utils/font_constants.dart';
 import '../utils/font_utils.dart' as font_utils;
 import '../utils/sample_layout.dart';
 import '../utils/text_renderer.dart';
@@ -18,17 +18,6 @@ const _rose = PdfColor.fromInt(0xFFe11d48);
 
 const _roseUi = Color(0xFFe11d48);
 const _blackUi = Color(0xFF000000);
-
-const _fallbackTibetan = FontConfig(
-  fontFamily: 'BabelStoneTibetan',
-  fontPath: '',
-  fontSize: 10,
-);
-const _fallbackChinese = FontConfig(
-  fontFamily: 'STHeiti',
-  fontPath: '',
-  fontSize: 8,
-);
 
 /// Pre-rendered text image stored for synchronous PDF page construction.
 class _Img {
@@ -51,7 +40,9 @@ class PdfService {
       _dharmaWheelSvg = await rootBundle.loadString(
         'assets/images/dharma_wheel.svg',
       );
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Failed to load dharma wheel SVG: $e');
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -100,17 +91,17 @@ class PdfService {
     final tibConfig = font_utils.effectiveFont(
       ps.tibetanFont,
       settings.tibetanFont,
-      _fallbackTibetan,
+      fallbackTibetanFont,
     );
     final pronConfig = font_utils.effectiveFont(
       ps.pronunciationFont,
       settings.pronunciationFont,
-      _fallbackChinese,
+      fallbackChineseFont,
     );
     final transConfig = font_utils.effectiveFont(
       ps.translationFont,
       settings.translationFont,
-      _fallbackChinese,
+      fallbackChineseFont,
     );
 
     // Load PDF fonts from file paths (for Chinese text drawn via pw.Text)
@@ -120,12 +111,16 @@ class PdfService {
       if (pronConfig.fontPath.isNotEmpty) {
         pronPdfFont = await _fontService.loadFontForPdf(pronConfig);
       }
-    } catch (_) {}
+    } catch (e, s) {
+      debugPrint('Failed to load pronunciation font for PDF: $e\n$s');
+    }
     try {
       if (transConfig.fontPath.isNotEmpty) {
         transPdfFont = await _fontService.loadFontForPdf(transConfig);
       }
-    } catch (_) {}
+    } catch (e, s) {
+      debugPrint('Failed to load translation font for PDF: $e\n$s');
+    }
     final chiFont = pronPdfFont ?? transPdfFont ?? pw.Font.helvetica();
     final tranFont = transPdfFont ?? pronPdfFont ?? pw.Font.helvetica();
 
@@ -142,7 +137,9 @@ class PdfService {
       if (titleChiConfig.fontPath.isNotEmpty) {
         titleChiPdfFont = await _fontService.loadFontForPdf(titleChiConfig);
       }
-    } catch (_) {}
+    } catch (e, s) {
+      debugPrint('Failed to load title Chinese font for PDF: $e\n$s');
+    }
     final titleChiFont = titleChiPdfFont ?? tranFont;
 
     // Font families for pre-rendered text (Tibetan through HarfBuzz)
@@ -329,7 +326,7 @@ class PdfService {
 
     for (var pageIdx = 0; pageIdx < pages.length; pageIdx++) {
       final page = pages[pageIdx];
-      final pageNumber = _resolvePageNumber(ps.pageNumber, pageIdx);
+      final pageNumber = resolvePageNumber(ps.pageNumber, pageIdx);
 
       doc.addPage(
         pw.Page(
@@ -433,7 +430,14 @@ class PdfService {
               if (tibImg != null)
                 pw.Image(tibImg.provider, width: tibImg.w, height: tibImg.h),
               if (tibImg == null)
-                pw.Text(' ', style: pw.TextStyle(font: chiFont, fontFallback: fontFallback, fontSize: chiFontSize)),
+                pw.Text(
+                  ' ',
+                  style: pw.TextStyle(
+                    font: chiFont,
+                    fontFallback: fontFallback,
+                    fontSize: chiFontSize,
+                  ),
+                ),
               pw.SizedBox(height: 6),
               pw.Text(
                 titleChinese.isEmpty ? ' ' : titleChinese,
@@ -527,7 +531,12 @@ class PdfService {
           angle: 1.5708,
           child: pw.Text(
             text,
-            style: pw.TextStyle(font: transFont, fontFallback: fontFallback, fontSize: 9, color: _rose),
+            style: pw.TextStyle(
+              font: transFont,
+              fontFallback: fontFallback,
+              fontSize: 9,
+              color: _rose,
+            ),
             textAlign: pw.TextAlign.center,
           ),
         );
@@ -697,13 +706,5 @@ class PdfService {
     }
 
     return pw.Padding(padding: pw.EdgeInsets.all(inset), child: buildInner());
-  }
-
-  String _resolvePageNumber(String base, int index) {
-    final trimmed = base.trim();
-    if (trimmed.isEmpty) return '${index + 1}';
-    final num = int.tryParse(trimmed);
-    if (num != null) return '${num + index}';
-    return trimmed;
   }
 }

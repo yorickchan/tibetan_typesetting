@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/project.dart';
 import '../utils/colors.dart';
+import '../utils/font_constants.dart';
 import '../utils/sample_layout.dart';
 
 class BlockStripWidget extends StatelessWidget {
@@ -24,8 +25,8 @@ class BlockStripWidget extends StatelessWidget {
     required this.onAdd,
     required this.onAddPage,
     required this.pageIndex,
-    this.tibetanFontFamily = 'BabelStoneTibetan',
-    this.translationFontFamily = 'STHeiti',
+    this.tibetanFontFamily = fallbackTibetanFontFamily,
+    this.translationFontFamily = fallbackChineseFontFamily,
   });
 
   @override
@@ -51,7 +52,11 @@ class BlockStripWidget extends StatelessWidget {
                     children: [
                       _AddButton(label: 'Block', onTap: onAdd),
                       const SizedBox(width: 4),
-                      _AddButton(label: 'Page', onTap: onAddPage, outlined: true),
+                      _AddButton(
+                        label: 'Page',
+                        onTap: onAddPage,
+                        outlined: true,
+                      ),
                     ],
                   );
                 }
@@ -70,7 +75,10 @@ class BlockStripWidget extends StatelessWidget {
                   onTap: () => onSelect(b.id),
                   child: Container(
                     width: 100,
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
@@ -93,18 +101,23 @@ class BlockStripWidget extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold,
-                                color: selected ? AppColors.sky400 : AppColors.textMuted,
+                                color: selected
+                                    ? AppColors.sky400
+                                    : AppColors.textMuted,
                               ),
                             ),
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 if (b.smallText)
-                                  const Text('S',
-                                      style: TextStyle(
-                                          fontSize: 7,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.amber400)),
+                                  const Text(
+                                    'S',
+                                    style: TextStyle(
+                                      fontSize: 7,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.amber400,
+                                    ),
+                                  ),
                                 if (b.columnBreakBefore)
                                   Container(
                                     margin: const EdgeInsets.only(left: 2),
@@ -112,7 +125,9 @@ class BlockStripWidget extends StatelessWidget {
                                     height: 4,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: AppColors.sky400.withValues(alpha: 0.6),
+                                      color: AppColors.sky400.withValues(
+                                        alpha: 0.6,
+                                      ),
                                     ),
                                   ),
                                 Container(
@@ -122,8 +137,12 @@ class BlockStripWidget extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: ok
-                                        ? AppColors.emerald400.withValues(alpha: 0.7)
-                                        : AppColors.amber400.withValues(alpha: 0.5),
+                                        ? AppColors.emerald400.withValues(
+                                            alpha: 0.7,
+                                          )
+                                        : AppColors.amber400.withValues(
+                                            alpha: 0.5,
+                                          ),
                                   ),
                                 ),
                               ],
@@ -140,9 +159,12 @@ class BlockStripWidget extends StatelessWidget {
                               height: 1.2,
                               color: tibetanLine.isEmpty
                                   ? AppColors.textFaint
-                                  : (selected ? AppColors.sky400 : AppColors.textBody),
-                              fontStyle:
-                                  tibetanLine.isEmpty ? FontStyle.italic : null,
+                                  : (selected
+                                        ? AppColors.sky400
+                                        : AppColors.textBody),
+                              fontStyle: tibetanLine.isEmpty
+                                  ? FontStyle.italic
+                                  : null,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -176,8 +198,10 @@ class BlockStripWidget extends StatelessWidget {
                   style: TextStyle(color: AppColors.textFaint, fontSize: 10),
                 ),
                 const SizedBox(width: 4),
-                Text('·',
-                    style: TextStyle(color: AppColors.border, fontSize: 10)),
+                Text(
+                  '·',
+                  style: TextStyle(color: AppColors.border, fontSize: 10),
+                ),
                 const SizedBox(width: 4),
                 Text(
                   'page ${pageIndex + 1}',
@@ -218,9 +242,11 @@ class _AddButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.add,
-                size: 12,
-                color: outlined ? AppColors.textBody : AppColors.buttonMutedFg),
+            Icon(
+              Icons.add,
+              size: 12,
+              color: outlined ? AppColors.textBody : AppColors.buttonMutedFg,
+            ),
             const SizedBox(width: 2),
             Text(
               label,

@@ -4,21 +4,11 @@ import '../models/app_settings.dart';
 import '../models/font_config.dart';
 import '../models/project.dart';
 import '../utils/colors.dart';
+import '../utils/font_constants.dart';
 import '../utils/font_utils.dart' as font_utils;
 import '../utils/sample_layout.dart';
 
 const double kMmToPx = 3.78;
-
-const _fallbackTibetan = FontConfig(
-  fontFamily: 'BabelStoneTibetan',
-  fontPath: '',
-  fontSize: 10,
-);
-const _fallbackChinese = FontConfig(
-  fontFamily: 'STHeiti',
-  fontPath: '',
-  fontSize: 8,
-);
 
 class SamplePageWidget extends StatelessWidget {
   final Project project;
@@ -56,17 +46,17 @@ class SamplePageWidget extends StatelessWidget {
     final tibFont = font_utils.effectiveFont(
       setup.tibetanFont,
       appSettings?.tibetanFont,
-      _fallbackTibetan,
+      fallbackTibetanFont,
     );
     final pronFont = font_utils.effectiveFont(
       setup.pronunciationFont,
       appSettings?.pronunciationFont,
-      _fallbackChinese,
+      fallbackChineseFont,
     );
     final transFont = font_utils.effectiveFont(
       setup.translationFont,
       appSettings?.translationFont,
-      _fallbackChinese,
+      fallbackChineseFont,
     );
 
     return ClipRRect(

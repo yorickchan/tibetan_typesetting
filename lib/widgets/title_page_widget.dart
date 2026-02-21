@@ -2,16 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../models/app_settings.dart';
-import '../models/font_config.dart';
 import '../models/project.dart';
 import '../utils/colors.dart';
+import '../utils/font_constants.dart';
 import '../utils/font_utils.dart' as font_utils;
 import 'sample_page.dart' show kMmToPx;
-
-const _fallbackTibetan =
-    FontConfig(fontFamily: 'BabelStoneTibetan', fontPath: '', fontSize: 10);
-const _fallbackChinese =
-    FontConfig(fontFamily: 'STHeiti', fontPath: '', fontSize: 8);
 
 class TitlePageWidget extends StatelessWidget {
   final Project project;
@@ -37,9 +32,15 @@ class TitlePageWidget extends StatelessWidget {
     final pageH = setup.pageHeightMm * kMmToPx;
 
     final bodyTibFont = font_utils.effectiveFont(
-        setup.tibetanFont, appSettings?.tibetanFont, _fallbackTibetan);
+      setup.tibetanFont,
+      appSettings?.tibetanFont,
+      fallbackTibetanFont,
+    );
     final bodyTransFont = font_utils.effectiveFont(
-        setup.translationFont, appSettings?.translationFont, _fallbackChinese);
+      setup.translationFont,
+      appSettings?.translationFont,
+      fallbackChineseFont,
+    );
 
     final tibFont = setup.titleTibetanFont ?? bodyTibFont;
     final transFont = setup.titleChineseFont ?? bodyTransFont;
@@ -90,15 +91,18 @@ class TitlePageWidget extends StatelessWidget {
                         _CrestPanel(),
                         Expanded(
                           child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: _TitleBox(
                               titleTibetan: titleTibetan,
                               titleChinese: titleChinese,
                               tibetanFontFamily: tibFont.fontFamily,
                               chineseFontFamily: transFont.fontFamily,
-                              tibetanFontSize: font_utils.previewFontSize(tibFont.fontSize),
-                              chineseFontSize: font_utils.previewFontSize(transFont.fontSize),
+                              tibetanFontSize: font_utils.previewFontSize(
+                                tibFont.fontSize,
+                              ),
+                              chineseFontSize: font_utils.previewFontSize(
+                                transFont.fontSize,
+                              ),
                             ),
                           ),
                         ),
@@ -152,8 +156,10 @@ class _CrestPanel extends StatelessWidget {
           'assets/images/dharma_wheel.svg',
           width: 80,
           height: 80,
-          colorFilter:
-              const ColorFilter.mode(AppColors.rose600, BlendMode.srcIn),
+          colorFilter: const ColorFilter.mode(
+            AppColors.rose600,
+            BlendMode.srcIn,
+          ),
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -40,18 +41,12 @@ class FontService {
 
   static List<String> get _fontDirs {
     if (Platform.isMacOS) {
-      return const [
-        '/System/Library/Fonts',
-        '/Library/Fonts',
-      ];
+      return const ['/System/Library/Fonts', '/Library/Fonts'];
     } else if (Platform.isWindows) {
       final winDir = Platform.environment['WINDIR'] ?? r'C:\Windows';
       return ['$winDir\\Fonts'];
     } else if (Platform.isLinux) {
-      return const [
-        '/usr/share/fonts',
-        '/usr/local/share/fonts',
-      ];
+      return const ['/usr/share/fonts', '/usr/local/share/fonts'];
     }
     return const [];
   }
@@ -70,7 +65,8 @@ class FontService {
     final fonts = <SystemFontInfo>[];
     final seen = <String>{};
 
-    final homeDir = Platform.environment['HOME'] ??
+    final homeDir =
+        Platform.environment['HOME'] ??
         Platform.environment['USERPROFILE'] ??
         '';
     final dirs = [
@@ -92,19 +88,24 @@ class FontService {
         if (seen.contains(path)) continue;
         seen.add(path);
 
-        final familyName = await font_utils.readFontFamilyName(path) ??
+        final familyName =
+            await font_utils.readFontFamilyName(path) ??
             font_utils.fontNameFromPath(path);
 
-        fonts.add(SystemFontInfo(
-          familyName: familyName,
-          filePath: path,
-          fileType: ext.substring(1), // remove leading dot
-        ));
+        fonts.add(
+          SystemFontInfo(
+            familyName: familyName,
+            filePath: path,
+            fileType: ext.substring(1), // remove leading dot
+          ),
+        );
       }
     }
 
     fonts.sort(
-        (a, b) => a.familyName.toLowerCase().compareTo(b.familyName.toLowerCase()));
+      (a, b) =>
+          a.familyName.toLowerCase().compareTo(b.familyName.toLowerCase()),
+    );
 
     _cachedFonts = fonts;
     return fonts;
@@ -147,14 +148,18 @@ class FontService {
         if (usedPaths.contains(info.filePath)) continue;
         if (info.familyName.toLowerCase().contains(pattern)) {
           try {
-            final font = await loadFontForPdf(FontConfig(
-              fontFamily: info.familyName,
-              fontPath: info.filePath,
-              fontSize: 10,
-            ));
+            final font = await loadFontForPdf(
+              FontConfig(
+                fontFamily: info.familyName,
+                fontPath: info.filePath,
+                fontSize: 10,
+              ),
+            );
             loaded.add(font);
             usedPaths.add(info.filePath);
-          } catch (_) {}
+          } catch (e) {
+            debugPrint('Failed to load CJK fallback font ${info.filePath}: $e');
+          }
         }
       }
     }

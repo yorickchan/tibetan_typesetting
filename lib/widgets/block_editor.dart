@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/project.dart';
 import '../utils/colors.dart';
+import '../utils/font_constants.dart';
 
 class BlockEditorWidget extends StatelessWidget {
   final TextBlock? selectedBlock;
@@ -32,9 +33,9 @@ class BlockEditorWidget extends StatelessWidget {
     required this.onToggleSmallText,
     required this.onSelectPrev,
     required this.onSelectNext,
-    this.tibetanFontFamily = 'BabelStoneTibetan',
-    this.pronunciationFontFamily = 'STHeiti',
-    this.translationFontFamily = 'STHeiti',
+    this.tibetanFontFamily = fallbackTibetanFontFamily,
+    this.pronunciationFontFamily = fallbackChineseFontFamily,
+    this.translationFontFamily = fallbackChineseFontFamily,
   });
 
   @override
@@ -123,43 +124,75 @@ class _Toolbar extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            _iconBtn(Icons.arrow_upward, onSelectPrev,
-                enabled: selectedIndex > 0, size: 18),
+            _iconBtn(
+              Icons.arrow_upward,
+              onSelectPrev,
+              enabled: selectedIndex > 0,
+              size: 18,
+            ),
             Text(
               'Block ${selectedIndex + 1}',
               style: TextStyle(
-                  color: AppColors.textBody, fontSize: 11, fontWeight: FontWeight.w600),
+                color: AppColors.textBody,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             Text(
               ' / $totalBlocks',
               style: TextStyle(color: AppColors.textFaint, fontSize: 11),
             ),
-            _iconBtn(Icons.arrow_downward, onSelectNext,
-                enabled: selectedIndex < totalBlocks - 1, size: 18),
+            _iconBtn(
+              Icons.arrow_downward,
+              onSelectNext,
+              enabled: selectedIndex < totalBlocks - 1,
+              size: 18,
+            ),
             const SizedBox(width: 8),
-            _smallBtn(Icons.arrow_upward, 'Move', () => onMoveBlock(-1),
-                enabled: selectedIndex > 0),
-            const SizedBox(width: 4),
-            _smallBtn(Icons.arrow_downward, 'Move', () => onMoveBlock(1),
-                enabled: selectedIndex < totalBlocks - 1),
-            _divider(),
-            _toggleBtn(
-              Icons.view_column_outlined, 'Line break',
-              block.columnBreakBefore, AppColors.sky500, onToggleColumnBreak,
+            _smallBtn(
+              Icons.arrow_upward,
+              'Move',
+              () => onMoveBlock(-1),
+              enabled: selectedIndex > 0,
             ),
             const SizedBox(width: 4),
-            _toggleBtn(
-              Icons.insert_page_break_outlined, 'New page',
-              block.pageBreakBefore, AppColors.rose500, onTogglePageBreak,
-            ),
-            const SizedBox(width: 4),
-            _toggleBtn(
-              Icons.text_fields, 'Small',
-              block.smallText, AppColors.amber400, onToggleSmallText,
+            _smallBtn(
+              Icons.arrow_downward,
+              'Move',
+              () => onMoveBlock(1),
+              enabled: selectedIndex < totalBlocks - 1,
             ),
             _divider(),
-            _iconBtn(Icons.delete_outline, onDeleteBlock,
-                color: AppColors.rose400, size: 18),
+            _toggleBtn(
+              Icons.view_column_outlined,
+              'Line break',
+              block.columnBreakBefore,
+              AppColors.sky500,
+              onToggleColumnBreak,
+            ),
+            const SizedBox(width: 4),
+            _toggleBtn(
+              Icons.insert_page_break_outlined,
+              'New page',
+              block.pageBreakBefore,
+              AppColors.rose500,
+              onTogglePageBreak,
+            ),
+            const SizedBox(width: 4),
+            _toggleBtn(
+              Icons.text_fields,
+              'Small',
+              block.smallText,
+              AppColors.amber400,
+              onToggleSmallText,
+            ),
+            _divider(),
+            _iconBtn(
+              Icons.delete_outline,
+              onDeleteBlock,
+              color: AppColors.rose400,
+              size: 18,
+            ),
           ],
         ),
       ),
@@ -175,8 +208,13 @@ class _Toolbar extends StatelessWidget {
     );
   }
 
-  Widget _iconBtn(IconData icon, VoidCallback onPressed,
-      {bool enabled = true, Color? color, double size = 16}) {
+  Widget _iconBtn(
+    IconData icon,
+    VoidCallback onPressed, {
+    bool enabled = true,
+    Color? color,
+    double size = 16,
+  }) {
     final c = color ?? AppColors.textCaption;
     return SizedBox(
       width: 28,
@@ -190,8 +228,12 @@ class _Toolbar extends StatelessWidget {
     );
   }
 
-  Widget _smallBtn(IconData icon, String label, VoidCallback onPressed,
-      {bool enabled = true}) {
+  Widget _smallBtn(
+    IconData icon,
+    String label,
+    VoidCallback onPressed, {
+    bool enabled = true,
+  }) {
     return GestureDetector(
       onTap: enabled ? onPressed : null,
       child: Container(
@@ -203,19 +245,22 @@ class _Toolbar extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                size: 10,
-                color: enabled
-                    ? AppColors.textCaption
-                    : AppColors.textCaption.withValues(alpha: 0.3)),
+            Icon(
+              icon,
+              size: 10,
+              color: enabled
+                  ? AppColors.textCaption
+                  : AppColors.textCaption.withValues(alpha: 0.3),
+            ),
             const SizedBox(width: 2),
             Text(
               label,
               style: TextStyle(
-                  color: enabled
-                      ? AppColors.textCaption
-                      : AppColors.textCaption.withValues(alpha: 0.3),
-                  fontSize: 10),
+                color: enabled
+                    ? AppColors.textCaption
+                    : AppColors.textCaption.withValues(alpha: 0.3),
+                fontSize: 10,
+              ),
             ),
           ],
         ),
@@ -224,7 +269,12 @@ class _Toolbar extends StatelessWidget {
   }
 
   Widget _toggleBtn(
-      IconData icon, String label, bool active, Color activeColor, VoidCallback onPressed) {
+    IconData icon,
+    String label,
+    bool active,
+    Color activeColor,
+    VoidCallback onPressed,
+  ) {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
@@ -232,23 +282,32 @@ class _Toolbar extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
-            color: active ? activeColor.withValues(alpha: 0.4) : AppColors.border,
+            color: active
+                ? activeColor.withValues(alpha: 0.4)
+                : AppColors.border,
           ),
           color: active ? activeColor.withValues(alpha: 0.15) : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                size: 10,
-                color: active ? activeColor.withValues(alpha: 0.8) : AppColors.textMuted),
+            Icon(
+              icon,
+              size: 10,
+              color: active
+                  ? activeColor.withValues(alpha: 0.8)
+                  : AppColors.textMuted,
+            ),
             const SizedBox(width: 2),
             Text(
               label,
               style: TextStyle(
-                  color: active ? activeColor.withValues(alpha: 0.8) : AppColors.textMuted,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500),
+                color: active
+                    ? activeColor.withValues(alpha: 0.8)
+                    : AppColors.textMuted,
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
@@ -314,12 +373,16 @@ class _EditorFieldsState extends State<_EditorFields> {
     return InputDecoration(
       labelText: label,
       labelStyle: TextStyle(
-          color: AppColors.textMuted,
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 1.2),
+        color: AppColors.textMuted,
+        fontSize: 10,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 1.2,
+      ),
       hintText: placeholder,
-      hintStyle: TextStyle(color: AppColors.textMuted.withValues(alpha: 0.5), fontSize: 13),
+      hintStyle: TextStyle(
+        color: AppColors.textMuted.withValues(alpha: 0.5),
+        fontSize: 13,
+      ),
       filled: true,
       fillColor: AppColors.inputFill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -375,9 +438,10 @@ class _EditorFieldsState extends State<_EditorFields> {
       controller: _tibetanCtrl,
       onChanged: (v) => widget.onUpdateBlock({'tibetan': v}),
       style: TextStyle(
-          fontFamily: widget.tibetanFontFamily,
-          fontSize: 13,
-          color: AppColors.textPrimary),
+        fontFamily: widget.tibetanFontFamily,
+        fontSize: 13,
+        color: AppColors.textPrimary,
+      ),
       maxLines: null,
       minLines: 3,
       decoration: _fieldDecoration('TIBETAN', 'Tibetan text'),
@@ -389,9 +453,10 @@ class _EditorFieldsState extends State<_EditorFields> {
       controller: _pronCtrl,
       onChanged: (v) => widget.onUpdateBlock({'chinesePronunciation': v}),
       style: TextStyle(
-          fontFamily: widget.pronunciationFontFamily,
-          fontSize: 13,
-          color: AppColors.textPrimary),
+        fontFamily: widget.pronunciationFontFamily,
+        fontSize: 13,
+        color: AppColors.textPrimary,
+      ),
       maxLines: null,
       minLines: 3,
       decoration: _fieldDecoration('PRONUNCIATION', 'Chinese pronunciation'),
@@ -403,9 +468,10 @@ class _EditorFieldsState extends State<_EditorFields> {
       controller: _transCtrl,
       onChanged: (v) => widget.onUpdateBlock({'chineseTranslation': v}),
       style: TextStyle(
-          fontFamily: widget.translationFontFamily,
-          fontSize: 13,
-          color: AppColors.textPrimary),
+        fontFamily: widget.translationFontFamily,
+        fontSize: 13,
+        color: AppColors.textPrimary,
+      ),
       maxLines: null,
       minLines: 3,
       decoration: _fieldDecoration('TRANSLATION', 'Chinese translation'),
