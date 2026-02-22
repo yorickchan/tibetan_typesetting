@@ -1,4 +1,8 @@
-# 藏文排版 &nbsp;·&nbsp; v1.1.2
+# 藏文排版 &nbsp;·&nbsp; v1.1.3
+
+<p align="center">
+  <img src="assets/images/icon.png" width="128" alt="應用程式圖示"/>
+</p>
 
 一個用於創建和匯出藏文文檔的 Flutter 桌面應用程式，採用傳統排版格式並包含中文翻譯。
 

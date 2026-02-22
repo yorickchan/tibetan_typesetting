@@ -1,5 +1,13 @@
 # Release Notes
 
+## [1.1.3] - 2026-02-22
+
+### 🎨 Assets
+- Added application icon (`assets/images/icon.png`) for macOS and Windows builds
+- Icon now displayed in README headers
+
+---
+
 ## [1.1.2] - 2026-02-22
 
 ### 📖 Documentation
