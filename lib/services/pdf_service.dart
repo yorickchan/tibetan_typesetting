@@ -1,4 +1,4 @@
-import 'dart:ui' show Color;
+import 'dart:ui' show Color, TextAlign;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -59,6 +59,7 @@ class PdfService {
     required String fontFamily,
     List<String>? fontFamilyFallback,
     double? lineHeight,
+    TextAlign textAlign = TextAlign.left,
   }) async {
     if (text.trim().isEmpty) return null;
     final r = await renderTextToPng(
@@ -69,6 +70,7 @@ class PdfService {
       color: color,
       maxWidth: maxWidth,
       lineHeight: lineHeight,
+      textAlign: textAlign,
     );
     if (r == null) return null;
     return _Img(pw.MemoryImage(r.pngBytes), r.width, r.height);
@@ -206,6 +208,7 @@ class PdfService {
             titleTextW,
             fontFamily: titleTibFamily,
             lineHeight: 1.4,
+            textAlign: TextAlign.center,
           ),
         ),
       );
@@ -427,6 +430,7 @@ class PdfService {
           ),
           child: pw.Column(
             mainAxisSize: pw.MainAxisSize.min,
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
               if (tibImg != null)
                 pw.Image(tibImg.provider, width: tibImg.w, height: tibImg.h),

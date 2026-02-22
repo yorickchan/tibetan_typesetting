@@ -462,7 +462,7 @@ abstract class AppLocalizations {
   /// No description provided for @titlePage.
   ///
   /// In en, this message translates to:
-  /// **'Title Page'**
+  /// **'Title page'**
   String get titlePage;
 
   /// No description provided for @showTitlePage.
@@ -524,18 +524,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Default: {name}'**
   String defaultValueWithName(String name);
-
-  /// No description provided for @titleTibetan.
-  ///
-  /// In en, this message translates to:
-  /// **'Title (Tibetan)'**
-  String get titleTibetan;
-
-  /// No description provided for @titleChinese.
-  ///
-  /// In en, this message translates to:
-  /// **'Title (Chinese)'**
-  String get titleChinese;
 
   /// No description provided for @dharmaWheel.
   ///
@@ -818,6 +806,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Size'**
   String get size;
+
+  /// No description provided for @pronunciationDictionary.
+  ///
+  /// In en, this message translates to:
+  /// **'Pronunciation Dictionary'**
+  String get pronunciationDictionary;
+
+  /// No description provided for @deleteEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{syllable}\"?'**
+  String deleteEntry(String syllable);
+
+  /// No description provided for @charactersInPronunciation.
+  ///
+  /// In en, this message translates to:
+  /// **'Characters in pronunciation:'**
+  String get charactersInPronunciation;
+
+  /// No description provided for @syllableMapsToChars.
+  ///
+  /// In en, this message translates to:
+  /// **'This syllable maps to {count} Chinese characters when auto-filling.'**
+  String syllableMapsToChars(int count);
+
+  /// No description provided for @exportDictionary.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Dictionary'**
+  String get exportDictionary;
+
+  /// No description provided for @import.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get import;
+
+  /// No description provided for @searchEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'Search entries'**
+  String get searchEntries;
+
+  /// No description provided for @noEntriesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No entries yet. Type Tibetan and pronunciation in the editor to auto-save.'**
+  String get noEntriesYet;
+
+  /// No description provided for @noMatchingEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching entries.'**
+  String get noMatchingEntries;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @importedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {count} entries'**
+  String importedCount(int count);
+
+  /// No description provided for @block.
+  ///
+  /// In en, this message translates to:
+  /// **'Block'**
+  String get block;
+
+  /// No description provided for @move.
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get move;
+
+  /// No description provided for @tibetanLabelShort.
+  ///
+  /// In en, this message translates to:
+  /// **'TIBETAN'**
+  String get tibetanLabelShort;
+
+  /// No description provided for @pronunciationLabelShort.
+  ///
+  /// In en, this message translates to:
+  /// **'PRONUNCIATION'**
+  String get pronunciationLabelShort;
+
+  /// No description provided for @translationLabelShort.
+  ///
+  /// In en, this message translates to:
+  /// **'TRANSLATION'**
+  String get translationLabelShort;
 }
 
 class _AppLocalizationsDelegate

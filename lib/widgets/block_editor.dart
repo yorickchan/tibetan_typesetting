@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/project.dart';
 import '../services/pronunciation_service.dart';
 import '../utils/colors.dart';
@@ -44,6 +45,8 @@ class BlockEditorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (selectedBlock == null) {
       return Container(
         decoration: BoxDecoration(
@@ -54,7 +57,7 @@ class BlockEditorWidget extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Center(
           child: Text(
-            'Select a block above to start editing.',
+            l10n.selectBlockToEdit,
             style: TextStyle(color: AppColors.textMuted, fontSize: 13),
           ),
         ),
@@ -80,6 +83,7 @@ class BlockEditorWidget extends StatelessWidget {
             onTogglePageBreak: onTogglePageBreak,
             onToggleSmallText: onToggleSmallText,
             onDeleteBlock: onDeleteBlock,
+            l10n: l10n,
           ),
           Container(height: 1, color: AppColors.divider),
           _EditorFields(
@@ -88,6 +92,7 @@ class BlockEditorWidget extends StatelessWidget {
             tibetanFontFamily: tibetanFontFamily,
             pronunciationFontFamily: pronunciationFontFamily,
             translationFontFamily: translationFontFamily,
+            l10n: l10n,
           ),
         ],
       ),
@@ -106,6 +111,7 @@ class _Toolbar extends StatelessWidget {
   final VoidCallback onTogglePageBreak;
   final VoidCallback onToggleSmallText;
   final VoidCallback onDeleteBlock;
+  final AppLocalizations l10n;
 
   const _Toolbar({
     required this.selectedIndex,
@@ -118,6 +124,7 @@ class _Toolbar extends StatelessWidget {
     required this.onTogglePageBreak,
     required this.onToggleSmallText,
     required this.onDeleteBlock,
+    required this.l10n,
   });
 
   @override
@@ -135,16 +142,12 @@ class _Toolbar extends StatelessWidget {
               size: 18,
             ),
             Text(
-              'Block ${selectedIndex + 1}',
+              l10n.blockNumber(selectedIndex + 1, totalBlocks),
               style: TextStyle(
                 color: AppColors.textBody,
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
-            ),
-            Text(
-              ' / $totalBlocks',
-              style: TextStyle(color: AppColors.textFaint, fontSize: 11),
             ),
             _iconBtn(
               Icons.arrow_downward,
@@ -155,21 +158,21 @@ class _Toolbar extends StatelessWidget {
             const SizedBox(width: 8),
             _smallBtn(
               Icons.arrow_upward,
-              'Move',
+              l10n.move,
               () => onMoveBlock(-1),
               enabled: selectedIndex > 0,
             ),
             const SizedBox(width: 4),
             _smallBtn(
               Icons.arrow_downward,
-              'Move',
+              l10n.move,
               () => onMoveBlock(1),
               enabled: selectedIndex < totalBlocks - 1,
             ),
             _divider(),
             _toggleBtn(
               Icons.view_column_outlined,
-              'Line break',
+              l10n.lineBreak,
               block.columnBreakBefore,
               AppColors.sky500,
               onToggleColumnBreak,
@@ -177,7 +180,7 @@ class _Toolbar extends StatelessWidget {
             const SizedBox(width: 4),
             _toggleBtn(
               Icons.insert_page_break_outlined,
-              'New page',
+              l10n.newPage,
               block.pageBreakBefore,
               AppColors.rose500,
               onTogglePageBreak,
@@ -185,7 +188,7 @@ class _Toolbar extends StatelessWidget {
             const SizedBox(width: 4),
             _toggleBtn(
               Icons.text_fields,
-              'Small',
+              l10n.smallText,
               block.smallText,
               AppColors.amber400,
               onToggleSmallText,
@@ -326,6 +329,7 @@ class _EditorFields extends StatefulWidget {
   final String tibetanFontFamily;
   final String pronunciationFontFamily;
   final String translationFontFamily;
+  final AppLocalizations l10n;
 
   const _EditorFields({
     required this.block,
@@ -333,6 +337,7 @@ class _EditorFields extends StatefulWidget {
     required this.tibetanFontFamily,
     required this.pronunciationFontFamily,
     required this.translationFontFamily,
+    required this.l10n,
   });
 
   @override
@@ -535,7 +540,10 @@ class _EditorFieldsState extends State<_EditorFields> {
       ),
       maxLines: null,
       minLines: 3,
-      decoration: _fieldDecoration('TIBETAN', 'Tibetan text'),
+      decoration: _fieldDecoration(
+        widget.l10n.tibetanLabelShort,
+        widget.l10n.tibetanText,
+      ),
     );
   }
 
@@ -550,7 +558,10 @@ class _EditorFieldsState extends State<_EditorFields> {
       ),
       maxLines: null,
       minLines: 3,
-      decoration: _fieldDecoration('PRONUNCIATION', 'Chinese pronunciation'),
+      decoration: _fieldDecoration(
+        widget.l10n.pronunciationLabelShort,
+        widget.l10n.chinesePronunciation,
+      ),
     );
   }
 
@@ -565,7 +576,10 @@ class _EditorFieldsState extends State<_EditorFields> {
       ),
       maxLines: null,
       minLines: 3,
-      decoration: _fieldDecoration('TRANSLATION', 'Chinese translation'),
+      decoration: _fieldDecoration(
+        widget.l10n.translationLabelShort,
+        widget.l10n.chineseTranslation,
+      ),
     );
   }
 }

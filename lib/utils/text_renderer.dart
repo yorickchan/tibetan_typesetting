@@ -29,6 +29,7 @@ Future<RenderedText?> renderTextToPng(
   required double maxWidth,
   double scale = 460 / 72,
   double? lineHeight,
+  TextAlign textAlign = TextAlign.left,
 }) async {
   if (text.trim().isEmpty) return null;
 
@@ -43,10 +44,17 @@ Future<RenderedText?> renderTextToPng(
   final painter = TextPainter(
     text: TextSpan(text: text, style: style),
     textDirection: TextDirection.ltr,
+    textAlign: textAlign,
   );
   painter.layout(maxWidth: maxWidth * scale);
 
-  final w = painter.width.ceilToDouble();
+  // For centered/right alignment use maxWidth as canvas width so that the
+  // alignment is computed across the full available space, not just the
+  // intrinsic text width.
+  final useFullWidth = textAlign != TextAlign.left && textAlign != TextAlign.start;
+  final w = useFullWidth
+      ? (maxWidth * scale).ceilToDouble()
+      : painter.width.ceilToDouble();
   final h = painter.height.ceilToDouble();
   if (w <= 0 || h <= 0) return null;
 
@@ -65,7 +73,7 @@ Future<RenderedText?> renderTextToPng(
 
   return RenderedText(
     pngBytes: byteData.buffer.asUint8List(),
-    width: w / scale,
+    width: useFullWidth ? maxWidth : w / scale,
     height: h / scale,
   );
 }

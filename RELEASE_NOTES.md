@@ -1,5 +1,13 @@
 # Release Notes
 
+## [1.1.2] - 2026-02-22
+
+### 📖 Documentation
+- Added version number to README headers
+- Updated README (English & Traditional Chinese) with pronunciation dictionary screenshots and multi-character pronunciation feature
+
+---
+
 ## [1.1.1] - 2026-02-22
 
 ### ✨ New Features

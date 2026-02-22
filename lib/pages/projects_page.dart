@@ -629,7 +629,7 @@ class _ProjectCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Updated ${formatDate(item.updatedAt)}',
+                      l10n.updated(formatDate(item.updatedAt)),
                       style: TextStyle(
                         color: AppColors.textMuted,
                         fontSize: 11,

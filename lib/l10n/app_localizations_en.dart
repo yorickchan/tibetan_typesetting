@@ -195,7 +195,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exportPdfHint => 'Use Export PDF to output. Zoom: Cmd +/−/0';
 
   @override
-  String get titlePage => 'Title Page';
+  String get titlePage => 'Title page';
 
   @override
   String get showTitlePage => 'Show title page';
@@ -228,12 +228,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String defaultValueWithName(String name) {
     return 'Default: $name';
   }
-
-  @override
-  String get titleTibetan => 'Title (Tibetan)';
-
-  @override
-  String get titleChinese => 'Title (Chinese)';
 
   @override
   String get dharmaWheel => 'Dharma Wheel';
@@ -380,4 +374,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get size => 'Size';
+
+  @override
+  String get pronunciationDictionary => 'Pronunciation Dictionary';
+
+  @override
+  String deleteEntry(String syllable) {
+    return 'Delete \"$syllable\"?';
+  }
+
+  @override
+  String get charactersInPronunciation => 'Characters in pronunciation:';
+
+  @override
+  String syllableMapsToChars(int count) {
+    return 'This syllable maps to $count Chinese characters when auto-filling.';
+  }
+
+  @override
+  String get exportDictionary => 'Export Dictionary';
+
+  @override
+  String get import => 'Import';
+
+  @override
+  String get searchEntries => 'Search entries';
+
+  @override
+  String get noEntriesYet =>
+      'No entries yet. Type Tibetan and pronunciation in the editor to auto-save.';
+
+  @override
+  String get noMatchingEntries => 'No matching entries.';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String importedCount(int count) {
+    return 'Imported $count entries';
+  }
+
+  @override
+  String get block => 'Block';
+
+  @override
+  String get move => 'Move';
+
+  @override
+  String get tibetanLabelShort => 'TIBETAN';
+
+  @override
+  String get pronunciationLabelShort => 'PRONUNCIATION';
+
+  @override
+  String get translationLabelShort => 'TRANSLATION';
 }

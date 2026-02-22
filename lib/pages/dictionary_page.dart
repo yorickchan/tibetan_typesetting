@@ -73,7 +73,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
           style: TextStyle(color: AppColors.textPrimary),
         ),
         content: Text(
-          'Delete "${entry.tibetanSyllable}"?',
+          _l10n.deleteEntry(entry.tibetanSyllable),
           style: TextStyle(color: AppColors.textBody),
         ),
         actions: [
@@ -143,7 +143,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
               Row(
                 children: [
                   Text(
-                    'Characters in pronunciation:',
+                    _l10n.charactersInPronunciation,
                     style: TextStyle(
                       color: AppColors.textCaption,
                       fontSize: 12,
@@ -202,11 +202,8 @@ class _DictionaryPageState extends State<DictionaryPage> {
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
-                    'This syllable maps to $wordCount Chinese characters when auto-filling.',
-                    style: TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 11,
-                    ),
+                    _l10n.syllableMapsToChars(wordCount),
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 11),
                   ),
                 ),
             ],
@@ -247,7 +244,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
     try {
       final json = await _pronunciationService.exportToJson();
       final path = await FilePicker.platform.saveFile(
-        dialogTitle: 'Export Dictionary',
+        dialogTitle: _l10n.exportDictionary,
         fileName: 'pronunciation_dictionary.json',
         type: FileType.custom,
         allowedExtensions: ['json'],
@@ -270,7 +267,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
       final file = File(result.files.single.path!);
       final json = await file.readAsString();
       final count = await _pronunciationService.importFromJson(json);
-      _showSnack('Imported $count entries');
+      _showSnack(_l10n.importedCount(count));
       _loadEntries();
     } catch (e) {
       _showSnack(_l10n.failedToImportProject, error: true);
@@ -292,16 +289,22 @@ class _DictionaryPageState extends State<DictionaryPage> {
   @override
   Widget build(BuildContext context) {
     return AppShell(
-      title: 'Pronunciation Dictionary',
+      title: _l10n.pronunciationDictionary,
       actions: [
         TextButton.icon(
           icon: Icon(Icons.upload_file, size: 16, color: AppColors.textCaption),
-          label: Text('Import', style: TextStyle(color: AppColors.textCaption, fontSize: 12)),
+          label: Text(
+            _l10n.import,
+            style: TextStyle(color: AppColors.textCaption, fontSize: 12),
+          ),
           onPressed: _importJson,
         ),
         TextButton.icon(
           icon: Icon(Icons.download, size: 16, color: AppColors.textCaption),
-          label: Text('Export', style: TextStyle(color: AppColors.textCaption, fontSize: 12)),
+          label: Text(
+            _l10n.export,
+            style: TextStyle(color: AppColors.textCaption, fontSize: 12),
+          ),
           onPressed: _exportJson,
         ),
         const SizedBox(width: 8),
@@ -318,7 +321,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
                 color: AppColors.textMuted,
                 size: 18,
               ),
-              hintText: 'Search entries',
+              hintText: _l10n.searchEntries,
               hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 13),
               filled: true,
               fillColor: AppColors.cardBg,
@@ -350,8 +353,8 @@ class _DictionaryPageState extends State<DictionaryPage> {
                 ? Center(
                     child: Text(
                       _entries.isEmpty
-                          ? 'No entries yet. Type Tibetan and pronunciation in the editor to auto-save.'
-                          : 'No matching entries.',
+                          ? _l10n.noEntriesYet
+                          : _l10n.noMatchingEntries,
                       style: TextStyle(
                         color: AppColors.textMuted,
                         fontSize: 13,
@@ -387,6 +390,8 @@ class _EntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -397,7 +402,7 @@ class _EntryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-              Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -452,7 +457,7 @@ class _EntryCard extends StatelessWidget {
               color: AppColors.textCaption,
             ),
             onPressed: onEdit,
-            tooltip: 'Edit',
+            tooltip: l10n.edit,
           ),
           IconButton(
             icon: Icon(
@@ -461,7 +466,7 @@ class _EntryCard extends StatelessWidget {
               color: AppColors.rose400,
             ),
             onPressed: onDelete,
-            tooltip: 'Delete',
+            tooltip: l10n.delete,
           ),
         ],
       ),

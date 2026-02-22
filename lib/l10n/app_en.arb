@@ -102,17 +102,11 @@
       }
     }
   },
-  "titlePage": "Title Page",
-  "showTitlePage": "Show title page",
-  "titleTibetan": "Title (Tibetan)",
-  "titleChinese": "Title (Chinese)",
   "dharmaWheel": "Dharma Wheel",
   "fonts": "Fonts",
   "tibetanFont": "Tibetan Font",
   "pronunciationFont": "Pronunciation Font",
   "translationFont": "Translation Font",
-  "titleTibetanFont": "Title Tibetan Font",
-  "titleChineseFont": "Title Chinese Font",
   "defaultValue": "Default",
   "defaultFont": "Default value: {name}",
   "@defaultFont": {
@@ -168,5 +162,42 @@
   "translation": "Translation",
   "width": "Width",
   "height": "Height",
-  "size": "Size"
+  "size": "Size",
+  "pronunciationDictionary": "Pronunciation Dictionary",
+  "deleteEntry": "Delete \"{syllable}\"?",
+  "@deleteEntry": {
+    "placeholders": {
+      "syllable": {
+        "type": "String"
+      }
+    }
+  },
+  "charactersInPronunciation": "Characters in pronunciation:",
+  "syllableMapsToChars": "This syllable maps to {count} Chinese characters when auto-filling.",
+  "@syllableMapsToChars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportDictionary": "Export Dictionary",
+  "import": "Import",
+  "searchEntries": "Search entries",
+  "noEntriesYet": "No entries yet. Type Tibetan and pronunciation in the editor to auto-save.",
+  "noMatchingEntries": "No matching entries.",
+  "edit": "Edit",
+  "importedCount": "Imported {count} entries",
+  "@importedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "block": "Block",
+  "move": "Move",
+  "tibetanLabelShort": "TIBETAN",
+  "pronunciationLabelShort": "PRONUNCIATION",
+  "translationLabelShort": "TRANSLATION"
 }

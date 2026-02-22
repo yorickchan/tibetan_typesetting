@@ -230,12 +230,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get titleTibetan => '标题（藏文）';
-
-  @override
-  String get titleChinese => '标题（中文）';
-
-  @override
   String get dharmaWheel => '法轮';
 
   @override
@@ -379,6 +373,60 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get size => '字号';
+
+  @override
+  String get pronunciationDictionary => '发音字典';
+
+  @override
+  String deleteEntry(String syllable) {
+    return '删除\"$syllable\"？';
+  }
+
+  @override
+  String get charactersInPronunciation => '注音字符数：';
+
+  @override
+  String syllableMapsToChars(int count) {
+    return '此音节在自动填充时对应 $count 个中文字符。';
+  }
+
+  @override
+  String get exportDictionary => '导出字典';
+
+  @override
+  String get import => '导入';
+
+  @override
+  String get searchEntries => '搜索词条';
+
+  @override
+  String get noEntriesYet => '暂无词条。在编辑器中输入藏文和注音即可自动保存。';
+
+  @override
+  String get noMatchingEntries => '没有匹配的词条。';
+
+  @override
+  String get edit => '编辑';
+
+  @override
+  String importedCount(int count) {
+    return '已导入 $count 个词条';
+  }
+
+  @override
+  String get block => '段落';
+
+  @override
+  String get move => '移动';
+
+  @override
+  String get tibetanLabelShort => '藏文';
+
+  @override
+  String get pronunciationLabelShort => '注音';
+
+  @override
+  String get translationLabelShort => '翻译';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -607,12 +655,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get titleTibetan => '標題（藏文）';
-
-  @override
-  String get titleChinese => '標題（中文）';
-
-  @override
   String get dharmaWheel => '法輪';
 
   @override
@@ -756,4 +798,58 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get size => '大小';
+
+  @override
+  String get pronunciationDictionary => '發音字典';
+
+  @override
+  String deleteEntry(String syllable) {
+    return '刪除「$syllable」？';
+  }
+
+  @override
+  String get charactersInPronunciation => '拼音字元數：';
+
+  @override
+  String syllableMapsToChars(int count) {
+    return '此音節在自動填寫時對應 $count 個中文字元。';
+  }
+
+  @override
+  String get exportDictionary => '匯出字典';
+
+  @override
+  String get import => '匯入';
+
+  @override
+  String get searchEntries => '搜尋詞條';
+
+  @override
+  String get noEntriesYet => '暫無詞條。在編輯器中輸入藏文和拼音即可自動儲存。';
+
+  @override
+  String get noMatchingEntries => '沒有相符的詞條。';
+
+  @override
+  String get edit => '編輯';
+
+  @override
+  String importedCount(int count) {
+    return '已匯入 $count 個詞條';
+  }
+
+  @override
+  String get block => '段落';
+
+  @override
+  String get move => '移動';
+
+  @override
+  String get tibetanLabelShort => '藏文';
+
+  @override
+  String get pronunciationLabelShort => '拼音';
+
+  @override
+  String get translationLabelShort => '翻譯';
 }
