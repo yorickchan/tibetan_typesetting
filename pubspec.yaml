@@ -45,6 +45,7 @@ dependencies:
   file_picker: ^10.3.10
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.14.4
   flutter_test:
     sdk: flutter
 
@@ -80,3 +81,12 @@ flutter:
 
   # Fonts are now loaded dynamically from system fonts via Settings.
   # See lib/services/font_service.dart
+
+flutter_launcher_icons:
+  windows:
+    generate: true
+    image_path: 'assets/images/icon.png'
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: 'assets/images/icon.png'
