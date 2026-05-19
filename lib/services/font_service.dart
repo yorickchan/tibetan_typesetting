@@ -7,6 +7,16 @@ import 'package:pdf/widgets.dart' as pw;
 import '../models/font_config.dart';
 import '../utils/font_utils.dart' as font_utils;
 
+/// Raised when a font file is recognised but its format cannot be used for
+/// CJK / non-Latin text in PDFs (e.g. OpenType with CFF outlines).
+class UnsupportedFontError implements Exception {
+  final String message;
+  const UnsupportedFontError(this.message);
+
+  @override
+  String toString() => 'UnsupportedFontError: $message';
+}
+
 /// Information about a font file discovered on the system.
 class SystemFontInfo {
   final String familyName;
@@ -207,6 +217,9 @@ class FontService {
             );
             loaded.add(font);
             usedPaths.add(info.filePath);
+          } on UnsupportedFontError {
+            // Fallback scan: many system fonts are CFF / missing tables.
+            // This is expected and not actionable, so don't log it.
           } catch (e) {
             debugPrint('Failed to load CJK fallback font ${info.filePath}: $e');
           }
@@ -255,6 +268,9 @@ class FontService {
 
   /// Load a font suitable for the `pdf` package. Returns a cached instance
   /// if the same font path was loaded before.
+  ///
+  /// Throws [UnsupportedFontError] if the font uses CFF (OpenType PostScript)
+  /// outlines, which the `pdf` package cannot embed for CJK / non-Latin text.
   Future<pw.Font> loadFontForPdf(FontConfig config) async {
     final cached = _pdfFontCache[config.fontPath];
     if (cached != null) return cached;
@@ -264,8 +280,31 @@ class FontService {
     ByteData fontData = ByteData.sublistView(bytes);
 
     if (_isTtc(bytes)) {
-      final extracted = font_utils.extractTtfFromTtc(fontData, fontIndex: 0);
-      if (extracted != null) fontData = extracted;
+      final extracted = font_utils.extractFirstTrueTypeFromTtc(fontData);
+      if (extracted == null) {
+        throw UnsupportedFontError(
+          'Font "${config.fontFamily}" (${config.fontPath}) cannot be embedded '
+          'in PDFs (no TrueType-outline variant with the required tables). '
+          'Please choose a different font.',
+        );
+      }
+      fontData = extracted;
+    } else {
+      if (!font_utils.isTrueTypeOutlineFont(fontData)) {
+        throw UnsupportedFontError(
+          'Font "${config.fontFamily}" (${config.fontPath}) uses OpenType/CFF '
+          'outlines which are not supported by the PDF engine for CJK text. '
+          'Please choose a TrueType-flavored font (.ttf).',
+        );
+      }
+      final missing = font_utils.missingPdfEmbeddingTables(fontData);
+      if (missing.isNotEmpty) {
+        throw UnsupportedFontError(
+          'Font "${config.fontFamily}" (${config.fontPath}) is missing '
+          'required font tables (${missing.join(', ')}) and cannot be '
+          'embedded in PDFs. Please choose a different font.',
+        );
+      }
     }
 
     final font = pw.Font.ttf(fontData);

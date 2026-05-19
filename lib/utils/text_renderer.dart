@@ -46,14 +46,21 @@ Future<RenderedText?> renderTextToPng(
     textDirection: TextDirection.ltr,
     textAlign: textAlign,
   );
-  painter.layout(maxWidth: maxWidth * scale);
 
-  // For centered/right alignment use maxWidth as canvas width so that the
-  // alignment is computed across the full available space, not just the
-  // intrinsic text width.
-  final useFullWidth = textAlign != TextAlign.left && textAlign != TextAlign.start;
+  // For centered/right alignment, force the painter's layout width to the
+  // full available width so that TextAlign positions each line within the
+  // full canvas (otherwise lines are centered inside their own intrinsic
+  // bounding box, which produces left-aligned-looking output).
+  final useFullWidth =
+      textAlign != TextAlign.left && textAlign != TextAlign.start;
+  final layoutMax = maxWidth * scale;
+  painter.layout(
+    minWidth: useFullWidth ? layoutMax : 0,
+    maxWidth: layoutMax,
+  );
+
   final w = useFullWidth
-      ? (maxWidth * scale).ceilToDouble()
+      ? layoutMax.ceilToDouble()
       : painter.width.ceilToDouble();
   final h = painter.height.ceilToDouble();
   if (w <= 0 || h <= 0) return null;

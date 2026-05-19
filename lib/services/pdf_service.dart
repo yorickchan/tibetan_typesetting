@@ -6,6 +6,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../models/app_settings.dart';
+import '../models/font_config.dart';
 import '../models/project.dart';
 import '../utils/font_constants.dart';
 import '../utils/font_utils.dart' as font_utils;
@@ -13,6 +14,15 @@ import '../utils/sample_layout.dart';
 import '../utils/text_renderer.dart';
 import 'font_service.dart';
 import 'settings_service.dart';
+
+/// Result of a PDF generation: the produced bytes together with any
+/// non-fatal warnings (e.g. fonts that fell back to a default because the
+/// original was not supported by the PDF engine).
+class PdfGenerationResult {
+  final Uint8List bytes;
+  final List<String> warnings;
+  const PdfGenerationResult({required this.bytes, required this.warnings});
+}
 
 const _rose = PdfColor.fromInt(0xFFe11d48);
 
@@ -84,7 +94,20 @@ class PdfService {
     Project project, {
     AppSettings? appSettings,
   }) async {
+    final result = await generatePdfWithWarnings(
+      project,
+      appSettings: appSettings,
+    );
+    return result.bytes;
+  }
+
+  Future<PdfGenerationResult> generatePdfWithWarnings(
+    Project project, {
+    AppSettings? appSettings,
+  }) async {
     await _loadSvg();
+
+    final warnings = <String>[];
 
     // Resolve effective fonts
     final settings = appSettings ?? await SettingsService().getSettings();
@@ -106,23 +129,26 @@ class PdfService {
       fallbackChineseFont,
     );
 
+    Future<pw.Font?> tryLoadPdfFont(
+      FontConfig config,
+      String role,
+    ) async {
+      if (config.fontPath.isEmpty) return null;
+      try {
+        return await _fontService.loadFontForPdf(config);
+      } on UnsupportedFontError catch (e) {
+        warnings.add('$role: ${e.message}');
+        debugPrint('Failed to load $role font for PDF: $e');
+        return null;
+      } catch (e, s) {
+        debugPrint('Failed to load $role font for PDF: $e\n$s');
+        return null;
+      }
+    }
+
     // Load PDF fonts from file paths (for Chinese text drawn via pw.Text)
-    pw.Font? pronPdfFont;
-    pw.Font? transPdfFont;
-    try {
-      if (pronConfig.fontPath.isNotEmpty) {
-        pronPdfFont = await _fontService.loadFontForPdf(pronConfig);
-      }
-    } catch (e, s) {
-      debugPrint('Failed to load pronunciation font for PDF: $e\n$s');
-    }
-    try {
-      if (transConfig.fontPath.isNotEmpty) {
-        transPdfFont = await _fontService.loadFontForPdf(transConfig);
-      }
-    } catch (e, s) {
-      debugPrint('Failed to load translation font for PDF: $e\n$s');
-    }
+    final pronPdfFont = await tryLoadPdfFont(pronConfig, 'pronunciation');
+    final transPdfFont = await tryLoadPdfFont(transConfig, 'translation');
     final chiFont = pronPdfFont ?? transPdfFont ?? pw.Font.helvetica();
     final tranFont = transPdfFont ?? pronPdfFont ?? pw.Font.helvetica();
 
@@ -134,14 +160,10 @@ class PdfService {
     final titleTibConfig = ps.titleTibetanFont ?? tibConfig;
     final titleChiConfig = ps.titleChineseFont ?? transConfig;
 
-    pw.Font? titleChiPdfFont;
-    try {
-      if (titleChiConfig.fontPath.isNotEmpty) {
-        titleChiPdfFont = await _fontService.loadFontForPdf(titleChiConfig);
-      }
-    } catch (e, s) {
-      debugPrint('Failed to load title Chinese font for PDF: $e\n$s');
-    }
+    final titleChiPdfFont = await tryLoadPdfFont(
+      titleChiConfig,
+      'title Chinese',
+    );
     final titleChiFont = titleChiPdfFont ?? tranFont;
 
     // Font families for pre-rendered text (Tibetan through HarfBuzz)
@@ -357,7 +379,8 @@ class PdfService {
       );
     }
 
-    return doc.save();
+    final bytes = await doc.save();
+    return PdfGenerationResult(bytes: bytes, warnings: warnings);
   }
 
   // ---------------------------------------------------------------------------

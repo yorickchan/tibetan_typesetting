@@ -168,7 +168,7 @@ class _ExportPageState extends State<ExportPage> {
     if (_project == null) return;
     setState(() => _pdfBusy = true);
     try {
-      final bytes = await _pdfService.generatePdf(
+      final result = await _pdfService.generatePdfWithWarnings(
         _project!,
         appSettings: _appSettings,
       );
@@ -182,9 +182,17 @@ class _ExportPageState extends State<ExportPage> {
         if (mounted) setState(() => _pdfBusy = false);
         return;
       }
-      await File(path).writeAsBytes(bytes);
-      _showSnack(_l10n.projectExported);
-    } catch (e) {
+      await File(path).writeAsBytes(result.bytes);
+      if (result.warnings.isNotEmpty) {
+        _showSnack(
+          '${_l10n.projectExported}\n${result.warnings.join('\n')}',
+          error: true,
+        );
+      } else {
+        _showSnack(_l10n.projectExported);
+      }
+    } catch (e, s) {
+      debugPrint('PDF export failed: $e\n$s');
       _showSnack(e.toString(), error: true);
     } finally {
       if (mounted) setState(() => _pdfBusy = false);
