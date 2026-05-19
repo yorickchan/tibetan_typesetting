@@ -16,27 +16,49 @@ List<String> splitLines(String s) {
       .toList();
 }
 
+class LayoutCell {
+  final TextBlock block;
+  final double leftFraction;
+  final double widthFraction;
+
+  const LayoutCell({
+    required this.block,
+    required this.leftFraction,
+    required this.widthFraction,
+  });
+
+  int get start => (leftFraction * 1000).round();
+  int get span => (widthFraction * 1000).round();
+}
+
 class _Row {
-  final List<TextBlock> items;
+  final List<LayoutCell> cells;
   final bool pageBreakBefore;
-  _Row({required this.items, required this.pageBreakBefore});
+
+  _Row({required this.cells, required this.pageBreakBefore});
 }
 
 class PageLayout {
   final int colCount;
+  final List<List<LayoutCell>> flowRows;
   final List<List<TextBlock?>> rows;
-  PageLayout({required this.colCount, required this.rows});
+
+  PageLayout({required this.colCount, required this.flowRows})
+    : rows = _legacyRows(flowRows, colCount);
 }
 
-List<_Row> _buildRows(List<TextBlock> blocks, int colCount) {
+List<_Row> _buildRows(List<TextBlock> blocks, double gapFraction) {
   final rows = <_Row>[];
-  var current = <TextBlock>[];
+  final gap = gapFraction.clamp(0.0, 0.08);
+  var current = <LayoutCell>[];
+  var cursor = 0.0;
   var pendingPageBreak = false;
 
   void pushRow() {
     if (current.isEmpty) return;
-    rows.add(_Row(items: current, pageBreakBefore: pendingPageBreak));
+    rows.add(_Row(cells: current, pageBreakBefore: pendingPageBreak));
     current = [];
+    cursor = 0;
     pendingPageBreak = false;
   }
 
@@ -50,10 +72,20 @@ List<_Row> _buildRows(List<TextBlock> blocks, int colCount) {
     if (block.columnBreakBefore && current.isNotEmpty) {
       pushRow();
     }
-    if (colCount > 0 && current.length >= colCount) {
+
+    final width = estimateBlockWidthFraction(block);
+    if (current.isNotEmpty && cursor + width > 1.0) {
       pushRow();
     }
-    current.add(block);
+
+    current.add(
+      LayoutCell(
+        block: block,
+        leftFraction: cursor,
+        widthFraction: width.clamp(0.08, 1.0 - cursor),
+      ),
+    );
+    cursor += width + gap;
   }
 
   pushRow();
@@ -62,10 +94,10 @@ List<_Row> _buildRows(List<TextBlock> blocks, int colCount) {
 
 List<List<TextBlock?>> blocksToRows(List<TextBlock> blocks, int colCount) {
   final cols = colCount < 1 ? 1 : colCount;
-  return _buildRows(blocks, colCount).map((row) {
-    final padded = List<TextBlock?>.from(row.items);
-    while (padded.length < cols) {
-      padded.add(null);
+  return _buildRows(blocks, 0.01).map((row) {
+    final padded = List<TextBlock?>.filled(cols, null);
+    for (var i = 0; i < row.cells.length && i < padded.length; i++) {
+      padded[i] = row.cells[i].block;
     }
     return padded;
   }).toList();
@@ -75,33 +107,27 @@ List<PageLayout> paginateBlocks(
   List<TextBlock> blocks,
   int colCount, [
   int maxRows = 4,
+  double gapFraction = 0.01,
 ]) {
   final rowsPerPage = maxRows < 1 ? 1 : maxRows;
+  final effectiveColCount = colCount < 1 ? 8 : colCount;
 
   if (blocks.isEmpty) {
-    return [PageLayout(colCount: colCount < 1 ? 1 : colCount, rows: [])];
+    return [PageLayout(colCount: effectiveColCount, flowRows: [])];
   }
 
-  final rows = _buildRows(blocks, colCount);
+  final rows = _buildRows(blocks, gapFraction);
   final pages = <PageLayout>[];
   var current = <_Row>[];
 
   void pushPage() {
     if (current.isEmpty) return;
-    final pageColCount = colCount > 0
-        ? (colCount < 1 ? 1 : colCount)
-        : current.map((r) => r.items.length).reduce((a, b) => a > b ? a : b);
-    final effectiveColCount = pageColCount < 1 ? 1 : pageColCount;
-
-    final pageRows = current.map((row) {
-      final padded = List<TextBlock?>.from(row.items);
-      while (padded.length < effectiveColCount) {
-        padded.add(null);
-      }
-      return padded;
-    }).toList();
-
-    pages.add(PageLayout(colCount: effectiveColCount, rows: pageRows));
+    pages.add(
+      PageLayout(
+        colCount: effectiveColCount,
+        flowRows: current.map((row) => row.cells).toList(),
+      ),
+    );
     current = [];
   }
 
@@ -117,7 +143,44 @@ List<PageLayout> paginateBlocks(
 
   if (current.isNotEmpty) pushPage();
   if (pages.isEmpty) {
-    pages.add(PageLayout(colCount: colCount < 1 ? 1 : colCount, rows: []));
+    pages.add(PageLayout(colCount: effectiveColCount, flowRows: []));
   }
   return pages;
+}
+
+int estimateBlockSpan(TextBlock block, int colCount) {
+  final units = colCount < 1 ? 1 : colCount;
+  return (estimateBlockWidthFraction(block) * units).ceil().clamp(1, units);
+}
+
+double estimateBlockWidthFraction(TextBlock block) {
+  final manual = block.columnSpan;
+  if (manual != null) {
+    return manual.clamp(1, 12) / 12;
+  }
+
+  final tibetanLen = splitLines(block.tibetan).join('').runes.length;
+  final pronLen = splitLines(block.chinesePronunciation).join('').runes.length;
+  final transLen = splitLines(block.chineseTranslation).join('').runes.length;
+  final score = [
+    tibetanLen * 1.15,
+    pronLen * 0.62,
+    transLen * 0.62,
+  ].reduce((a, b) => a > b ? a : b);
+
+  return (0.07 + score / 260).clamp(0.09, 0.52);
+}
+
+List<List<TextBlock?>> _legacyRows(
+  List<List<LayoutCell>> flowRows,
+  int colCount,
+) {
+  final cols = colCount < 1 ? 1 : colCount;
+  return flowRows.map((row) {
+    final padded = List<TextBlock?>.filled(cols, null);
+    for (var i = 0; i < row.length && i < padded.length; i++) {
+      padded[i] = row[i].block;
+    }
+    return padded;
+  }).toList();
 }

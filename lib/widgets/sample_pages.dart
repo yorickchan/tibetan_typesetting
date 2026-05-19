@@ -24,10 +24,7 @@ class SamplePagesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final setup = project.pageSetup;
-    final colCount = (setup.columnCount > 0)
-        ? setup.columnCount.clamp(1, 8)
-        : 0;
-    final pages = paginateBlocks(project.blocks, colCount, 4);
+    final pages = paginateBlocks(project.blocks, 0, 4, setup.flowGap);
     final showTitlePage = setup.showTitlePage && !skipTitlePage;
 
     final pageWidgets = <Widget>[];
@@ -48,6 +45,7 @@ class SamplePagesWidget extends StatelessWidget {
           project: project,
           appSettings: appSettings,
           rows: pages[index].rows,
+          flowRows: pages[index].flowRows,
           colCount: pages[index].colCount,
           highlightBlockId: highlightBlockId,
           showMark: index % 2 == 0,

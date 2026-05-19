@@ -168,8 +168,10 @@ class _ExportPageState extends State<ExportPage> {
     if (_project == null) return;
     setState(() => _pdfBusy = true);
     try {
-      final bytes = await _pdfService.generatePdf(_project!,
-          appSettings: _appSettings);
+      final bytes = await _pdfService.generatePdf(
+        _project!,
+        appSettings: _appSettings,
+      );
       final path = await FilePicker.platform.saveFile(
         dialogTitle: 'Save PDF',
         fileName: '${_project!.name}.pdf',
@@ -280,8 +282,10 @@ class _ExportPageState extends State<ExportPage> {
               ),
               style: TextButton.styleFrom(
                 backgroundColor: AppColors.sky500,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -295,13 +299,13 @@ class _ExportPageState extends State<ExportPage> {
                 child: CircularProgressIndicator(color: AppColors.sky500),
               )
             : _error != null
-                ? Center(
-                    child: Text(
-                      _error!,
-                      style: const TextStyle(color: AppColors.rose300),
-                    ),
-                  )
-                : _buildContent(),
+            ? Center(
+                child: Text(
+                  _error!,
+                  style: const TextStyle(color: AppColors.rose300),
+                ),
+              )
+            : _buildContent(),
       ),
     );
   }
@@ -331,6 +335,44 @@ class _ExportPageState extends State<ExportPage> {
                 ),
               ),
               const SizedBox(height: 16),
+
+              Text(
+                _l10n.sentenceSpacing,
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Expanded(
+                    child: Slider(
+                      value: ps.flowGap.clamp(0.0, 0.08),
+                      min: 0,
+                      max: 0.08,
+                      divisions: 8,
+                      activeColor: AppColors.sky500,
+                      inactiveColor: AppColors.border,
+                      onChanged: (v) =>
+                          _updateSetup((s) => s.copyWith(flowGap: v)),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 42,
+                    child: Text(
+                      '${(ps.flowGap * 100).round()}%',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        color: AppColors.textCaption,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
 
               Row(
                 children: [
@@ -372,67 +414,6 @@ class _ExportPageState extends State<ExportPage> {
                 ],
               ),
               const SizedBox(height: 16),
-
-              Text(
-                _l10n.columns,
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: Checkbox(
-                      value: ps.columnCount <= 0,
-                      onChanged: (v) => _updateSetup(
-                        (s) => s.copyWith(columnCount: v == true ? 0 : 5),
-                      ),
-                      activeColor: AppColors.sky500,
-                      side: BorderSide(color: AppColors.textMuted),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    _l10n.autoPerPage,
-                    style: TextStyle(color: AppColors.textBody, fontSize: 11),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Expanded(
-                    child: Slider(
-                      value: (ps.columnCount <= 0 ? 1 : ps.columnCount)
-                          .toDouble()
-                          .clamp(1, 8),
-                      min: 1,
-                      max: 8,
-                      divisions: 7,
-                      activeColor: AppColors.sky500,
-                      inactiveColor: AppColors.border,
-                      onChanged: ps.columnCount <= 0
-                          ? null
-                          : (v) => _updateSetup(
-                              (s) => s.copyWith(columnCount: v.round()),
-                            ),
-                    ),
-                  ),
-                  Text(
-                    ps.columnCount <= 0 ? 'Auto' : '${ps.columnCount}',
-                    style: TextStyle(
-                      color: AppColors.textCaption,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
 
               Row(
                 children: [
@@ -481,7 +462,10 @@ class _ExportPageState extends State<ExportPage> {
                   const SizedBox(width: 6),
                   Text(
                     _l10n.showFrame,
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ),
@@ -596,9 +580,7 @@ class _ExportPageState extends State<ExportPage> {
         icon: Icon(icon, color: AppColors.textBody),
         style: IconButton.styleFrom(
           backgroundColor: AppColors.surfaceContainer,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
         onPressed: onPressed,
       ),

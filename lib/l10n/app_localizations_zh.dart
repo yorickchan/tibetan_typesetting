@@ -183,6 +183,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get autoPerPage => '每页自动';
 
   @override
+  String get sentenceSpacing => '句距';
+
+  @override
   String get showFrame => '显示边框';
 
   @override
@@ -606,6 +609,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get autoPerPage => '每頁自動';
+
+  @override
+  String get sentenceSpacing => '句距';
 
   @override
   String get showFrame => '顯示邊框';

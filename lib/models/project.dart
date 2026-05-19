@@ -8,14 +8,14 @@ class MarginMm {
   double bottom;
   double left;
 
-  MarginMm({
-    this.top = 10,
-    this.right = 10,
-    this.bottom = 10,
-    this.left = 10,
-  });
+  MarginMm({this.top = 10, this.right = 10, this.bottom = 10, this.left = 10});
 
-  MarginMm copyWith({double? top, double? right, double? bottom, double? left}) {
+  MarginMm copyWith({
+    double? top,
+    double? right,
+    double? bottom,
+    double? left,
+  }) {
     return MarginMm(
       top: top ?? this.top,
       right: right ?? this.right,
@@ -47,6 +47,7 @@ class PageSetup {
   bool showFrame;
   String leftVerticalTitle;
   String pageNumber;
+  double flowGap;
   bool showTitlePage;
   String titleTibetan;
   String titleChinese;
@@ -64,6 +65,7 @@ class PageSetup {
     this.showFrame = true,
     this.leftVerticalTitle = '',
     this.pageNumber = '',
+    this.flowGap = 0.01,
     this.showTitlePage = true,
     this.titleTibetan = '',
     this.titleChinese = '',
@@ -82,6 +84,7 @@ class PageSetup {
     bool? showFrame,
     String? leftVerticalTitle,
     String? pageNumber,
+    double? flowGap,
     bool? showTitlePage,
     String? titleTibetan,
     String? titleChinese,
@@ -104,11 +107,11 @@ class PageSetup {
       showFrame: showFrame ?? this.showFrame,
       leftVerticalTitle: leftVerticalTitle ?? this.leftVerticalTitle,
       pageNumber: pageNumber ?? this.pageNumber,
+      flowGap: flowGap ?? this.flowGap,
       showTitlePage: showTitlePage ?? this.showTitlePage,
       titleTibetan: titleTibetan ?? this.titleTibetan,
       titleChinese: titleChinese ?? this.titleChinese,
-      tibetanFont:
-          clearTibetanFont ? null : (tibetanFont ?? this.tibetanFont),
+      tibetanFont: clearTibetanFont ? null : (tibetanFont ?? this.tibetanFont),
       pronunciationFont: clearPronunciationFont
           ? null
           : (pronunciationFont ?? this.pronunciationFont),
@@ -132,14 +135,14 @@ class PageSetup {
     'showFrame': showFrame,
     'leftVerticalTitle': leftVerticalTitle,
     'pageNumber': pageNumber,
+    'flowGap': flowGap,
     'showTitlePage': showTitlePage,
     'titleTibetan': titleTibetan,
     'titleChinese': titleChinese,
     if (tibetanFont != null) 'tibetanFont': tibetanFont!.toJson(),
     if (pronunciationFont != null)
       'pronunciationFont': pronunciationFont!.toJson(),
-    if (translationFont != null)
-      'translationFont': translationFont!.toJson(),
+    if (translationFont != null) 'translationFont': translationFont!.toJson(),
     if (titleTibetanFont != null)
       'titleTibetanFont': titleTibetanFont!.toJson(),
     if (titleChineseFont != null)
@@ -156,6 +159,7 @@ class PageSetup {
     showFrame: json['showFrame'] as bool? ?? true,
     leftVerticalTitle: json['leftVerticalTitle'] as String? ?? '',
     pageNumber: json['pageNumber'] as String? ?? '',
+    flowGap: (json['flowGap'] as num?)?.toDouble() ?? 0.01,
     showTitlePage: json['showTitlePage'] as bool? ?? true,
     titleTibetan: json['titleTibetan'] as String? ?? '',
     titleChinese: json['titleChinese'] as String? ?? '',
@@ -163,20 +167,16 @@ class PageSetup {
         ? FontConfig.fromJson(json['tibetanFont'] as Map<String, dynamic>)
         : null,
     pronunciationFont: json['pronunciationFont'] != null
-        ? FontConfig.fromJson(
-            json['pronunciationFont'] as Map<String, dynamic>)
+        ? FontConfig.fromJson(json['pronunciationFont'] as Map<String, dynamic>)
         : null,
     translationFont: json['translationFont'] != null
-        ? FontConfig.fromJson(
-            json['translationFont'] as Map<String, dynamic>)
+        ? FontConfig.fromJson(json['translationFont'] as Map<String, dynamic>)
         : null,
     titleTibetanFont: json['titleTibetanFont'] != null
-        ? FontConfig.fromJson(
-            json['titleTibetanFont'] as Map<String, dynamic>)
+        ? FontConfig.fromJson(json['titleTibetanFont'] as Map<String, dynamic>)
         : null,
     titleChineseFont: json['titleChineseFont'] != null
-        ? FontConfig.fromJson(
-            json['titleChineseFont'] as Map<String, dynamic>)
+        ? FontConfig.fromJson(json['titleChineseFont'] as Map<String, dynamic>)
         : null,
   );
 }
@@ -189,6 +189,7 @@ class TextBlock {
   bool pageBreakBefore;
   bool columnBreakBefore;
   bool smallText;
+  int? columnSpan;
 
   TextBlock({
     required this.id,
@@ -198,6 +199,7 @@ class TextBlock {
     this.pageBreakBefore = false,
     this.columnBreakBefore = false,
     this.smallText = false,
+    this.columnSpan,
   });
 
   TextBlock copyWith({
@@ -208,6 +210,8 @@ class TextBlock {
     bool? pageBreakBefore,
     bool? columnBreakBefore,
     bool? smallText,
+    int? columnSpan,
+    bool clearColumnSpan = false,
   }) {
     return TextBlock(
       id: id ?? this.id,
@@ -217,6 +221,7 @@ class TextBlock {
       pageBreakBefore: pageBreakBefore ?? this.pageBreakBefore,
       columnBreakBefore: columnBreakBefore ?? this.columnBreakBefore,
       smallText: smallText ?? this.smallText,
+      columnSpan: clearColumnSpan ? null : (columnSpan ?? this.columnSpan),
     );
   }
 
@@ -228,6 +233,7 @@ class TextBlock {
     'pageBreakBefore': pageBreakBefore,
     'columnBreakBefore': columnBreakBefore,
     'smallText': smallText,
+    if (columnSpan != null) 'columnSpan': columnSpan,
   };
 
   factory TextBlock.fromJson(Map<String, dynamic> json) => TextBlock(
@@ -238,6 +244,7 @@ class TextBlock {
     pageBreakBefore: json['pageBreakBefore'] as bool? ?? false,
     columnBreakBefore: json['columnBreakBefore'] as bool? ?? false,
     smallText: json['smallText'] as bool? ?? false,
+    columnSpan: (json['columnSpan'] as num?)?.toInt(),
   );
 }
 
@@ -258,9 +265,9 @@ class Project {
     PageSetup? pageSetup,
     required this.updatedAt,
     required this.createdAt,
-  })  : tags = tags ?? [],
-        blocks = blocks ?? [],
-        pageSetup = pageSetup ?? PageSetup();
+  }) : tags = tags ?? [],
+       blocks = blocks ?? [],
+       pageSetup = pageSetup ?? PageSetup();
 
   Project copyWith({
     String? id,
@@ -298,7 +305,8 @@ class Project {
     id: json['id'] as String,
     name: json['name'] as String,
     tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
-    blocks: (json['blocks'] as List<dynamic>?)
+    blocks:
+        (json['blocks'] as List<dynamic>?)
             ?.map((b) => TextBlock.fromJson(b as Map<String, dynamic>))
             .toList() ??
         [],
@@ -328,5 +336,8 @@ class ProjectListItem {
 }
 
 String nowIso() {
-  return DateTime.now().toUtc().toIso8601String().replaceAll(RegExp(r'\.\d+'), '');
+  return DateTime.now().toUtc().toIso8601String().replaceAll(
+    RegExp(r'\.\d+'),
+    '',
+  );
 }

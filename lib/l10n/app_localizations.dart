@@ -435,6 +435,12 @@ abstract class AppLocalizations {
   /// **'Auto per page'**
   String get autoPerPage;
 
+  /// No description provided for @sentenceSpacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Sentence spacing'**
+  String get sentenceSpacing;
+
   /// No description provided for @showFrame.
   ///
   /// In en, this message translates to:

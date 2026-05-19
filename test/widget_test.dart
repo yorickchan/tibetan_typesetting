@@ -54,14 +54,14 @@ void main() {
       );
       final pages = paginateBlocks(blocks, 3, 4);
       expect(pages.length, 1);
-      expect(pages[0].rows.length, 4);
+      expect(pages[0].flowRows.expand((row) => row).length, 12);
       expect(pages[0].colCount, 3);
     });
 
     test('splits into multiple pages when exceeding maxRows', () {
       final blocks = List.generate(
         20,
-        (i) => TextBlock(id: 'b$i', tibetan: 'text $i'),
+        (i) => TextBlock(id: 'b$i', tibetan: 'text $i', columnSpan: 4),
       );
       final pages = paginateBlocks(blocks, 3, 4);
       expect(pages.length, greaterThan(1));
@@ -75,6 +75,108 @@ void main() {
       ];
       final pages = paginateBlocks(blocks, 3, 4);
       expect(pages.length, 2);
+    });
+
+    test('flows blocks using manual column spans', () {
+      final blocks = [
+        TextBlock(id: 'b1', tibetan: 'short', columnSpan: 4),
+        TextBlock(id: 'b2', tibetan: 'short', columnSpan: 4),
+        TextBlock(id: 'b3', tibetan: 'short', columnSpan: 4),
+      ];
+
+      final pages = paginateBlocks(blocks, 4, 4);
+
+      expect(pages.length, 1);
+      expect(pages[0].flowRows.length, 2);
+      expect(pages[0].flowRows[0].map((c) => c.block.id), ['b1', 'b2']);
+      expect(pages[0].flowRows[1].single.block.id, 'b3');
+    });
+
+    test('flows blocks continuously without fixed column starts', () {
+      final blocks = [
+        TextBlock(id: 'b1', tibetan: 'བོད།'),
+        TextBlock(id: 'b2', tibetan: 'བོད།'),
+        TextBlock(id: 'b3', tibetan: 'བོད།'),
+      ];
+
+      final page = paginateBlocks(blocks, 5, 4, 0).single;
+      final row = page.flowRows.single;
+
+      expect(row.map((cell) => cell.block.id), ['b1', 'b2', 'b3']);
+      expect(row[0].leftFraction, 0);
+      expect(row[1].leftFraction, closeTo(row[0].widthFraction, 0.0001));
+      expect(
+        row[2].leftFraction,
+        closeTo(row[0].widthFraction + row[1].widthFraction, 0.0001),
+      );
+      expect(row[0].widthFraction, isNot(closeTo(1 / page.colCount, 0.0001)));
+    });
+
+    test('flow gap controls distance between consecutive blocks', () {
+      final blocks = [
+        TextBlock(id: 'b1', tibetan: 'བོད།'),
+        TextBlock(id: 'b2', tibetan: 'བོད།'),
+      ];
+
+      final tight = paginateBlocks(blocks, 0, 4, 0.005).single.flowRows.single;
+      final loose = paginateBlocks(blocks, 0, 4, 0.05).single.flowRows.single;
+
+      final tightGap =
+          tight[1].leftFraction -
+          tight[0].leftFraction -
+          tight[0].widthFraction;
+      final looseGap =
+          loose[1].leftFraction -
+          loose[0].leftFraction -
+          loose[0].widthFraction;
+
+      expect(looseGap, greaterThan(tightGap));
+    });
+
+    test('auto span gives longer blocks more width', () {
+      final short = TextBlock(id: 'short', tibetan: 'བོད།');
+      final long = TextBlock(
+        id: 'long',
+        tibetan: 'བདེ་ཆེན་སྨོན་ལམ་གྱི་ཚིག་རིང་པོ་ཞིག་འདིར་བཀོད་པ་ཡིན།',
+        chineseTranslation: '這是一段較長的翻譯文字，用來測試自動欄寬。',
+      );
+
+      expect(
+        estimateBlockSpan(long, 8),
+        greaterThan(estimateBlockSpan(short, 8)),
+      );
+    });
+
+    test('manual width levels use twelve equal divisions', () {
+      final width1 = estimateBlockWidthFraction(
+        TextBlock(id: 'manual-1', tibetan: 'བོད།', columnSpan: 1),
+      );
+      final width6 = estimateBlockWidthFraction(
+        TextBlock(id: 'manual-6', tibetan: 'བོད།', columnSpan: 6),
+      );
+      final width12 = estimateBlockWidthFraction(
+        TextBlock(id: 'manual-12', tibetan: 'བོད།', columnSpan: 12),
+      );
+
+      expect(width1, closeTo(1 / 12, 0.0001));
+      expect(width6, closeTo(6 / 12, 0.0001));
+      expect(width12, closeTo(1, 0.0001));
+    });
+
+    test('manual width level one is compact', () {
+      final width = estimateBlockWidthFraction(
+        TextBlock(id: 'manual', tibetan: 'བོད།', columnSpan: 1),
+      );
+
+      expect(width, lessThanOrEqualTo(0.09));
+    });
+
+    test('manual width level three leaves less blank space', () {
+      final width = estimateBlockWidthFraction(
+        TextBlock(id: 'manual', tibetan: 'བོད།', columnSpan: 3),
+      );
+
+      expect(width, lessThanOrEqualTo(0.30));
     });
   });
 
@@ -103,6 +205,7 @@ void main() {
         pageBreakBefore: true,
         columnBreakBefore: false,
         smallText: true,
+        columnSpan: 3,
       );
 
       final json = block.toJson();
@@ -115,6 +218,7 @@ void main() {
       expect(restored.pageBreakBefore, block.pageBreakBefore);
       expect(restored.columnBreakBefore, block.columnBreakBefore);
       expect(restored.smallText, block.smallText);
+      expect(restored.columnSpan, block.columnSpan);
     });
 
     test('copyWith creates modified copy', () {
@@ -138,6 +242,7 @@ void main() {
         showTitlePage: true,
         titleTibetan: 'མགོ་མ格外',
         titleChinese: '标题',
+        flowGap: 0.03,
         tibetanFont: const FontConfig(
           fontFamily: 'TestFont',
           fontPath: '/path/to/font.ttf',
@@ -156,6 +261,7 @@ void main() {
       expect(restored.showTitlePage, setup.showTitlePage);
       expect(restored.titleTibetan, setup.titleTibetan);
       expect(restored.titleChinese, setup.titleChinese);
+      expect(restored.flowGap, 0.03);
       expect(restored.tibetanFont?.fontFamily, 'TestFont');
     });
 

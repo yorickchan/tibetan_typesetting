@@ -163,8 +163,7 @@ class PdfService {
     final sideW = 18 * PdfPageFormat.mm;
     final inset = 2 * PdfPageFormat.mm;
 
-    final colCount = (ps.columnCount > 0) ? ps.columnCount : 0;
-    final pages = paginateBlocks(project.blocks, colCount, 4);
+    final pages = paginateBlocks(project.blocks, 0, 4, ps.flowGap);
 
     // ---- dimensions needed for pre-render sizing ----
 
@@ -234,25 +233,21 @@ class PdfService {
     // Content blocks
     for (var pi = 0; pi < pages.length; pi++) {
       final page = pages[pi];
-      final pageCols = page.colCount < 1 ? 1 : page.colCount;
-      final cellW = contentW / pageCols;
-
       final showMark = pi % 2 == 0;
-      for (var ri = 0; ri < page.rows.length; ri++) {
-        final row = page.rows[ri];
-        for (var ci = 0; ci < pageCols; ci++) {
-          if (ci >= row.length) continue;
-          final block = row[ci];
-          if (block == null) continue;
+      for (var ri = 0; ri < page.flowRows.length; ri++) {
+        final row = page.flowRows[ri];
+        for (var cellIndex = 0; cellIndex < row.length; cellIndex++) {
+          final cell = row[cellIndex];
+          final block = cell.block;
 
-          final key = '${pi}_${ri}_$ci';
+          final key = '${pi}_${ri}_$cellIndex';
           final tibLines = splitLines(block.tibetan);
           var heading = tibLines.isNotEmpty ? tibLines[0] : '';
           final body = tibLines.length > 1
               ? tibLines.sublist(1).join('\n')
               : '';
 
-          if (showMark && ri == 0 && ci == 0) {
+          if (showMark && ri == 0 && cellIndex == 0) {
             heading = '\u0F04\u0F05\u0F0D\u0F0D   $heading';
           }
 
@@ -260,10 +255,11 @@ class PdfService {
           final hSize = tibFontSize * 0.9 * (small ? 0.75 : 1.0);
           final bSize = tibFontSize * (small ? 0.75 : 1.0);
 
-          // Small text extends from its column position to the right edge
-          final textMaxW = small
-              ? (contentW - ci * cellW - padX * 2)
-              : (cellW - padX * 2);
+          final left = cell.leftFraction * contentW;
+          final spannedW = cell.widthFraction * contentW;
+          final textMaxW = small && block.columnSpan == null
+              ? (contentW - left - padX * 2)
+              : (spannedW - padX * 2);
 
           tasks.add(
             put(
@@ -557,21 +553,19 @@ class PdfService {
     }
 
     pw.Widget contentArea(double cW, double cH) {
-      final rows = page.rows;
-      final pageCols = page.colCount;
+      final rows = page.flowRows;
       if (rows.isEmpty) return pw.SizedBox.expand();
 
       final rowCount = rows.length;
-      final cellW = cW / (pageCols < 1 ? 1 : pageCols);
       final padX = 3 * PdfPageFormat.mm;
       final padY = 2 * PdfPageFormat.mm;
       final smallRowShrink = 6 * PdfPageFormat.mm;
 
       // Check which rows are "short" (smallText with empty translation)
-      bool isShortRow(List<TextBlock?> row) {
-        for (final b in row) {
-          if (b != null && b.smallText) {
-            final trans = splitLines(b.chineseTranslation).join('');
+      bool isShortRow(List<LayoutCell> row) {
+        for (final cell in row) {
+          if (cell.block.smallText) {
+            final trans = splitLines(cell.block.chineseTranslation).join('');
             if (trans.isEmpty) return true;
           }
         }
@@ -652,19 +646,24 @@ class PdfService {
       final showMark = pageIdx % 2 == 0;
       for (var ri = 0; ri < rows.length; ri++) {
         final row = rows[ri];
-        for (var ci = 0; ci < pageCols; ci++) {
-          final block = (ci < row.length) ? row[ci] : null;
-          if (block == null) continue;
-          final key = '${pageIdx}_${ri}_$ci';
-          final blockW = block.smallText
-              ? (cW - ci * cellW - padX * 2)
-              : (cellW - padX * 2);
-          final hasMark = showMark && ri == 0 && ci == 0;
+        for (var cellIndex = 0; cellIndex < row.length; cellIndex++) {
+          final cell = row[cellIndex];
+          final block = cell.block;
+          final key = '${pageIdx}_${ri}_$cellIndex';
+          final left = cell.leftFraction * cW;
+          final spannedW = cell.widthFraction * cW;
+          final blockW = block.smallText && block.columnSpan == null
+              ? (cW - left - padX * 2)
+              : (spannedW - padX * 2);
+          final hasMark = showMark && ri == 0 && cellIndex == 0;
           positioned.add(
             pw.Positioned(
-              left: ci * cellW + padX,
+              left: left + padX,
               top: rowYs[ri] + padY,
-              child: pw.SizedBox(width: blockW, child: buildBlock(key, block, hasMark)),
+              child: pw.SizedBox(
+                width: blockW,
+                child: buildBlock(key, block, hasMark),
+              ),
             ),
           );
         }

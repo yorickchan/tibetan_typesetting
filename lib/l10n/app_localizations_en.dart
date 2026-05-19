@@ -183,6 +183,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get autoPerPage => 'Auto per page';
 
   @override
+  String get sentenceSpacing => 'Sentence spacing';
+
+  @override
   String get showFrame => 'Show frame';
 
   @override

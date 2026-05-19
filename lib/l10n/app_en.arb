@@ -80,6 +80,7 @@
   "right": "Right",
   "columns": "Columns",
   "autoPerPage": "Auto per page",
+  "sentenceSpacing": "Sentence spacing",
   "showFrame": "Show frame",
   "leftVerticalTitle": "Left vertical title",
   "pageNumberLabel": "Page number",

@@ -82,6 +82,7 @@ class BlockEditorWidget extends StatelessWidget {
             onToggleColumnBreak: onToggleColumnBreak,
             onTogglePageBreak: onTogglePageBreak,
             onToggleSmallText: onToggleSmallText,
+            onSetColumnSpan: (span) => onUpdateBlock({'columnSpan': span}),
             onDeleteBlock: onDeleteBlock,
             l10n: l10n,
           ),
@@ -110,6 +111,7 @@ class _Toolbar extends StatelessWidget {
   final VoidCallback onToggleColumnBreak;
   final VoidCallback onTogglePageBreak;
   final VoidCallback onToggleSmallText;
+  final ValueChanged<int?> onSetColumnSpan;
   final VoidCallback onDeleteBlock;
   final AppLocalizations l10n;
 
@@ -123,6 +125,7 @@ class _Toolbar extends StatelessWidget {
     required this.onToggleColumnBreak,
     required this.onTogglePageBreak,
     required this.onToggleSmallText,
+    required this.onSetColumnSpan,
     required this.onDeleteBlock,
     required this.l10n,
   });
@@ -176,6 +179,70 @@ class _Toolbar extends StatelessWidget {
               block.columnBreakBefore,
               AppColors.sky500,
               onToggleColumnBreak,
+            ),
+            const SizedBox(width: 4),
+            PopupMenuButton<String>(
+              tooltip: 'Column span',
+              color: AppColors.surface,
+              initialValue: block.columnSpan?.toString() ?? 'auto',
+              onSelected: (value) {
+                onSetColumnSpan(value == 'auto' ? null : int.parse(value));
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem<String>(
+                  value: 'auto',
+                  child: Text(
+                    'Auto',
+                    style: TextStyle(color: AppColors.textPrimary),
+                  ),
+                ),
+                for (final span in List<int>.generate(12, (index) => index + 1))
+                  PopupMenuItem<String>(
+                    value: '$span',
+                    child: Text(
+                      '$span',
+                      style: TextStyle(color: AppColors.textPrimary),
+                    ),
+                  ),
+              ],
+              child: Container(
+                height: 24,
+                padding: const EdgeInsets.symmetric(horizontal: 7),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: block.columnSpan == null
+                        ? AppColors.border
+                        : AppColors.sky500,
+                  ),
+                  color: block.columnSpan == null
+                      ? Colors.transparent
+                      : AppColors.sky500.withValues(alpha: 0.12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.width_normal_outlined,
+                      size: 13,
+                      color: block.columnSpan == null
+                          ? AppColors.textMuted
+                          : AppColors.sky400,
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      block.columnSpan == null ? 'Auto' : '${block.columnSpan}',
+                      style: TextStyle(
+                        color: block.columnSpan == null
+                            ? AppColors.textMuted
+                            : AppColors.sky400,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(width: 4),
             _toggleBtn(

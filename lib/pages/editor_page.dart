@@ -162,6 +162,11 @@ class _EditorPageState extends State<EditorPage> {
           chineseTranslation: patch.containsKey('chineseTranslation')
               ? patch['chineseTranslation'] as String
               : null,
+          columnSpan: patch.containsKey('columnSpan')
+              ? patch['columnSpan'] as int?
+              : null,
+          clearColumnSpan:
+              patch.containsKey('columnSpan') && patch['columnSpan'] == null,
         );
       }).toList();
       _project = _project!.copyWith(blocks: blocks);
@@ -302,19 +307,21 @@ class _EditorPageState extends State<EditorPage> {
 
   List<_PageWithBlocks> get _pagesWithBlocks {
     if (_project == null) return [];
-    final setup = _project!.pageSetup;
-    final colCount = (setup.columnCount > 0)
-        ? setup.columnCount.clamp(1, 8)
-        : 0;
-    final pages = paginateBlocks(_project!.blocks, colCount, 4);
+    final pages = paginateBlocks(
+      _project!.blocks,
+      0,
+      4,
+      _project!.pageSetup.flowGap,
+    );
     return pages.map((page) {
       final seen = <String>{};
       final blocks = <TextBlock>[];
-      for (final row in page.rows) {
+      for (final row in page.flowRows) {
         for (final cell in row) {
-          if (cell != null && !seen.contains(cell.id)) {
-            seen.add(cell.id);
-            blocks.add(cell);
+          final block = cell.block;
+          if (!seen.contains(block.id)) {
+            seen.add(block.id);
+            blocks.add(block);
           }
         }
       }
@@ -474,6 +481,13 @@ class _EditorPageState extends State<EditorPage> {
           onUpdateSetup: _updateSetup,
           l10n: _l10n,
         ),
+        const SizedBox(height: 8),
+
+        _FlowSpacingPanel(
+          pageSetup: project.pageSetup,
+          l10n: _l10n,
+          onUpdateSetup: _updateSetup,
+        ),
         const SizedBox(height: 12),
 
         if (project.pageSetup.showTitlePage) ...[
@@ -553,6 +567,7 @@ class _EditorPageState extends State<EditorPage> {
                     project: project,
                     appSettings: _appSettings,
                     rows: pageData.page.rows,
+                    flowRows: pageData.page.flowRows,
                     colCount: pageData.page.colCount,
                     highlightBlockId: _selectedId,
                     showMark: pageIdx % 2 == 0,
@@ -567,6 +582,64 @@ class _EditorPageState extends State<EditorPage> {
           );
         }),
       ],
+    );
+  }
+}
+
+class _FlowSpacingPanel extends StatelessWidget {
+  final PageSetup pageSetup;
+  final AppLocalizations l10n;
+  final void Function(PageSetup Function(PageSetup)) onUpdateSetup;
+
+  const _FlowSpacingPanel({
+    required this.pageSetup,
+    required this.l10n,
+    required this.onUpdateSetup,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.cardBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        children: [
+          Icon(Icons.format_line_spacing, size: 14, color: AppColors.textMuted),
+          const SizedBox(width: 6),
+          Text(
+            l10n.sentenceSpacing,
+            style: TextStyle(
+              color: AppColors.textBody,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Slider(
+              value: pageSetup.flowGap.clamp(0.0, 0.08),
+              min: 0,
+              max: 0.08,
+              divisions: 8,
+              activeColor: AppColors.sky500,
+              inactiveColor: AppColors.border,
+              onChanged: (v) => onUpdateSetup((s) => s.copyWith(flowGap: v)),
+            ),
+          ),
+          SizedBox(
+            width: 42,
+            child: Text(
+              '${(pageSetup.flowGap * 100).round()}%',
+              textAlign: TextAlign.right,
+              style: TextStyle(color: AppColors.textCaption, fontSize: 11),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

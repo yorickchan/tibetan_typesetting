@@ -56,6 +56,7 @@
   "right": "右",
   "columns": "欄數",
   "autoPerPage": "每頁自動",
+  "sentenceSpacing": "句距",
   "showFrame": "顯示邊框",
   "leftVerticalTitle": "左側豎排標題",
   "pageNumberLabel": "頁碼",

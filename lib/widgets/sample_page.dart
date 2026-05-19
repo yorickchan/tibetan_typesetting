@@ -14,6 +14,7 @@ class SamplePageWidget extends StatelessWidget {
   final Project project;
   final AppSettings? appSettings;
   final List<List<TextBlock?>>? rows;
+  final List<List<LayoutCell>>? flowRows;
   final int? colCount;
   final bool showMark;
   final String? pageNumber;
@@ -24,6 +25,7 @@ class SamplePageWidget extends StatelessWidget {
     required this.project,
     this.appSettings,
     this.rows,
+    this.flowRows,
     this.colCount,
     this.showMark = false,
     this.pageNumber,
@@ -37,7 +39,16 @@ class SamplePageWidget extends StatelessWidget {
     final fallbackColCount = (setup.columnCount > 0)
         ? setup.columnCount.clamp(1, 8)
         : 5;
-    final effectiveRows = rows ?? blocksToRows(blocks, fallbackColCount);
+    final effectiveFlowRows =
+        flowRows ??
+        (rows != null
+            ? _flowRowsFromLegacyRows(rows!)
+            : paginateBlocks(
+                blocks,
+                fallbackColCount,
+                4,
+                setup.flowGap,
+              ).first.flowRows);
     final effectiveColCount = colCount ?? fallbackColCount;
 
     final pageW = setup.pageWidthMm * kMmToPx;
@@ -95,7 +106,7 @@ class SamplePageWidget extends StatelessWidget {
                       border: Border.all(color: AppColors.rose600, width: 1),
                     ),
                     child: _ContentGrid(
-                      rows: effectiveRows,
+                      rows: effectiveFlowRows,
                       colCount: effectiveColCount,
                       showMark: showMark,
                       highlightBlockId: highlightBlockId,
@@ -161,7 +172,7 @@ class _SidePanel extends StatelessWidget {
 }
 
 class _ContentGrid extends StatelessWidget {
-  final List<List<TextBlock?>> rows;
+  final List<List<LayoutCell>> rows;
   final int colCount;
   final bool showMark;
   final String? highlightBlockId;
@@ -193,14 +204,13 @@ class _ContentGrid extends StatelessWidget {
       builder: (context, constraints) {
         final totalW = constraints.maxWidth;
         final totalH = constraints.maxHeight;
-        final cellW = totalW / colCount;
         final rowCount = rows.length;
         const smallRowShrink = 4 * kMmToPx;
 
-        bool isShortRow(List<TextBlock?> row) {
-          for (final b in row) {
-            if (b != null && b.smallText) {
-              final trans = splitLines(b.chineseTranslation).join('');
+        bool isShortRow(List<LayoutCell> row) {
+          for (final cell in row) {
+            if (cell.block.smallText) {
+              final trans = splitLines(cell.block.chineseTranslation).join('');
               if (trans.isEmpty) return true;
             }
           }
@@ -225,9 +235,9 @@ class _ContentGrid extends StatelessWidget {
 
         for (var ri = 0; ri < rows.length; ri++) {
           final row = rows[ri];
-          for (var ci = 0; ci < colCount; ci++) {
-            final block = (ci < row.length) ? row[ci] : null;
-            if (block == null) continue;
+          for (var cellIndex = 0; cellIndex < row.length; cellIndex++) {
+            final cell = row[cellIndex];
+            final block = cell.block;
 
             final isHL = highlightBlockId == block.id;
             final isSmall = block.smallText;
@@ -241,7 +251,7 @@ class _ContentGrid extends StatelessWidget {
             final trans = isSmall
                 ? ''
                 : splitLines(block.chineseTranslation).join(' ');
-            final doShowMark = showMark && ri == 0 && ci == 0;
+            final doShowMark = showMark && ri == 0 && cellIndex == 0;
 
             final smallFactor = isSmall ? 0.75 : 1.0;
             final headingSize =
@@ -250,11 +260,15 @@ class _ContentGrid extends StatelessWidget {
             final chineseSize =
                 font_utils.previewFontSize(chiSize) * smallFactor;
 
-            final blockW = isSmall ? (totalW - ci * cellW) : cellW;
+            final left = cell.leftFraction * totalW;
+            final spannedW = cell.widthFraction * totalW;
+            final blockW = isSmall && block.columnSpan == null
+                ? (totalW - left)
+                : spannedW.clamp(0, totalW - left).toDouble();
 
             children.add(
               Positioned(
-                left: ci * cellW,
+                left: left,
                 top: rowYs[ri],
                 width: blockW,
                 height: rowHs[ri],
@@ -361,4 +375,23 @@ class _ContentGrid extends StatelessWidget {
       },
     );
   }
+}
+
+List<List<LayoutCell>> _flowRowsFromLegacyRows(List<List<TextBlock?>> rows) {
+  return rows.map((row) {
+    final cells = <LayoutCell>[];
+    for (var i = 0; i < row.length; i++) {
+      final block = row[i];
+      if (block != null) {
+        cells.add(
+          LayoutCell(
+            block: block,
+            leftFraction: row.isEmpty ? 0 : i / row.length,
+            widthFraction: row.isEmpty ? 1 : 1 / row.length,
+          ),
+        );
+      }
+    }
+    return cells;
+  }).toList();
 }
