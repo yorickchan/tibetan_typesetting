@@ -36,7 +36,12 @@ class _FontPickerState extends State<FontPicker> {
 
   Future<void> _loadFonts() async {
     final fonts = await FontService().scanSystemFonts();
-    if (mounted) setState(() { _allFonts = fonts; _loading = false; });
+    if (mounted) {
+      setState(() {
+        _allFonts = fonts;
+        _loading = false;
+      });
+    }
   }
 
   String? get _selectedName {
@@ -100,8 +105,7 @@ class _FontPickerState extends State<FontPicker> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Icon(Icons.unfold_more,
-                    size: 16, color: AppColors.textMuted),
+                Icon(Icons.unfold_more, size: 16, color: AppColors.textMuted),
               ],
             ),
           ),
@@ -154,7 +158,11 @@ class _FontPickerDialogState extends State<_FontPickerDialog> {
         _filtered = widget.fonts;
       } else {
         _filtered = widget.fonts
-            .where((f) => f.familyName.toLowerCase().contains(q))
+            .where(
+              (f) =>
+                  f.familyName.toLowerCase().contains(q) ||
+                  f.filePath.toLowerCase().contains(q),
+            )
             .toList();
       }
     });
@@ -180,12 +188,18 @@ class _FontPickerDialogState extends State<_FontPickerDialog> {
                 decoration: InputDecoration(
                   hintText: 'Search fonts...',
                   hintStyle: TextStyle(
-                      color: AppColors.textMuted.withValues(alpha: 0.6)),
-                  prefixIcon: Icon(Icons.search,
-                      size: 18, color: AppColors.textMuted),
+                    color: AppColors.textMuted.withValues(alpha: 0.6),
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    size: 18,
+                    color: AppColors.textMuted,
+                  ),
                   isDense: true,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
                   filled: true,
                   fillColor: AppColors.inputFill,
                   border: OutlineInputBorder(
@@ -222,10 +236,10 @@ class _FontPickerDialogState extends State<_FontPickerDialog> {
                   return ListTile(
                     dense: true,
                     selected: selected,
-                    selectedTileColor:
-                        AppColors.sky500.withValues(alpha: 0.15),
+                    selectedTileColor: AppColors.sky500.withValues(alpha: 0.15),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6)),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     title: Text(
                       font.familyName,
                       style: TextStyle(
@@ -238,8 +252,7 @@ class _FontPickerDialogState extends State<_FontPickerDialog> {
                     ),
                     trailing: Text(
                       font.fileType.toUpperCase(),
-                      style: TextStyle(
-                          color: AppColors.textFaint, fontSize: 9),
+                      style: TextStyle(color: AppColors.textFaint, fontSize: 9),
                     ),
                     onTap: () => widget.onSelected(font),
                   );
@@ -253,8 +266,10 @@ class _FontPickerDialogState extends State<_FontPickerDialog> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Cancel',
-                      style: TextStyle(color: AppColors.textCaption)),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.textCaption),
+                  ),
                 ),
               ),
             ),

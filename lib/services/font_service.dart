@@ -21,6 +21,25 @@ class SystemFontInfo {
     required this.fileType,
   });
 
+  static SystemFontInfo? fromNativeMap(Map<Object?, Object?> map) {
+    final familyName = map['familyName'];
+    final filePath = map['filePath'];
+    final fileType = map['fileType'];
+    if (familyName is! String ||
+        familyName.trim().isEmpty ||
+        filePath is! String ||
+        filePath.trim().isEmpty ||
+        fileType is! String ||
+        fileType.trim().isEmpty) {
+      return null;
+    }
+    return SystemFontInfo(
+      familyName: familyName,
+      filePath: filePath,
+      fileType: fileType.toLowerCase(),
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -39,9 +58,15 @@ class FontService {
   final _loadedPreviewFamilies = <String>{};
   final _pdfFontCache = <String, pw.Font>{};
 
+  static const _channel = MethodChannel('tibetan_typesetting/system_fonts');
+
   static List<String> get _fontDirs {
     if (Platform.isMacOS) {
-      return const ['/System/Library/Fonts', '/Library/Fonts'];
+      return const [
+        '/System/Library/Fonts',
+        '/Library/Fonts',
+        '/Network/Library/Fonts',
+      ];
     } else if (Platform.isWindows) {
       final winDir = Platform.environment['WINDIR'] ?? r'C:\Windows';
       return ['$winDir\\Fonts'];
@@ -64,6 +89,12 @@ class FontService {
 
     final fonts = <SystemFontInfo>[];
     final seen = <String>{};
+
+    for (final font in await _scanNativeSystemFonts()) {
+      if (seen.contains(font.filePath)) continue;
+      seen.add(font.filePath);
+      fonts.add(font);
+    }
 
     final homeDir =
         Platform.environment['HOME'] ??
@@ -107,12 +138,31 @@ class FontService {
           a.familyName.toLowerCase().compareTo(b.familyName.toLowerCase()),
     );
 
-    _cachedFonts = fonts;
-    return fonts;
+    _cachedFonts = deduplicateFamilies(fonts);
+    return _cachedFonts!;
   }
 
   /// Force a re-scan next time [scanSystemFonts] is called.
   void invalidateCache() => _cachedFonts = null;
+
+  static List<SystemFontInfo> deduplicateFamilies(List<SystemFontInfo> fonts) {
+    final byFamily = <String, SystemFontInfo>{};
+    for (final font in fonts) {
+      final key = font.familyName.trim().toLowerCase();
+      if (key.isEmpty) continue;
+      final existing = byFamily[key];
+      if (existing == null || _fontPriority(font) < _fontPriority(existing)) {
+        byFamily[key] = font;
+      }
+    }
+
+    final deduplicated = byFamily.values.toList();
+    deduplicated.sort(
+      (a, b) =>
+          a.familyName.toLowerCase().compareTo(b.familyName.toLowerCase()),
+    );
+    return deduplicated;
+  }
 
   /// Well-known font families with broad CJK coverage, checked in priority order.
   static const _cjkFallbackPatterns = [
@@ -230,6 +280,41 @@ class FontService {
   static String _extensionLower(String path) {
     final dot = path.lastIndexOf('.');
     return dot >= 0 ? path.substring(dot).toLowerCase() : '';
+  }
+
+  static int _fontPriority(SystemFontInfo font) {
+    final path = font.filePath.toLowerCase();
+    final name = font.familyName.toLowerCase();
+    if (path.contains('regular') || name.contains('regular')) return 0;
+    if (!path.contains('bold') &&
+        !path.contains('italic') &&
+        !path.contains('oblique') &&
+        !path.contains('black') &&
+        !path.contains('heavy')) {
+      return 1;
+    }
+    return 2;
+  }
+
+  Future<List<SystemFontInfo>> _scanNativeSystemFonts() async {
+    if (!Platform.isMacOS) return const [];
+
+    try {
+      final result = await _channel.invokeListMethod<Object?>('listFonts');
+      if (result == null) return const [];
+
+      return result
+          .whereType<Map<Object?, Object?>>()
+          .map(SystemFontInfo.fromNativeMap)
+          .whereType<SystemFontInfo>()
+          .where((font) => _supportedExtensions.contains('.${font.fileType}'))
+          .toList();
+    } on MissingPluginException {
+      return const [];
+    } on PlatformException catch (e) {
+      debugPrint('Failed to list native system fonts: ${e.message}');
+      return const [];
+    }
   }
 
   static bool _isTtc(Uint8List bytes) =>
