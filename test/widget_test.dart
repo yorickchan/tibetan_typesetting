@@ -178,6 +178,57 @@ void main() {
 
       expect(width, lessThanOrEqualTo(0.30));
     });
+
+    test('small rows stay normal height when small text has multiple lines', () {
+      final row = [
+        LayoutCell(
+          block: TextBlock(
+            id: 'small',
+            tibetan: 'བོད།\nབོད།',
+            chinesePronunciation: 'bod\nbod',
+            smallText: true,
+          ),
+          leftFraction: 0,
+          widthFraction: 0.5,
+        ),
+      ];
+
+      expect(shouldUseShortRow(row), isFalse);
+    });
+
+    test('small rows stay normal height when mixed with normal blocks', () {
+      final row = [
+        LayoutCell(
+          block: TextBlock(id: 'small', tibetan: 'བོད།', smallText: true),
+          leftFraction: 0,
+          widthFraction: 0.25,
+        ),
+        LayoutCell(
+          block: TextBlock(id: 'normal', tibetan: 'བོད།'),
+          leftFraction: 0.3,
+          widthFraction: 0.25,
+        ),
+      ];
+
+      expect(shouldUseShortRow(row), isFalse);
+    });
+
+    test('compact one-line small rows can use short height', () {
+      final row = [
+        LayoutCell(
+          block: TextBlock(
+            id: 'small',
+            tibetan: 'བོད།',
+            chinesePronunciation: 'bod',
+            smallText: true,
+          ),
+          leftFraction: 0,
+          widthFraction: 0.25,
+        ),
+      ];
+
+      expect(shouldUseShortRow(row), isTrue);
+    });
   });
 
   group('blocksToRows', () {

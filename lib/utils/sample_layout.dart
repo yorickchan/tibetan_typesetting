@@ -171,6 +171,25 @@ double estimateBlockWidthFraction(TextBlock block) {
   return (0.07 + score / 260).clamp(0.09, 0.52);
 }
 
+bool shouldUseShortRow(List<LayoutCell> row) {
+  if (row.isEmpty) return false;
+
+  var hasSmallBlock = false;
+  for (final cell in row) {
+    final block = cell.block;
+    if (!block.smallText) return false;
+    hasSmallBlock = true;
+
+    if (splitLines(block.chineseTranslation).join('').isNotEmpty) {
+      return false;
+    }
+    if (splitLines(block.tibetan).length > 1) return false;
+    if (splitLines(block.chinesePronunciation).length > 1) return false;
+  }
+
+  return hasSmallBlock;
+}
+
 List<List<TextBlock?>> _legacyRows(
   List<List<LayoutCell>> flowRows,
   int colCount,

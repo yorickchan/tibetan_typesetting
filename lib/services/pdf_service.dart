@@ -584,17 +584,6 @@ class PdfService {
       final padY = 2 * PdfPageFormat.mm;
       final smallRowShrink = 6 * PdfPageFormat.mm;
 
-      // Check which rows are "short" (smallText with empty translation)
-      bool isShortRow(List<LayoutCell> row) {
-        for (final cell in row) {
-          if (cell.block.smallText) {
-            final trans = splitLines(cell.block.chineseTranslation).join('');
-            if (trans.isEmpty) return true;
-          }
-        }
-        return false;
-      }
-
       final baseRowH = cH / rowCount;
       final shortRowH = baseRowH - smallRowShrink;
       final normalRowH = baseRowH;
@@ -604,7 +593,7 @@ class PdfService {
       double yAccum = 0;
       for (var ri = 0; ri < rowCount; ri++) {
         rowYs.add(yAccum);
-        yAccum += isShortRow(rows[ri]) ? shortRowH : normalRowH;
+        yAccum += shouldUseShortRow(rows[ri]) ? shortRowH : normalRowH;
       }
 
       pw.Widget buildBlock(String key, TextBlock block, bool hasMark) {

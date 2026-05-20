@@ -207,16 +207,6 @@ class _ContentGrid extends StatelessWidget {
         final rowCount = rows.length;
         const smallRowShrink = 4 * kMmToPx;
 
-        bool isShortRow(List<LayoutCell> row) {
-          for (final cell in row) {
-            if (cell.block.smallText) {
-              final trans = splitLines(cell.block.chineseTranslation).join('');
-              if (trans.isEmpty) return true;
-            }
-          }
-          return false;
-        }
-
         final baseRowH = totalH / rowCount;
         final shortRowH = baseRowH - smallRowShrink;
         final normalRowH = baseRowH;
@@ -226,7 +216,7 @@ class _ContentGrid extends StatelessWidget {
         double yAccum = 0;
         for (var ri = 0; ri < rowCount; ri++) {
           rowYs.add(yAccum);
-          final h = isShortRow(rows[ri]) ? shortRowH : normalRowH;
+          final h = shouldUseShortRow(rows[ri]) ? shortRowH : normalRowH;
           rowHs.add(h);
           yAccum += h;
         }
@@ -307,7 +297,7 @@ class _ContentGrid extends StatelessWidget {
                             fontFamily: tibFamily,
                             fontSize: headingSize,
                             color: AppColors.rose600,
-                            height: 0.75,
+                            height: isSmall ? 1.2 : 0.75,
                           ),
                           maxLines: isSmall ? null : 2,
                           overflow: isSmall ? null : TextOverflow.ellipsis,
@@ -321,7 +311,7 @@ class _ContentGrid extends StatelessWidget {
                               fontFamily: tibFamily,
                               fontSize: bodySize,
                               color: Colors.black87,
-                              height: 0.75,
+                              height: isSmall ? 1.2 : 0.75,
                             ),
                             maxLines: isSmall ? null : 3,
                             overflow: isSmall ? null : TextOverflow.ellipsis,
