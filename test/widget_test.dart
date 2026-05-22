@@ -1,11 +1,24 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 import 'package:tibetan_typesetting/models/project.dart';
 import 'package:tibetan_typesetting/models/font_config.dart';
+import 'package:tibetan_typesetting/services/pdf_service.dart';
 import 'package:tibetan_typesetting/utils/sample_layout.dart';
 import 'package:tibetan_typesetting/utils/font_constants.dart';
 
 void main() {
+  group('contentPageCenterBorder', () {
+    test('draws only vertical separators', () {
+      final border = contentPageCenterBorder();
+
+      expect(border.top, pw.BorderSide.none);
+      expect(border.bottom, pw.BorderSide.none);
+      expect(border.left.width, 0.5);
+      expect(border.right.width, 0.5);
+    });
+  });
+
   group('resolvePageNumber', () {
     test('returns index + 1 for empty string', () {
       expect(resolvePageNumber('', 0), '1');

@@ -29,6 +29,12 @@ const _rose = PdfColor.fromInt(0xFFe11d48);
 const _roseUi = Color(0xFFe11d48);
 const _blackUi = Color(0xFF000000);
 
+@visibleForTesting
+pw.Border contentPageCenterBorder() {
+  const side = pw.BorderSide(color: _rose, width: 0.5);
+  return const pw.Border.symmetric(vertical: side);
+}
+
 /// Pre-rendered text image stored for synchronous PDF page construction.
 class _Img {
   final pw.MemoryImage provider;
@@ -129,10 +135,7 @@ class PdfService {
       fallbackChineseFont,
     );
 
-    Future<pw.Font?> tryLoadPdfFont(
-      FontConfig config,
-      String role,
-    ) async {
+    Future<pw.Font?> tryLoadPdfFont(FontConfig config, String role) async {
       if (config.fontPath.isEmpty) return null;
       try {
         return await _fontService.loadFontForPdf(config);
@@ -580,8 +583,8 @@ class PdfService {
       if (rows.isEmpty) return pw.SizedBox.expand();
 
       final rowCount = rows.length;
-      final padX = 3 * PdfPageFormat.mm;
-      final padY = 2 * PdfPageFormat.mm;
+      final padX = 2 * PdfPageFormat.mm;
+      final padY = 1 * PdfPageFormat.mm;
       final smallRowShrink = 6 * PdfPageFormat.mm;
 
       final baseRowH = cH / rowCount;
@@ -696,16 +699,7 @@ class PdfService {
       return pw.Row(
         children: [
           sidePanel(ps.leftVerticalTitle, image: sideImg),
-          pw.Expanded(
-            child: pw.Container(
-              decoration: ps.showFrame
-                  ? pw.BoxDecoration(
-                      border: pw.Border.all(color: _rose, width: 0.5),
-                    )
-                  : null,
-              child: contentArea(cW, cH),
-            ),
-          ),
+          pw.Expanded(child: pw.Container(child: contentArea(cW, cH))),
           sidePanel(pageNumber),
         ],
       );
