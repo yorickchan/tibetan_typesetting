@@ -29,12 +29,6 @@ const _rose = PdfColor.fromInt(0xFFe11d48);
 const _roseUi = Color(0xFFe11d48);
 const _blackUi = Color(0xFF000000);
 
-@visibleForTesting
-pw.Border contentPageCenterBorder() {
-  const side = pw.BorderSide(color: _rose, width: 0.5);
-  return const pw.Border.symmetric(vertical: side);
-}
-
 /// Pre-rendered text image stored for synchronous PDF page construction.
 class _Img {
   final pw.MemoryImage provider;
