@@ -4,10 +4,37 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:tibetan_typesetting/models/project.dart';
 import 'package:tibetan_typesetting/models/font_config.dart';
 import 'package:tibetan_typesetting/services/pdf_service.dart';
+import 'package:tibetan_typesetting/services/pronunciation_service.dart';
 import 'package:tibetan_typesetting/utils/sample_layout.dart';
 import 'package:tibetan_typesetting/utils/font_constants.dart';
 
 void main() {
+  group('PronunciationService', () {
+    test('rejects punctuation-only pronunciations', () {
+      expect(PronunciationService.isSavablePronunciation('，'), isFalse);
+      expect(PronunciationService.isSavablePronunciation('。；：、'), isFalse);
+      expect(PronunciationService.isSavablePronunciation('.,;:!?'), isFalse);
+      expect(PronunciationService.isSavablePronunciation(' ། '), isFalse);
+    });
+
+    test('accepts pronunciations containing letters or Chinese characters', () {
+      expect(PronunciationService.isSavablePronunciation('a'), isTrue);
+      expect(PronunciationService.isSavablePronunciation('中'), isTrue);
+      expect(PronunciationService.isSavablePronunciation('中，'), isTrue);
+    });
+
+    test('filters punctuation before mapping pronunciations to syllables', () {
+      expect(
+        PronunciationService.savablePronunciationCharacters('甲，乙。丙；丁：戊、己'),
+        ['甲', '乙', '丙', '丁', '戊', '己'],
+      );
+      expect(
+        PronunciationService.savablePronunciationCharacters('a,b; c!'),
+        ['a', 'b', 'c'],
+      );
+    });
+  });
+
   group('contentPageCenterBorder', () {
     test('draws only vertical separators', () {
       final border = contentPageCenterBorder();

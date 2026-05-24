@@ -509,10 +509,9 @@ class _EditorFieldsState extends State<_EditorFields> {
     if (tibetan.isEmpty || pronunciation.isEmpty) return;
 
     final syllables = extractSyllables(tibetan);
-    final chars = pronunciation.runes
-        .map(String.fromCharCode)
-        .where((c) => c.trim().isNotEmpty)
-        .toList();
+    final chars = PronunciationService.savablePronunciationCharacters(
+      pronunciation,
+    );
 
     if (syllables.isEmpty || chars.isEmpty) return;
 

@@ -11,7 +11,23 @@ class PronunciationService {
   factory PronunciationService() => _instance;
   PronunciationService._internal();
 
+  static final RegExp _savablePronunciationChar = RegExp(
+    r'[\p{L}\p{N}]',
+    unicode: true,
+  );
+
   final _db = DatabaseService();
+
+  static bool isSavablePronunciation(String value) {
+    return _savablePronunciationChar.hasMatch(value.trim());
+  }
+
+  static List<String> savablePronunciationCharacters(String value) {
+    return value.runes
+        .map(String.fromCharCode)
+        .where((c) => _savablePronunciationChar.hasMatch(c))
+        .toList();
+  }
 
   Future<String?> getPronunciation(String tibetanSyllable) async {
     final db = await _db.database;
@@ -42,7 +58,8 @@ class PronunciationService {
     String chinesePronunciation, {
     int wordCount = 1,
   }) async {
-    if (tibetanSyllable.trim().isEmpty || chinesePronunciation.trim().isEmpty) {
+    if (tibetanSyllable.trim().isEmpty ||
+        !isSavablePronunciation(chinesePronunciation)) {
       return;
     }
     final db = await _db.database;
@@ -64,7 +81,8 @@ class PronunciationService {
     String chinesePronunciation, {
     int? wordCount,
   }) async {
-    if (tibetanSyllable.trim().isEmpty || chinesePronunciation.trim().isEmpty) {
+    if (tibetanSyllable.trim().isEmpty ||
+        !isSavablePronunciation(chinesePronunciation)) {
       return;
     }
     final db = await _db.database;
@@ -138,7 +156,10 @@ class PronunciationService {
       final pronunciation = map['chinesePronunciation'] as String?;
       final wordCount = (map['wordCount'] as int?) ?? 1;
       if (syllable == null || pronunciation == null) continue;
-      if (syllable.trim().isEmpty || pronunciation.trim().isEmpty) continue;
+      if (syllable.trim().isEmpty ||
+          !isSavablePronunciation(pronunciation)) {
+        continue;
+      }
 
       if (!overwrite) {
         final existing = await getPronunciation(syllable);
