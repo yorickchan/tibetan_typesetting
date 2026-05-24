@@ -7,6 +7,7 @@ import '../models/project.dart';
 import '../services/pronunciation_service.dart';
 import '../utils/colors.dart';
 import '../utils/font_constants.dart';
+import '../utils/sample_layout.dart';
 import '../utils/tibetan_segmenter.dart';
 
 class BlockEditorWidget extends StatelessWidget {
@@ -196,7 +197,10 @@ class _Toolbar extends StatelessWidget {
                     style: TextStyle(color: AppColors.textPrimary),
                   ),
                 ),
-                for (final span in List<int>.generate(12, (index) => index + 1))
+                for (final span in List<int>.generate(
+                  maxColumnSpan,
+                  (index) => index + 1,
+                ))
                   PopupMenuItem<String>(
                     value: '$span',
                     child: Text(

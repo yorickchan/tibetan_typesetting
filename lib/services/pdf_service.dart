@@ -76,7 +76,8 @@ class PdfService {
     required String fontFamily,
     List<String>? fontFamilyFallback,
     double? lineHeight,
-    double verticalPadding = 0,
+    double topPadding = 0,
+    double bottomPadding = 0,
     TextAlign textAlign = TextAlign.left,
   }) async {
     if (text.trim().isEmpty) return null;
@@ -88,7 +89,8 @@ class PdfService {
       color: color,
       maxWidth: maxWidth,
       lineHeight: lineHeight,
-      verticalPadding: verticalPadding,
+      topPadding: topPadding,
+      bottomPadding: bottomPadding,
       textAlign: textAlign,
     );
     if (r == null) return null;
@@ -287,6 +289,7 @@ class PdfService {
           final hSize = tibContentSize;
           final bSize = tibContentSize;
           final tibBleed = contentTibetanRasterBleed(tibContentSize);
+          final tibBottomBleed = contentTibetanBottomBleed(tibContentSize);
 
           final left = cell.leftFraction * contentW;
           final spannedW = cell.widthFraction * contentW;
@@ -304,7 +307,8 @@ class PdfService {
                 textMaxW,
                 fontFamily: tibFamily,
                 lineHeight: contentTibetanLineHeight(smallText: small),
-                verticalPadding: tibBleed,
+                topPadding: tibBleed,
+                bottomPadding: tibBottomBleed,
               ),
             ),
           );
@@ -318,7 +322,8 @@ class PdfService {
                 textMaxW,
                 fontFamily: tibFamily,
                 lineHeight: contentTibetanLineHeight(smallText: small),
-                verticalPadding: tibBleed,
+                topPadding: tibBleed,
+                bottomPadding: tibBottomBleed,
               ),
             ),
           );
@@ -616,7 +621,9 @@ class PdfService {
           tibetanFontSize: smallTibetanSize,
           chineseFontSize: smallChineseSize,
           topPadding:
-              padY + contentTibetanRasterBleed(smallTibetanSize) * 2,
+              padY +
+              contentTibetanRasterBleed(smallTibetanSize) +
+              contentTibetanBottomBleed(smallTibetanSize),
           tibetanLineHeight: contentTibetanLineHeight(smallText: true),
           chineseLineHeight: 1.4,
         );
@@ -635,7 +642,7 @@ class PdfService {
         final hSize = contentTibetanFontSize(tibFontSize, smallText: small);
         final pronSize = pronFontSize * (small ? 0.75 : 1.0);
         final transSize = transFontSize * (small ? 0.75 : 1.0);
-        final markPad = hasMark ? hSize * 3.5 : 0.0;
+        final markPad = hasMark ? contentOpeningMarkIndent(hSize) : 0.0;
 
         final pron = splitLines(block.chinesePronunciation).join('\n');
         final trans = small
@@ -658,7 +665,7 @@ class PdfService {
               ),
             if (pron.isNotEmpty)
               pw.Padding(
-                padding: pw.EdgeInsets.only(top: 2, left: markPad),
+                padding: pw.EdgeInsets.only(left: markPad),
                 child: pw.Text(
                   pron,
                   style: pw.TextStyle(

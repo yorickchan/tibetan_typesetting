@@ -345,7 +345,9 @@ class _ContentGrid extends StatelessWidget {
                         Padding(
                           padding: EdgeInsets.only(
                             top: 2,
-                            left: doShowMark ? headingSize * 3.5 : 0,
+                            left: doShowMark
+                                ? contentOpeningMarkIndent(headingSize)
+                                : 0,
                           ),
                           child: Text(
                             pron,
@@ -363,7 +365,9 @@ class _ContentGrid extends StatelessWidget {
                         Padding(
                           padding: EdgeInsets.only(
                             top: 1,
-                            left: doShowMark ? headingSize * 3.5 : 0,
+                            left: doShowMark
+                                ? contentOpeningMarkIndent(headingSize)
+                                : 0,
                           ),
                           child: Text(
                             trans,

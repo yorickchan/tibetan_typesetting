@@ -29,7 +29,8 @@ Future<RenderedText?> renderTextToPng(
   required double maxWidth,
   double scale = 460 / 72,
   double? lineHeight,
-  double verticalPadding = 0,
+  double topPadding = 0,
+  double bottomPadding = 0,
   TextAlign textAlign = TextAlign.left,
 }) async {
   if (text.trim().isEmpty) return null;
@@ -63,13 +64,15 @@ Future<RenderedText?> renderTextToPng(
   final w = useFullWidth
       ? layoutMax.ceilToDouble()
       : painter.width.ceilToDouble();
-  final scaledVerticalPadding = verticalPadding * scale;
-  final h = (painter.height + scaledVerticalPadding * 2).ceilToDouble();
+  final scaledTopPadding = topPadding * scale;
+  final scaledBottomPadding = bottomPadding * scale;
+  final h = (painter.height + scaledTopPadding + scaledBottomPadding)
+      .ceilToDouble();
   if (w <= 0 || h <= 0) return null;
 
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, w, h));
-  painter.paint(canvas, Offset(0, scaledVerticalPadding));
+  painter.paint(canvas, Offset(0, scaledTopPadding));
   final picture = recorder.endRecording();
 
   final image = await picture.toImage(w.toInt(), h.toInt());

@@ -74,7 +74,7 @@ void main() {
     test('splits into multiple pages when exceeding maxRows', () {
       final blocks = List.generate(
         20,
-        (i) => TextBlock(id: 'b$i', tibetan: 'text $i', columnSpan: 4),
+        (i) => TextBlock(id: 'b$i', tibetan: 'text $i', columnSpan: 8),
       );
       final pages = paginateBlocks(blocks, 3, 4);
       expect(pages.length, greaterThan(1));
@@ -92,9 +92,9 @@ void main() {
 
     test('flows blocks using manual column spans', () {
       final blocks = [
-        TextBlock(id: 'b1', tibetan: 'short', columnSpan: 4),
-        TextBlock(id: 'b2', tibetan: 'short', columnSpan: 4),
-        TextBlock(id: 'b3', tibetan: 'short', columnSpan: 4),
+        TextBlock(id: 'b1', tibetan: 'short', columnSpan: 8),
+        TextBlock(id: 'b2', tibetan: 'short', columnSpan: 8),
+        TextBlock(id: 'b3', tibetan: 'short', columnSpan: 8),
       ];
 
       final pages = paginateBlocks(blocks, 4, 4);
@@ -160,20 +160,28 @@ void main() {
       );
     });
 
-    test('manual width levels use twelve equal divisions', () {
+    test('manual width levels use twenty-four equal divisions', () {
       final width1 = estimateBlockWidthFraction(
         TextBlock(id: 'manual-1', tibetan: 'བོད།', columnSpan: 1),
-      );
-      final width6 = estimateBlockWidthFraction(
-        TextBlock(id: 'manual-6', tibetan: 'བོད།', columnSpan: 6),
       );
       final width12 = estimateBlockWidthFraction(
         TextBlock(id: 'manual-12', tibetan: 'བོད།', columnSpan: 12),
       );
+      final width24 = estimateBlockWidthFraction(
+        TextBlock(id: 'manual-24', tibetan: 'བོད།', columnSpan: 24),
+      );
 
-      expect(width1, closeTo(1 / 12, 0.0001));
-      expect(width6, closeTo(6 / 12, 0.0001));
-      expect(width12, closeTo(1, 0.0001));
+      expect(width1, closeTo(1 / 24, 0.0001));
+      expect(width12, closeTo(12 / 24, 0.0001));
+      expect(width24, closeTo(1, 0.0001));
+    });
+
+    test('manual width clamps above twenty-four divisions', () {
+      final width = estimateBlockWidthFraction(
+        TextBlock(id: 'manual-oversize', tibetan: 'བོད།', columnSpan: 25),
+      );
+
+      expect(width, closeTo(1, 0.0001));
     });
 
     test('manual width level one is compact', () {
@@ -292,8 +300,13 @@ void main() {
       expect(contentTibetanFontSize(12, smallText: true), 9);
     });
 
+    test('opening mark indent aligns Chinese with first Tibetan character', () {
+      expect(contentOpeningMarkIndent(12), 30);
+    });
+
     test('content Tibetan raster bleed leaves room for tight line-height glyphs', () {
       expect(contentTibetanRasterBleed(12), 6);
+      expect(contentTibetanBottomBleed(12), closeTo(2.4, 0.0001));
     });
   });
 

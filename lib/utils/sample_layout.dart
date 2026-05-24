@@ -1,5 +1,7 @@
 import '../models/project.dart';
 
+const int maxColumnSpan = 24;
+
 String resolvePageNumber(String base, int index) {
   final trimmed = base.trim();
   if (trimmed.isEmpty) return '${index + 1}';
@@ -156,7 +158,7 @@ int estimateBlockSpan(TextBlock block, int colCount) {
 double estimateBlockWidthFraction(TextBlock block) {
   final manual = block.columnSpan;
   if (manual != null) {
-    return manual.clamp(1, 12) / 12;
+    return manual.clamp(1, maxColumnSpan) / maxColumnSpan;
   }
 
   final tibetanLen = splitLines(block.tibetan).join('').runes.length;
@@ -179,8 +181,16 @@ double contentTibetanFontSize(double fontSize, {required bool smallText}) {
   return fontSize * (smallText ? 0.75 : 1.0);
 }
 
+double contentOpeningMarkIndent(double fontSize) {
+  return fontSize * 2.5;
+}
+
 double contentTibetanRasterBleed(double fontSize) {
   return fontSize * 0.5;
+}
+
+double contentTibetanBottomBleed(double fontSize) {
+  return fontSize * 0.2;
 }
 
 bool shouldUseShortRow(
