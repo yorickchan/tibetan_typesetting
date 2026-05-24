@@ -242,6 +242,59 @@ void main() {
 
       expect(shouldUseShortRow(row), isTrue);
     });
+
+    test('compact small rows stay normal height when enlarged text would overflow', () {
+      final row = [
+        LayoutCell(
+          block: TextBlock(
+            id: 'small',
+            tibetan: 'བོད།',
+            chinesePronunciation: 'bod',
+            smallText: true,
+          ),
+          leftFraction: 0,
+          widthFraction: 0.25,
+        ),
+      ];
+
+      final minHeight = estimateCompactSmallRowHeight(
+        row,
+        tibetanFontSize: 18,
+        chineseFontSize: 14,
+        topPadding: 16,
+      );
+
+      expect(
+        shouldUseShortRow(
+          row,
+          availableHeight: minHeight - 1,
+          minimumHeight: minHeight,
+        ),
+        isFalse,
+      );
+      expect(
+        shouldUseShortRow(
+          row,
+          availableHeight: minHeight,
+          minimumHeight: minHeight,
+        ),
+        isTrue,
+      );
+    });
+
+    test('content Tibetan line height matches preview spacing', () {
+      expect(contentTibetanLineHeight(smallText: false), 0.75);
+      expect(contentTibetanLineHeight(smallText: true), 1.2);
+    });
+
+    test('content Tibetan font size does not shrink headings in PDF export', () {
+      expect(contentTibetanFontSize(12, smallText: false), 12);
+      expect(contentTibetanFontSize(12, smallText: true), 9);
+    });
+
+    test('content Tibetan raster bleed leaves room for tight line-height glyphs', () {
+      expect(contentTibetanRasterBleed(12), 6);
+    });
   });
 
   group('blocksToRows', () {

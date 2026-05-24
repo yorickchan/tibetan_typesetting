@@ -171,7 +171,23 @@ double estimateBlockWidthFraction(TextBlock block) {
   return (0.07 + score / 260).clamp(0.09, 0.52);
 }
 
-bool shouldUseShortRow(List<LayoutCell> row) {
+double contentTibetanLineHeight({required bool smallText}) {
+  return smallText ? 1.2 : 0.75;
+}
+
+double contentTibetanFontSize(double fontSize, {required bool smallText}) {
+  return fontSize * (smallText ? 0.75 : 1.0);
+}
+
+double contentTibetanRasterBleed(double fontSize) {
+  return fontSize * 0.5;
+}
+
+bool shouldUseShortRow(
+  List<LayoutCell> row, {
+  double? availableHeight,
+  double? minimumHeight,
+}) {
   if (row.isEmpty) return false;
 
   var hasSmallBlock = false;
@@ -187,7 +203,40 @@ bool shouldUseShortRow(List<LayoutCell> row) {
     if (splitLines(block.chinesePronunciation).length > 1) return false;
   }
 
+  if (availableHeight != null &&
+      minimumHeight != null &&
+      availableHeight < minimumHeight) {
+    return false;
+  }
+
   return hasSmallBlock;
+}
+
+double estimateCompactSmallRowHeight(
+  List<LayoutCell> row, {
+  required double tibetanFontSize,
+  required double chineseFontSize,
+  double topPadding = 0,
+  double tibetanLineHeight = 1.2,
+  double chineseLineHeight = 1.0,
+}) {
+  var maxHeight = 0.0;
+
+  for (final cell in row) {
+    final block = cell.block;
+    var height = topPadding;
+
+    if (splitLines(block.tibetan).isNotEmpty) {
+      height += tibetanFontSize * tibetanLineHeight;
+    }
+    if (splitLines(block.chinesePronunciation).isNotEmpty) {
+      height += 2 + chineseFontSize * chineseLineHeight;
+    }
+
+    if (height > maxHeight) maxHeight = height;
+  }
+
+  return maxHeight;
 }
 
 List<List<TextBlock?>> _legacyRows(

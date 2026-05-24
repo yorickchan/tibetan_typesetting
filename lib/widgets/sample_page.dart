@@ -214,9 +214,27 @@ class _ContentGrid extends StatelessWidget {
         final rowYs = <double>[];
         final rowHs = <double>[];
         double yAccum = 0;
+        final smallTibetanSize = contentTibetanFontSize(
+          font_utils.previewFontSize(tibSize),
+          smallText: true,
+        );
+        final smallChineseSize = font_utils.previewFontSize(chiSize) * 0.75;
         for (var ri = 0; ri < rowCount; ri++) {
           rowYs.add(yAccum);
-          final h = shouldUseShortRow(rows[ri]) ? shortRowH : normalRowH;
+          final minShortRowH = estimateCompactSmallRowHeight(
+            rows[ri],
+            tibetanFontSize: smallTibetanSize,
+            chineseFontSize: smallChineseSize,
+            topPadding: 16,
+          );
+          final h =
+              shouldUseShortRow(
+                rows[ri],
+                availableHeight: shortRowH,
+                minimumHeight: minShortRowH,
+              )
+              ? shortRowH
+              : normalRowH;
           rowHs.add(h);
           yAccum += h;
         }
@@ -243,10 +261,12 @@ class _ContentGrid extends StatelessWidget {
                 : splitLines(block.chineseTranslation).join(' ');
             final doShowMark = showMark && ri == 0 && cellIndex == 0;
 
+            final headingSize = contentTibetanFontSize(
+              font_utils.previewFontSize(tibSize),
+              smallText: isSmall,
+            );
+            final bodySize = headingSize;
             final smallFactor = isSmall ? 0.75 : 1.0;
-            final headingSize =
-                font_utils.previewFontSize(tibSize) * smallFactor;
-            final bodySize = font_utils.previewFontSize(tibSize) * smallFactor;
             final chineseSize =
                 font_utils.previewFontSize(chiSize) * smallFactor;
 
@@ -297,7 +317,9 @@ class _ContentGrid extends StatelessWidget {
                             fontFamily: tibFamily,
                             fontSize: headingSize,
                             color: AppColors.rose600,
-                            height: isSmall ? 1.2 : 0.75,
+                            height: contentTibetanLineHeight(
+                              smallText: isSmall,
+                            ),
                           ),
                           maxLines: isSmall ? null : 2,
                           overflow: isSmall ? null : TextOverflow.ellipsis,
@@ -311,7 +333,9 @@ class _ContentGrid extends StatelessWidget {
                               fontFamily: tibFamily,
                               fontSize: bodySize,
                               color: Colors.black87,
-                              height: isSmall ? 1.2 : 0.75,
+                              height: contentTibetanLineHeight(
+                                smallText: isSmall,
+                              ),
                             ),
                             maxLines: isSmall ? null : 3,
                             overflow: isSmall ? null : TextOverflow.ellipsis,

@@ -29,6 +29,13 @@ const _rose = PdfColor.fromInt(0xFFe11d48);
 const _roseUi = Color(0xFFe11d48);
 const _blackUi = Color(0xFF000000);
 
+pw.Border contentPageCenterBorder() {
+  return pw.Border(
+    left: pw.BorderSide(color: _rose, width: 0.5),
+    right: pw.BorderSide(color: _rose, width: 0.5),
+  );
+}
+
 /// Pre-rendered text image stored for synchronous PDF page construction.
 class _Img {
   final pw.MemoryImage provider;
@@ -69,6 +76,7 @@ class PdfService {
     required String fontFamily,
     List<String>? fontFamilyFallback,
     double? lineHeight,
+    double verticalPadding = 0,
     TextAlign textAlign = TextAlign.left,
   }) async {
     if (text.trim().isEmpty) return null;
@@ -80,6 +88,7 @@ class PdfService {
       color: color,
       maxWidth: maxWidth,
       lineHeight: lineHeight,
+      verticalPadding: verticalPadding,
       textAlign: textAlign,
     );
     if (r == null) return null;
@@ -271,8 +280,13 @@ class PdfService {
           }
 
           final small = block.smallText;
-          final hSize = tibFontSize * 0.9 * (small ? 0.75 : 1.0);
-          final bSize = tibFontSize * (small ? 0.75 : 1.0);
+          final tibContentSize = contentTibetanFontSize(
+            tibFontSize,
+            smallText: small,
+          );
+          final hSize = tibContentSize;
+          final bSize = tibContentSize;
+          final tibBleed = contentTibetanRasterBleed(tibContentSize);
 
           final left = cell.leftFraction * contentW;
           final spannedW = cell.widthFraction * contentW;
@@ -289,7 +303,8 @@ class PdfService {
                 _roseUi,
                 textMaxW,
                 fontFamily: tibFamily,
-                lineHeight: 1.4,
+                lineHeight: contentTibetanLineHeight(smallText: small),
+                verticalPadding: tibBleed,
               ),
             ),
           );
@@ -302,7 +317,8 @@ class PdfService {
                 _blackUi,
                 textMaxW,
                 fontFamily: tibFamily,
-                lineHeight: 1.5,
+                lineHeight: contentTibetanLineHeight(smallText: small),
+                verticalPadding: tibBleed,
               ),
             ),
           );
@@ -588,14 +604,35 @@ class PdfService {
       // Precompute row Y offsets
       final rowYs = <double>[];
       double yAccum = 0;
+      final smallTibetanSize = contentTibetanFontSize(
+        tibFontSize,
+        smallText: true,
+      );
+      final smallChineseSize = pronFontSize * 0.75;
       for (var ri = 0; ri < rowCount; ri++) {
         rowYs.add(yAccum);
-        yAccum += shouldUseShortRow(rows[ri]) ? shortRowH : normalRowH;
+        final minShortRowH = estimateCompactSmallRowHeight(
+          rows[ri],
+          tibetanFontSize: smallTibetanSize,
+          chineseFontSize: smallChineseSize,
+          topPadding:
+              padY + contentTibetanRasterBleed(smallTibetanSize) * 2,
+          tibetanLineHeight: contentTibetanLineHeight(smallText: true),
+          chineseLineHeight: 1.4,
+        );
+        yAccum +=
+            shouldUseShortRow(
+              rows[ri],
+              availableHeight: shortRowH,
+              minimumHeight: minShortRowH,
+            )
+            ? shortRowH
+            : normalRowH;
       }
 
       pw.Widget buildBlock(String key, TextBlock block, bool hasMark) {
         final small = block.smallText;
-        final hSize = tibFontSize * 0.9 * (small ? 0.75 : 1.0);
+        final hSize = contentTibetanFontSize(tibFontSize, smallText: small);
         final pronSize = pronFontSize * (small ? 0.75 : 1.0);
         final transSize = transFontSize * (small ? 0.75 : 1.0);
         final markPad = hasMark ? hSize * 3.5 : 0.0;
