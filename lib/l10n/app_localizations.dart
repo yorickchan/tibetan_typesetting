@@ -345,6 +345,18 @@ abstract class AppLocalizations {
   /// **'Small'**
   String get smallText;
 
+  /// No description provided for @freeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Free text'**
+  String get freeText;
+
+  /// No description provided for @freeTextContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese or English text'**
+  String get freeTextContent;
+
   /// No description provided for @tibetanText.
   ///
   /// In en, this message translates to:

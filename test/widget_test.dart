@@ -28,10 +28,11 @@ void main() {
         PronunciationService.savablePronunciationCharacters('甲，乙。丙；丁：戊、己'),
         ['甲', '乙', '丙', '丁', '戊', '己'],
       );
-      expect(
-        PronunciationService.savablePronunciationCharacters('a,b; c!'),
-        ['a', 'b', 'c'],
-      );
+      expect(PronunciationService.savablePronunciationCharacters('a,b; c!'), [
+        'a',
+        'b',
+        'c',
+      ]);
     });
   });
 
@@ -227,22 +228,25 @@ void main() {
       expect(width, lessThanOrEqualTo(0.30));
     });
 
-    test('small rows stay normal height when small text has multiple lines', () {
-      final row = [
-        LayoutCell(
-          block: TextBlock(
-            id: 'small',
-            tibetan: 'བོད།\nབོད།',
-            chinesePronunciation: 'bod\nbod',
-            smallText: true,
+    test(
+      'small rows stay normal height when small text has multiple lines',
+      () {
+        final row = [
+          LayoutCell(
+            block: TextBlock(
+              id: 'small',
+              tibetan: 'བོད།\nབོད།',
+              chinesePronunciation: 'bod\nbod',
+              smallText: true,
+            ),
+            leftFraction: 0,
+            widthFraction: 0.5,
           ),
-          leftFraction: 0,
-          widthFraction: 0.5,
-        ),
-      ];
+        ];
 
-      expect(shouldUseShortRow(row), isFalse);
-    });
+        expect(shouldUseShortRow(row), isFalse);
+      },
+    );
 
     test('small rows stay normal height when mixed with normal blocks', () {
       final row = [
@@ -278,63 +282,112 @@ void main() {
       expect(shouldUseShortRow(row), isTrue);
     });
 
-    test('compact small rows stay normal height when enlarged text would overflow', () {
+    test('compact free text rows can use short height', () {
       final row = [
         LayoutCell(
           block: TextBlock(
-            id: 'small',
-            tibetan: 'བོད།',
-            chinesePronunciation: 'bod',
-            smallText: true,
+            id: 'free',
+            tibetan: 'A short note',
+            format: TextBlockFormat.freeText,
           ),
           leftFraction: 0,
           widthFraction: 0.25,
         ),
       ];
 
-      final minHeight = estimateCompactSmallRowHeight(
-        row,
-        tibetanFontSize: 18,
-        chineseFontSize: 14,
-        topPadding: 16,
+      expect(shouldUseShortRow(row), isTrue);
+    });
+
+    test('free text width is estimated from free text content only', () {
+      final normalWidth = estimateBlockWidthFraction(
+        TextBlock(
+          id: 'normal',
+          tibetan: 'Short',
+          chinesePronunciation: 'ignored pronunciation that is much longer',
+          chineseTranslation:
+              'ignored translation that would otherwise make this wider',
+        ),
+      );
+      final freeTextWidth = estimateBlockWidthFraction(
+        TextBlock(
+          id: 'free',
+          tibetan: 'Short',
+          chinesePronunciation: 'ignored pronunciation that is much longer',
+          chineseTranslation:
+              'ignored translation that would otherwise make this wider',
+          format: TextBlockFormat.freeText,
+        ),
       );
 
-      expect(
-        shouldUseShortRow(
-          row,
-          availableHeight: minHeight - 1,
-          minimumHeight: minHeight,
-        ),
-        isFalse,
-      );
-      expect(
-        shouldUseShortRow(
-          row,
-          availableHeight: minHeight,
-          minimumHeight: minHeight,
-        ),
-        isTrue,
-      );
+      expect(freeTextWidth, lessThan(normalWidth));
     });
+
+    test(
+      'compact small rows stay normal height when enlarged text would overflow',
+      () {
+        final row = [
+          LayoutCell(
+            block: TextBlock(
+              id: 'small',
+              tibetan: 'བོད།',
+              chinesePronunciation: 'bod',
+              smallText: true,
+            ),
+            leftFraction: 0,
+            widthFraction: 0.25,
+          ),
+        ];
+
+        final minHeight = estimateCompactSmallRowHeight(
+          row,
+          tibetanFontSize: 18,
+          chineseFontSize: 14,
+          topPadding: 16,
+        );
+
+        expect(
+          shouldUseShortRow(
+            row,
+            availableHeight: minHeight - 1,
+            minimumHeight: minHeight,
+          ),
+          isFalse,
+        );
+        expect(
+          shouldUseShortRow(
+            row,
+            availableHeight: minHeight,
+            minimumHeight: minHeight,
+          ),
+          isTrue,
+        );
+      },
+    );
 
     test('content Tibetan line height matches preview spacing', () {
       expect(contentTibetanLineHeight(smallText: false), 0.75);
       expect(contentTibetanLineHeight(smallText: true), 1.2);
     });
 
-    test('content Tibetan font size does not shrink headings in PDF export', () {
-      expect(contentTibetanFontSize(12, smallText: false), 12);
-      expect(contentTibetanFontSize(12, smallText: true), 9);
-    });
+    test(
+      'content Tibetan font size does not shrink headings in PDF export',
+      () {
+        expect(contentTibetanFontSize(12, smallText: false), 12);
+        expect(contentTibetanFontSize(12, smallText: true), 9);
+      },
+    );
 
     test('opening mark indent aligns Chinese with first Tibetan character', () {
       expect(contentOpeningMarkIndent(12), 30);
     });
 
-    test('content Tibetan raster bleed leaves room for tight line-height glyphs', () {
-      expect(contentTibetanRasterBleed(12), 6);
-      expect(contentTibetanBottomBleed(12), closeTo(2.4, 0.0001));
-    });
+    test(
+      'content Tibetan raster bleed leaves room for tight line-height glyphs',
+      () {
+        expect(contentTibetanRasterBleed(12), 6);
+        expect(contentTibetanBottomBleed(12), closeTo(2.4, 0.0001));
+      },
+    );
   });
 
   group('blocksToRows', () {
@@ -362,6 +415,7 @@ void main() {
         pageBreakBefore: true,
         columnBreakBefore: false,
         smallText: true,
+        format: TextBlockFormat.freeText,
         columnSpan: 3,
       );
 
@@ -375,7 +429,19 @@ void main() {
       expect(restored.pageBreakBefore, block.pageBreakBefore);
       expect(restored.columnBreakBefore, block.columnBreakBefore);
       expect(restored.smallText, block.smallText);
+      expect(restored.format, block.format);
+      expect(restored.isFreeText, isTrue);
       expect(restored.columnSpan, block.columnSpan);
+    });
+
+    test('defaults missing format to normal', () {
+      final restored = TextBlock.fromJson({
+        'id': 'legacy',
+        'tibetan': 'legacy text',
+      });
+
+      expect(restored.format, TextBlockFormat.normal);
+      expect(restored.isFreeText, isFalse);
     });
 
     test('copyWith creates modified copy', () {

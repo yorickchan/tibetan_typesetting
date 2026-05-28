@@ -162,6 +162,9 @@ class _EditorPageState extends State<EditorPage> {
           chineseTranslation: patch.containsKey('chineseTranslation')
               ? patch['chineseTranslation'] as String
               : null,
+          format: patch.containsKey('format')
+              ? patch['format'] as TextBlockFormat
+              : null,
           columnSpan: patch.containsKey('columnSpan')
               ? patch['columnSpan'] as int?
               : null,
@@ -291,6 +294,14 @@ class _EditorPageState extends State<EditorPage> {
       _project = _project!.copyWith(blocks: blocks);
     });
     _bumpSave();
+  }
+
+  void _toggleFreeTextFormat() {
+    if (_project == null || _selectedBlock == null) return;
+    final nextFormat = _selectedBlock!.isFreeText
+        ? TextBlockFormat.normal
+        : TextBlockFormat.freeText;
+    _updateBlock({'format': nextFormat});
   }
 
   void _selectPrev() {
@@ -553,6 +564,7 @@ class _EditorPageState extends State<EditorPage> {
                     onToggleColumnBreak: _toggleColumnBreak,
                     onTogglePageBreak: _togglePageBreak,
                     onToggleSmallText: _toggleSmallText,
+                    onToggleFreeTextFormat: _toggleFreeTextFormat,
                     onSelectPrev: _selectPrev,
                     onSelectNext: _selectNext,
                     tibetanFontFamily: tibFont.fontFamily,

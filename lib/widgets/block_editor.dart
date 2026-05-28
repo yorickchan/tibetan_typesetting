@@ -20,6 +20,7 @@ class BlockEditorWidget extends StatelessWidget {
   final VoidCallback onToggleColumnBreak;
   final VoidCallback onTogglePageBreak;
   final VoidCallback onToggleSmallText;
+  final VoidCallback onToggleFreeTextFormat;
   final VoidCallback onSelectPrev;
   final VoidCallback onSelectNext;
   final String tibetanFontFamily;
@@ -37,6 +38,7 @@ class BlockEditorWidget extends StatelessWidget {
     required this.onToggleColumnBreak,
     required this.onTogglePageBreak,
     required this.onToggleSmallText,
+    required this.onToggleFreeTextFormat,
     required this.onSelectPrev,
     required this.onSelectNext,
     this.tibetanFontFamily = fallbackTibetanFontFamily,
@@ -83,6 +85,7 @@ class BlockEditorWidget extends StatelessWidget {
             onToggleColumnBreak: onToggleColumnBreak,
             onTogglePageBreak: onTogglePageBreak,
             onToggleSmallText: onToggleSmallText,
+            onToggleFreeTextFormat: onToggleFreeTextFormat,
             onSetColumnSpan: (span) => onUpdateBlock({'columnSpan': span}),
             onDeleteBlock: onDeleteBlock,
             l10n: l10n,
@@ -112,6 +115,7 @@ class _Toolbar extends StatelessWidget {
   final VoidCallback onToggleColumnBreak;
   final VoidCallback onTogglePageBreak;
   final VoidCallback onToggleSmallText;
+  final VoidCallback onToggleFreeTextFormat;
   final ValueChanged<int?> onSetColumnSpan;
   final VoidCallback onDeleteBlock;
   final AppLocalizations l10n;
@@ -126,6 +130,7 @@ class _Toolbar extends StatelessWidget {
     required this.onToggleColumnBreak,
     required this.onTogglePageBreak,
     required this.onToggleSmallText,
+    required this.onToggleFreeTextFormat,
     required this.onSetColumnSpan,
     required this.onDeleteBlock,
     required this.l10n,
@@ -263,6 +268,14 @@ class _Toolbar extends StatelessWidget {
               block.smallText,
               AppColors.amber400,
               onToggleSmallText,
+            ),
+            const SizedBox(width: 4),
+            _toggleBtn(
+              Icons.notes_outlined,
+              l10n.freeText,
+              block.isFreeText,
+              AppColors.sky400,
+              onToggleFreeTextFormat,
             ),
             _divider(),
             _iconBtn(
@@ -454,7 +467,7 @@ class _EditorFieldsState extends State<_EditorFields> {
   }
 
   Future<void> _autoFillPronunciation(String tibetanText) async {
-    if (widget.block.smallText) return;
+    if (widget.block.smallText || widget.block.isFreeText) return;
     if (_isAutoFilling) return;
     _isAutoFilling = true;
 
@@ -504,7 +517,7 @@ class _EditorFieldsState extends State<_EditorFields> {
   }
 
   Future<void> _savePronunciationToDictionary(String pronunciation) async {
-    if (widget.block.smallText) return;
+    if (widget.block.smallText || widget.block.isFreeText) return;
     final tibetan = _tibetanCtrl.text;
     if (tibetan.isEmpty || pronunciation.isEmpty) return;
 
@@ -573,6 +586,9 @@ class _EditorFieldsState extends State<_EditorFields> {
       padding: const EdgeInsets.all(12),
       child: LayoutBuilder(
         builder: (context, constraints) {
+          if (widget.block.isFreeText) {
+            return _freeTextField();
+          }
           if (constraints.maxWidth > 600) {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -613,6 +629,24 @@ class _EditorFieldsState extends State<_EditorFields> {
       decoration: _fieldDecoration(
         widget.l10n.tibetanLabelShort,
         widget.l10n.tibetanText,
+      ),
+    );
+  }
+
+  Widget _freeTextField() {
+    return TextField(
+      controller: _tibetanCtrl,
+      onChanged: (v) => widget.onUpdateBlock({'tibetan': v}),
+      style: TextStyle(
+        fontFamily: widget.translationFontFamily,
+        fontSize: 13,
+        color: AppColors.textPrimary,
+      ),
+      maxLines: null,
+      minLines: 5,
+      decoration: _fieldDecoration(
+        widget.l10n.freeText,
+        widget.l10n.freeTextContent,
       ),
     );
   }

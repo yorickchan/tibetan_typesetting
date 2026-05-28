@@ -136,6 +136,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get smallText => '小字';
 
   @override
+  String get freeText => '自由文本';
+
+  @override
+  String get freeTextContent => '中文或英文文本';
+
+  @override
   String get tibetanText => '藏文';
 
   @override
@@ -562,6 +568,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get smallText => '小字';
+
+  @override
+  String get freeText => '自由文字';
+
+  @override
+  String get freeTextContent => '中文或英文文字';
 
   @override
   String get tibetanText => '藏文';

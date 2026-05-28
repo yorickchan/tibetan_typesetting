@@ -55,6 +55,8 @@
   "lineBreak": "Line break",
   "newPage": "New page",
   "smallText": "Small",
+  "freeText": "Free text",
+  "freeTextContent": "Chinese or English text",
   "tibetanText": "Tibetan text",
   "chinesePronunciation": "Chinese pronunciation",
   "chineseTranslation": "Chinese translation",

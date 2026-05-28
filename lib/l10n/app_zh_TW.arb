@@ -41,6 +41,8 @@
   "lineBreak": "換欄",
   "newPage": "換頁",
   "smallText": "小字",
+  "freeText": "自由文字",
+  "freeTextContent": "中文或英文文字",
   "tibetanText": "藏文",
   "chinesePronunciation": "中文拼音",
   "chineseTranslation": "中文翻譯",

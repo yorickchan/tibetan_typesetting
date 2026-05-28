@@ -249,6 +249,8 @@ class _ContentGrid extends StatelessWidget {
 
             final isHL = highlightBlockId == block.id;
             final isSmall = block.smallText;
+            final isFreeText = block.isFreeText;
+            final isCompact = isSmall || isFreeText;
 
             final tibLines = splitLines(block.tibetan);
             final heading = tibLines.isNotEmpty ? tibLines[0] : '';
@@ -256,23 +258,24 @@ class _ContentGrid extends StatelessWidget {
                 ? tibLines.sublist(1).join(' ')
                 : '';
             final pron = splitLines(block.chinesePronunciation).join(' ');
-            final trans = isSmall
+            final trans = isCompact
                 ? ''
                 : splitLines(block.chineseTranslation).join(' ');
-            final doShowMark = showMark && ri == 0 && cellIndex == 0;
+            final doShowMark =
+                !isFreeText && showMark && ri == 0 && cellIndex == 0;
 
             final headingSize = contentTibetanFontSize(
               font_utils.previewFontSize(tibSize),
               smallText: isSmall,
             );
             final bodySize = headingSize;
-            final smallFactor = isSmall ? 0.75 : 1.0;
-            final chineseSize =
-                font_utils.previewFontSize(chiSize) * smallFactor;
+            final chineseSize = isFreeText
+                ? font_utils.previewFontSize(translationFont.fontSize) * 0.75
+                : font_utils.previewFontSize(chiSize) * (isSmall ? 0.75 : 1.0);
 
             final left = cell.leftFraction * totalW;
             final spannedW = cell.widthFraction * totalW;
-            final blockW = isSmall && block.columnSpan == null
+            final blockW = isCompact && block.columnSpan == null
                 ? (totalW - left)
                 : spannedW.clamp(0, totalW - left).toDouble();
 
@@ -298,7 +301,18 @@ class _ContentGrid extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (heading.isNotEmpty || doShowMark)
+                      if (isFreeText)
+                        Text(
+                          splitLines(block.tibetan).join('\n'),
+                          style: TextStyle(
+                            fontFamily: transFamily,
+                            fontSize: chineseSize,
+                            color: Colors.black87,
+                            height: 1.2,
+                          ),
+                          maxLines: null,
+                        ),
+                      if (!isFreeText && (heading.isNotEmpty || doShowMark))
                         Text.rich(
                           TextSpan(
                             children: [
@@ -324,7 +338,7 @@ class _ContentGrid extends StatelessWidget {
                           maxLines: isSmall ? null : 2,
                           overflow: isSmall ? null : TextOverflow.ellipsis,
                         ),
-                      if (body.isNotEmpty)
+                      if (!isFreeText && body.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 1),
                           child: Text(
@@ -341,7 +355,7 @@ class _ContentGrid extends StatelessWidget {
                             overflow: isSmall ? null : TextOverflow.ellipsis,
                           ),
                         ),
-                      if (pron.isNotEmpty)
+                      if (!isFreeText && pron.isNotEmpty)
                         Padding(
                           padding: EdgeInsets.only(
                             top: 2,
@@ -361,7 +375,7 @@ class _ContentGrid extends StatelessWidget {
                             overflow: isSmall ? null : TextOverflow.ellipsis,
                           ),
                         ),
-                      if (trans.isNotEmpty)
+                      if (!isFreeText && trans.isNotEmpty)
                         Padding(
                           padding: EdgeInsets.only(
                             top: 1,

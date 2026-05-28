@@ -136,6 +136,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get smallText => 'Small';
 
   @override
+  String get freeText => 'Free text';
+
+  @override
+  String get freeTextContent => 'Chinese or English text';
+
+  @override
   String get tibetanText => 'Tibetan text';
 
   @override

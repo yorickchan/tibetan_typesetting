@@ -269,6 +269,7 @@ class PdfService {
         for (var cellIndex = 0; cellIndex < row.length; cellIndex++) {
           final cell = row[cellIndex];
           final block = cell.block;
+          if (block.isFreeText) continue;
 
           final key = '${pi}_${ri}_$cellIndex';
           final tibLines = splitLines(block.tibetan);
@@ -639,15 +640,17 @@ class PdfService {
 
       pw.Widget buildBlock(String key, TextBlock block, bool hasMark) {
         final small = block.smallText;
+        final freeText = block.isFreeText;
         final hSize = contentTibetanFontSize(tibFontSize, smallText: small);
         final pronSize = pronFontSize * (small ? 0.75 : 1.0);
-        final transSize = transFontSize * (small ? 0.75 : 1.0);
+        final transSize = transFontSize * (small || freeText ? 0.75 : 1.0);
         final markPad = hasMark ? contentOpeningMarkIndent(hSize) : 0.0;
 
         final pron = splitLines(block.chinesePronunciation).join('\n');
-        final trans = small
+        final trans = small || freeText
             ? ''
             : splitLines(block.chineseTranslation).join('\n');
+        final freeTextContent = splitLines(block.tibetan).join('\n');
 
         final hImg = imgs['${key}_h'];
         final bImg = imgs['${key}_b'];
@@ -656,6 +659,17 @@ class PdfService {
           mainAxisSize: pw.MainAxisSize.min,
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
+            if (freeText && freeTextContent.isNotEmpty)
+              pw.Text(
+                freeTextContent,
+                style: pw.TextStyle(
+                  font: transFont,
+                  fontFallback: fontFallback,
+                  fontSize: transSize,
+                  color: PdfColors.black,
+                  lineSpacing: transSize * 0.4,
+                ),
+              ),
             if (hImg != null)
               pw.Image(hImg.provider, width: hImg.w, height: hImg.h),
             if (bImg != null)
@@ -705,10 +719,12 @@ class PdfService {
           final key = '${pageIdx}_${ri}_$cellIndex';
           final left = cell.leftFraction * cW;
           final spannedW = cell.widthFraction * cW;
-          final blockW = block.smallText && block.columnSpan == null
+          final blockW =
+              (block.smallText || block.isFreeText) && block.columnSpan == null
               ? (cW - left - padX * 2)
               : (spannedW - padX * 2);
-          final hasMark = showMark && ri == 0 && cellIndex == 0;
+          final hasMark =
+              !block.isFreeText && showMark && ri == 0 && cellIndex == 0;
           positioned.add(
             pw.Positioned(
               left: left + padX,

@@ -181,6 +181,18 @@ class PageSetup {
   );
 }
 
+enum TextBlockFormat {
+  normal,
+  freeText;
+
+  static TextBlockFormat fromJson(String? value) {
+    return switch (value) {
+      'freeText' => TextBlockFormat.freeText,
+      _ => TextBlockFormat.normal,
+    };
+  }
+}
+
 class TextBlock {
   String id;
   String tibetan;
@@ -189,6 +201,7 @@ class TextBlock {
   bool pageBreakBefore;
   bool columnBreakBefore;
   bool smallText;
+  TextBlockFormat format;
   int? columnSpan;
 
   TextBlock({
@@ -199,8 +212,11 @@ class TextBlock {
     this.pageBreakBefore = false,
     this.columnBreakBefore = false,
     this.smallText = false,
+    this.format = TextBlockFormat.normal,
     this.columnSpan,
   });
+
+  bool get isFreeText => format == TextBlockFormat.freeText;
 
   TextBlock copyWith({
     String? id,
@@ -210,6 +226,7 @@ class TextBlock {
     bool? pageBreakBefore,
     bool? columnBreakBefore,
     bool? smallText,
+    TextBlockFormat? format,
     int? columnSpan,
     bool clearColumnSpan = false,
   }) {
@@ -221,6 +238,7 @@ class TextBlock {
       pageBreakBefore: pageBreakBefore ?? this.pageBreakBefore,
       columnBreakBefore: columnBreakBefore ?? this.columnBreakBefore,
       smallText: smallText ?? this.smallText,
+      format: format ?? this.format,
       columnSpan: clearColumnSpan ? null : (columnSpan ?? this.columnSpan),
     );
   }
@@ -233,6 +251,7 @@ class TextBlock {
     'pageBreakBefore': pageBreakBefore,
     'columnBreakBefore': columnBreakBefore,
     'smallText': smallText,
+    'format': format.name,
     if (columnSpan != null) 'columnSpan': columnSpan,
   };
 
@@ -244,6 +263,7 @@ class TextBlock {
     pageBreakBefore: json['pageBreakBefore'] as bool? ?? false,
     columnBreakBefore: json['columnBreakBefore'] as bool? ?? false,
     smallText: json['smallText'] as bool? ?? false,
+    format: TextBlockFormat.fromJson(json['format'] as String?),
     columnSpan: (json['columnSpan'] as num?)?.toInt(),
   );
 }

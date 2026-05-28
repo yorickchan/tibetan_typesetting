@@ -162,8 +162,12 @@ double estimateBlockWidthFraction(TextBlock block) {
   }
 
   final tibetanLen = splitLines(block.tibetan).join('').runes.length;
-  final pronLen = splitLines(block.chinesePronunciation).join('').runes.length;
-  final transLen = splitLines(block.chineseTranslation).join('').runes.length;
+  final pronLen = block.isFreeText
+      ? 0
+      : splitLines(block.chinesePronunciation).join('').runes.length;
+  final transLen = block.isFreeText
+      ? 0
+      : splitLines(block.chineseTranslation).join('').runes.length;
   final score = [
     tibetanLen * 1.15,
     pronLen * 0.62,
@@ -203,8 +207,13 @@ bool shouldUseShortRow(
   var hasSmallBlock = false;
   for (final cell in row) {
     final block = cell.block;
-    if (!block.smallText) return false;
+    if (!block.smallText && !block.isFreeText) return false;
     hasSmallBlock = true;
+
+    if (block.isFreeText) {
+      if (splitLines(block.tibetan).length > 1) return false;
+      continue;
+    }
 
     if (splitLines(block.chineseTranslation).join('').isNotEmpty) {
       return false;
@@ -235,6 +244,14 @@ double estimateCompactSmallRowHeight(
   for (final cell in row) {
     final block = cell.block;
     var height = topPadding;
+
+    if (block.isFreeText) {
+      if (splitLines(block.tibetan).isNotEmpty) {
+        height += chineseFontSize * chineseLineHeight;
+      }
+      if (height > maxHeight) maxHeight = height;
+      continue;
+    }
 
     if (splitLines(block.tibetan).isNotEmpty) {
       height += tibetanFontSize * tibetanLineHeight;

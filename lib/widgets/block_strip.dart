@@ -67,7 +67,8 @@ class BlockStripWidget extends StatelessWidget {
                 final tibetanLine = splitLines(b.tibetan).isNotEmpty
                     ? splitLines(b.tibetan)[0]
                     : '';
-                final chineseLine = splitLines(b.chineseTranslation).isNotEmpty
+                final chineseLine =
+                    !b.isFreeText && splitLines(b.chineseTranslation).isNotEmpty
                     ? splitLines(b.chineseTranslation)[0]
                     : '';
 
@@ -118,6 +119,15 @@ class BlockStripWidget extends StatelessWidget {
                                       color: AppColors.amber400,
                                     ),
                                   ),
+                                if (b.isFreeText)
+                                  const Text(
+                                    'F',
+                                    style: TextStyle(
+                                      fontSize: 7,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.sky400,
+                                    ),
+                                  ),
                                 if (b.columnBreakBefore)
                                   Container(
                                     margin: const EdgeInsets.only(left: 2),
@@ -154,7 +164,9 @@ class BlockStripWidget extends StatelessWidget {
                           child: Text(
                             tibetanLine.isEmpty ? 'empty' : tibetanLine,
                             style: TextStyle(
-                              fontFamily: tibetanFontFamily,
+                              fontFamily: b.isFreeText
+                                  ? translationFontFamily
+                                  : tibetanFontFamily,
                               fontSize: 10,
                               height: 1.2,
                               color: tibetanLine.isEmpty
