@@ -10,9 +10,11 @@ String resolvePageNumber(String base, int index) {
   return trimmed;
 }
 
+final RegExp _lineBreak = RegExp(r'\r?\n');
+
 List<String> splitLines(String s) {
   return s
-      .split(RegExp(r'\r?\n'))
+      .split(_lineBreak)
       .map((x) => x.trim())
       .where((x) => x.isNotEmpty)
       .toList();

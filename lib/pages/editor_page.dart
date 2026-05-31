@@ -117,11 +117,6 @@ class _EditorPageState extends State<EditorPage> {
     return _project!.blocks[idx];
   }
 
-  int _globalIndexOf(String id) {
-    if (_project == null) return -1;
-    return _project!.blocks.indexWhere((b) => b.id == id);
-  }
-
   void _bumpSave() {
     _saveTimer?.cancel();
     _saveTimer = Timer(const Duration(milliseconds: 800), () {
@@ -149,9 +144,10 @@ class _EditorPageState extends State<EditorPage> {
 
   void _updateBlock(Map<String, dynamic> patch) {
     if (_project == null || _selectedBlock == null) return;
+    final selectedId = _selectedId;
     setState(() {
       final blocks = _project!.blocks.map((b) {
-        if (b.id != _selectedBlock!.id) return b;
+        if (b.id != selectedId) return b;
         return b.copyWith(
           tibetan: patch.containsKey('tibetan')
               ? patch['tibetan'] as String
@@ -253,10 +249,11 @@ class _EditorPageState extends State<EditorPage> {
 
   void _toggleColumnBreak() {
     if (_project == null || _selectedBlock == null) return;
+    final selectedId = _selectedId;
     setState(() {
       final blocks = _project!.blocks
           .map(
-            (b) => b.id == _selectedBlock!.id
+            (b) => b.id == selectedId
                 ? b.copyWith(columnBreakBefore: !b.columnBreakBefore)
                 : b,
           )
@@ -268,10 +265,11 @@ class _EditorPageState extends State<EditorPage> {
 
   void _togglePageBreak() {
     if (_project == null || _selectedBlock == null) return;
+    final selectedId = _selectedId;
     setState(() {
       final blocks = _project!.blocks
           .map(
-            (b) => b.id == _selectedBlock!.id
+            (b) => b.id == selectedId
                 ? b.copyWith(pageBreakBefore: !b.pageBreakBefore)
                 : b,
           )
@@ -283,10 +281,11 @@ class _EditorPageState extends State<EditorPage> {
 
   void _toggleSmallText() {
     if (_project == null || _selectedBlock == null) return;
+    final selectedId = _selectedId;
     setState(() {
       final blocks = _project!.blocks
           .map(
-            (b) => b.id == _selectedBlock!.id
+            (b) => b.id == selectedId
                 ? b.copyWith(smallText: !b.smallText)
                 : b,
           )
@@ -472,6 +471,30 @@ class _EditorPageState extends State<EditorPage> {
     final project = _project!;
     final pagesWithBlocks = _pagesWithBlocks;
 
+    // Effective fonts are identical for every page; compute once.
+    final tibFont = font_utils.effectiveFont(
+      project.pageSetup.tibetanFont,
+      _appSettings.tibetanFont,
+      fallbackTibetanFont,
+    );
+    final pronFont = font_utils.effectiveFont(
+      project.pageSetup.pronunciationFont,
+      _appSettings.pronunciationFont,
+      fallbackChineseFont,
+    );
+    final transFont = font_utils.effectiveFont(
+      project.pageSetup.translationFont,
+      _appSettings.translationFont,
+      fallbackChineseFont,
+    );
+
+    // Precompute id -> global index map so per-block lookups are O(1).
+    final blockIndexById = <String, int>{};
+    for (var i = 0; i < project.blocks.length; i++) {
+      blockIndexById[project.blocks[i].id] = i;
+    }
+    int globalIndexOf(String id) => blockIndexById[id] ?? -1;
+
     return ListView(
       children: [
         TitlePageSettingsPanel(
@@ -521,29 +544,13 @@ class _EditorPageState extends State<EditorPage> {
           final selectedOnThisPage =
               _selectedId != null && pageBlockIds.contains(_selectedId);
 
-          final tibFont = font_utils.effectiveFont(
-            project.pageSetup.tibetanFont,
-            _appSettings.tibetanFont,
-            fallbackTibetanFont,
-          );
-          final pronFont = font_utils.effectiveFont(
-            project.pageSetup.pronunciationFont,
-            _appSettings.pronunciationFont,
-            fallbackChineseFont,
-          );
-          final transFont = font_utils.effectiveFont(
-            project.pageSetup.translationFont,
-            _appSettings.translationFont,
-            fallbackChineseFont,
-          );
-
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Column(
               children: [
                 BlockStripWidget(
                   blocks: pageData.blocks,
-                  globalIndexOf: _globalIndexOf,
+                  globalIndexOf: globalIndexOf,
                   selectedId: _selectedId,
                   onSelect: (id) => setState(() => _selectedId = id),
                   onAdd: _addBlock,

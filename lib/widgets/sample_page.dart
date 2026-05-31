@@ -303,7 +303,7 @@ class _ContentGrid extends StatelessWidget {
                     children: [
                       if (isFreeText)
                         Text(
-                          splitLines(block.tibetan).join('\n'),
+                          tibLines.join('\n'),
                           style: TextStyle(
                             fontFamily: transFamily,
                             fontSize: chineseSize,

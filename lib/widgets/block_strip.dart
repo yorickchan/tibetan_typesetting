@@ -64,12 +64,15 @@ class BlockStripWidget extends StatelessWidget {
                 final globalIdx = globalIndexOf(b.id);
                 final selected = b.id == selectedId;
                 final ok = b.tibetan.trim().isNotEmpty;
-                final tibetanLine = splitLines(b.tibetan).isNotEmpty
-                    ? splitLines(b.tibetan)[0]
+                final tibetanLines = splitLines(b.tibetan);
+                final tibetanLine = tibetanLines.isNotEmpty
+                    ? tibetanLines[0]
                     : '';
-                final chineseLine =
-                    !b.isFreeText && splitLines(b.chineseTranslation).isNotEmpty
-                    ? splitLines(b.chineseTranslation)[0]
+                final translationLines = b.isFreeText
+                    ? const <String>[]
+                    : splitLines(b.chineseTranslation);
+                final chineseLine = translationLines.isNotEmpty
+                    ? translationLines[0]
                     : '';
 
                 return GestureDetector(
