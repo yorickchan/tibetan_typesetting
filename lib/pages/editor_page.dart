@@ -46,6 +46,8 @@ class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage>
   bool _titleOpen = false;
   bool _fontOpen = false;
   Timer? _saveTimer;
+  List<_PageWithBlocks>? _cachedPages;
+  List<TextBlock>? _lastBlocks;
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
@@ -294,13 +296,20 @@ class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage>
 
   List<_PageWithBlocks> get _pagesWithBlocks {
     if (_project == null) return [];
+    
+    // Return cached result if blocks haven't changed
+    if (_cachedPages != null && identical(_project!.blocks, _lastBlocks)) {
+      return _cachedPages!;
+    }
+    
     final pages = paginateBlocks(
       _project!.blocks,
       0,
       4,
       _project!.pageSetup.flowGap,
     );
-    return pages.map((page) {
+    
+    _cachedPages = pages.map((page) {
       final seen = <String>{};
       final blocks = <TextBlock>[];
       for (final row in page.flowRows) {
@@ -314,6 +323,9 @@ class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage>
       }
       return _PageWithBlocks(page: page, blocks: blocks);
     }).toList();
+    
+    _lastBlocks = _project!.blocks;
+    return _cachedPages!;
   }
 
   @override
