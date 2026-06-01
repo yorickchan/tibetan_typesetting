@@ -7,12 +7,16 @@ import '../utils/decorations.dart';
 
 class EditorPageSetupPanel extends StatelessWidget {
   final PageSetup pageSetup;
+  final bool isOpen;
+  final VoidCallback onToggle;
   final AppLocalizations l10n;
   final void Function(PageSetup Function(PageSetup)) onUpdateSetup;
 
   const EditorPageSetupPanel({
     super.key,
     required this.pageSetup,
+    required this.isOpen,
+    required this.onToggle,
     required this.l10n,
     required this.onUpdateSetup,
   });
@@ -34,99 +38,133 @@ class EditorPageSetupPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.cardBorder),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.pageSetup,
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _NumberField(
-                  initialValue: pageSetup.pageWidthMm,
-                  label: l10n.pageWidth,
-                  onChanged: (value) {
-                    if (value >= 50) {
-                      onUpdateSetup(
-                        (setup) => setup.copyWith(pageWidthMm: value),
-                      );
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _NumberField(
-                  initialValue: pageSetup.pageHeightMm,
-                  label: l10n.pageHeight,
-                  onChanged: (value) {
-                    if (value >= 50) {
-                      onUpdateSetup(
-                        (setup) => setup.copyWith(pageHeightMm: value),
-                      );
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              ...[
-                ('top', l10n.top, pageSetup.marginMm.top),
-                ('bottom', l10n.bottom, pageSetup.marginMm.bottom),
-                ('left', l10n.left, pageSetup.marginMm.left),
-                ('right', l10n.right, pageSetup.marginMm.right),
-              ].map(
-                (margin) => Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: _NumberField(
-                      initialValue: margin.$3,
-                      label: '${margin.$2} (mm)',
-                      onChanged: (value) => _updateMargin(margin.$1, value),
+          GestureDetector(
+            onTap: onToggle,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.settings_outlined,
+                    size: 14,
+                    color: AppColors.textCaption,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    l10n.pageSetup,
+                    style: TextStyle(
+                      color: AppColors.textBody,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              SizedBox(
-                width: 20,
-                height: 20,
-                child: Checkbox(
-                  value: pageSetup.showFrame,
-                  onChanged: (value) => onUpdateSetup(
-                    (setup) => setup.copyWith(showFrame: value),
+                  const Spacer(),
+                  Icon(
+                    isOpen ? Icons.expand_less : Icons.expand_more,
+                    size: 14,
+                    color: AppColors.textMuted,
                   ),
-                  activeColor: AppColors.sky500,
-                  side: BorderSide(color: AppColors.textMuted),
-                ),
+                ],
               ),
-              const SizedBox(width: 6),
-              Text(
-                l10n.showFrame,
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-              ),
-            ],
+            ),
           ),
+          if (isOpen) ...[
+            Container(height: 1, color: AppColors.divider),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _NumberField(
+                          initialValue: pageSetup.pageWidthMm,
+                          label: l10n.pageWidth,
+                          onChanged: (value) {
+                            if (value >= 50) {
+                              onUpdateSetup(
+                                (setup) => setup.copyWith(pageWidthMm: value),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _NumberField(
+                          initialValue: pageSetup.pageHeightMm,
+                          label: l10n.pageHeight,
+                          onChanged: (value) {
+                            if (value >= 50) {
+                              onUpdateSetup(
+                                (setup) => setup.copyWith(pageHeightMm: value),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      ...[
+                        ('top', l10n.top, pageSetup.marginMm.top),
+                        ('bottom', l10n.bottom, pageSetup.marginMm.bottom),
+                        ('left', l10n.left, pageSetup.marginMm.left),
+                        ('right', l10n.right, pageSetup.marginMm.right),
+                      ].map(
+                        (margin) => Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: _NumberField(
+                              initialValue: margin.$3,
+                              label: '${margin.$2} (mm)',
+                              onChanged: (value) =>
+                                  _updateMargin(margin.$1, value),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: Checkbox(
+                          value: pageSetup.showFrame,
+                          onChanged: (value) => onUpdateSetup(
+                            (setup) => setup.copyWith(showFrame: value),
+                          ),
+                          activeColor: AppColors.sky500,
+                          side: BorderSide(color: AppColors.textMuted),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        l10n.showFrame,
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

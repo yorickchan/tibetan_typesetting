@@ -50,6 +50,7 @@ class _EditorPageState extends State<EditorPage>
   String? _selectedId;
   bool _titleOpen = false;
   bool _fontOpen = false;
+  bool _pageSetupOpen = false;
   Timer? _saveTimer;
   List<_PageWithBlocks>? _cachedPages;
   List<TextBlock>? _lastBlocks;
@@ -522,6 +523,8 @@ class _EditorPageState extends State<EditorPage>
 
         EditorPageSetupPanel(
           pageSetup: project.pageSetup,
+          isOpen: _pageSetupOpen,
+          onToggle: () => setState(() => _pageSetupOpen = !_pageSetupOpen),
           l10n: _l10n,
           onUpdateSetup: _updateSetup,
         ),

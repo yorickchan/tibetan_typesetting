@@ -11,12 +11,16 @@ void main() {
 
   Widget buildPanel({
     PageSetup? pageSetup,
+    bool isOpen = true,
+    VoidCallback? onToggle,
     required void Function(PageSetup Function(PageSetup)) onUpdateSetup,
   }) {
     return MaterialApp(
       home: Scaffold(
         body: EditorPageSetupPanel(
           pageSetup: pageSetup ?? PageSetup(),
+          isOpen: isOpen,
+          onToggle: onToggle ?? () {},
           l10n: l10n,
           onUpdateSetup: onUpdateSetup,
         ),
@@ -25,6 +29,27 @@ void main() {
   }
 
   group('EditorPageSetupPanel', () {
+    testWidgets('hides details when collapsed and invokes toggle from header', (
+      tester,
+    ) async {
+      var toggleCount = 0;
+      await tester.pumpWidget(
+        buildPanel(
+          isOpen: false,
+          onToggle: () => toggleCount++,
+          onUpdateSetup: (_) {},
+        ),
+      );
+
+      expect(find.text(l10n.pageSetup), findsOneWidget);
+      expect(find.text(l10n.pageWidth), findsNothing);
+      expect(find.byIcon(Icons.expand_more), findsOneWidget);
+
+      await tester.tap(find.text(l10n.pageSetup));
+
+      expect(toggleCount, 1);
+    });
+
     testWidgets('updates page width from the width field', (tester) async {
       PageSetup updated = PageSetup();
       await tester.pumpWidget(
