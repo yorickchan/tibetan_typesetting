@@ -9,7 +9,6 @@ import '../models/project.dart';
 import '../services/database_service.dart';
 import '../services/settings_service.dart';
 import '../utils/colors.dart';
-import '../utils/decorations.dart';
 import '../utils/snackbar.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/project_card.dart';
