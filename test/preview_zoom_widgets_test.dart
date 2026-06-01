@@ -36,6 +36,8 @@ void main() {
   });
 
   testWidgets('ScaledPreview reserves scaled dimensions', (tester) async {
+    const childKey = Key('preview-child');
+
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -43,12 +45,13 @@ void main() {
             zoom: 1.5,
             width: 200,
             height: 100,
-            child: SizedBox(width: 200, height: 100),
+            child: SizedBox(key: childKey, width: 200, height: 100),
           ),
         ),
       ),
     );
 
     expect(tester.getSize(find.byType(ScaledPreview)), const Size(300, 150));
+    expect(tester.getSize(find.byKey(childKey)), const Size(200, 100));
   });
 }

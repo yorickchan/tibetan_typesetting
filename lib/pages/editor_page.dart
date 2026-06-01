@@ -19,9 +19,12 @@ import '../utils/save_state_mixin.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/block_editor.dart';
 import '../widgets/block_strip.dart';
+import '../widgets/editor_page_setup_panel.dart';
 import '../widgets/flow_spacing_panel.dart';
 import '../widgets/font_settings_panel.dart';
+import '../widgets/preview_zoom_toolbar.dart';
 import '../widgets/sample_page.dart';
+import '../widgets/scaled_preview.dart';
 import '../widgets/title_page_settings_panel.dart';
 import '../widgets/title_page_widget.dart';
 import 'export_page.dart';
@@ -36,7 +39,8 @@ class EditorPage extends StatefulWidget {
   State<EditorPage> createState() => _EditorPageState();
 }
 
-class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage> {
+class _EditorPageState extends State<EditorPage>
+    with SaveStateMixin<EditorPage> {
   final _db = DatabaseService();
   final _settingsService = SettingsService();
   Project? _project;
@@ -49,6 +53,7 @@ class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage>
   Timer? _saveTimer;
   List<_PageWithBlocks>? _cachedPages;
   List<TextBlock>? _lastBlocks;
+  double _zoom = 1.0;
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
@@ -161,6 +166,14 @@ class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage>
     _bumpSave();
   }
 
+  void _applyZoom(double newZoom) {
+    setState(() => _zoom = newZoom.clamp(kPreviewZoomMin, kPreviewZoomMax));
+  }
+
+  void _zoomIn() => _applyZoom(_zoom + kPreviewZoomStep);
+  void _zoomOut() => _applyZoom(_zoom - kPreviewZoomStep);
+  void _zoomReset() => _applyZoom(1.0);
+
   void _addBlock() {
     if (_project == null) return;
     final id = _uuid.v4().replaceAll('-', '');
@@ -265,9 +278,7 @@ class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage>
     setState(() {
       final blocks = _project!.blocks
           .map(
-            (b) => b.id == selectedId
-                ? b.copyWith(smallText: !b.smallText)
-                : b,
+            (b) => b.id == selectedId ? b.copyWith(smallText: !b.smallText) : b,
           )
           .toList();
       _project = _project!.copyWith(blocks: blocks);
@@ -297,19 +308,19 @@ class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage>
 
   List<_PageWithBlocks> get _pagesWithBlocks {
     if (_project == null) return [];
-    
+
     // Return cached result if blocks haven't changed
     if (_cachedPages != null && identical(_project!.blocks, _lastBlocks)) {
       return _cachedPages!;
     }
-    
+
     final pages = paginateBlocks(
       _project!.blocks,
       0,
       4,
       _project!.pageSetup.flowGap,
     );
-    
+
     _cachedPages = pages.map((page) {
       final seen = <String>{};
       final blocks = <TextBlock>[];
@@ -324,7 +335,7 @@ class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage>
       }
       return _PageWithBlocks(page: page, blocks: blocks);
     }).toList();
-    
+
     _lastBlocks = _project!.blocks;
     return _cachedPages!;
   }
@@ -460,6 +471,8 @@ class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage>
   Widget _buildEditor() {
     final project = _project!;
     final pagesWithBlocks = _pagesWithBlocks;
+    final previewWidth = project.pageSetup.pageWidthMm * kMmToPx;
+    final previewHeight = project.pageSetup.pageHeightMm * kMmToPx;
 
     // Effective fonts are identical for every page; compute once.
     final tibFont = font_utils.effectiveFont(
@@ -507,6 +520,13 @@ class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage>
         ),
         const SizedBox(height: 8),
 
+        EditorPageSetupPanel(
+          pageSetup: project.pageSetup,
+          l10n: _l10n,
+          onUpdateSetup: _updateSetup,
+        ),
+        const SizedBox(height: 8),
+
         FlowSpacingPanel(
           pageSetup: project.pageSetup,
           l10n: _l10n,
@@ -514,14 +534,30 @@ class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage>
         ),
         const SizedBox(height: 12),
 
+        Align(
+          alignment: Alignment.centerRight,
+          child: PreviewZoomToolbar(
+            zoom: _zoom,
+            onZoomOut: _zoomOut,
+            onZoomIn: _zoomIn,
+            onReset: _zoomReset,
+          ),
+        ),
+        const SizedBox(height: 12),
+
         if (project.pageSetup.showTitlePage) ...[
           Center(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: TitlePageWidget(
-                project: project,
-                appSettings: _appSettings,
-                pageNumber: '',
+              child: ScaledPreview(
+                zoom: _zoom,
+                width: previewWidth,
+                height: previewHeight,
+                child: TitlePageWidget(
+                  project: project,
+                  appSettings: _appSettings,
+                  pageNumber: '',
+                ),
               ),
             ),
           ),
@@ -572,17 +608,22 @@ class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage>
                 const SizedBox(height: 8),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: SamplePageWidget(
-                    project: project,
-                    appSettings: _appSettings,
-                    rows: pageData.page.rows,
-                    flowRows: pageData.page.flowRows,
-                    colCount: pageData.page.colCount,
-                    highlightBlockId: _selectedId,
-                    showMark: pageIdx % 2 == 0,
-                    pageNumber: resolvePageNumber(
-                      project.pageSetup.pageNumber,
-                      pageIdx,
+                  child: ScaledPreview(
+                    zoom: _zoom,
+                    width: previewWidth,
+                    height: previewHeight,
+                    child: SamplePageWidget(
+                      project: project,
+                      appSettings: _appSettings,
+                      rows: pageData.page.rows,
+                      flowRows: pageData.page.flowRows,
+                      colCount: pageData.page.colCount,
+                      highlightBlockId: _selectedId,
+                      showMark: pageIdx % 2 == 0,
+                      pageNumber: resolvePageNumber(
+                        project.pageSetup.pageNumber,
+                        pageIdx,
+                      ),
                     ),
                   ),
                 ),

@@ -19,10 +19,13 @@ class ScaledPreview extends StatelessWidget {
     return SizedBox(
       width: width * zoom,
       height: height * zoom,
-      child: Transform.scale(
+      child: Align(
         alignment: Alignment.topLeft,
-        scale: zoom,
-        child: child,
+        child: Transform.scale(
+          alignment: Alignment.topLeft,
+          scale: zoom,
+          child: SizedBox(width: width, height: height, child: child),
+        ),
       ),
     );
   }
