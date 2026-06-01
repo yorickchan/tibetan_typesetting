@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../models/block_update.dart';
 import '../models/project.dart';
 import '../services/pronunciation_service.dart';
 import '../utils/colors.dart';
+import '../utils/decorations.dart';
 import '../utils/font_constants.dart';
 import '../utils/sample_layout.dart';
 import '../utils/tibetan_segmenter.dart';
@@ -14,7 +16,7 @@ class BlockEditorWidget extends StatelessWidget {
   final TextBlock? selectedBlock;
   final int selectedIndex;
   final int totalBlocks;
-  final ValueChanged<Map<String, dynamic>> onUpdateBlock;
+  final ValueChanged<BlockUpdate> onUpdateBlock;
   final ValueChanged<int> onMoveBlock;
   final VoidCallback onDeleteBlock;
   final VoidCallback onToggleColumnBreak;
@@ -86,7 +88,9 @@ class BlockEditorWidget extends StatelessWidget {
             onTogglePageBreak: onTogglePageBreak,
             onToggleSmallText: onToggleSmallText,
             onToggleFreeTextFormat: onToggleFreeTextFormat,
-            onSetColumnSpan: (span) => onUpdateBlock({'columnSpan': span}),
+            onSetColumnSpan: (span) => onUpdateBlock(
+              BlockUpdate(columnSpan: span, clearColumnSpan: span == null),
+            ),
             onDeleteBlock: onDeleteBlock,
             l10n: l10n,
           ),
@@ -409,7 +413,7 @@ class _Toolbar extends StatelessWidget {
 
 class _EditorFields extends StatefulWidget {
   final TextBlock block;
-  final ValueChanged<Map<String, dynamic>> onUpdateBlock;
+  final ValueChanged<BlockUpdate> onUpdateBlock;
   final String tibetanFontFamily;
   final String pronunciationFontFamily;
   final String translationFontFamily;
@@ -493,7 +497,7 @@ class _EditorFieldsState extends State<_EditorFields> {
       final newPron = pronunciations.join(' ');
       if (newPron != _pronCtrl.text) {
         _pronCtrl.text = newPron;
-        widget.onUpdateBlock({'chinesePronunciation': newPron});
+        widget.onUpdateBlock(BlockUpdate(chinesePronunciation: newPron));
       }
     } finally {
       _isAutoFilling = false;
@@ -501,7 +505,7 @@ class _EditorFieldsState extends State<_EditorFields> {
   }
 
   void _onTibetanChanged(String v) {
-    widget.onUpdateBlock({'tibetan': v});
+    widget.onUpdateBlock(BlockUpdate(tibetan: v));
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), () {
       _autoFillPronunciation(v);
@@ -509,7 +513,7 @@ class _EditorFieldsState extends State<_EditorFields> {
   }
 
   void _onPronunciationChanged(String v) {
-    widget.onUpdateBlock({'chinesePronunciation': v});
+    widget.onUpdateBlock(BlockUpdate(chinesePronunciation: v));
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
       _savePronunciationToDictionary(v);
@@ -546,38 +550,6 @@ class _EditorFieldsState extends State<_EditorFields> {
         );
       }
     }
-  }
-
-  InputDecoration _fieldDecoration(String label, String placeholder) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(
-        color: AppColors.textMuted,
-        fontSize: 10,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 1.2,
-      ),
-      hintText: placeholder,
-      hintStyle: TextStyle(
-        color: AppColors.textMuted.withValues(alpha: 0.5),
-        fontSize: 13,
-      ),
-      filled: true,
-      fillColor: AppColors.inputFill,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: AppColors.border),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: AppColors.border),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: AppColors.sky500),
-      ),
-    );
   }
 
   @override
@@ -626,9 +598,9 @@ class _EditorFieldsState extends State<_EditorFields> {
       ),
       maxLines: null,
       minLines: 3,
-      decoration: _fieldDecoration(
-        widget.l10n.tibetanLabelShort,
-        widget.l10n.tibetanText,
+      decoration: fieldDecoration(
+        label: widget.l10n.tibetanLabelShort,
+        placeholder: widget.l10n.tibetanText,
       ),
     );
   }
@@ -636,7 +608,7 @@ class _EditorFieldsState extends State<_EditorFields> {
   Widget _freeTextField() {
     return TextField(
       controller: _tibetanCtrl,
-      onChanged: (v) => widget.onUpdateBlock({'tibetan': v}),
+      onChanged: (v) => widget.onUpdateBlock(BlockUpdate(tibetan: v)),
       style: TextStyle(
         fontFamily: widget.translationFontFamily,
         fontSize: 13,
@@ -644,9 +616,9 @@ class _EditorFieldsState extends State<_EditorFields> {
       ),
       maxLines: null,
       minLines: 5,
-      decoration: _fieldDecoration(
-        widget.l10n.freeText,
-        widget.l10n.freeTextContent,
+      decoration: fieldDecoration(
+        label: widget.l10n.freeText,
+        placeholder: widget.l10n.freeTextContent,
       ),
     );
   }
@@ -662,9 +634,9 @@ class _EditorFieldsState extends State<_EditorFields> {
       ),
       maxLines: null,
       minLines: 3,
-      decoration: _fieldDecoration(
-        widget.l10n.pronunciationLabelShort,
-        widget.l10n.chinesePronunciation,
+      decoration: fieldDecoration(
+        label: widget.l10n.pronunciationLabelShort,
+        placeholder: widget.l10n.chinesePronunciation,
       ),
     );
   }
@@ -672,7 +644,7 @@ class _EditorFieldsState extends State<_EditorFields> {
   Widget _transField() {
     return TextField(
       controller: _transCtrl,
-      onChanged: (v) => widget.onUpdateBlock({'chineseTranslation': v}),
+      onChanged: (v) => widget.onUpdateBlock(BlockUpdate(chineseTranslation: v)),
       style: TextStyle(
         fontFamily: widget.translationFontFamily,
         fontSize: 13,
@@ -680,9 +652,9 @@ class _EditorFieldsState extends State<_EditorFields> {
       ),
       maxLines: null,
       minLines: 3,
-      decoration: _fieldDecoration(
-        widget.l10n.translationLabelShort,
-        widget.l10n.chineseTranslation,
+      decoration: fieldDecoration(
+        label: widget.l10n.translationLabelShort,
+        placeholder: widget.l10n.chineseTranslation,
       ),
     );
   }

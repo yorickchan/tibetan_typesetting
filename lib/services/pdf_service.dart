@@ -50,6 +50,7 @@ class PdfService {
 
   final _fontService = FontService();
   String? _dharmaWheelSvg;
+  final Map<String, _Img> _renderCache = {};
 
   Future<void> _loadSvg() async {
     if (_dharmaWheelSvg != null) return;
@@ -81,6 +82,12 @@ class PdfService {
     TextAlign textAlign = TextAlign.left,
   }) async {
     if (text.trim().isEmpty) return null;
+    
+    final key = '${text.hashCode}_${fontFamily}_${fontSize}_${color.value}_${maxWidth}_${lineHeight}_${topPadding}_${bottomPadding}_${textAlign}';
+    if (_renderCache.containsKey(key)) {
+      return _renderCache[key];
+    }
+    
     final r = await renderTextToPng(
       text,
       fontFamily: fontFamily,
@@ -94,7 +101,10 @@ class PdfService {
       textAlign: textAlign,
     );
     if (r == null) return null;
-    return _Img(pw.MemoryImage(r.pngBytes), r.width, r.height);
+    
+    final img = _Img(pw.MemoryImage(r.pngBytes), r.width, r.height);
+    _renderCache[key] = img;
+    return img;
   }
 
   // ---------------------------------------------------------------------------
@@ -116,6 +126,7 @@ class PdfService {
     Project project, {
     AppSettings? appSettings,
   }) async {
+    _renderCache.clear();
     await _loadSvg();
 
     final warnings = <String>[];

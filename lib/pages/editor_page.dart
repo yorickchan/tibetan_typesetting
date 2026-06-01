@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/app_settings.dart';
+import '../models/block_update.dart';
 import '../models/project.dart';
 import '../services/database_service.dart';
 import '../services/font_service.dart';
@@ -14,9 +15,11 @@ import '../utils/colors.dart';
 import '../utils/font_constants.dart';
 import '../utils/font_utils.dart' as font_utils;
 import '../utils/sample_layout.dart';
+import '../utils/save_state_mixin.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/block_editor.dart';
 import '../widgets/block_strip.dart';
+import '../widgets/flow_spacing_panel.dart';
 import '../widgets/font_settings_panel.dart';
 import '../widgets/sample_page.dart';
 import '../widgets/title_page_settings_panel.dart';
@@ -33,7 +36,7 @@ class EditorPage extends StatefulWidget {
   State<EditorPage> createState() => _EditorPageState();
 }
 
-class _EditorPageState extends State<EditorPage> {
+class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage> {
   final _db = DatabaseService();
   final _settingsService = SettingsService();
   Project? _project;
@@ -44,7 +47,8 @@ class _EditorPageState extends State<EditorPage> {
   bool _titleOpen = false;
   bool _fontOpen = false;
   Timer? _saveTimer;
-  String _saveState = 'idle'; // idle, saving, saved, error
+  List<_PageWithBlocks>? _cachedPages;
+  List<TextBlock>? _lastBlocks;
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
@@ -126,46 +130,22 @@ class _EditorPageState extends State<EditorPage> {
 
   Future<void> _saveCurrent() async {
     if (_project == null) return;
-    setState(() => _saveState = 'saving');
-    try {
-      await _db.updateProject(_project!);
-      if (!mounted) return;
-      setState(() => _saveState = 'saved');
-      Future.delayed(const Duration(seconds: 1), () {
-        if (mounted && _saveState == 'saved') {
-          setState(() => _saveState = 'idle');
-        }
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _saveState = 'error');
-    }
+    await performSave(() => _db.updateProject(_project!));
   }
 
-  void _updateBlock(Map<String, dynamic> patch) {
+  void _updateBlock(BlockUpdate update) {
     if (_project == null || _selectedBlock == null) return;
     final selectedId = _selectedId;
     setState(() {
       final blocks = _project!.blocks.map((b) {
         if (b.id != selectedId) return b;
         return b.copyWith(
-          tibetan: patch.containsKey('tibetan')
-              ? patch['tibetan'] as String
-              : null,
-          chinesePronunciation: patch.containsKey('chinesePronunciation')
-              ? patch['chinesePronunciation'] as String
-              : null,
-          chineseTranslation: patch.containsKey('chineseTranslation')
-              ? patch['chineseTranslation'] as String
-              : null,
-          format: patch.containsKey('format')
-              ? patch['format'] as TextBlockFormat
-              : null,
-          columnSpan: patch.containsKey('columnSpan')
-              ? patch['columnSpan'] as int?
-              : null,
-          clearColumnSpan:
-              patch.containsKey('columnSpan') && patch['columnSpan'] == null,
+          tibetan: update.tibetan,
+          chinesePronunciation: update.chinesePronunciation,
+          chineseTranslation: update.chineseTranslation,
+          format: update.format,
+          columnSpan: update.columnSpan,
+          clearColumnSpan: update.clearColumnSpan,
         );
       }).toList();
       _project = _project!.copyWith(blocks: blocks);
@@ -300,7 +280,7 @@ class _EditorPageState extends State<EditorPage> {
     final nextFormat = _selectedBlock!.isFreeText
         ? TextBlockFormat.normal
         : TextBlockFormat.freeText;
-    _updateBlock({'format': nextFormat});
+    _updateBlock(BlockUpdate(format: nextFormat));
   }
 
   void _selectPrev() {
@@ -317,13 +297,20 @@ class _EditorPageState extends State<EditorPage> {
 
   List<_PageWithBlocks> get _pagesWithBlocks {
     if (_project == null) return [];
+    
+    // Return cached result if blocks haven't changed
+    if (_cachedPages != null && identical(_project!.blocks, _lastBlocks)) {
+      return _cachedPages!;
+    }
+    
     final pages = paginateBlocks(
       _project!.blocks,
       0,
       4,
       _project!.pageSetup.flowGap,
     );
-    return pages.map((page) {
+    
+    _cachedPages = pages.map((page) {
       final seen = <String>{};
       final blocks = <TextBlock>[];
       for (final row in page.flowRows) {
@@ -337,11 +324,14 @@ class _EditorPageState extends State<EditorPage> {
       }
       return _PageWithBlocks(page: page, blocks: blocks);
     }).toList();
+    
+    _lastBlocks = _project!.blocks;
+    return _cachedPages!;
   }
 
   @override
   Widget build(BuildContext context) {
-    final savePill = switch (_saveState) {
+    final savePill = switch (saveState) {
       'saving' => _l10n.saving,
       'saved' => _l10n.saved,
       'error' => _l10n.saveError,
@@ -395,18 +385,18 @@ class _EditorPageState extends State<EditorPage> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: _saveState == 'error'
+                        color: saveState == 'error'
                             ? AppColors.rose600.withValues(alpha: 0.5)
                             : AppColors.borderSubtle,
                       ),
-                      color: _saveState == 'error'
+                      color: saveState == 'error'
                           ? AppColors.rose600.withValues(alpha: 0.15)
                           : AppColors.cardBg,
                     ),
                     child: Text(
                       savePill,
                       style: TextStyle(
-                        color: _saveState == 'error'
+                        color: saveState == 'error'
                             ? AppColors.rose300
                             : AppColors.textSecondary,
                         fontSize: 11,
@@ -517,7 +507,7 @@ class _EditorPageState extends State<EditorPage> {
         ),
         const SizedBox(height: 8),
 
-        _FlowSpacingPanel(
+        FlowSpacingPanel(
           pageSetup: project.pageSetup,
           l10n: _l10n,
           onUpdateSetup: _updateSetup,
@@ -601,64 +591,6 @@ class _EditorPageState extends State<EditorPage> {
           );
         }),
       ],
-    );
-  }
-}
-
-class _FlowSpacingPanel extends StatelessWidget {
-  final PageSetup pageSetup;
-  final AppLocalizations l10n;
-  final void Function(PageSetup Function(PageSetup)) onUpdateSetup;
-
-  const _FlowSpacingPanel({
-    required this.pageSetup,
-    required this.l10n,
-    required this.onUpdateSetup,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Row(
-        children: [
-          Icon(Icons.format_line_spacing, size: 14, color: AppColors.textMuted),
-          const SizedBox(width: 6),
-          Text(
-            l10n.sentenceSpacing,
-            style: TextStyle(
-              color: AppColors.textBody,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Slider(
-              value: pageSetup.flowGap.clamp(0.0, 0.08),
-              min: 0,
-              max: 0.08,
-              divisions: 8,
-              activeColor: AppColors.sky500,
-              inactiveColor: AppColors.border,
-              onChanged: (v) => onUpdateSetup((s) => s.copyWith(flowGap: v)),
-            ),
-          ),
-          SizedBox(
-            width: 42,
-            child: Text(
-              '${(pageSetup.flowGap * 100).round()}%',
-              textAlign: TextAlign.right,
-              style: TextStyle(color: AppColors.textCaption, fontSize: 11),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

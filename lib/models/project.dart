@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'font_config.dart';
 
 class MarginMm {
-  double top;
-  double right;
-  double bottom;
-  double left;
+  final double top;
+  final double right;
+  final double bottom;
+  final double left;
 
   MarginMm({this.top = 10, this.right = 10, this.bottom = 10, this.left = 10});
 
@@ -40,22 +40,22 @@ class MarginMm {
 }
 
 class PageSetup {
-  double pageWidthMm;
-  double pageHeightMm;
-  MarginMm marginMm;
-  int columnCount;
-  bool showFrame;
-  String leftVerticalTitle;
-  String pageNumber;
-  double flowGap;
-  bool showTitlePage;
-  String titleTibetan;
-  String titleChinese;
-  FontConfig? tibetanFont;
-  FontConfig? pronunciationFont;
-  FontConfig? translationFont;
-  FontConfig? titleTibetanFont;
-  FontConfig? titleChineseFont;
+  final double pageWidthMm;
+  final double pageHeightMm;
+  final MarginMm marginMm;
+  final int columnCount;
+  final bool showFrame;
+  final String leftVerticalTitle;
+  final String pageNumber;
+  final double flowGap;
+  final bool showTitlePage;
+  final String titleTibetan;
+  final String titleChinese;
+  final FontConfig? tibetanFont;
+  final FontConfig? pronunciationFont;
+  final FontConfig? translationFont;
+  final FontConfig? titleTibetanFont;
+  final FontConfig? titleChineseFont;
 
   PageSetup({
     this.pageWidthMm = 300,
@@ -194,15 +194,15 @@ enum TextBlockFormat {
 }
 
 class TextBlock {
-  String id;
-  String tibetan;
-  String chinesePronunciation;
-  String chineseTranslation;
-  bool pageBreakBefore;
-  bool columnBreakBefore;
-  bool smallText;
-  TextBlockFormat format;
-  int? columnSpan;
+  final String id;
+  final String tibetan;
+  final String chinesePronunciation;
+  final String chineseTranslation;
+  final bool pageBreakBefore;
+  final bool columnBreakBefore;
+  final bool smallText;
+  final TextBlockFormat format;
+  final int? columnSpan;
 
   TextBlock({
     required this.id,
@@ -269,13 +269,13 @@ class TextBlock {
 }
 
 class Project {
-  String id;
-  String name;
-  List<String> tags;
-  List<TextBlock> blocks;
-  PageSetup pageSetup;
-  String updatedAt;
-  String createdAt;
+  final String id;
+  final String name;
+  final List<String> tags;
+  final List<TextBlock> blocks;
+  final PageSetup pageSetup;
+  final String updatedAt;
+  final String createdAt;
 
   Project({
     required this.id,

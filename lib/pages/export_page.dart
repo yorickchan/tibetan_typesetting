@@ -12,6 +12,9 @@ import '../services/font_service.dart';
 import '../services/pdf_service.dart';
 import '../services/settings_service.dart';
 import '../utils/colors.dart';
+import '../utils/decorations.dart';
+import '../utils/save_state_mixin.dart';
+import '../utils/snackbar.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/sample_pages.dart';
 
@@ -23,7 +26,7 @@ class ExportPage extends StatefulWidget {
   State<ExportPage> createState() => _ExportPageState();
 }
 
-class _ExportPageState extends State<ExportPage> {
+class _ExportPageState extends State<ExportPage> with SaveStateMixin<ExportPage> {
   final _db = DatabaseService();
   final _pdfService = PdfService();
   final _settingsService = SettingsService();
@@ -35,7 +38,6 @@ class _ExportPageState extends State<ExportPage> {
   bool _loading = true;
   String? _error;
   bool _pdfBusy = false;
-  String _saveState = 'idle';
   double _zoom = 1.0;
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
@@ -110,14 +112,7 @@ class _ExportPageState extends State<ExportPage> {
 
   void _showSnack(String msg, {bool error = false}) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: error ? AppColors.rose600 : AppColors.sky500,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    showAppSnackBar(context, msg, error: error);
   }
 
   void _updateSetup(PageSetup Function(PageSetup) updater) {
@@ -148,20 +143,7 @@ class _ExportPageState extends State<ExportPage> {
 
   Future<void> _saveProject() async {
     if (_project == null) return;
-    setState(() => _saveState = 'saving');
-    try {
-      await _db.updateProject(_project!);
-      if (!mounted) return;
-      setState(() => _saveState = 'saved');
-      Future.delayed(const Duration(seconds: 1), () {
-        if (mounted && _saveState == 'saved') {
-          setState(() => _saveState = 'idle');
-        }
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _saveState = 'error');
-    }
+    await performSave(() => _db.updateProject(_project!));
   }
 
   Future<void> _exportPdf() async {
@@ -197,29 +179,6 @@ class _ExportPageState extends State<ExportPage> {
     } finally {
       if (mounted) setState(() => _pdfBusy = false);
     }
-  }
-
-  InputDecoration _numberDecor(String label) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 11),
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      filled: true,
-      fillColor: AppColors.inputFill,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: AppColors.borderSubtle),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: AppColors.borderSubtle),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: AppColors.sky500),
-      ),
-    );
   }
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
@@ -266,7 +225,7 @@ class _ExportPageState extends State<ExportPage> {
       child: AppShell(
         title: _l10n.exportPdf,
         actions: [
-          if (_saveState == 'saving')
+          if (saveState == 'saving')
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: Center(
@@ -392,7 +351,7 @@ class _ExportPageState extends State<ExportPage> {
                         color: AppColors.textPrimary,
                         fontSize: 13,
                       ),
-                      decoration: _numberDecor(_l10n.pageWidth),
+                      decoration: numberDecor(_l10n.pageWidth),
                       onChanged: (v) {
                         final n = double.tryParse(v);
                         if (n != null && n >= 50) {
@@ -410,7 +369,7 @@ class _ExportPageState extends State<ExportPage> {
                         color: AppColors.textPrimary,
                         fontSize: 13,
                       ),
-                      decoration: _numberDecor(_l10n.pageHeight),
+                      decoration: numberDecor(_l10n.pageHeight),
                       onChanged: (v) {
                         final n = double.tryParse(v);
                         if (n != null && n >= 50) {
@@ -441,7 +400,7 @@ class _ExportPageState extends State<ExportPage> {
                             color: AppColors.textPrimary,
                             fontSize: 13,
                           ),
-                          decoration: _numberDecor('${e.$2} (mm)'),
+                          decoration: numberDecor('${e.$2} (mm)'),
                           onChanged: (v) {
                             final n = double.tryParse(v);
                             if (n != null) _updateMargin(e.$1, n);
@@ -482,7 +441,7 @@ class _ExportPageState extends State<ExportPage> {
               TextFormField(
                 initialValue: ps.leftVerticalTitle,
                 style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
-                decoration: _numberDecor(_l10n.leftVerticalTitle),
+                decoration: numberDecor(_l10n.leftVerticalTitle),
                 onChanged: (v) =>
                     _updateSetup((s) => s.copyWith(leftVerticalTitle: v)),
               ),
@@ -490,7 +449,7 @@ class _ExportPageState extends State<ExportPage> {
               TextFormField(
                 initialValue: ps.pageNumber,
                 style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
-                decoration: _numberDecor(_l10n.pageNumberLabel),
+                decoration: numberDecor(_l10n.pageNumberLabel),
                 onChanged: (v) =>
                     _updateSetup((s) => s.copyWith(pageNumber: v)),
               ),
