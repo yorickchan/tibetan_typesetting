@@ -14,6 +14,7 @@ import '../utils/colors.dart';
 import '../utils/font_constants.dart';
 import '../utils/font_utils.dart' as font_utils;
 import '../utils/sample_layout.dart';
+import '../utils/save_state_mixin.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/block_editor.dart';
 import '../widgets/block_strip.dart';
@@ -33,7 +34,7 @@ class EditorPage extends StatefulWidget {
   State<EditorPage> createState() => _EditorPageState();
 }
 
-class _EditorPageState extends State<EditorPage> {
+class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage> {
   final _db = DatabaseService();
   final _settingsService = SettingsService();
   Project? _project;
@@ -44,7 +45,6 @@ class _EditorPageState extends State<EditorPage> {
   bool _titleOpen = false;
   bool _fontOpen = false;
   Timer? _saveTimer;
-  String _saveState = 'idle'; // idle, saving, saved, error
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
@@ -126,20 +126,7 @@ class _EditorPageState extends State<EditorPage> {
 
   Future<void> _saveCurrent() async {
     if (_project == null) return;
-    setState(() => _saveState = 'saving');
-    try {
-      await _db.updateProject(_project!);
-      if (!mounted) return;
-      setState(() => _saveState = 'saved');
-      Future.delayed(const Duration(seconds: 1), () {
-        if (mounted && _saveState == 'saved') {
-          setState(() => _saveState = 'idle');
-        }
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _saveState = 'error');
-    }
+    await performSave(() => _db.updateProject(_project!));
   }
 
   void _updateBlock(Map<String, dynamic> patch) {
@@ -341,7 +328,7 @@ class _EditorPageState extends State<EditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    final savePill = switch (_saveState) {
+    final savePill = switch (saveState) {
       'saving' => _l10n.saving,
       'saved' => _l10n.saved,
       'error' => _l10n.saveError,
@@ -395,18 +382,18 @@ class _EditorPageState extends State<EditorPage> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: _saveState == 'error'
+                        color: saveState == 'error'
                             ? AppColors.rose600.withValues(alpha: 0.5)
                             : AppColors.borderSubtle,
                       ),
-                      color: _saveState == 'error'
+                      color: saveState == 'error'
                           ? AppColors.rose600.withValues(alpha: 0.15)
                           : AppColors.cardBg,
                     ),
                     child: Text(
                       savePill,
                       style: TextStyle(
-                        color: _saveState == 'error'
+                        color: saveState == 'error'
                             ? AppColors.rose300
                             : AppColors.textSecondary,
                         fontSize: 11,

@@ -13,6 +13,7 @@ import '../services/pdf_service.dart';
 import '../services/settings_service.dart';
 import '../utils/colors.dart';
 import '../utils/decorations.dart';
+import '../utils/save_state_mixin.dart';
 import '../utils/snackbar.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/sample_pages.dart';
@@ -25,7 +26,7 @@ class ExportPage extends StatefulWidget {
   State<ExportPage> createState() => _ExportPageState();
 }
 
-class _ExportPageState extends State<ExportPage> {
+class _ExportPageState extends State<ExportPage> with SaveStateMixin<ExportPage> {
   final _db = DatabaseService();
   final _pdfService = PdfService();
   final _settingsService = SettingsService();
@@ -37,7 +38,6 @@ class _ExportPageState extends State<ExportPage> {
   bool _loading = true;
   String? _error;
   bool _pdfBusy = false;
-  String _saveState = 'idle';
   double _zoom = 1.0;
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
@@ -143,20 +143,7 @@ class _ExportPageState extends State<ExportPage> {
 
   Future<void> _saveProject() async {
     if (_project == null) return;
-    setState(() => _saveState = 'saving');
-    try {
-      await _db.updateProject(_project!);
-      if (!mounted) return;
-      setState(() => _saveState = 'saved');
-      Future.delayed(const Duration(seconds: 1), () {
-        if (mounted && _saveState == 'saved') {
-          setState(() => _saveState = 'idle');
-        }
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _saveState = 'error');
-    }
+    await performSave(() => _db.updateProject(_project!));
   }
 
   Future<void> _exportPdf() async {
@@ -238,7 +225,7 @@ class _ExportPageState extends State<ExportPage> {
       child: AppShell(
         title: _l10n.exportPdf,
         actions: [
-          if (_saveState == 'saving')
+          if (saveState == 'saving')
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: Center(
