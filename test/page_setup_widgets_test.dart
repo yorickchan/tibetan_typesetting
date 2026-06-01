@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tibetan_typesetting/l10n/app_localizations_en.dart';
 import 'package:tibetan_typesetting/models/project.dart';
 import 'package:tibetan_typesetting/widgets/editor_page_setup_panel.dart';
+import 'package:tibetan_typesetting/widgets/export_pdf_settings_panel.dart';
 
 void main() {
   final l10n = AppLocalizationsEn();
@@ -79,6 +80,31 @@ void main() {
       await tester.tap(find.byType(Checkbox));
 
       expect(updated.showFrame, isFalse);
+    });
+  });
+
+  group('ExportPdfSettingsPanel', () {
+    testWidgets('shows only vertical title and page number fields', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExportPdfSettingsPanel(
+              pageSetup: PageSetup(),
+              l10n: l10n,
+              onUpdateSetup: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text(l10n.leftVerticalTitle), findsOneWidget);
+      expect(find.text(l10n.pageNumberLabel), findsOneWidget);
+      expect(find.text(l10n.sentenceSpacing), findsNothing);
+      expect(find.text(l10n.pageWidth), findsNothing);
+      expect(find.text(l10n.pageHeight), findsNothing);
+      expect(find.text(l10n.showFrame), findsNothing);
     });
   });
 }

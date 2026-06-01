@@ -12,10 +12,11 @@ import '../services/font_service.dart';
 import '../services/pdf_service.dart';
 import '../services/settings_service.dart';
 import '../utils/colors.dart';
-import '../utils/decorations.dart';
 import '../utils/save_state_mixin.dart';
 import '../utils/snackbar.dart';
 import '../widgets/app_shell.dart';
+import '../widgets/export_pdf_settings_panel.dart';
+import '../widgets/preview_zoom_toolbar.dart';
 import '../widgets/sample_pages.dart';
 
 class ExportPage extends StatefulWidget {
@@ -26,7 +27,8 @@ class ExportPage extends StatefulWidget {
   State<ExportPage> createState() => _ExportPageState();
 }
 
-class _ExportPageState extends State<ExportPage> with SaveStateMixin<ExportPage> {
+class _ExportPageState extends State<ExportPage>
+    with SaveStateMixin<ExportPage> {
   final _db = DatabaseService();
   final _pdfService = PdfService();
   final _settingsService = SettingsService();
@@ -41,10 +43,6 @@ class _ExportPageState extends State<ExportPage> with SaveStateMixin<ExportPage>
   double _zoom = 1.0;
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
-
-  static const _zoomMin = 0.2;
-  static const _zoomMax = 3.0;
-  static const _zoomStep = 0.1;
 
   @override
   void initState() {
@@ -67,13 +65,13 @@ class _ExportPageState extends State<ExportPage> with SaveStateMixin<ExportPage>
 
   void _applyZoom(double newZoom) {
     setState(() {
-      _zoom = newZoom.clamp(_zoomMin, _zoomMax);
+      _zoom = newZoom.clamp(kPreviewZoomMin, kPreviewZoomMax);
       _txController.value = Matrix4.diagonal3Values(_zoom, _zoom, 1);
     });
   }
 
-  void _zoomIn() => _applyZoom(_zoom + _zoomStep);
-  void _zoomOut() => _applyZoom(_zoom - _zoomStep);
+  void _zoomIn() => _applyZoom(_zoom + kPreviewZoomStep);
+  void _zoomOut() => _applyZoom(_zoom - kPreviewZoomStep);
   void _zoomReset() => _applyZoom(1.0);
 
   Future<void> _loadProject() async {
@@ -119,24 +117,6 @@ class _ExportPageState extends State<ExportPage> with SaveStateMixin<ExportPage>
     if (_project == null) return;
     setState(() {
       _project = _project!.copyWith(pageSetup: updater(_project!.pageSetup));
-    });
-    _saveProject();
-  }
-
-  void _updateMargin(String key, double value) {
-    if (_project == null) return;
-    setState(() {
-      final m = _project!.pageSetup.marginMm;
-      final newMargin = switch (key) {
-        'top' => m.copyWith(top: value),
-        'right' => m.copyWith(right: value),
-        'bottom' => m.copyWith(bottom: value),
-        'left' => m.copyWith(left: value),
-        _ => m,
-      };
-      _project = _project!.copyWith(
-        pageSetup: _project!.pageSetup.copyWith(marginMm: newMargin),
-      );
     });
     _saveProject();
   }
@@ -283,178 +263,10 @@ class _ExportPageState extends State<ExportPage> with SaveStateMixin<ExportPage>
 
     return ListView(
       children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.cardBg,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.cardBorder),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _l10n.pageSetup,
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              Text(
-                _l10n.sentenceSpacing,
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Expanded(
-                    child: Slider(
-                      value: ps.flowGap.clamp(0.0, 0.08),
-                      min: 0,
-                      max: 0.08,
-                      divisions: 8,
-                      activeColor: AppColors.sky500,
-                      inactiveColor: AppColors.border,
-                      onChanged: (v) =>
-                          _updateSetup((s) => s.copyWith(flowGap: v)),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 42,
-                    child: Text(
-                      '${(ps.flowGap * 100).round()}%',
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: AppColors.textCaption,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      initialValue: ps.pageWidthMm.toStringAsFixed(0),
-                      keyboardType: TextInputType.number,
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 13,
-                      ),
-                      decoration: numberDecor(_l10n.pageWidth),
-                      onChanged: (v) {
-                        final n = double.tryParse(v);
-                        if (n != null && n >= 50) {
-                          _updateSetup((s) => s.copyWith(pageWidthMm: n));
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextFormField(
-                      initialValue: ps.pageHeightMm.toStringAsFixed(0),
-                      keyboardType: TextInputType.number,
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 13,
-                      ),
-                      decoration: numberDecor(_l10n.pageHeight),
-                      onChanged: (v) {
-                        final n = double.tryParse(v);
-                        if (n != null && n >= 50) {
-                          _updateSetup((s) => s.copyWith(pageHeightMm: n));
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              Row(
-                children: [
-                  ...[
-                    ('top', _l10n.top),
-                    ('bottom', _l10n.bottom),
-                    ('left', _l10n.left),
-                    ('right', _l10n.right),
-                  ].map(
-                    (e) => Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: TextFormField(
-                          initialValue: _getMargin(e.$1).toStringAsFixed(0),
-                          keyboardType: TextInputType.number,
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 13,
-                          ),
-                          decoration: numberDecor('${e.$2} (mm)'),
-                          onChanged: (v) {
-                            final n = double.tryParse(v);
-                            if (n != null) _updateMargin(e.$1, n);
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              Row(
-                children: [
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: Checkbox(
-                      value: ps.showFrame,
-                      onChanged: (v) =>
-                          _updateSetup((s) => s.copyWith(showFrame: v)),
-                      activeColor: AppColors.sky500,
-                      side: BorderSide(color: AppColors.textMuted),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    _l10n.showFrame,
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              TextFormField(
-                initialValue: ps.leftVerticalTitle,
-                style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
-                decoration: numberDecor(_l10n.leftVerticalTitle),
-                onChanged: (v) =>
-                    _updateSetup((s) => s.copyWith(leftVerticalTitle: v)),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                initialValue: ps.pageNumber,
-                style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
-                decoration: numberDecor(_l10n.pageNumberLabel),
-                onChanged: (v) =>
-                    _updateSetup((s) => s.copyWith(pageNumber: v)),
-              ),
-            ],
-          ),
+        ExportPdfSettingsPanel(
+          pageSetup: ps,
+          l10n: _l10n,
+          onUpdateSetup: _updateSetup,
         ),
         const SizedBox(height: 16),
 
@@ -492,24 +304,11 @@ class _ExportPageState extends State<ExportPage> with SaveStateMixin<ExportPage>
                       ),
                     ],
                   ),
-                  Row(
-                    children: [
-                      _zoomBtn(Icons.remove, _zoomOut),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        child: Text(
-                          '${(_zoom * 100).round()}%',
-                          style: TextStyle(
-                            color: AppColors.textBody,
-                            fontSize: 11,
-                            fontFamily: 'monospace',
-                          ),
-                        ),
-                      ),
-                      _zoomBtn(Icons.add, _zoomIn),
-                      const SizedBox(width: 4),
-                      _zoomBtn(Icons.refresh, _zoomReset),
-                    ],
+                  PreviewZoomToolbar(
+                    zoom: _zoom,
+                    onZoomOut: _zoomOut,
+                    onZoomIn: _zoomIn,
+                    onReset: _zoomReset,
                   ),
                 ],
               ),
@@ -535,33 +334,5 @@ class _ExportPageState extends State<ExportPage> with SaveStateMixin<ExportPage>
         const SizedBox(height: 16),
       ],
     );
-  }
-
-  Widget _zoomBtn(IconData icon, VoidCallback onPressed) {
-    return SizedBox(
-      width: 28,
-      height: 28,
-      child: IconButton(
-        padding: EdgeInsets.zero,
-        iconSize: 16,
-        icon: Icon(icon, color: AppColors.textBody),
-        style: IconButton.styleFrom(
-          backgroundColor: AppColors.surfaceContainer,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-        ),
-        onPressed: onPressed,
-      ),
-    );
-  }
-
-  double _getMargin(String key) {
-    if (_project == null) return 10;
-    return switch (key) {
-      'top' => _project!.pageSetup.marginMm.top,
-      'right' => _project!.pageSetup.marginMm.right,
-      'bottom' => _project!.pageSetup.marginMm.bottom,
-      'left' => _project!.pageSetup.marginMm.left,
-      _ => 10,
-    };
   }
 }
