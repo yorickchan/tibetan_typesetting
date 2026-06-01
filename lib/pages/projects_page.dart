@@ -137,9 +137,11 @@ class _ProjectsPageState extends State<ProjectsPage> {
     try {
       final project = await _db.getProject(item.id);
       if (project == null) return;
-      project.name = result['name'] as String;
-      project.tags = result['tags'] as List<String>;
-      await _db.updateProject(project);
+      final updated = project.copyWith(
+        name: result['name'] as String,
+        tags: result['tags'] as List<String>,
+      );
+      await _db.updateProject(updated);
       _showSnackMsg(_l10n.projectUpdated);
       _loadProjects();
     } catch (e) {

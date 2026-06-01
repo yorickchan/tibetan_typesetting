@@ -166,20 +166,20 @@ class DatabaseService {
 
   Future<Project?> updateProject(Project project) async {
     final db = await database;
-    project.updatedAt = nowIso();
+    final updated = project.copyWith(updatedAt: nowIso());
     final count = await db.update(
       'projects',
       {
-        'name': project.name,
-        'tags_json': jsonEncode(project.tags),
-        'project_json': project.toJsonString(),
-        'updated_at': project.updatedAt,
+        'name': updated.name,
+        'tags_json': jsonEncode(updated.tags),
+        'project_json': updated.toJsonString(),
+        'updated_at': updated.updatedAt,
       },
       where: 'id = ?',
-      whereArgs: [project.id],
+      whereArgs: [updated.id],
     );
     if (count == 0) return null;
-    return project;
+    return updated;
   }
 
   Future<bool> deleteProject(String projectId) async {
@@ -226,24 +226,27 @@ class DatabaseService {
       id: _uuid.v4().replaceAll('-', ''),
       createdAt: now,
       updatedAt: now,
+      blocks: project.blocks
+          .map((b) => b.id.isEmpty
+              ? b.copyWith(id: _uuid.v4().replaceAll('-', ''))
+              : b)
+          .toList(),
     );
-    for (final b in imported.blocks) {
-      if (b.id.isEmpty) b.id = _uuid.v4().replaceAll('-', '');
-    }
-    if (imported.blocks.isEmpty) {
-      imported.blocks = [TextBlock(id: _uuid.v4().replaceAll('-', ''))];
-    }
+    final finalBlocks = imported.blocks.isEmpty
+        ? [TextBlock(id: _uuid.v4().replaceAll('-', ''))]
+        : imported.blocks;
+    final finalImported = imported.copyWith(blocks: finalBlocks);
 
     final db = await database;
     await db.insert('projects', {
-      'id': imported.id,
-      'name': imported.name,
-      'tags_json': jsonEncode(imported.tags),
-      'project_json': imported.toJsonString(),
-      'created_at': imported.createdAt,
-      'updated_at': imported.updatedAt,
+      'id': finalImported.id,
+      'name': finalImported.name,
+      'tags_json': jsonEncode(finalImported.tags),
+      'project_json': finalImported.toJsonString(),
+      'created_at': finalImported.createdAt,
+      'updated_at': finalImported.updatedAt,
     });
 
-    return imported;
+    return finalImported;
   }
 }
