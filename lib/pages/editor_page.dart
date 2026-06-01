@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/app_settings.dart';
+import '../models/block_update.dart';
 import '../models/project.dart';
 import '../services/database_service.dart';
 import '../services/font_service.dart';
@@ -129,30 +130,19 @@ class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage>
     await performSave(() => _db.updateProject(_project!));
   }
 
-  void _updateBlock(Map<String, dynamic> patch) {
+  void _updateBlock(BlockUpdate update) {
     if (_project == null || _selectedBlock == null) return;
     final selectedId = _selectedId;
     setState(() {
       final blocks = _project!.blocks.map((b) {
         if (b.id != selectedId) return b;
         return b.copyWith(
-          tibetan: patch.containsKey('tibetan')
-              ? patch['tibetan'] as String
-              : null,
-          chinesePronunciation: patch.containsKey('chinesePronunciation')
-              ? patch['chinesePronunciation'] as String
-              : null,
-          chineseTranslation: patch.containsKey('chineseTranslation')
-              ? patch['chineseTranslation'] as String
-              : null,
-          format: patch.containsKey('format')
-              ? patch['format'] as TextBlockFormat
-              : null,
-          columnSpan: patch.containsKey('columnSpan')
-              ? patch['columnSpan'] as int?
-              : null,
-          clearColumnSpan:
-              patch.containsKey('columnSpan') && patch['columnSpan'] == null,
+          tibetan: update.tibetan,
+          chinesePronunciation: update.chinesePronunciation,
+          chineseTranslation: update.chineseTranslation,
+          format: update.format,
+          columnSpan: update.columnSpan,
+          clearColumnSpan: update.clearColumnSpan,
         );
       }).toList();
       _project = _project!.copyWith(blocks: blocks);
@@ -287,7 +277,7 @@ class _EditorPageState extends State<EditorPage> with SaveStateMixin<EditorPage>
     final nextFormat = _selectedBlock!.isFreeText
         ? TextBlockFormat.normal
         : TextBlockFormat.freeText;
-    _updateBlock({'format': nextFormat});
+    _updateBlock(BlockUpdate(format: nextFormat));
   }
 
   void _selectPrev() {

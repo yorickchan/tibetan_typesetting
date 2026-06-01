@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../models/block_update.dart';
 import '../models/project.dart';
 import '../services/pronunciation_service.dart';
 import '../utils/colors.dart';
@@ -15,7 +16,7 @@ class BlockEditorWidget extends StatelessWidget {
   final TextBlock? selectedBlock;
   final int selectedIndex;
   final int totalBlocks;
-  final ValueChanged<Map<String, dynamic>> onUpdateBlock;
+  final ValueChanged<BlockUpdate> onUpdateBlock;
   final ValueChanged<int> onMoveBlock;
   final VoidCallback onDeleteBlock;
   final VoidCallback onToggleColumnBreak;
@@ -87,7 +88,9 @@ class BlockEditorWidget extends StatelessWidget {
             onTogglePageBreak: onTogglePageBreak,
             onToggleSmallText: onToggleSmallText,
             onToggleFreeTextFormat: onToggleFreeTextFormat,
-            onSetColumnSpan: (span) => onUpdateBlock({'columnSpan': span}),
+            onSetColumnSpan: (span) => onUpdateBlock(
+              BlockUpdate(columnSpan: span, clearColumnSpan: span == null),
+            ),
             onDeleteBlock: onDeleteBlock,
             l10n: l10n,
           ),
@@ -410,7 +413,7 @@ class _Toolbar extends StatelessWidget {
 
 class _EditorFields extends StatefulWidget {
   final TextBlock block;
-  final ValueChanged<Map<String, dynamic>> onUpdateBlock;
+  final ValueChanged<BlockUpdate> onUpdateBlock;
   final String tibetanFontFamily;
   final String pronunciationFontFamily;
   final String translationFontFamily;
@@ -494,7 +497,7 @@ class _EditorFieldsState extends State<_EditorFields> {
       final newPron = pronunciations.join(' ');
       if (newPron != _pronCtrl.text) {
         _pronCtrl.text = newPron;
-        widget.onUpdateBlock({'chinesePronunciation': newPron});
+        widget.onUpdateBlock(BlockUpdate(chinesePronunciation: newPron));
       }
     } finally {
       _isAutoFilling = false;
@@ -502,7 +505,7 @@ class _EditorFieldsState extends State<_EditorFields> {
   }
 
   void _onTibetanChanged(String v) {
-    widget.onUpdateBlock({'tibetan': v});
+    widget.onUpdateBlock(BlockUpdate(tibetan: v));
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), () {
       _autoFillPronunciation(v);
@@ -510,7 +513,7 @@ class _EditorFieldsState extends State<_EditorFields> {
   }
 
   void _onPronunciationChanged(String v) {
-    widget.onUpdateBlock({'chinesePronunciation': v});
+    widget.onUpdateBlock(BlockUpdate(chinesePronunciation: v));
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
       _savePronunciationToDictionary(v);
@@ -605,7 +608,7 @@ class _EditorFieldsState extends State<_EditorFields> {
   Widget _freeTextField() {
     return TextField(
       controller: _tibetanCtrl,
-      onChanged: (v) => widget.onUpdateBlock({'tibetan': v}),
+      onChanged: (v) => widget.onUpdateBlock(BlockUpdate(tibetan: v)),
       style: TextStyle(
         fontFamily: widget.translationFontFamily,
         fontSize: 13,
@@ -641,7 +644,7 @@ class _EditorFieldsState extends State<_EditorFields> {
   Widget _transField() {
     return TextField(
       controller: _transCtrl,
-      onChanged: (v) => widget.onUpdateBlock({'chineseTranslation': v}),
+      onChanged: (v) => widget.onUpdateBlock(BlockUpdate(chineseTranslation: v)),
       style: TextStyle(
         fontFamily: widget.translationFontFamily,
         fontSize: 13,
