@@ -9,6 +9,7 @@ import '../models/project.dart';
 import '../services/database_service.dart';
 import '../services/settings_service.dart';
 import '../utils/colors.dart';
+import '../utils/decorations.dart';
 import '../widgets/app_shell.dart';
 import 'editor_page.dart';
 import 'export_page.dart';

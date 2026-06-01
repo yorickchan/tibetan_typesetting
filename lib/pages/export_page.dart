@@ -12,6 +12,7 @@ import '../services/font_service.dart';
 import '../services/pdf_service.dart';
 import '../services/settings_service.dart';
 import '../utils/colors.dart';
+import '../utils/decorations.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/sample_pages.dart';
 
@@ -199,29 +200,6 @@ class _ExportPageState extends State<ExportPage> {
     }
   }
 
-  InputDecoration _numberDecor(String label) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 11),
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      filled: true,
-      fillColor: AppColors.inputFill,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: AppColors.borderSubtle),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: AppColors.borderSubtle),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: AppColors.sky500),
-      ),
-    );
-  }
-
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
@@ -392,7 +370,7 @@ class _ExportPageState extends State<ExportPage> {
                         color: AppColors.textPrimary,
                         fontSize: 13,
                       ),
-                      decoration: _numberDecor(_l10n.pageWidth),
+                      decoration: numberDecor(_l10n.pageWidth),
                       onChanged: (v) {
                         final n = double.tryParse(v);
                         if (n != null && n >= 50) {
@@ -410,7 +388,7 @@ class _ExportPageState extends State<ExportPage> {
                         color: AppColors.textPrimary,
                         fontSize: 13,
                       ),
-                      decoration: _numberDecor(_l10n.pageHeight),
+                      decoration: numberDecor(_l10n.pageHeight),
                       onChanged: (v) {
                         final n = double.tryParse(v);
                         if (n != null && n >= 50) {
@@ -441,7 +419,7 @@ class _ExportPageState extends State<ExportPage> {
                             color: AppColors.textPrimary,
                             fontSize: 13,
                           ),
-                          decoration: _numberDecor('${e.$2} (mm)'),
+                          decoration: numberDecor('${e.$2} (mm)'),
                           onChanged: (v) {
                             final n = double.tryParse(v);
                             if (n != null) _updateMargin(e.$1, n);
@@ -482,7 +460,7 @@ class _ExportPageState extends State<ExportPage> {
               TextFormField(
                 initialValue: ps.leftVerticalTitle,
                 style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
-                decoration: _numberDecor(_l10n.leftVerticalTitle),
+                decoration: numberDecor(_l10n.leftVerticalTitle),
                 onChanged: (v) =>
                     _updateSetup((s) => s.copyWith(leftVerticalTitle: v)),
               ),
@@ -490,7 +468,7 @@ class _ExportPageState extends State<ExportPage> {
               TextFormField(
                 initialValue: ps.pageNumber,
                 style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
-                decoration: _numberDecor(_l10n.pageNumberLabel),
+                decoration: numberDecor(_l10n.pageNumberLabel),
                 onChanged: (v) =>
                     _updateSetup((s) => s.copyWith(pageNumber: v)),
               ),

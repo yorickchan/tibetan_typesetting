@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import '../models/project.dart';
 import '../services/pronunciation_service.dart';
 import '../utils/colors.dart';
+import '../utils/decorations.dart';
 import '../utils/font_constants.dart';
 import '../utils/sample_layout.dart';
 import '../utils/tibetan_segmenter.dart';
@@ -548,38 +549,6 @@ class _EditorFieldsState extends State<_EditorFields> {
     }
   }
 
-  InputDecoration _fieldDecoration(String label, String placeholder) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(
-        color: AppColors.textMuted,
-        fontSize: 10,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 1.2,
-      ),
-      hintText: placeholder,
-      hintStyle: TextStyle(
-        color: AppColors.textMuted.withValues(alpha: 0.5),
-        fontSize: 13,
-      ),
-      filled: true,
-      fillColor: AppColors.inputFill,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: AppColors.border),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: AppColors.border),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: AppColors.sky500),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -626,9 +595,9 @@ class _EditorFieldsState extends State<_EditorFields> {
       ),
       maxLines: null,
       minLines: 3,
-      decoration: _fieldDecoration(
-        widget.l10n.tibetanLabelShort,
-        widget.l10n.tibetanText,
+      decoration: fieldDecoration(
+        label: widget.l10n.tibetanLabelShort,
+        placeholder: widget.l10n.tibetanText,
       ),
     );
   }
@@ -644,9 +613,9 @@ class _EditorFieldsState extends State<_EditorFields> {
       ),
       maxLines: null,
       minLines: 5,
-      decoration: _fieldDecoration(
-        widget.l10n.freeText,
-        widget.l10n.freeTextContent,
+      decoration: fieldDecoration(
+        label: widget.l10n.freeText,
+        placeholder: widget.l10n.freeTextContent,
       ),
     );
   }
@@ -662,9 +631,9 @@ class _EditorFieldsState extends State<_EditorFields> {
       ),
       maxLines: null,
       minLines: 3,
-      decoration: _fieldDecoration(
-        widget.l10n.pronunciationLabelShort,
-        widget.l10n.chinesePronunciation,
+      decoration: fieldDecoration(
+        label: widget.l10n.pronunciationLabelShort,
+        placeholder: widget.l10n.chinesePronunciation,
       ),
     );
   }
@@ -680,9 +649,9 @@ class _EditorFieldsState extends State<_EditorFields> {
       ),
       maxLines: null,
       minLines: 3,
-      decoration: _fieldDecoration(
-        widget.l10n.translationLabelShort,
-        widget.l10n.chineseTranslation,
+      decoration: fieldDecoration(
+        label: widget.l10n.translationLabelShort,
+        placeholder: widget.l10n.chineseTranslation,
       ),
     );
   }
