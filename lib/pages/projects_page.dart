@@ -10,6 +10,7 @@ import '../services/database_service.dart';
 import '../services/settings_service.dart';
 import '../utils/colors.dart';
 import '../utils/decorations.dart';
+import '../utils/snackbar.dart';
 import '../widgets/app_shell.dart';
 import 'editor_page.dart';
 import 'export_page.dart';
@@ -75,14 +76,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
 
   void _showSnackMsg(String msg, {bool error = false}) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: error ? AppColors.rose600 : AppColors.sky500,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    showAppSnackBar(context, msg, error: error);
   }
 
   Future<void> _openProject(String projectId) async {

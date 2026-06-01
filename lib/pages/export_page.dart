@@ -13,6 +13,7 @@ import '../services/pdf_service.dart';
 import '../services/settings_service.dart';
 import '../utils/colors.dart';
 import '../utils/decorations.dart';
+import '../utils/snackbar.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/sample_pages.dart';
 
@@ -111,14 +112,7 @@ class _ExportPageState extends State<ExportPage> {
 
   void _showSnack(String msg, {bool error = false}) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: error ? AppColors.rose600 : AppColors.sky500,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    showAppSnackBar(context, msg, error: error);
   }
 
   void _updateSetup(PageSetup Function(PageSetup) updater) {
