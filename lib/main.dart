@@ -73,6 +73,8 @@ class _TibetanTypesettingAppState extends State<TibetanTypesettingApp> {
 
   ThemeData _buildTheme() {
     final isDark = _brightness == Brightness.dark;
+    // Set semantic colors before building theme (must be called before
+    // any widget reads AppColors statics during this build pass).
     AppColors.setBrightness(isDark ? Brightness.dark : Brightness.light);
     final bgColor = isDark ? AppColors.slate950 : AppColors.lightSlate50;
 
@@ -278,7 +280,6 @@ class _TibetanTypesettingAppState extends State<TibetanTypesettingApp> {
         ),
       ],
       child: MaterialApp(
-        key: ValueKey('${_settings.theme}${_settings.locale}'),
         navigatorKey: rootNavigatorKey,
         title: 'Tibetan Typesetting',
         locale: _locale,
@@ -287,7 +288,7 @@ class _TibetanTypesettingAppState extends State<TibetanTypesettingApp> {
         debugShowCheckedModeBanner: false,
         theme: _buildTheme(),
         home: _HomeWrapper(
-          needsSetup: !_settings.hasFontsConfigured,
+          needsSetup: !_settings.hasAnyFontConfigured,
           onOpenSettings: () => _openSettings(require: true),
         ),
       ),

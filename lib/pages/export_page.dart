@@ -205,7 +205,7 @@ class _ExportPageState extends State<ExportPage>
       child: AppShell(
         title: _l10n.exportPdf,
         actions: [
-          if (saveState == 'saving')
+          if (saveState == SaveState.saving)
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: Center(

@@ -143,11 +143,7 @@ class FontService {
       }
     }
 
-    fonts.sort(
-      (a, b) =>
-          a.familyName.toLowerCase().compareTo(b.familyName.toLowerCase()),
-    );
-
+    // deduplicateFamilies will sort the result, so no need to sort here
     _cachedFonts = deduplicateFamilies(fonts);
     return _cachedFonts!;
   }
@@ -257,8 +253,8 @@ class FontService {
       loader.addFont(Future.value(fontData));
       await loader.load();
       _loadedPreviewFamilies.add(config.fontFamily);
-    } catch (_) {
-      // Font loading failure is non-fatal; Flutter will use fallback.
+    } catch (e) {
+      debugPrint('Failed to load font ${config.fontFamily} for preview: $e');
     }
   }
 

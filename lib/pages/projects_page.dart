@@ -100,7 +100,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
     final result = await _showNameTagsDialog(
       title: l10n.newProject,
       initialName: l10n.untitled,
-      l10n: l10n,
+      isCreate: true,
     );
     if (result == null) return;
     try {
@@ -126,7 +126,6 @@ class _ProjectsPageState extends State<ProjectsPage> {
       title: l10n.renameProject,
       initialName: item.name,
       initialTags: item.tags.join(', '),
-      l10n: l10n,
     );
     if (result == null) return;
     try {
@@ -247,11 +246,12 @@ class _ProjectsPageState extends State<ProjectsPage> {
     required String title,
     String initialName = '',
     String initialTags = '',
-    AppLocalizations? l10n,
+    bool isCreate = false,
   }) async {
     final nameCtrl = TextEditingController(text: initialName);
     final tagsCtrl = TextEditingController(text: initialTags);
-    final effectiveL10n = l10n ?? _l10n;
+    try {
+    final effectiveL10n = _l10n;
 
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
@@ -337,7 +337,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
               Navigator.pop(ctx, {'name': name, 'tags': tags});
             },
             child: Text(
-              title.contains('New') ? effectiveL10n.create : effectiveL10n.save,
+              isCreate ? effectiveL10n.create : effectiveL10n.save,
               style: const TextStyle(
                 color: AppColors.sky500,
                 fontWeight: FontWeight.w600,
@@ -349,6 +349,10 @@ class _ProjectsPageState extends State<ProjectsPage> {
     );
 
     return result;
+    } finally {
+      nameCtrl.dispose();
+      tagsCtrl.dispose();
+    }
   }
 
   String _formatDate(String iso) {

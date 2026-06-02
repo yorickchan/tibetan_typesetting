@@ -1,5 +1,3 @@
-const int _tshegCodeUnit = 0x0F0B;
-
 // U+0F0B ་ TIBETAN MARK INTERSYLLABIC TSHEG
 // U+0F0C ་ TIBETAN MARK DELIMITER TSHEG BSTAR (variant tsheg)
 final _splitPattern = RegExp('[\u0F0B\u0F0C]');
@@ -18,7 +16,3 @@ List<String> extractSyllables(String tibetanText) {
       .toList();
 }
 
-String joinSyllables(List<String> syllables) {
-  if (syllables.isEmpty) return '';
-  return syllables.join(String.fromCharCode(_tshegCodeUnit));
-}

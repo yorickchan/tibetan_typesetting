@@ -1,9 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pdf/widgets.dart' as pw;
 
 import 'package:tibetan_typesetting/models/project.dart';
 import 'package:tibetan_typesetting/models/font_config.dart';
-import 'package:tibetan_typesetting/services/pdf_service.dart';
 import 'package:tibetan_typesetting/services/pronunciation_service.dart';
 import 'package:tibetan_typesetting/utils/sample_layout.dart';
 import 'package:tibetan_typesetting/utils/font_constants.dart';
@@ -33,17 +31,6 @@ void main() {
         'b',
         'c',
       ]);
-    });
-  });
-
-  group('contentPageCenterBorder', () {
-    test('draws only vertical separators', () {
-      final border = contentPageCenterBorder();
-
-      expect(border.top, pw.BorderSide.none);
-      expect(border.bottom, pw.BorderSide.none);
-      expect(border.left.width, 0.5);
-      expect(border.right.width, 0.5);
     });
   });
 
@@ -183,8 +170,8 @@ void main() {
       );
 
       expect(
-        estimateBlockSpan(long, 8),
-        greaterThan(estimateBlockSpan(short, 8)),
+        estimateBlockWidthFraction(long),
+        greaterThan(estimateBlockWidthFraction(short)),
       );
     });
 
@@ -388,21 +375,6 @@ void main() {
         expect(contentTibetanBottomBleed(12), closeTo(2.4, 0.0001));
       },
     );
-  });
-
-  group('blocksToRows', () {
-    test('pads rows to column count', () {
-      final blocks = [
-        TextBlock(id: 'b1', tibetan: 'text 1'),
-        TextBlock(id: 'b2', tibetan: 'text 2'),
-      ];
-      final rows = blocksToRows(blocks, 5);
-      expect(rows.length, 1);
-      expect(rows[0].length, 5);
-      expect(rows[0][0]?.id, 'b1');
-      expect(rows[0][1]?.id, 'b2');
-      expect(rows[0][2], isNull);
-    });
   });
 
   group('TextBlock', () {

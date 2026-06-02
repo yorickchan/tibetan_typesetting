@@ -5,13 +5,24 @@ class PronunciationEntry {
   final String createdAt;
   final String updatedAt;
 
-  PronunciationEntry({
+  const PronunciationEntry({
     required this.tibetanSyllable,
     required this.chinesePronunciation,
     this.wordCount = 1,
     required this.createdAt,
     required this.updatedAt,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PronunciationEntry &&
+          tibetanSyllable == other.tibetanSyllable &&
+          chinesePronunciation == other.chinesePronunciation &&
+          wordCount == other.wordCount;
+
+  @override
+  int get hashCode => Object.hash(tibetanSyllable, chinesePronunciation, wordCount);
 
   PronunciationEntry copyWith({
     String? tibetanSyllable,

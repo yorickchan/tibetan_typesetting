@@ -96,17 +96,6 @@ List<_Row> _buildRows(List<TextBlock> blocks, double gapFraction) {
   return rows;
 }
 
-List<List<TextBlock?>> blocksToRows(List<TextBlock> blocks, int colCount) {
-  final cols = colCount < 1 ? 1 : colCount;
-  return _buildRows(blocks, 0.01).map((row) {
-    final padded = List<TextBlock?>.filled(cols, null);
-    for (var i = 0; i < row.cells.length && i < padded.length; i++) {
-      padded[i] = row.cells[i].block;
-    }
-    return padded;
-  }).toList();
-}
-
 List<PageLayout> paginateBlocks(
   List<TextBlock> blocks,
   int colCount, [
@@ -150,11 +139,6 @@ List<PageLayout> paginateBlocks(
     pages.add(PageLayout(colCount: effectiveColCount, flowRows: []));
   }
   return pages;
-}
-
-int estimateBlockSpan(TextBlock block, int colCount) {
-  final units = colCount < 1 ? 1 : colCount;
-  return (estimateBlockWidthFraction(block) * units).ceil().clamp(1, units);
 }
 
 double estimateBlockWidthFraction(TextBlock block) {

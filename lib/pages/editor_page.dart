@@ -13,9 +13,9 @@ import '../services/font_service.dart';
 import '../services/settings_service.dart';
 import '../utils/colors.dart';
 import '../utils/font_constants.dart';
+import '../utils/save_state_mixin.dart';
 import '../utils/font_utils.dart' as font_utils;
 import '../utils/sample_layout.dart';
-import '../utils/save_state_mixin.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/block_editor.dart';
 import '../widgets/block_strip.dart';
@@ -135,7 +135,7 @@ class _EditorPageState extends State<EditorPage>
   }
 
   Future<void> _saveCurrent() async {
-    if (_project == null) return;
+    if (!mounted || _project == null) return;
     await performSave(() => _db.updateProject(_project!));
   }
 
@@ -344,9 +344,9 @@ class _EditorPageState extends State<EditorPage>
   @override
   Widget build(BuildContext context) {
     final savePill = switch (saveState) {
-      'saving' => _l10n.saving,
-      'saved' => _l10n.saved,
-      'error' => _l10n.saveError,
+      SaveState.saving => _l10n.saving,
+      SaveState.saved => _l10n.saved,
+      SaveState.error => _l10n.saveError,
       _ => null,
     };
 
@@ -397,18 +397,18 @@ class _EditorPageState extends State<EditorPage>
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: saveState == 'error'
+                        color: saveState == SaveState.error
                             ? AppColors.rose600.withValues(alpha: 0.5)
                             : AppColors.borderSubtle,
                       ),
-                      color: saveState == 'error'
+                      color: saveState == SaveState.error
                           ? AppColors.rose600.withValues(alpha: 0.15)
                           : AppColors.cardBg,
                     ),
                     child: Text(
                       savePill,
                       style: TextStyle(
-                        color: saveState == 'error'
+                        color: saveState == SaveState.error
                             ? AppColors.rose300
                             : AppColors.textSecondary,
                         fontSize: 11,

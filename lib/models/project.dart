@@ -8,7 +8,7 @@ class MarginMm {
   final double bottom;
   final double left;
 
-  MarginMm({this.top = 10, this.right = 10, this.bottom = 10, this.left = 10});
+  const MarginMm({this.top = 10, this.right = 10, this.bottom = 10, this.left = 10});
 
   MarginMm copyWith({
     double? top,
@@ -301,9 +301,9 @@ class Project {
     return Project(
       id: id ?? this.id,
       name: name ?? this.name,
-      tags: tags ?? List.from(this.tags),
-      blocks: blocks ?? this.blocks.map((b) => b.copyWith()).toList(),
-      pageSetup: pageSetup ?? this.pageSetup.copyWith(),
+      tags: tags ?? this.tags,
+      blocks: blocks ?? this.blocks,
+      pageSetup: pageSetup ?? this.pageSetup,
       updatedAt: updatedAt ?? this.updatedAt,
       createdAt: createdAt ?? this.createdAt,
     );
@@ -347,7 +347,7 @@ class ProjectListItem {
   final List<String> tags;
   final String updatedAt;
 
-  ProjectListItem({
+  const ProjectListItem({
     required this.id,
     required this.name,
     required this.tags,
@@ -355,9 +355,11 @@ class ProjectListItem {
   });
 }
 
+final _fractionalSecondsRe = RegExp(r'\.\d+');
+
 String nowIso() {
   return DateTime.now().toUtc().toIso8601String().replaceAll(
-    RegExp(r'\.\d+'),
+    _fractionalSecondsRe,
     '',
   );
 }

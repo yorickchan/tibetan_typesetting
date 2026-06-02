@@ -29,12 +29,6 @@ const _rose = PdfColor.fromInt(0xFFe11d48);
 const _roseUi = Color(0xFFe11d48);
 const _blackUi = Color(0xFF000000);
 
-pw.Border contentPageCenterBorder() {
-  return pw.Border(
-    left: pw.BorderSide(color: _rose, width: 0.5),
-    right: pw.BorderSide(color: _rose, width: 0.5),
-  );
-}
 
 /// Pre-rendered text image stored for synchronous PDF page construction.
 class _Img {
@@ -83,7 +77,7 @@ class PdfService {
   }) async {
     if (text.trim().isEmpty) return null;
     
-    final key = '${text.hashCode}_${fontFamily}_${fontSize}_${color.value}_${maxWidth}_${lineHeight}_${topPadding}_${bottomPadding}_${textAlign}';
+    final key = '${text}_|_${fontFamily}_|_${fontSize}_|_${color.toARGB32()}_|_${maxWidth}_|_${lineHeight}_|_${topPadding}_|_${bottomPadding}_|_${textAlign}';
     if (_renderCache.containsKey(key)) {
       return _renderCache[key];
     }

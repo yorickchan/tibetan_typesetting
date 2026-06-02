@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../models/app_settings.dart';
@@ -26,8 +27,13 @@ class SettingsService {
       _cached = AppSettings();
       return _cached!;
     }
-    _cached =
-        AppSettings.fromJsonString(rows.first['value_json'] as String);
+    try {
+      _cached =
+          AppSettings.fromJsonString(rows.first['value_json'] as String);
+    } catch (e) {
+      debugPrint('Failed to parse app settings, using defaults: $e');
+      _cached = const AppSettings();
+    }
     return _cached!;
   }
 

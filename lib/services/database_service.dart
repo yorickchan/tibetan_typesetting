@@ -12,12 +12,10 @@ class DatabaseService {
   factory DatabaseService() => _instance;
   DatabaseService._internal();
 
-  Database? _db;
+  Future<Database>? _dbFuture;
 
   Future<Database> get database async {
-    if (_db != null) return _db!;
-    _db = await _initDb();
-    return _db!;
+    return _dbFuture ??= _initDb();
   }
 
   Future<Database> _initDb() async {
@@ -86,13 +84,35 @@ class DatabaseService {
 
   Future<List<ProjectListItem>> listProjects({String? query, String? tag}) async {
     final db = await database;
+
+    final q = (query ?? '').trim().toLowerCase();
+    final t = (tag ?? '').trim().toLowerCase();
+
+    // Build WHERE clauses for SQL-level filtering
+    final whereClauses = <String>[];
+    final whereArgs = <dynamic>[];
+
+    if (q.isNotEmpty) {
+      whereClauses.add('(LOWER(name) LIKE ? OR LOWER(tags_json) LIKE ?)');
+      whereArgs.add('%$q%');
+      whereArgs.add('%$q%');
+    }
+    if (t.isNotEmpty) {
+      whereClauses.add('LOWER(tags_json) LIKE ?');
+      whereArgs.add('%"$t"%');
+    }
+
+    final where = whereClauses.isNotEmpty ? whereClauses.join(' AND ') : null;
+
     final rows = await db.query(
       'projects',
       columns: ['id', 'name', 'tags_json', 'updated_at'],
+      where: where,
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
       orderBy: 'updated_at DESC',
     );
 
-    var items = rows.map((row) {
+    return rows.map((row) {
       final tags = (jsonDecode(row['tags_json'] as String) as List<dynamic>).cast<String>();
       return ProjectListItem(
         id: row['id'] as String,
@@ -101,24 +121,6 @@ class DatabaseService {
         updatedAt: row['updated_at'] as String,
       );
     }).toList();
-
-    final q = (query ?? '').trim().toLowerCase();
-    final t = (tag ?? '').trim().toLowerCase();
-
-    if (q.isNotEmpty) {
-      items = items
-          .where((i) =>
-              i.name.toLowerCase().contains(q) ||
-              i.tags.any((x) => x.toLowerCase().contains(q)))
-          .toList();
-    }
-    if (t.isNotEmpty) {
-      items = items
-          .where((i) => i.tags.any((x) => x.toLowerCase() == t))
-          .toList();
-    }
-
-    return items;
   }
 
   Future<Project> createProject({
@@ -208,13 +210,15 @@ class DatabaseService {
     );
 
     final db = await database;
-    await db.insert('projects', {
-      'id': newProject.id,
-      'name': newProject.name,
-      'tags_json': jsonEncode(newProject.tags),
-      'project_json': newProject.toJsonString(),
-      'created_at': newProject.createdAt,
-      'updated_at': newProject.updatedAt,
+    await db.transaction((txn) async {
+      await txn.insert('projects', {
+        'id': newProject.id,
+        'name': newProject.name,
+        'tags_json': jsonEncode(newProject.tags),
+        'project_json': newProject.toJsonString(),
+        'created_at': newProject.createdAt,
+        'updated_at': newProject.updatedAt,
+      });
     });
 
     return newProject;
@@ -222,29 +226,31 @@ class DatabaseService {
 
   Future<Project> importProject(Project project) async {
     final now = nowIso();
-    final imported = project.copyWith(
+    final blocks = project.blocks
+        .map((b) => b.id.isEmpty
+            ? b.copyWith(id: _uuid.v4().replaceAll('-', ''))
+            : b)
+        .toList();
+    final finalBlocks = blocks.isEmpty
+        ? [TextBlock(id: _uuid.v4().replaceAll('-', ''))]
+        : blocks;
+    final finalImported = project.copyWith(
       id: _uuid.v4().replaceAll('-', ''),
       createdAt: now,
       updatedAt: now,
-      blocks: project.blocks
-          .map((b) => b.id.isEmpty
-              ? b.copyWith(id: _uuid.v4().replaceAll('-', ''))
-              : b)
-          .toList(),
+      blocks: finalBlocks,
     );
-    final finalBlocks = imported.blocks.isEmpty
-        ? [TextBlock(id: _uuid.v4().replaceAll('-', ''))]
-        : imported.blocks;
-    final finalImported = imported.copyWith(blocks: finalBlocks);
 
     final db = await database;
-    await db.insert('projects', {
-      'id': finalImported.id,
-      'name': finalImported.name,
-      'tags_json': jsonEncode(finalImported.tags),
-      'project_json': finalImported.toJsonString(),
-      'created_at': finalImported.createdAt,
-      'updated_at': finalImported.updatedAt,
+    await db.transaction((txn) async {
+      await txn.insert('projects', {
+        'id': finalImported.id,
+        'name': finalImported.name,
+        'tags_json': jsonEncode(finalImported.tags),
+        'project_json': finalImported.toJsonString(),
+        'created_at': finalImported.createdAt,
+        'updated_at': finalImported.updatedAt,
+      });
     });
 
     return finalImported;

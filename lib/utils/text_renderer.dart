@@ -75,17 +75,22 @@ Future<RenderedText?> renderTextToPng(
   painter.paint(canvas, Offset(0, scaledTopPadding));
   final picture = recorder.endRecording();
 
-  final image = await picture.toImage(w.toInt(), h.toInt());
-  final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-  image.dispose();
-  picture.dispose();
-  painter.dispose();
-
-  if (byteData == null) return null;
-
-  return RenderedText(
-    pngBytes: byteData.buffer.asUint8List(),
-    width: useFullWidth ? maxWidth : w / scale,
-    height: h / scale,
-  );
+  try {
+    final image = await picture.toImage(w.toInt(), h.toInt());
+    try {
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) return null;
+      return RenderedText(
+        pngBytes: byteData.buffer
+            .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+        width: useFullWidth ? maxWidth : w / scale,
+        height: h / scale,
+      );
+    } finally {
+      image.dispose();
+    }
+  } finally {
+    picture.dispose();
+    painter.dispose();
+  }
 }

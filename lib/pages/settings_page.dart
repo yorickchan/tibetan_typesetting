@@ -162,7 +162,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   bool get _canSave {
     if (widget.requireFonts) {
-      return _settings?.hasFontsConfigured ?? false;
+      return _settings?.hasAnyFontConfigured ?? false;
     }
     return true;
   }
@@ -462,9 +462,8 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildLanguageSelector() {
-    final l10n = AppLocalizations.of(context)!;
     final languages = [
-      (null, l10n.systemDefault),
+      (null, _l10n.systemDefault),
       ('en', 'English'),
       ('zh', '简体中文'),
       ('zh_TW', '繁體中文'),

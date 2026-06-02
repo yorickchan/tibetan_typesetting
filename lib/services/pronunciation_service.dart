@@ -3,7 +3,15 @@ import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 
 import '../models/pronunciation_entry.dart';
+import '../models/project.dart' show nowIso;
 import 'database_service.dart';
+
+class _ImportEntry {
+  final String syllable;
+  final String pronunciation;
+  final int wordCount;
+  _ImportEntry(this.syllable, this.pronunciation, this.wordCount);
+}
 
 class PronunciationService {
   static final PronunciationService _instance =
@@ -53,20 +61,17 @@ class PronunciationService {
     return (rows.first['word_count'] as int?) ?? 1;
   }
 
-  Future<void> savePronunciation(
+  Future<bool> savePronunciation(
     String tibetanSyllable,
     String chinesePronunciation, {
     int wordCount = 1,
   }) async {
     if (tibetanSyllable.trim().isEmpty ||
         !isSavablePronunciation(chinesePronunciation)) {
-      return;
+      return false;
     }
     final db = await _db.database;
-    final now = DateTime.now().toUtc().toIso8601String().replaceAll(
-      RegExp(r'\.\d+'),
-      '',
-    );
+    final now = nowIso();
     await db.insert('pronunciation_dictionary', {
       'tibetan_syllable': tibetanSyllable.trim(),
       'chinese_pronunciation': chinesePronunciation.trim(),
@@ -74,22 +79,20 @@ class PronunciationService {
       'created_at': now,
       'updated_at': now,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
+    return true;
   }
 
-  Future<void> updatePronunciation(
+  Future<bool> updatePronunciation(
     String tibetanSyllable,
     String chinesePronunciation, {
     int? wordCount,
   }) async {
     if (tibetanSyllable.trim().isEmpty ||
         !isSavablePronunciation(chinesePronunciation)) {
-      return;
+      return false;
     }
     final db = await _db.database;
-    final now = DateTime.now().toUtc().toIso8601String().replaceAll(
-      RegExp(r'\.\d+'),
-      '',
-    );
+    final now = nowIso();
     final updates = <String, dynamic>{
       'chinese_pronunciation': chinesePronunciation.trim(),
       'updated_at': now,
@@ -97,12 +100,13 @@ class PronunciationService {
     if (wordCount != null) {
       updates['word_count'] = wordCount.clamp(1, 10);
     }
-    await db.update(
+    final count = await db.update(
       'pronunciation_dictionary',
       updates,
       where: 'tibetan_syllable = ?',
       whereArgs: [tibetanSyllable.trim()],
     );
+    return count > 0;
   }
 
   Future<List<PronunciationEntry>> getAllEntries() async {
@@ -149,25 +153,52 @@ class PronunciationService {
 
   Future<int> importFromJson(String jsonStr, {bool overwrite = false}) async {
     final List<dynamic> data = jsonDecode(jsonStr) as List<dynamic>;
-    int imported = 0;
-    for (final item in data) {
-      final map = item as Map<String, dynamic>;
-      final syllable = map['tibetanSyllable'] as String?;
-      final pronunciation = map['chinesePronunciation'] as String?;
-      final wordCount = (map['wordCount'] as int?) ?? 1;
-      if (syllable == null || pronunciation == null) continue;
-      if (syllable.trim().isEmpty ||
-          !isSavablePronunciation(pronunciation)) {
-        continue;
-      }
 
-      if (!overwrite) {
-        final existing = await getPronunciation(syllable);
-        if (existing != null) continue;
-      }
-      await savePronunciation(syllable, pronunciation, wordCount: wordCount);
+    // Validate and collect entries
+    final entries = <_ImportEntry>[];
+    for (final item in data) {
+      if (item is! Map<String, dynamic>) continue;
+      final syllable = (item['tibetanSyllable'] as String?)?.trim();
+      final pronunciation = (item['chinesePronunciation'] as String?)?.trim();
+      final wordCount = (item['wordCount'] as int?) ?? 1;
+      if (syllable == null || syllable.isEmpty) continue;
+      if (pronunciation == null || !isSavablePronunciation(pronunciation)) continue;
+      entries.add(_ImportEntry(syllable, pronunciation, wordCount.clamp(1, 10)));
+    }
+    if (entries.isEmpty) return 0;
+
+    final db = await _db.database;
+
+    // Fetch all existing syllables in a single query
+    Set<String> existingSyllables;
+    if (!overwrite) {
+      final syllables = entries.map((e) => e.syllable).toList();
+      final placeholders = syllables.map((_) => '?').join(',');
+      final rows = await db.rawQuery(
+        'SELECT tibetan_syllable FROM pronunciation_dictionary WHERE tibetan_syllable IN ($placeholders)',
+        syllables,
+      );
+      existingSyllables = rows.map((r) => r['tibetan_syllable'] as String).toSet();
+    } else {
+      existingSyllables = {};
+    }
+
+    // Batch insert all new entries
+    final now = nowIso();
+    final batch = db.batch();
+    int imported = 0;
+    for (final entry in entries) {
+      if (!overwrite && existingSyllables.contains(entry.syllable)) continue;
+      batch.insert('pronunciation_dictionary', {
+        'tibetan_syllable': entry.syllable,
+        'chinese_pronunciation': entry.pronunciation,
+        'word_count': entry.wordCount,
+        'created_at': now,
+        'updated_at': now,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
       imported++;
     }
+    await batch.commit(noResult: true);
     return imported;
   }
 }

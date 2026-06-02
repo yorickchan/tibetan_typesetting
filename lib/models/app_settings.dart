@@ -5,15 +5,15 @@ import 'font_config.dart';
 enum AppTheme { system, light, dark }
 
 class AppSettings {
-  FontConfig? tibetanFont;
-  FontConfig? pronunciationFont;
-  FontConfig? translationFont;
-  double defaultPageWidthMm;
-  double defaultPageHeightMm;
-  String? locale;
-  AppTheme theme;
+  final FontConfig? tibetanFont;
+  final FontConfig? pronunciationFont;
+  final FontConfig? translationFont;
+  final double defaultPageWidthMm;
+  final double defaultPageHeightMm;
+  final String? locale;
+  final AppTheme theme;
 
-  AppSettings({
+  const AppSettings({
     this.tibetanFont,
     this.pronunciationFont,
     this.translationFont,
@@ -23,7 +23,30 @@ class AppSettings {
     this.theme = AppTheme.dark,
   });
 
-  bool get hasFontsConfigured =>
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AppSettings &&
+          tibetanFont == other.tibetanFont &&
+          pronunciationFont == other.pronunciationFont &&
+          translationFont == other.translationFont &&
+          defaultPageWidthMm == other.defaultPageWidthMm &&
+          defaultPageHeightMm == other.defaultPageHeightMm &&
+          locale == other.locale &&
+          theme == other.theme;
+
+  @override
+  int get hashCode => Object.hash(
+        tibetanFont,
+        pronunciationFont,
+        translationFont,
+        defaultPageWidthMm,
+        defaultPageHeightMm,
+        locale,
+        theme,
+      );
+
+  bool get hasAnyFontConfigured =>
       tibetanFont != null ||
       pronunciationFont != null ||
       translationFont != null;

@@ -39,13 +39,19 @@ class _DictionaryPageState extends State<DictionaryPage> {
 
   Future<void> _loadEntries() async {
     setState(() => _loading = true);
-    final entries = await _pronunciationService.getAllEntries();
-    if (!mounted) return;
-    setState(() {
-      _entries = entries;
-      _filtered = entries;
-      _loading = false;
-    });
+    try {
+      final entries = await _pronunciationService.getAllEntries();
+      if (!mounted) return;
+      setState(() {
+        _entries = entries;
+        _filtered = entries;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      _showSnack('Failed to load dictionary: $e', error: true);
+    }
   }
 
   void _filterEntries(String query) {
@@ -96,12 +102,13 @@ class _DictionaryPageState extends State<DictionaryPage> {
     );
     if (confirmed != true) return;
     await _pronunciationService.deleteEntry(entry.tibetanSyllable);
-    _showSnack(_l10n.saved);
+    _showSnack(_l10n.projectDeleted);
     _loadEntries();
   }
 
   Future<void> _editEntry(PronunciationEntry entry) async {
     final ctrl = TextEditingController(text: entry.chinesePronunciation);
+    try {
     int wordCount = entry.wordCount;
     final result = await showDialog<bool>(
       context: context,
@@ -238,6 +245,9 @@ class _DictionaryPageState extends State<DictionaryPage> {
     );
     _showSnack(_l10n.saved);
     _loadEntries();
+    } finally {
+      ctrl.dispose();
+    }
   }
 
   Future<void> _exportJson() async {
