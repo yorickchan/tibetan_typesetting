@@ -1,0 +1,302 @@
+{
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/l10n/app_localizations.dart": {
+    "mtime": 1780401008.0435889,
+    "ast_hash": "b59aa6d43354612492b80462b2ad3661",
+    "semantic_hash": "b59aa6d43354612492b80462b2ad3661"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/l10n/app_localizations_en.dart": {
+    "mtime": 1780401008.0395632,
+    "ast_hash": "d9856e8cf2231897537c00a657b55edd",
+    "semantic_hash": "d9856e8cf2231897537c00a657b55edd"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/l10n/app_localizations_zh.dart": {
+    "mtime": 1780401008.041664,
+    "ast_hash": "031b780350c599c2b700bbbc14d38801",
+    "semantic_hash": "031b780350c599c2b700bbbc14d38801"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/main.dart": {
+    "mtime": 1780400662.2664955,
+    "ast_hash": "faa545ef5968337fb91b0f35d004c77a",
+    "semantic_hash": "faa545ef5968337fb91b0f35d004c77a"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/models/app_settings.dart": {
+    "mtime": 1780400377.9004085,
+    "ast_hash": "5b4823eba7927b2dec4ac88a27b3f6ea",
+    "semantic_hash": "5b4823eba7927b2dec4ac88a27b3f6ea"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/models/block_update.dart": {
+    "mtime": 1780343481.1230621,
+    "ast_hash": "c0eb7ed6cfb3e78cecb42a39f7992cc9",
+    "semantic_hash": "c0eb7ed6cfb3e78cecb42a39f7992cc9"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/models/font_config.dart": {
+    "mtime": 1771609803.3546264,
+    "ast_hash": "ca4f44625c185694baabf7adecfde0d3",
+    "semantic_hash": "ca4f44625c185694baabf7adecfde0d3"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/models/project.dart": {
+    "mtime": 1780400410.0070581,
+    "ast_hash": "d61ea0cd91f4a96a247fae4474dcdbe1",
+    "semantic_hash": "d61ea0cd91f4a96a247fae4474dcdbe1"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/models/pronunciation_entry.dart": {
+    "mtime": 1780400348.5773995,
+    "ast_hash": "8d154d3603e378c853c099dba8c91941",
+    "semantic_hash": "8d154d3603e378c853c099dba8c91941"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/pages/dictionary_page.dart": {
+    "mtime": 1780400613.5852668,
+    "ast_hash": "4a3c18f3bda80784b14a871548c87ea2",
+    "semantic_hash": "4a3c18f3bda80784b14a871548c87ea2"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/pages/editor_page.dart": {
+    "mtime": 1780400631.4919374,
+    "ast_hash": "ffe75ecc6268034c034d24f63d733e2d",
+    "semantic_hash": "ffe75ecc6268034c034d24f63d733e2d"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/pages/export_page.dart": {
+    "mtime": 1780400157.571766,
+    "ast_hash": "6ac307b48f2181c5fcb64682accbcc9f",
+    "semantic_hash": "6ac307b48f2181c5fcb64682accbcc9f"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/pages/projects_page.dart": {
+    "mtime": 1780400428.8061953,
+    "ast_hash": "aaa791b1b83dbd7c6be4d2700da21313",
+    "semantic_hash": "aaa791b1b83dbd7c6be4d2700da21313"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/pages/settings_page.dart": {
+    "mtime": 1780400556.9933324,
+    "ast_hash": "23e9387494726993f65ffd78a36b3e62",
+    "semantic_hash": "23e9387494726993f65ffd78a36b3e62"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/services/database_service.dart": {
+    "mtime": 1780400278.3855891,
+    "ast_hash": "d60059e625b899bd93d96414a8cf3167",
+    "semantic_hash": "d60059e625b899bd93d96414a8cf3167"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/services/font_service.dart": {
+    "mtime": 1780400681.9272747,
+    "ast_hash": "30729157b1ad8dc2d0b1db400f616432",
+    "semantic_hash": "30729157b1ad8dc2d0b1db400f616432"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/services/pdf_service.dart": {
+    "mtime": 1780400490.0526514,
+    "ast_hash": "869325665302d45b54c42fa8b02a45ea",
+    "semantic_hash": "869325665302d45b54c42fa8b02a45ea"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/services/pronunciation_service.dart": {
+    "mtime": 1780400594.029158,
+    "ast_hash": "20bb792391c323df49097b25fd977d54",
+    "semantic_hash": "20bb792391c323df49097b25fd977d54"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/services/settings_service.dart": {
+    "mtime": 1780400550.5041256,
+    "ast_hash": "d031a771373af0669d1bdeac87063303",
+    "semantic_hash": "d031a771373af0669d1bdeac87063303"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/utils/colors.dart": {
+    "mtime": 1780400330.2853618,
+    "ast_hash": "0f693468f7c00f6f1ac95e044c2252c0",
+    "semantic_hash": "0f693468f7c00f6f1ac95e044c2252c0"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/utils/decorations.dart": {
+    "mtime": 1780343481.12391,
+    "ast_hash": "21e7b98e03613a88074da12fb7fc2b75",
+    "semantic_hash": "21e7b98e03613a88074da12fb7fc2b75"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/utils/font_constants.dart": {
+    "mtime": 1771698488.5377,
+    "ast_hash": "dec056a7628fa16e2b75972d227ae0e4",
+    "semantic_hash": "dec056a7628fa16e2b75972d227ae0e4"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/utils/font_utils.dart": {
+    "mtime": 1780400441.6327398,
+    "ast_hash": "f0caa9dd23b655ee9e589b316c6aba3f",
+    "semantic_hash": "f0caa9dd23b655ee9e589b316c6aba3f"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/utils/sample_layout.dart": {
+    "mtime": 1780400238.3951988,
+    "ast_hash": "7acd697aea9d4cd74886ee33314ed7bb",
+    "semantic_hash": "7acd697aea9d4cd74886ee33314ed7bb"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/utils/save_state_mixin.dart": {
+    "mtime": 1780400130.4167142,
+    "ast_hash": "0063442c9f6953063716f63d6830d2ed",
+    "semantic_hash": "0063442c9f6953063716f63d6830d2ed"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/utils/snackbar.dart": {
+    "mtime": 1780343481.124067,
+    "ast_hash": "271f8b1dad020d9ace7c0e788f97e073",
+    "semantic_hash": "271f8b1dad020d9ace7c0e788f97e073"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/utils/text_renderer.dart": {
+    "mtime": 1780400097.7814288,
+    "ast_hash": "b24751ff44077aa6718ea67a2043a502",
+    "semantic_hash": "b24751ff44077aa6718ea67a2043a502"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/utils/tibetan_segmenter.dart": {
+    "mtime": 1780400253.4972916,
+    "ast_hash": "7d8b0a84353c527feae214ea7f4b5443",
+    "semantic_hash": "7d8b0a84353c527feae214ea7f4b5443"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/app_shell.dart": {
+    "mtime": 1771637659.5434735,
+    "ast_hash": "17be3513f9833d9c975e51e317ad104e",
+    "semantic_hash": "17be3513f9833d9c975e51e317ad104e"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/block_editor.dart": {
+    "mtime": 1780343481.1242037,
+    "ast_hash": "3efceee1993653972e84b4a7f651b52a",
+    "semantic_hash": "3efceee1993653972e84b4a7f651b52a"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/block_strip.dart": {
+    "mtime": 1780222373.6926196,
+    "ast_hash": "8a93b31c9abf0a04c57e37d0a1deeae7",
+    "semantic_hash": "8a93b31c9abf0a04c57e37d0a1deeae7"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/editor_page_setup_panel.dart": {
+    "mtime": 1780345717.7798505,
+    "ast_hash": "3c5928e18345200480c38602fbdb6772",
+    "semantic_hash": "3c5928e18345200480c38602fbdb6772"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/export_pdf_settings_panel.dart": {
+    "mtime": 1780345178.871294,
+    "ast_hash": "f1cfd3a41a11f140aa12477124254bb5",
+    "semantic_hash": "f1cfd3a41a11f140aa12477124254bb5"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/flow_spacing_panel.dart": {
+    "mtime": 1780343481.1243243,
+    "ast_hash": "e37d9655cd06602ddee112dac1f9421a",
+    "semantic_hash": "e37d9655cd06602ddee112dac1f9421a"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/font_picker.dart": {
+    "mtime": 1779160992.1608264,
+    "ast_hash": "fb383aafec29e2659f216723de59cb4a",
+    "semantic_hash": "fb383aafec29e2659f216723de59cb4a"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/font_settings_panel.dart": {
+    "mtime": 1771697269.1980457,
+    "ast_hash": "32eed60432ce6bd2b4eb23ab10760be3",
+    "semantic_hash": "32eed60432ce6bd2b4eb23ab10760be3"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/preview_zoom_toolbar.dart": {
+    "mtime": 1780345065.2216568,
+    "ast_hash": "ed5ac27a52a15eafe24fbb8da435e161",
+    "semantic_hash": "ed5ac27a52a15eafe24fbb8da435e161"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/project_card.dart": {
+    "mtime": 1780343481.1244233,
+    "ast_hash": "fe97686cebe26e9901310fd15b7e914a",
+    "semantic_hash": "fe97686cebe26e9901310fd15b7e914a"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/sample_page.dart": {
+    "mtime": 1780222377.5119097,
+    "ast_hash": "981e29de03021011110603702f8f32f9",
+    "semantic_hash": "981e29de03021011110603702f8f32f9"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/sample_pages.dart": {
+    "mtime": 1779163257.8077304,
+    "ast_hash": "37b7696ca4ef79df9598d46c8077577b",
+    "semantic_hash": "37b7696ca4ef79df9598d46c8077577b"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/scaled_preview.dart": {
+    "mtime": 1780345267.1190083,
+    "ast_hash": "604f5f61ec78bc0318078e4b76ac1922",
+    "semantic_hash": "604f5f61ec78bc0318078e4b76ac1922"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/title_page_settings_panel.dart": {
+    "mtime": 1771697232.3762121,
+    "ast_hash": "f18206f3c34476f48e0ea44bd207bfe0",
+    "semantic_hash": "f18206f3c34476f48e0ea44bd207bfe0"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/title_page_widget.dart": {
+    "mtime": 1771697397.0588346,
+    "ast_hash": "a5cb3ad12cf74ad724b4153b924cfb4f",
+    "semantic_hash": "a5cb3ad12cf74ad724b4153b924cfb4f"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/font_service_test.dart": {
+    "mtime": 1779161334.1713777,
+    "ast_hash": "f2ea110da687e399517305dabd18bac1",
+    "semantic_hash": "f2ea110da687e399517305dabd18bac1"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/models_test.dart": {
+    "mtime": 1780343481.1245177,
+    "ast_hash": "410d33a1c1fbc4c715bc4c0bb4012dc0",
+    "semantic_hash": "410d33a1c1fbc4c715bc4c0bb4012dc0"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/page_setup_widgets_test.dart": {
+    "mtime": 1780345672.049822,
+    "ast_hash": "e1c31f3cef28c5da500a4c625c2d9102",
+    "semantic_hash": "e1c31f3cef28c5da500a4c625c2d9102"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/pagination_test.dart": {
+    "mtime": 1780343481.124604,
+    "ast_hash": "007135f89c87207482fdb8c541088801",
+    "semantic_hash": "007135f89c87207482fdb8c541088801"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/preview_zoom_widgets_test.dart": {
+    "mtime": 1780345253.064326,
+    "ast_hash": "bde96918d494aaead8e82750a0120453",
+    "semantic_hash": "bde96918d494aaead8e82750a0120453"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/pronunciation_service_test.dart": {
+    "mtime": 1780343481.1246886,
+    "ast_hash": "741575c63e1d289154e01cf8a622158d",
+    "semantic_hash": "741575c63e1d289154e01cf8a622158d"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/widget_test.dart": {
+    "mtime": 1780400513.3873563,
+    "ast_hash": "b2552f1487e75dbf942ff2c81a795fdc",
+    "semantic_hash": "b2552f1487e75dbf942ff2c81a795fdc"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/AGENTS.md": {
+    "mtime": 1780222049.1909742,
+    "ast_hash": "3dc76292c60b6926e4ff99b1360a6e04",
+    "semantic_hash": "3dc76292c60b6926e4ff99b1360a6e04"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/CLAUDE.md": {
+    "mtime": 1771631246.2119853,
+    "ast_hash": "91b8eef6211d9077b1dc8779e4956a78",
+    "semantic_hash": "91b8eef6211d9077b1dc8779e4956a78"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/PUBLISH.md": {
+    "mtime": 1771626774.0635886,
+    "ast_hash": "8c83845f2d99af43a5c5ffd738e8d290",
+    "semantic_hash": "8c83845f2d99af43a5c5ffd738e8d290"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/README.md": {
+    "mtime": 1771786843.508142,
+    "ast_hash": "a2918752c95233cb609dce3c903b3620",
+    "semantic_hash": "a2918752c95233cb609dce3c903b3620"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/README.zh-TW.md": {
+    "mtime": 1771786854.4665635,
+    "ast_hash": "38216ee54a86e11c41bc38e547a34ef7",
+    "semantic_hash": "38216ee54a86e11c41bc38e547a34ef7"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/RELEASE_GUIDE.md": {
+    "mtime": 1771626711.230373,
+    "ast_hash": "a51df2c067ac9b3cef1b3bfccbf4cfa1",
+    "semantic_hash": "a51df2c067ac9b3cef1b3bfccbf4cfa1"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/RELEASE_NOTES.md": {
+    "mtime": 1771786870.5346274,
+    "ast_hash": "2c1a591d3e50e33d68bf6b3182a9284d",
+    "semantic_hash": "2c1a591d3e50e33d68bf6b3182a9284d"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/analysis_options.yaml": {
+    "mtime": 1780343481.1229606,
+    "ast_hash": "a885e7d55e4f1ef4ec643614c0af84a7",
+    "semantic_hash": "a885e7d55e4f1ef4ec643614c0af84a7"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/l10n.yaml": {
+    "mtime": 1771630643.1386325,
+    "ast_hash": "4725a0e1d7a200afc68ee8f909547cfb",
+    "semantic_hash": "4725a0e1d7a200afc68ee8f909547cfb"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/pubspec.yaml": {
+    "mtime": 1780400645.6574965,
+    "ast_hash": "1063073f1e0e923744aade09d1305f28",
+    "semantic_hash": "1063073f1e0e923744aade09d1305f28"
+  }
+}
