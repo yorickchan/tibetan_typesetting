@@ -855,6 +855,8 @@ class _EditorPageState extends State<EditorPage>
                         pageIdx,
                       ),
                       floatingImages: pageData.page.floatingImages,
+                      onFloatImageMove: _onFloatImageMove,
+                      onFloatImageResize: _onFloatImageResize,
                     ),
                   ),
                 ),

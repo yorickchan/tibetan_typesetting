@@ -22,6 +22,8 @@ class SamplePageWidget extends StatelessWidget {
   final String? pageNumber;
   final String? highlightBlockId;
   final List<TextBlock> floatingImages;
+  final void Function(String id, double dxMm, double dyMm)? onFloatImageMove;
+  final void Function(String id, double dwMm, double dhMm)? onFloatImageResize;
 
   const SamplePageWidget({
     super.key,
@@ -34,6 +36,8 @@ class SamplePageWidget extends StatelessWidget {
     this.pageNumber,
     this.highlightBlockId,
     this.floatingImages = const [],
+    this.onFloatImageMove,
+    this.onFloatImageResize,
   });
 
   @override
@@ -118,6 +122,8 @@ class SamplePageWidget extends StatelessWidget {
                       pronunciationFont: pronFont,
                       translationFont: transFont,
                       floatingImages: floatingImages,
+                      onFloatImageMove: onFloatImageMove,
+                      onFloatImageResize: onFloatImageResize,
                     ),
                   ),
                 ),

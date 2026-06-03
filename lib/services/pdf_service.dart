@@ -697,16 +697,13 @@ class PdfService {
                 ),
               ),
             if (hImg != null && block.isImageBlock) ...[
-              () {
-                final scale = (maxW / hImg!.w).clamp(0.1, 1.0);
-                return pw.Image(
-                  hImg!.provider,
-                  width: hImg!.w * scale,
-                  height: hImg!.h * scale,
-                );
-              }(),
+              pw.Image(
+                hImg.provider,
+                width: hImg.w * (maxW / hImg.w).clamp(0.1, 1.0),
+                height: hImg.h * (maxW / hImg.w).clamp(0.1, 1.0),
+              ),
             ] else if (hImg != null)
-              pw.Image(hImg!.provider, width: hImg!.w, height: hImg!.h),
+              pw.Image(hImg.provider, width: hImg.w, height: hImg.h),
             if (bImg != null)
               pw.Padding(
                 padding: const pw.EdgeInsets.only(top: 1),
@@ -791,7 +788,7 @@ class PdfService {
                   horizontalRadius: 2,
                   verticalRadius: 2,
                   child: pw.Image(
-                    pw.MemoryImage(await File(fi.imagePath!).readAsBytes()),
+                    pw.MemoryImage(File(fi.imagePath!).readAsBytesSync()),
                     fit: pw.BoxFit.contain,
                   ),
                 ),
