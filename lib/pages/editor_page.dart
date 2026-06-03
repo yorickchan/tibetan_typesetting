@@ -245,6 +245,24 @@ class _EditorPageState extends State<EditorPage>
     });
     _bumpSave();
   }
+
+  void _onBlockReorder(List<TextBlock> pageBlocks, int oldIndex, int newIndex) {
+    if (_project == null) return;
+    final globalOld = _project!.blocks.indexOf(pageBlocks[oldIndex]);
+    if (globalOld < 0) return;
+    _undoService.pushState(_project!);
+    setState(() {
+      final blocks = List<TextBlock>.from(_project!.blocks);
+      final item = blocks.removeAt(globalOld);
+      final globalNew = newIndex > oldIndex
+          ? _project!.blocks.indexOf(pageBlocks[newIndex]) - 1
+          : _project!.blocks.indexOf(pageBlocks[newIndex]);
+      blocks.insert(globalNew, item);
+      _project = _project!.copyWith(blocks: blocks);
+      _cachedPages = null;
+    });
+    _bumpSave();
+  }
   void _toggleColumnBreak() {
     if (_project == null || _selectedBlock == null) return;
     final selectedId = _selectedId;
@@ -640,6 +658,8 @@ class _EditorPageState extends State<EditorPage>
                   onSelect: (id) => setState(() => _selectedId = id),
                   onAdd: _addBlock,
                   onAddPage: _addPage,
+                  onBlockReorder: (oldIdx, newIdx) =>
+                      _onBlockReorder(pageData.blocks, oldIdx, newIdx),
                   pageIndex: pageIdx,
                   tibetanFontFamily: tibFont.fontFamily,
                   translationFontFamily: transFont.fontFamily,
