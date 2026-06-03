@@ -215,6 +215,30 @@ class _EditorPageState extends State<EditorPage>
     _bumpSave();
   }
 
+  Future<void> _addImageBlock() async {
+    if (_project == null) return;
+    final result = await FilePicker.pickFiles(
+      type: FileType.image,
+    );
+    if (result == null || result.files.isEmpty) return;
+    if (result.files.single.path == null) return;
+
+    _undoService.pushState(_project!);
+    final id = _uuid.v4().replaceAll('-', '');
+    final block = TextBlock(id: id, imagePath: result.files.single.path);
+    final idx = _selectedIndex >= 0
+        ? _selectedIndex + 1
+        : _project!.blocks.length;
+    setState(() {
+      final blocks = List<TextBlock>.from(_project!.blocks);
+      blocks.insert(idx, block);
+      _project = _project!.copyWith(blocks: blocks);
+      _selectedId = id;
+      _cachedPages = null;
+    });
+    _bumpSave();
+  }
+
   Future<void> _importCsv() async {
     if (_project == null) return;
     final result = await FilePicker.pickFiles(
@@ -554,6 +578,27 @@ class _EditorPageState extends State<EditorPage>
                   icon: const Icon(Icons.file_upload, size: 16),
                   label: const Text(
                     'Import',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(color: AppColors.border),
+                    ),
+                  ),
+                  onPressed: _project == null ? null : _addImageBlock,
+                  icon: const Icon(Icons.image, size: 16),
+                  label: const Text(
+                    'Image',
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
                   ),
                 ),

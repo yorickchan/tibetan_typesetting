@@ -241,6 +241,7 @@ class _BlockTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Index + flags row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -255,6 +256,11 @@ class _BlockTile extends StatelessWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          if (block.isImageBlock)
+                            const Padding(
+                              padding: EdgeInsets.only(right: 2),
+                              child: Icon(Icons.image, size: 10, color: AppColors.sky400),
+                            ),
                           if (block.smallText)
                             const Text(
                               'S',
@@ -290,30 +296,38 @@ class _BlockTile extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 2),
-                  Expanded(
-                    child: Text(
-                      tibetanLine.isEmpty ? 'empty' : tibetanLine,
-                      style: TextStyle(
-                        fontFamily: block.isFreeText ? translationFontFamily : tibetanFontFamily,
-                        fontSize: 10,
-                        height: 1.2,
-                        color: tibetanLine.isEmpty
-                            ? AppColors.textFaint
-                            : (selected ? AppColors.sky400 : AppColors.textBody),
-                        fontStyle: tibetanLine.isEmpty ? FontStyle.italic : null,
+                  if (block.isImageBlock)
+                    const Expanded(
+                      child: Center(
+                        child: Icon(Icons.image, size: 18, color: AppColors.sky400),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    )
+                  else ...[
+                    const SizedBox(height: 2),
+                    Expanded(
+                      child: Text(
+                        tibetanLine.isEmpty ? 'empty' : tibetanLine,
+                        style: TextStyle(
+                          fontFamily: block.isFreeText ? translationFontFamily : tibetanFontFamily,
+                          fontSize: 10,
+                          height: 1.2,
+                          color: tibetanLine.isEmpty
+                              ? AppColors.textFaint
+                              : (selected ? AppColors.sky400 : AppColors.textBody),
+                          fontStyle: tibetanLine.isEmpty ? FontStyle.italic : null,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                  if (chineseLine.isNotEmpty)
-                    Text(
-                      chineseLine,
-                      style: TextStyle(fontFamily: translationFontFamily, fontSize: 9, color: AppColors.textMuted),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    if (chineseLine.isNotEmpty)
+                      Text(
+                        chineseLine,
+                        style: TextStyle(fontFamily: translationFontFamily, fontSize: 9, color: AppColors.textMuted),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
                 ],
               ),
             ),

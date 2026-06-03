@@ -312,6 +312,7 @@ class TextBlock {
   final bool smallText;
   final TextBlockFormat format;
   final int? columnSpan;
+  final String? imagePath;
 
   TextBlock({
     required this.id,
@@ -323,9 +324,11 @@ class TextBlock {
     this.smallText = false,
     this.format = TextBlockFormat.normal,
     this.columnSpan,
+    this.imagePath,
   });
 
   bool get isFreeText => format == TextBlockFormat.freeText;
+  bool get isImageBlock => imagePath != null && imagePath!.isNotEmpty;
 
   TextBlock copyWith({
     String? id,
@@ -337,7 +340,9 @@ class TextBlock {
     bool? smallText,
     TextBlockFormat? format,
     int? columnSpan,
+    String? imagePath,
     bool clearColumnSpan = false,
+    bool clearImagePath = false,
   }) {
     return TextBlock(
       id: id ?? this.id,
@@ -349,6 +354,7 @@ class TextBlock {
       smallText: smallText ?? this.smallText,
       format: format ?? this.format,
       columnSpan: clearColumnSpan ? null : (columnSpan ?? this.columnSpan),
+      imagePath: clearImagePath ? null : (imagePath ?? this.imagePath),
     );
   }
 
@@ -362,6 +368,7 @@ class TextBlock {
     'smallText': smallText,
     'format': format.name,
     if (columnSpan != null) 'columnSpan': columnSpan,
+    if (imagePath != null) 'imagePath': imagePath,
   };
 
   factory TextBlock.fromJson(Map<String, dynamic> json) => TextBlock(
@@ -374,6 +381,7 @@ class TextBlock {
     smallText: json['smallText'] as bool? ?? false,
     format: TextBlockFormat.fromJson(json['format'] as String?),
     columnSpan: (json['columnSpan'] as num?)?.toInt(),
+    imagePath: json['imagePath'] as String?,
   );
 }
 

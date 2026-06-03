@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'dart:ui' show Color, TextAlign;
 
 import 'package:flutter/foundation.dart';
@@ -274,7 +276,16 @@ class PdfService {
         for (var cellIndex = 0; cellIndex < row.length; cellIndex++) {
           final cell = row[cellIndex];
           final block = cell.block;
-          if (block.isFreeText) continue;
+          if (block.isImageBlock) {
+            final key = '${pi}_${ri}_$cellIndex';
+            final file = File(block.imagePath!);
+            if (await file.exists()) {
+              final bytes = await file.readAsBytes();
+              final img = _Img(pw.MemoryImage(bytes), 120, 120);
+              imgs['${key}_h'] = img;
+            }
+            continue;
+          }
 
           final key = '${pi}_${ri}_$cellIndex';
           final tibLines = splitLines(block.tibetan);
