@@ -1,0 +1,5 @@
+screenshot/auto pronunciation.png
+screenshot/edit screen.png
+screenshot/export pdf.png
+screenshot/main screen.png
+screenshot/pronunciation dictionary.png

@@ -25,9 +25,9 @@
     "semantic_hash": "5b4823eba7927b2dec4ac88a27b3f6ea"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/models/block_update.dart": {
-    "mtime": 1780343481.1230621,
-    "ast_hash": "c0eb7ed6cfb3e78cecb42a39f7992cc9",
-    "semantic_hash": "c0eb7ed6cfb3e78cecb42a39f7992cc9"
+    "mtime": 1780480519.6479592,
+    "ast_hash": "329ae1608c5da03a5856d8d1b9e0d17d",
+    "semantic_hash": "329ae1608c5da03a5856d8d1b9e0d17d"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/models/font_config.dart": {
     "mtime": 1771609803.3546264,
@@ -35,9 +35,9 @@
     "semantic_hash": "ca4f44625c185694baabf7adecfde0d3"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/models/project.dart": {
-    "mtime": 1780400410.0070581,
-    "ast_hash": "d61ea0cd91f4a96a247fae4474dcdbe1",
-    "semantic_hash": "d61ea0cd91f4a96a247fae4474dcdbe1"
+    "mtime": 1780480094.1113558,
+    "ast_hash": "dbc1e14d7cf5a2246c17051712be3c76",
+    "semantic_hash": "dbc1e14d7cf5a2246c17051712be3c76"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/models/pronunciation_entry.dart": {
     "mtime": 1780400348.5773995,
@@ -45,24 +45,24 @@
     "semantic_hash": "8d154d3603e378c853c099dba8c91941"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/pages/dictionary_page.dart": {
-    "mtime": 1780400613.5852668,
-    "ast_hash": "4a3c18f3bda80784b14a871548c87ea2",
-    "semantic_hash": "4a3c18f3bda80784b14a871548c87ea2"
+    "mtime": 1780476446.0195158,
+    "ast_hash": "74182954b41e213c6a6a58f6c5cb8c9d",
+    "semantic_hash": "74182954b41e213c6a6a58f6c5cb8c9d"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/pages/editor_page.dart": {
-    "mtime": 1780400631.4919374,
-    "ast_hash": "ffe75ecc6268034c034d24f63d733e2d",
-    "semantic_hash": "ffe75ecc6268034c034d24f63d733e2d"
+    "mtime": 1780482198.4823701,
+    "ast_hash": "fca5c10701901959d352a640ef4dfd1e",
+    "semantic_hash": "fca5c10701901959d352a640ef4dfd1e"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/pages/export_page.dart": {
-    "mtime": 1780400157.571766,
-    "ast_hash": "6ac307b48f2181c5fcb64682accbcc9f",
-    "semantic_hash": "6ac307b48f2181c5fcb64682accbcc9f"
+    "mtime": 1780477312.4652503,
+    "ast_hash": "c5d841820b0b9a28ae97c062cae9f3f5",
+    "semantic_hash": "c5d841820b0b9a28ae97c062cae9f3f5"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/pages/projects_page.dart": {
-    "mtime": 1780400428.8061953,
-    "ast_hash": "aaa791b1b83dbd7c6be4d2700da21313",
-    "semantic_hash": "aaa791b1b83dbd7c6be4d2700da21313"
+    "mtime": 1780476463.0835073,
+    "ast_hash": "67306a219d33bec802f0a71b03bd50b5",
+    "semantic_hash": "67306a219d33bec802f0a71b03bd50b5"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/pages/settings_page.dart": {
     "mtime": 1780400556.9933324,
@@ -80,14 +80,14 @@
     "semantic_hash": "30729157b1ad8dc2d0b1db400f616432"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/services/pdf_service.dart": {
-    "mtime": 1780400490.0526514,
-    "ast_hash": "869325665302d45b54c42fa8b02a45ea",
-    "semantic_hash": "869325665302d45b54c42fa8b02a45ea"
+    "mtime": 1780480968.0714293,
+    "ast_hash": "17573e5195affa17680e2555042042cf",
+    "semantic_hash": "17573e5195affa17680e2555042042cf"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/services/pronunciation_service.dart": {
-    "mtime": 1780400594.029158,
-    "ast_hash": "20bb792391c323df49097b25fd977d54",
-    "semantic_hash": "20bb792391c323df49097b25fd977d54"
+    "mtime": 1780475669.9827332,
+    "ast_hash": "502376f4992e959f44f5bcd268407a3f",
+    "semantic_hash": "502376f4992e959f44f5bcd268407a3f"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/services/settings_service.dart": {
     "mtime": 1780400550.5041256,
@@ -115,9 +115,9 @@
     "semantic_hash": "f0caa9dd23b655ee9e589b316c6aba3f"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/utils/sample_layout.dart": {
-    "mtime": 1780400238.3951988,
-    "ast_hash": "7acd697aea9d4cd74886ee33314ed7bb",
-    "semantic_hash": "7acd697aea9d4cd74886ee33314ed7bb"
+    "mtime": 1780480233.0348895,
+    "ast_hash": "b9009b5fd770fed59cc64da3571bb264",
+    "semantic_hash": "b9009b5fd770fed59cc64da3571bb264"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/utils/save_state_mixin.dart": {
     "mtime": 1780400130.4167142,
@@ -145,14 +145,14 @@
     "semantic_hash": "17be3513f9833d9c975e51e317ad104e"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/block_editor.dart": {
-    "mtime": 1780343481.1242037,
-    "ast_hash": "3efceee1993653972e84b4a7f651b52a",
-    "semantic_hash": "3efceee1993653972e84b4a7f651b52a"
+    "mtime": 1780480773.931088,
+    "ast_hash": "7b00e73b3a0c48126f4ffef28b53e14d",
+    "semantic_hash": "7b00e73b3a0c48126f4ffef28b53e14d"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/block_strip.dart": {
-    "mtime": 1780222373.6926196,
-    "ast_hash": "8a93b31c9abf0a04c57e37d0a1deeae7",
-    "semantic_hash": "8a93b31c9abf0a04c57e37d0a1deeae7"
+    "mtime": 1780477505.486201,
+    "ast_hash": "72fd1aa40033c0d1ff3df162a4c303eb",
+    "semantic_hash": "72fd1aa40033c0d1ff3df162a4c303eb"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/editor_page_setup_panel.dart": {
     "mtime": 1780345717.7798505,
@@ -190,19 +190,19 @@
     "semantic_hash": "fe97686cebe26e9901310fd15b7e914a"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/sample_page.dart": {
-    "mtime": 1780222377.5119097,
-    "ast_hash": "981e29de03021011110603702f8f32f9",
-    "semantic_hash": "981e29de03021011110603702f8f32f9"
+    "mtime": 1780481819.3178272,
+    "ast_hash": "f6b217e63d3e964c3098f462046e48e4",
+    "semantic_hash": "f6b217e63d3e964c3098f462046e48e4"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/sample_pages.dart": {
-    "mtime": 1779163257.8077304,
-    "ast_hash": "37b7696ca4ef79df9598d46c8077577b",
-    "semantic_hash": "37b7696ca4ef79df9598d46c8077577b"
+    "mtime": 1780480331.3339343,
+    "ast_hash": "f408575cfef96166b418482250205eeb",
+    "semantic_hash": "f408575cfef96166b418482250205eeb"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/scaled_preview.dart": {
-    "mtime": 1780345267.1190083,
-    "ast_hash": "604f5f61ec78bc0318078e4b76ac1922",
-    "semantic_hash": "604f5f61ec78bc0318078e4b76ac1922"
+    "mtime": 1780426402.6414926,
+    "ast_hash": "73c8e7d108c9f0918bc7d4385508b3a9",
+    "semantic_hash": "73c8e7d108c9f0918bc7d4385508b3a9"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/widgets/title_page_settings_panel.dart": {
     "mtime": 1771697232.3762121,
@@ -220,9 +220,9 @@
     "semantic_hash": "f2ea110da687e399517305dabd18bac1"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/models_test.dart": {
-    "mtime": 1780343481.1245177,
-    "ast_hash": "410d33a1c1fbc4c715bc4c0bb4012dc0",
-    "semantic_hash": "410d33a1c1fbc4c715bc4c0bb4012dc0"
+    "mtime": 1780480128.1775432,
+    "ast_hash": "6ba430ff86eb587e3a84ea25c2481c62",
+    "semantic_hash": "6ba430ff86eb587e3a84ea25c2481c62"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/page_setup_widgets_test.dart": {
     "mtime": 1780345672.049822,
@@ -230,9 +230,9 @@
     "semantic_hash": "e1c31f3cef28c5da500a4c625c2d9102"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/pagination_test.dart": {
-    "mtime": 1780343481.124604,
-    "ast_hash": "007135f89c87207482fdb8c541088801",
-    "semantic_hash": "007135f89c87207482fdb8c541088801"
+    "mtime": 1780480205.0490484,
+    "ast_hash": "e76f4e2f86bfb46861d7a594b2bed3e7",
+    "semantic_hash": "e76f4e2f86bfb46861d7a594b2bed3e7"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/preview_zoom_widgets_test.dart": {
     "mtime": 1780345253.064326,
@@ -295,8 +295,653 @@
     "semantic_hash": "4725a0e1d7a200afc68ee8f909547cfb"
   },
   "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/pubspec.yaml": {
-    "mtime": 1780400645.6574965,
-    "ast_hash": "1063073f1e0e923744aade09d1305f28",
-    "semantic_hash": "1063073f1e0e923744aade09d1305f28"
+    "mtime": 1780476277.4351668,
+    "ast_hash": "eddcd719f05b86008ed376c494ad5e50",
+    "semantic_hash": "eddcd719f05b86008ed376c494ad5e50"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/.claude/settings.local.json": {
+    "mtime": 1771748075.7756197,
+    "ast_hash": "8ea7ab33cc9b1348917b9e4334807057",
+    "semantic_hash": "8ea7ab33cc9b1348917b9e4334807057"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/.opencode/opencode.json": {
+    "mtime": 1780424563.812686,
+    "ast_hash": "e5f74d14a81702b55bdf53b33ec991d7",
+    "semantic_hash": "e5f74d14a81702b55bdf53b33ec991d7"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/.opencode/package.json": {
+    "mtime": 1780424569.9142168,
+    "ast_hash": "d3ab821609ec487b22aa5b0027f5f400",
+    "semantic_hash": "d3ab821609ec487b22aa5b0027f5f400"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/.opencode/plugins/graphify.js": {
+    "mtime": 1780434137.1063287,
+    "ast_hash": "64ccd3c03dbfe0980b6095766f5c4e52",
+    "semantic_hash": "64ccd3c03dbfe0980b6095766f5c4e52"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/.qoder/settings.local.json": {
+    "mtime": 1780482902.682112,
+    "ast_hash": "db4f8f7622348ab73cf5ff305f96539e",
+    "semantic_hash": "db4f8f7622348ab73cf5ff305f96539e"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/.remember/tmp/last-ndc.ts": {
+    "mtime": 1780399451.7443624,
+    "ast_hash": "ec9f0c71d9f7eeefb37885e4017c946c",
+    "semantic_hash": "ec9f0c71d9f7eeefb37885e4017c946c"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/.remember/tmp/last-save.json": {
+    "mtime": 1780399451.2790697,
+    "ast_hash": "be9a5ad8239cb88c1dbe683370aa231d",
+    "semantic_hash": "be9a5ad8239cb88c1dbe683370aa231d"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/android/app/build.gradle.kts": {
+    "mtime": 1771500156.0856948,
+    "ast_hash": "0c6c0ebdf576fbec8ffdfa8c770207b0",
+    "semantic_hash": "0c6c0ebdf576fbec8ffdfa8c770207b0"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java": {
+    "mtime": 1780475703.5585613,
+    "ast_hash": "9465370add297f50982df22d2a68ca38",
+    "semantic_hash": "9465370add297f50982df22d2a68ca38"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/android/app/src/main/kotlin/com/example/tibetan_typesetting/MainActivity.kt": {
+    "mtime": 1771500156.0860329,
+    "ast_hash": "f95c6fd1cc1d2cf7b70567422dd70b7b",
+    "semantic_hash": "f95c6fd1cc1d2cf7b70567422dd70b7b"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/android/build.gradle.kts": {
+    "mtime": 1771500156.0853915,
+    "ast_hash": "f11f360aed44d4f6871b398346af14f0",
+    "semantic_hash": "f11f360aed44d4f6871b398346af14f0"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/android/gradlew": {
+    "mtime": 1779159140.17719,
+    "ast_hash": "7f1cd7eb3f75a1dc85cd37753972a6e2",
+    "semantic_hash": "7f1cd7eb3f75a1dc85cd37753972a6e2"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/android/settings.gradle.kts": {
+    "mtime": 1771500156.0841582,
+    "ast_hash": "094e3cafe85d4dbf756dfe0bd754c6cb",
+    "semantic_hash": "094e3cafe85d4dbf756dfe0bd754c6cb"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework/Package.swift": {
+    "mtime": 1780482326.4738293,
+    "ast_hash": "0be97e7c440958734803cc9f1f14cd7f",
+    "semantic_hash": "0be97e7c440958734803cc9f1f14cd7f"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework/Sources/FlutterFramework/FlutterFramework.swift": {
+    "mtime": 1780482326.472947,
+    "ast_hash": "e6366d8685ad56268730656aa0a6e00c",
+    "semantic_hash": "e6366d8685ad56268730656aa0a6e00c"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift": {
+    "mtime": 1780482326.474597,
+    "ast_hash": "0313c69fe3d40d11317eb1e7632031b4",
+    "semantic_hash": "0313c69fe3d40d11317eb1e7632031b4"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Sources/FlutterGeneratedPluginSwiftPackage/FlutterGeneratedPluginSwiftPackage.swift": {
+    "mtime": 1779429075.724521,
+    "ast_hash": "e6366d8685ad56268730656aa0a6e00c",
+    "semantic_hash": "e6366d8685ad56268730656aa0a6e00c"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Flutter/ephemeral/flutter_lldb_helper.py": {
+    "mtime": 1779429075.6550012,
+    "ast_hash": "98fc75412162af387e2e3461e4e58094",
+    "semantic_hash": "98fc75412162af387e2e3461e4e58094"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Flutter/flutter_export_environment.sh": {
+    "mtime": 1779429075.657232,
+    "ast_hash": "cf0a3ac45606f6ae5d17ca4fccc82805",
+    "semantic_hash": "cf0a3ac45606f6ae5d17ca4fccc82805"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/AppDelegate.swift": {
+    "mtime": 1771153785.2807586,
+    "ast_hash": "2bd8469f2a4b701ff582f6574e58b13c",
+    "semantic_hash": "2bd8469f2a4b701ff582f6574e58b13c"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json": {
+    "mtime": 1753805016.5824144,
+    "ast_hash": "c3cdf9688b604d14f2e76a8287e16167",
+    "semantic_hash": "c3cdf9688b604d14f2e76a8287e16167"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json": {
+    "mtime": 1753805016.5833776,
+    "ast_hash": "770f4f65e02ca2fc57f46f4f4148d15d",
+    "semantic_hash": "770f4f65e02ca2fc57f46f4f4148d15d"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/GeneratedPluginRegistrant.h": {
+    "mtime": 1771500157.2177105,
+    "ast_hash": "decb9041b5e91a07e66f4664e5dac408",
+    "semantic_hash": "decb9041b5e91a07e66f4664e5dac408"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/GeneratedPluginRegistrant.m": {
+    "mtime": 1779427681.088459,
+    "ast_hash": "482f5f2f26db93447733db6dac6f0716",
+    "semantic_hash": "482f5f2f26db93447733db6dac6f0716"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Runner-Bridging-Header.h": {
+    "mtime": 1757351160.584852,
+    "ast_hash": "e07862ac930ed4d8479185d52c6cc66d",
+    "semantic_hash": "e07862ac930ed4d8479185d52c6cc66d"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/SceneDelegate.swift": {
+    "mtime": 1771153785.281,
+    "ast_hash": "748d701e783e68faf618c00464257a19",
+    "semantic_hash": "748d701e783e68faf618c00464257a19"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/RunnerTests/RunnerTests.swift": {
+    "mtime": 1771500156.0491056,
+    "ast_hash": "a225a382d14d7b16b6f602a5c1d49331",
+    "semantic_hash": "a225a382d14d7b16b6f602a5c1d49331"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/services/batch_import_service.dart": {
+    "mtime": 1780475197.935549,
+    "ast_hash": "5c86ecd6b15bd18436cd968d3e0e47df",
+    "semantic_hash": "5c86ecd6b15bd18436cd968d3e0e47df"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/services/html_export_service.dart": {
+    "mtime": 1780475595.049805,
+    "ast_hash": "2cbca63141f86fde8bb72699eed3cca7",
+    "semantic_hash": "2cbca63141f86fde8bb72699eed3cca7"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/services/image_cache_service.dart": {
+    "mtime": 1780475694.3528392,
+    "ast_hash": "bc6287839a85d484235f147572113a58",
+    "semantic_hash": "bc6287839a85d484235f147572113a58"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/services/undo_service.dart": {
+    "mtime": 1780474654.429991,
+    "ast_hash": "08716c81433fddbcf27c53e76ef517fa",
+    "semantic_hash": "08716c81433fddbcf27c53e76ef517fa"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/lib/utils/wylie_converter.dart": {
+    "mtime": 1780475884.1546257,
+    "ast_hash": "27745bb6cbfdbed1594c6eee8c162878",
+    "semantic_hash": "27745bb6cbfdbed1594c6eee8c162878"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/linux/flutter/generated_plugin_registrant.cc": {
+    "mtime": 1779427681.0855167,
+    "ast_hash": "d07afe003d5837167bdd357d593f20a0",
+    "semantic_hash": "d07afe003d5837167bdd357d593f20a0"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/linux/flutter/generated_plugin_registrant.h": {
+    "mtime": 1771500157.2157075,
+    "ast_hash": "d295462c9da9f7fef22dc86c34492318",
+    "semantic_hash": "d295462c9da9f7fef22dc86c34492318"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/linux/runner/main.cc": {
+    "mtime": 1753805016.5848129,
+    "ast_hash": "0643b8609698e96b3abd63c210361a87",
+    "semantic_hash": "0643b8609698e96b3abd63c210361a87"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/linux/runner/my_application.cc": {
+    "mtime": 1771500156.090179,
+    "ast_hash": "4cb3e85bf18735bf1022d87b6f247355",
+    "semantic_hash": "4cb3e85bf18735bf1022d87b6f247355"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/linux/runner/my_application.h": {
+    "mtime": 1763103777.5132916,
+    "ast_hash": "326a85d68857137fdfe8698a0c071baf",
+    "semantic_hash": "326a85d68857137fdfe8698a0c071baf"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Flutter/GeneratedPluginRegistrant.swift": {
+    "mtime": 1779427681.0892792,
+    "ast_hash": "964d781dbabfff768db9c19f8dc990f7",
+    "semantic_hash": "964d781dbabfff768db9c19f8dc990f7"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Flutter/ephemeral/Packages/.packages/FlutterFramework/Package.swift": {
+    "mtime": 1780482326.5085793,
+    "ast_hash": "0be97e7c440958734803cc9f1f14cd7f",
+    "semantic_hash": "0be97e7c440958734803cc9f1f14cd7f"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Flutter/ephemeral/Packages/.packages/FlutterFramework/Sources/FlutterFramework/FlutterFramework.swift": {
+    "mtime": 1780482326.508167,
+    "ast_hash": "e6366d8685ad56268730656aa0a6e00c",
+    "semantic_hash": "e6366d8685ad56268730656aa0a6e00c"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift": {
+    "mtime": 1780482326.5091617,
+    "ast_hash": "00772f50ec661389beb202d2bdc45fda",
+    "semantic_hash": "00772f50ec661389beb202d2bdc45fda"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Sources/FlutterGeneratedPluginSwiftPackage/FlutterGeneratedPluginSwiftPackage.swift": {
+    "mtime": 1779429075.7575212,
+    "ast_hash": "e6366d8685ad56268730656aa0a6e00c",
+    "semantic_hash": "e6366d8685ad56268730656aa0a6e00c"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Flutter/ephemeral/flutter_export_environment.sh": {
+    "mtime": 1780482328.9263144,
+    "ast_hash": "6fe1349cd9b2a5d3b3a2301e200b3d2b",
+    "semantic_hash": "6fe1349cd9b2a5d3b3a2301e200b3d2b"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Pods/Target Support Files/Pods-Runner/Pods-Runner-dummy.m": {
+    "mtime": 1779429226.3254895,
+    "ast_hash": "d3f88e6bc5bffb456bd31d3ae36c9256",
+    "semantic_hash": "d3f88e6bc5bffb456bd31d3ae36c9256"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Pods/Target Support Files/Pods-Runner/Pods-Runner-umbrella.h": {
+    "mtime": 1779429226.3237686,
+    "ast_hash": "814a4c2d3024597e419f66f6f048d39e",
+    "semantic_hash": "814a4c2d3024597e419f66f6f048d39e"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Pods/Target Support Files/Pods-RunnerTests/Pods-RunnerTests-dummy.m": {
+    "mtime": 1779429226.3276448,
+    "ast_hash": "097dfaf08332f413805fcca47157791c",
+    "semantic_hash": "097dfaf08332f413805fcca47157791c"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Pods/Target Support Files/Pods-RunnerTests/Pods-RunnerTests-umbrella.h": {
+    "mtime": 1779429226.3271425,
+    "ast_hash": "c23802aedf43339011f9ddde1d7d0c49",
+    "semantic_hash": "c23802aedf43339011f9ddde1d7d0c49"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Runner/AppDelegate.swift": {
+    "mtime": 1753805016.5858672,
+    "ast_hash": "2a7411ae3e7c6715525b94b6f8d2e80b",
+    "semantic_hash": "2a7411ae3e7c6715525b94b6f8d2e80b"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json": {
+    "mtime": 1771786483.8077223,
+    "ast_hash": "805294427bc0c1cf0c22609b008b7300",
+    "semantic_hash": "805294427bc0c1cf0c22609b008b7300"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Runner/MainFlutterWindow.swift": {
+    "mtime": 1779160897.747689,
+    "ast_hash": "b8455e8aa6bb2a572ad9ea44dfd1b95d",
+    "semantic_hash": "b8455e8aa6bb2a572ad9ea44dfd1b95d"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/RunnerTests/RunnerTests.swift": {
+    "mtime": 1771500156.069091,
+    "ast_hash": "97d3a20fd20a063c192e886d1822b4a8",
+    "semantic_hash": "97d3a20fd20a063c192e886d1822b4a8"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/batch_import_service_test.dart": {
+    "mtime": 1780475097.0314872,
+    "ast_hash": "5670157b843969b7fdc17f48b0c9ee9a",
+    "semantic_hash": "5670157b843969b7fdc17f48b0c9ee9a"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/html_export_service_test.dart": {
+    "mtime": 1780475647.1573296,
+    "ast_hash": "9494caf1ae5fa2252396e1ae558c5ecc",
+    "semantic_hash": "9494caf1ae5fa2252396e1ae558c5ecc"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/undo_service_test.dart": {
+    "mtime": 1780474667.792096,
+    "ast_hash": "19ada01b8892b510e598246c28e0969f",
+    "semantic_hash": "19ada01b8892b510e598246c28e0969f"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/wylie_converter_test.dart": {
+    "mtime": 1780475711.6527064,
+    "ast_hash": "829258f8ee9d0ba118fe7edbb8cbd50a",
+    "semantic_hash": "829258f8ee9d0ba118fe7edbb8cbd50a"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/test/zoom_overflow_test.dart": {
+    "mtime": 1780426584.824599,
+    "ast_hash": "eb4aa0337b02e79961b43cd02001bed0",
+    "semantic_hash": "eb4aa0337b02e79961b43cd02001bed0"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/web/manifest.json": {
+    "mtime": 1771500156.0659313,
+    "ast_hash": "ff97558876e15ec95063c50a16da8af7",
+    "semantic_hash": "ff97558876e15ec95063c50a16da8af7"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/windows/flutter/generated_plugin_registrant.cc": {
+    "mtime": 1779427681.0868409,
+    "ast_hash": "a8f91348d8d9090f22ec69d597c41e1f",
+    "semantic_hash": "a8f91348d8d9090f22ec69d597c41e1f"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/windows/flutter/generated_plugin_registrant.h": {
+    "mtime": 1771500157.2167149,
+    "ast_hash": "0ea33875f9f8e118f9c2ded03e2e2835",
+    "semantic_hash": "0ea33875f9f8e118f9c2ded03e2e2835"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/windows/runner/flutter_window.cpp": {
+    "mtime": 1753805016.588626,
+    "ast_hash": "9b92b95a9eecce25e3e9d356688d0cb6",
+    "semantic_hash": "9b92b95a9eecce25e3e9d356688d0cb6"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/windows/runner/flutter_window.h": {
+    "mtime": 1753805016.588717,
+    "ast_hash": "79bea736711adda00c49419a39a4a0b4",
+    "semantic_hash": "79bea736711adda00c49419a39a4a0b4"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/windows/runner/main.cpp": {
+    "mtime": 1771500156.0437343,
+    "ast_hash": "51da60c63e9e60ab761549bea0ad5051",
+    "semantic_hash": "51da60c63e9e60ab761549bea0ad5051"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/windows/runner/resource.h": {
+    "mtime": 1753805016.5888603,
+    "ast_hash": "c8f809a4f8d3f2f625e358fd90f72fee",
+    "semantic_hash": "c8f809a4f8d3f2f625e358fd90f72fee"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/windows/runner/utils.cpp": {
+    "mtime": 1753805016.5890517,
+    "ast_hash": "9b5697b276c8ad67a02ec12ad2c09851",
+    "semantic_hash": "9b5697b276c8ad67a02ec12ad2c09851"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/windows/runner/utils.h": {
+    "mtime": 1753805016.5891325,
+    "ast_hash": "c741fb9cddbf3a62f4688b6cca39ddcc",
+    "semantic_hash": "c741fb9cddbf3a62f4688b6cca39ddcc"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/windows/runner/win32_window.cpp": {
+    "mtime": 1753805016.5892215,
+    "ast_hash": "928e86a2be27eca688669dce6c9177d9",
+    "semantic_hash": "928e86a2be27eca688669dce6c9177d9"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/windows/runner/win32_window.h": {
+    "mtime": 1753805016.5893044,
+    "ast_hash": "5a4cf051798d7e6931ee0405a4523c8f",
+    "semantic_hash": "5a4cf051798d7e6931ee0405a4523c8f"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/.github/workflows/release.yml": {
+    "mtime": 1771626679.5576499,
+    "ast_hash": "67809f2aa082900734a84a847dd89109",
+    "semantic_hash": "67809f2aa082900734a84a847dd89109"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/.remember/now.md": {
+    "mtime": 1780399468.5913692,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/.remember/today-2026-06-02.md": {
+    "mtime": 1780399468.5911386,
+    "ast_hash": "190a592ebb2b8ac0a879b90059c5b5ff",
+    "semantic_hash": "190a592ebb2b8ac0a879b90059c5b5ff"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/.sisyphus/plans/tibetan-pronunciation-dictionary.md": {
+    "mtime": 1771704053.8755941,
+    "ast_hash": "00f9aba2b7ae34a74969c8159ee28749",
+    "semantic_hash": "00f9aba2b7ae34a74969c8159ee28749"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/docs/superpowers/plans/2026-05-26-free-text-block.md": {
+    "mtime": 1779735772.85451,
+    "ast_hash": "00a127779b4d259ed0b478abc4672b5e",
+    "semantic_hash": "00a127779b4d259ed0b478abc4672b5e"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/docs/superpowers/plans/2026-06-02-code-quality-optimization.md": {
+    "mtime": 1780341792.2867708,
+    "ast_hash": "45c0b70b47758fb50d7578035f72a9fd",
+    "semantic_hash": "45c0b70b47758fb50d7578035f72a9fd"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/docs/superpowers/plans/2026-06-02-editor-page-setup-and-zoom.md": {
+    "mtime": 1780344762.161684,
+    "ast_hash": "a2c81490a2b50f35f9ad1284dd5a34ea",
+    "semantic_hash": "a2c81490a2b50f35f9ad1284dd5a34ea"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/docs/superpowers/plans/2026-06-03-comprehensive-features.md": {
+    "mtime": 1780474609.1475852,
+    "ast_hash": "ea13f829d5ac6576f864e9d5b4857cd4",
+    "semantic_hash": "ea13f829d5ac6576f864e9d5b4857cd4"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/docs/superpowers/plans/2026-06-03-floating-image-blocks.md": {
+    "mtime": 1780479969.1807303,
+    "ast_hash": "2123a8d53be87f9cfb15ca7d733772de",
+    "semantic_hash": "2123a8d53be87f9cfb15ca7d733772de"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/docs/superpowers/specs/2026-05-26-free-text-block-design.md": {
+    "mtime": 1779735772.8035977,
+    "ast_hash": "97f4d01f9279f1e56cbc2f977e4eac40",
+    "semantic_hash": "97f4d01f9279f1e56cbc2f977e4eac40"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/docs/superpowers/specs/2026-06-02-code-quality-optimization-design.md": {
+    "mtime": 1780341657.9108636,
+    "ast_hash": "725a394f043d019ca8f0773d990dc7a1",
+    "semantic_hash": "725a394f043d019ca8f0773d990dc7a1"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/docs/superpowers/specs/2026-06-02-editor-page-setup-and-zoom-design.md": {
+    "mtime": 1780344517.8808982,
+    "ast_hash": "01fffc1cb91f8709abadccf5184b037b",
+    "semantic_hash": "01fffc1cb91f8709abadccf5184b037b"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md": {
+    "mtime": 1753805016.5836658,
+    "ast_hash": "e175e436acacf76c814d83532d0b662c",
+    "semantic_hash": "e175e436acacf76c814d83532d0b662c"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/linux/CMakeLists.txt": {
+    "mtime": 1771500156.0912056,
+    "ast_hash": "781de35455a68ffbed17744f7411fa0c",
+    "semantic_hash": "781de35455a68ffbed17744f7411fa0c"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/linux/flutter/CMakeLists.txt": {
+    "mtime": 1753805016.5844595,
+    "ast_hash": "46690fb8ffaf7d227d8bc4713f31140d",
+    "semantic_hash": "46690fb8ffaf7d227d8bc4713f31140d"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/linux/runner/CMakeLists.txt": {
+    "mtime": 1753805016.5845656,
+    "ast_hash": "6d75431dc21756981b53a7494c836311",
+    "semantic_hash": "6d75431dc21756981b53a7494c836311"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/web/index.html": {
+    "mtime": 1771500156.0656493,
+    "ast_hash": "1c2b62a31c69f62e6915c72cdf743a79",
+    "semantic_hash": "1c2b62a31c69f62e6915c72cdf743a79"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/windows/CMakeLists.txt": {
+    "mtime": 1771500156.046845,
+    "ast_hash": "e4cb1f02054bfd25116554cb63b9ba7a",
+    "semantic_hash": "e4cb1f02054bfd25116554cb63b9ba7a"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/windows/flutter/CMakeLists.txt": {
+    "mtime": 1753805016.5883272,
+    "ast_hash": "0c500410e3259a9a053797dc1c28070e",
+    "semantic_hash": "0c500410e3259a9a053797dc1c28070e"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/windows/runner/CMakeLists.txt": {
+    "mtime": 1753805016.5884225,
+    "ast_hash": "e99a99b5cc82a168fc557eb23b8d5a96",
+    "semantic_hash": "e99a99b5cc82a168fc557eb23b8d5a96"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/android/app/src/main/res/mipmap-hdpi/ic_launcher.png": {
+    "mtime": 1753805016.5794735,
+    "ast_hash": "13e9c72ec37fac220397aa819fa1ef2d",
+    "semantic_hash": "13e9c72ec37fac220397aa819fa1ef2d"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/android/app/src/main/res/mipmap-mdpi/ic_launcher.png": {
+    "mtime": 1753805016.5795605,
+    "ast_hash": "6270344430679711b81476e29878caa7",
+    "semantic_hash": "6270344430679711b81476e29878caa7"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png": {
+    "mtime": 1753805016.579642,
+    "ast_hash": "a0a8db5985280b3679d99a820ae2db79",
+    "semantic_hash": "a0a8db5985280b3679d99a820ae2db79"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png": {
+    "mtime": 1753805016.5797224,
+    "ast_hash": "afe1b655b9f32da22f9a4301bb8e6ba8",
+    "semantic_hash": "afe1b655b9f32da22f9a4301bb8e6ba8"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png": {
+    "mtime": 1753805016.5798097,
+    "ast_hash": "57838d52c318faff743130c3fcfae0c6",
+    "semantic_hash": "57838d52c318faff743130c3fcfae0c6"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/assets/images/dharma_wheel.svg": {
+    "mtime": 1771626058.6240323,
+    "ast_hash": "4d70f4b1493492e1798b408fcc82ad6e",
+    "semantic_hash": "4d70f4b1493492e1798b408fcc82ad6e"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/assets/images/icon.png": {
+    "mtime": 1771786255.0621111,
+    "ast_hash": "5ce2d0c75978f609076a84faa888d015",
+    "semantic_hash": "5ce2d0c75978f609076a84faa888d015"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png": {
+    "mtime": 1750531984.7258532,
+    "ast_hash": "c785f8932297af4acd5f5ccb7630f01c",
+    "semantic_hash": "c785f8932297af4acd5f5ccb7630f01c"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png": {
+    "mtime": 1750531984.7273974,
+    "ast_hash": "a2f8558fb1d42514111fbbb19fb67314",
+    "semantic_hash": "a2f8558fb1d42514111fbbb19fb67314"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png": {
+    "mtime": 1750531984.7222946,
+    "ast_hash": "2247a840b6ee72b8a069208af170e5b1",
+    "semantic_hash": "2247a840b6ee72b8a069208af170e5b1"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png": {
+    "mtime": 1750531984.732014,
+    "ast_hash": "1b3b1538136316263c7092951e923e9d",
+    "semantic_hash": "1b3b1538136316263c7092951e923e9d"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png": {
+    "mtime": 1750531984.7483478,
+    "ast_hash": "be8887071dd7ec39cb754d236aa9584f",
+    "semantic_hash": "be8887071dd7ec39cb754d236aa9584f"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png": {
+    "mtime": 1750531984.7151754,
+    "ast_hash": "043119ef4faa026ff82bd03f241e5338",
+    "semantic_hash": "043119ef4faa026ff82bd03f241e5338"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png": {
+    "mtime": 1750531984.7294285,
+    "ast_hash": "2b1452c4c1bda6177b4fbbb832df217f",
+    "semantic_hash": "2b1452c4c1bda6177b4fbbb832df217f"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png": {
+    "mtime": 1750531984.7171915,
+    "ast_hash": "2247a840b6ee72b8a069208af170e5b1",
+    "semantic_hash": "2247a840b6ee72b8a069208af170e5b1"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png": {
+    "mtime": 1750531984.7416012,
+    "ast_hash": "8245359312aea1b0d2412f79a07b0ca5",
+    "semantic_hash": "8245359312aea1b0d2412f79a07b0ca5"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png": {
+    "mtime": 1750531984.71888,
+    "ast_hash": "5b3c0902200ce596e9848f22e1f0fe0e",
+    "semantic_hash": "5b3c0902200ce596e9848f22e1f0fe0e"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png": {
+    "mtime": 1750531984.7245586,
+    "ast_hash": "5b3c0902200ce596e9848f22e1f0fe0e",
+    "semantic_hash": "5b3c0902200ce596e9848f22e1f0fe0e"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png": {
+    "mtime": 1750531984.7131512,
+    "ast_hash": "e419d22a37bc40ba185aca1acb6d4ac6",
+    "semantic_hash": "e419d22a37bc40ba185aca1acb6d4ac6"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png": {
+    "mtime": 1750531984.7205932,
+    "ast_hash": "36c0d7a7132bdde18898ffdfcfcdc4d2",
+    "semantic_hash": "36c0d7a7132bdde18898ffdfcfcdc4d2"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png": {
+    "mtime": 1750531984.7516284,
+    "ast_hash": "643842917530acf4c5159ae851b0baf2",
+    "semantic_hash": "643842917530acf4c5159ae851b0baf2"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png": {
+    "mtime": 1750531984.7338321,
+    "ast_hash": "665cb5e3c5729da6d639d26eff47a503",
+    "semantic_hash": "665cb5e3c5729da6d639d26eff47a503"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png": {
+    "mtime": 1750531984.7115083,
+    "ast_hash": "978c1bee49d7ad5fc1a4d81099b13e18",
+    "semantic_hash": "978c1bee49d7ad5fc1a4d81099b13e18"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png": {
+    "mtime": 1750531984.7087822,
+    "ast_hash": "978c1bee49d7ad5fc1a4d81099b13e18",
+    "semantic_hash": "978c1bee49d7ad5fc1a4d81099b13e18"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png": {
+    "mtime": 1750531984.7057936,
+    "ast_hash": "978c1bee49d7ad5fc1a4d81099b13e18",
+    "semantic_hash": "978c1bee49d7ad5fc1a4d81099b13e18"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png": {
+    "mtime": 1771786483.8038666,
+    "ast_hash": "3284eb0890b56670d1d8c2155793a922",
+    "semantic_hash": "3284eb0890b56670d1d8c2155793a922"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png": {
+    "mtime": 1771786483.491059,
+    "ast_hash": "bc3e18449e6c1d1ee24a1ec4995ed9c2",
+    "semantic_hash": "bc3e18449e6c1d1ee24a1ec4995ed9c2"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png": {
+    "mtime": 1771786483.4560697,
+    "ast_hash": "1b30e7622dd8b4a73099127332db4632",
+    "semantic_hash": "1b30e7622dd8b4a73099127332db4632"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png": {
+    "mtime": 1771786483.5252702,
+    "ast_hash": "079e0416c5ac66404b4a91b50a43a863",
+    "semantic_hash": "079e0416c5ac66404b4a91b50a43a863"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png": {
+    "mtime": 1771786483.4735262,
+    "ast_hash": "85fc26f07bfedb09bc3b0bfd3ee6ab7e",
+    "semantic_hash": "85fc26f07bfedb09bc3b0bfd3ee6ab7e"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png": {
+    "mtime": 1771786483.6216128,
+    "ast_hash": "6f797efeba13cfcd0fc227aa9d2bca68",
+    "semantic_hash": "6f797efeba13cfcd0fc227aa9d2bca68"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png": {
+    "mtime": 1771786483.481396,
+    "ast_hash": "ca42de4f529f7166ea245d9bf2190fad",
+    "semantic_hash": "ca42de4f529f7166ea245d9bf2190fad"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/screenshot/auto pronunciation.png": {
+    "mtime": 1771716249.9092903,
+    "ast_hash": "4075ba40715bf58b18a93c3d3f542cf3",
+    "semantic_hash": "4075ba40715bf58b18a93c3d3f542cf3"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/screenshot/edit screen.png": {
+    "mtime": 1771626291.2537272,
+    "ast_hash": "1800d0596c3284310434a5909c278c4b",
+    "semantic_hash": "1800d0596c3284310434a5909c278c4b"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/screenshot/export pdf.png": {
+    "mtime": 1771626291.2512012,
+    "ast_hash": "01789db3d0cd4c57faed32f6657e2b11",
+    "semantic_hash": "01789db3d0cd4c57faed32f6657e2b11"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/screenshot/main screen.png": {
+    "mtime": 1771626291.260981,
+    "ast_hash": "c0b7fa175cff47627bc21a3a326104cb",
+    "semantic_hash": "c0b7fa175cff47627bc21a3a326104cb"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/screenshot/pronunciation dictionary.png": {
+    "mtime": 1771716249.8969588,
+    "ast_hash": "976383f229b447ea76961d1d66ec6f04",
+    "semantic_hash": "976383f229b447ea76961d1d66ec6f04"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/web/favicon.png": {
+    "mtime": 1753805016.5875604,
+    "ast_hash": "5dcef449791fa27946b3d35ad8803796",
+    "semantic_hash": "5dcef449791fa27946b3d35ad8803796"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/web/icons/Icon-192.png": {
+    "mtime": 1753805016.587681,
+    "ast_hash": "ac9a721a12bbc803b44f645561ecb1e1",
+    "semantic_hash": "ac9a721a12bbc803b44f645561ecb1e1"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/web/icons/Icon-512.png": {
+    "mtime": 1753805016.5877917,
+    "ast_hash": "96e752610906ba2a93c65f8abe1645f1",
+    "semantic_hash": "96e752610906ba2a93c65f8abe1645f1"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/web/icons/Icon-maskable-192.png": {
+    "mtime": 1750531984.8325558,
+    "ast_hash": "c457ef57daa1d16f64b27b786ec2ea3c",
+    "semantic_hash": "c457ef57daa1d16f64b27b786ec2ea3c"
+  },
+  "/Users/yorick/Projects/tibetan_typesetting/tibetan_typesetting/web/icons/Icon-maskable-512.png": {
+    "mtime": 1750531984.8310812,
+    "ast_hash": "301a7604d45b3e739efc881eb04896ea",
+    "semantic_hash": "301a7604d45b3e739efc881eb04896ea"
   }
 }
