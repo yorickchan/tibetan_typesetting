@@ -142,6 +142,8 @@ List<PageLayout> paginateBlocks(
 }
 
 double estimateBlockWidthFraction(TextBlock block) {
+  if (block.isImageBlock) return 0.45;
+
   final manual = block.columnSpan;
   if (manual != null) {
     return manual.clamp(1, maxColumnSpan) / maxColumnSpan;

@@ -108,11 +108,11 @@ void main() {
     expect(foundImage, true);
   });
 
-  test('image blocks get minimum width fraction', () {
+  test('image blocks get wider default width fraction', () {
     final block = TextBlock(id: 'img', imagePath: '/tmp/test.png');
     final fraction = estimateBlockWidthFraction(block);
-    expect(fraction, greaterThanOrEqualTo(0.09));
-    expect(fraction, lessThanOrEqualTo(0.15));
+    expect(fraction, greaterThanOrEqualTo(0.4));
+    expect(fraction, lessThanOrEqualTo(0.5));
   });
 
   });

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'dart:ui' show Color, TextAlign;
+import 'dart:ui' show Color, TextAlign, instantiateImageCodec;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -281,8 +281,18 @@ class PdfService {
             final file = File(block.imagePath!);
             if (await file.exists()) {
               final bytes = await file.readAsBytes();
-              final img = _Img(pw.MemoryImage(bytes), 120, 120);
-              imgs['${key}_h'] = img;
+              // Decode to get actual dimensions for proper scaling
+              double w = 120, h = 120;
+              try {
+                final codec = await instantiateImageCodec(bytes);
+                final frame = await codec.getNextFrame();
+                w = frame.image.width.toDouble();
+                h = frame.image.height.toDouble();
+                frame.image.dispose();
+              } catch (_) {
+                // Fall back to default size
+              }
+              imgs['${key}_h'] = _Img(pw.MemoryImage(bytes), w, h);
             }
             continue;
           }
@@ -654,7 +664,7 @@ class PdfService {
             : normalRowH;
       }
 
-      pw.Widget buildBlock(String key, TextBlock block, bool hasMark) {
+      pw.Widget buildBlock(String key, TextBlock block, bool hasMark, double maxW) {
         final small = block.smallText;
         final freeText = block.isFreeText;
         final hSize = contentTibetanFontSize(tibFontSize, smallText: small);
@@ -686,8 +696,17 @@ class PdfService {
                   lineSpacing: transSize * 0.4,
                 ),
               ),
-            if (hImg != null)
-              pw.Image(hImg.provider, width: hImg.w, height: hImg.h),
+            if (hImg != null && block.isImageBlock) ...[
+              () {
+                final scale = (maxW / hImg!.w).clamp(0.1, 1.0);
+                return pw.Image(
+                  hImg!.provider,
+                  width: hImg!.w * scale,
+                  height: hImg!.h * scale,
+                );
+              }(),
+            ] else if (hImg != null)
+              pw.Image(hImg!.provider, width: hImg!.w, height: hImg!.h),
             if (bImg != null)
               pw.Padding(
                 padding: const pw.EdgeInsets.only(top: 1),
@@ -747,7 +766,7 @@ class PdfService {
               top: rowYs[ri] + padY,
               child: pw.SizedBox(
                 width: blockW,
-                child: buildBlock(key, block, hasMark),
+                child: buildBlock(key, block, hasMark, blockW),
               ),
             ),
           );
