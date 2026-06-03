@@ -16,6 +16,7 @@ import '../utils/font_constants.dart';
 import '../utils/save_state_mixin.dart';
 import '../utils/font_utils.dart' as font_utils;
 import '../utils/sample_layout.dart';
+import '../services/undo_service.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/block_editor.dart';
 import '../widgets/block_strip.dart';
@@ -54,6 +55,7 @@ class _EditorPageState extends State<EditorPage>
   Timer? _saveTimer;
   List<_PageWithBlocks>? _cachedPages;
   List<TextBlock>? _lastBlocks;
+  final _undoService = UndoService();
   double _zoom = 1.0;
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
@@ -142,6 +144,7 @@ class _EditorPageState extends State<EditorPage>
   void _updateBlock(BlockUpdate update) {
     if (_project == null || _selectedBlock == null) return;
     final selectedId = _selectedId;
+    _undoService.pushState(_project!);
     setState(() {
       final blocks = _project!.blocks.map((b) {
         if (b.id != selectedId) return b;
@@ -158,9 +161,9 @@ class _EditorPageState extends State<EditorPage>
     });
     _bumpSave();
   }
-
   void _updateSetup(PageSetup Function(PageSetup) updater) {
     if (_project == null) return;
+    _undoService.pushState(_project!);
     setState(() {
       _project = _project!.copyWith(pageSetup: updater(_project!.pageSetup));
     });
@@ -177,6 +180,7 @@ class _EditorPageState extends State<EditorPage>
 
   void _addBlock() {
     if (_project == null) return;
+    _undoService.pushState(_project!);
     final id = _uuid.v4().replaceAll('-', '');
     final block = TextBlock(id: id);
     final idx = _selectedIndex >= 0
@@ -193,6 +197,7 @@ class _EditorPageState extends State<EditorPage>
 
   void _addPage() {
     if (_project == null) return;
+    _undoService.pushState(_project!);
     final id = _uuid.v4().replaceAll('-', '');
     final block = TextBlock(id: id, pageBreakBefore: true);
     final idx = _selectedIndex >= 0
@@ -206,9 +211,9 @@ class _EditorPageState extends State<EditorPage>
     });
     _bumpSave();
   }
-
   void _deleteBlock() {
     if (_project == null || _selectedId == null) return;
+    _undoService.pushState(_project!);
     final idx = _selectedIndex;
     setState(() {
       final blocks = _project!.blocks
@@ -226,12 +231,12 @@ class _EditorPageState extends State<EditorPage>
     });
     _bumpSave();
   }
-
   void _moveBlock(int dir) {
     if (_project == null || _selectedId == null) return;
     final idx = _selectedIndex;
     final nextIdx = idx + dir;
     if (idx < 0 || nextIdx < 0 || nextIdx >= _project!.blocks.length) return;
+    _undoService.pushState(_project!);
     setState(() {
       final blocks = List<TextBlock>.from(_project!.blocks);
       final item = blocks.removeAt(idx);
@@ -240,10 +245,10 @@ class _EditorPageState extends State<EditorPage>
     });
     _bumpSave();
   }
-
   void _toggleColumnBreak() {
     if (_project == null || _selectedBlock == null) return;
     final selectedId = _selectedId;
+    _undoService.pushState(_project!);
     setState(() {
       final blocks = _project!.blocks
           .map(
@@ -256,10 +261,10 @@ class _EditorPageState extends State<EditorPage>
     });
     _bumpSave();
   }
-
   void _togglePageBreak() {
     if (_project == null || _selectedBlock == null) return;
     final selectedId = _selectedId;
+    _undoService.pushState(_project!);
     setState(() {
       final blocks = _project!.blocks
           .map(
@@ -272,10 +277,10 @@ class _EditorPageState extends State<EditorPage>
     });
     _bumpSave();
   }
-
   void _toggleSmallText() {
     if (_project == null || _selectedBlock == null) return;
     final selectedId = _selectedId;
+    _undoService.pushState(_project!);
     setState(() {
       final blocks = _project!.blocks
           .map(
@@ -293,6 +298,30 @@ class _EditorPageState extends State<EditorPage>
         ? TextBlockFormat.normal
         : TextBlockFormat.freeText;
     _updateBlock(BlockUpdate(format: nextFormat));
+  }
+
+  void _undo() {
+    if (_project == null) return;
+    final prev = _undoService.undo(_project!);
+    if (prev != null) {
+      setState(() {
+        _project = prev;
+        _cachedPages = null;
+      });
+      _bumpSave();
+    }
+  }
+
+  void _redo() {
+    if (_project == null) return;
+    final next = _undoService.redo(_project!);
+    if (next != null) {
+      setState(() {
+        _project = next;
+        _cachedPages = null;
+      });
+      _bumpSave();
+    }
   }
 
   void _selectPrev() {
@@ -356,6 +385,10 @@ class _EditorPageState extends State<EditorPage>
             const _AddBlockIntent(),
         const SingleActivator(LogicalKeyboardKey.keyS, control: true):
             const _SaveIntent(),
+        const SingleActivator(LogicalKeyboardKey.keyZ, control: true):
+            const _UndoIntent(),
+        const SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true):
+            const _RedoIntent(),
         const SingleActivator(LogicalKeyboardKey.delete):
             const _DeleteBlockIntent(),
         const SingleActivator(LogicalKeyboardKey.arrowUp, alt: true):
@@ -370,6 +403,12 @@ class _EditorPageState extends State<EditorPage>
           ),
           _SaveIntent: CallbackAction<_SaveIntent>(
             onInvoke: (_) => _saveCurrent(),
+          ),
+          _UndoIntent: CallbackAction<_UndoIntent>(
+            onInvoke: (_) => _undo(),
+          ),
+          _RedoIntent: CallbackAction<_RedoIntent>(
+            onInvoke: (_) => _redo(),
           ),
           _DeleteBlockIntent: CallbackAction<_DeleteBlockIntent>(
             onInvoke: (_) => _deleteBlock(),
@@ -386,6 +425,23 @@ class _EditorPageState extends State<EditorPage>
           child: AppShell(
             title: _project?.name ?? _l10n.editor,
             actions: [
+              IconButton(
+                icon: const Icon(Icons.undo),
+                tooltip: '${_l10n.undo} (Ctrl+Z)',
+                onPressed: _undoService.canUndo ? _undo : null,
+                iconSize: 18,
+                padding: const EdgeInsets.all(6),
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              ),
+              IconButton(
+                icon: const Icon(Icons.redo),
+                tooltip: '${_l10n.redo} (Ctrl+Shift+Z)',
+                onPressed: _undoService.canRedo ? _redo : null,
+                iconSize: 18,
+                padding: const EdgeInsets.all(6),
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              ),
+              const SizedBox(width: 4),
               if (savePill != null)
                 Padding(
                   padding: const EdgeInsets.only(right: 4),
@@ -664,4 +720,12 @@ class _MoveBlockUpIntent extends Intent {
 
 class _MoveBlockDownIntent extends Intent {
   const _MoveBlockDownIntent();
+}
+
+class _UndoIntent extends Intent {
+  const _UndoIntent();
+}
+
+class _RedoIntent extends Intent {
+  const _RedoIntent();
 }
