@@ -61,6 +61,27 @@ class PronunciationService {
     return (rows.first['word_count'] as int?) ?? 1;
   }
 
+  Future<List<String>> checkSpelling(String tibetanText) async {
+    final db = await _db.database;
+    final tibetanRegex = RegExp(r'[\u0F00-\u0FFF]+');
+    final matches = tibetanRegex.allMatches(tibetanText);
+    final unknown = <String>[];
+    for (final match in matches) {
+      final syllable = match.group(0)!;
+      final rows = await db.query(
+        'pronunciation_dictionary',
+        columns: ['tibetan_syllable'],
+        where: 'tibetan_syllable = ?',
+        whereArgs: [syllable],
+        limit: 1,
+      );
+      if (rows.isEmpty) {
+        unknown.add(syllable);
+      }
+    }
+    return unknown;
+  }
+
   Future<bool> savePronunciation(
     String tibetanSyllable,
     String chinesePronunciation, {
