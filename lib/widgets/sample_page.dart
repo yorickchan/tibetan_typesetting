@@ -288,7 +288,7 @@ class _ContentGrid extends StatelessWidget {
                           )
                         : null,
                     child: SizedBox.expand(
-                      child: block.imagePath != null && File(block.imagePath!).existsSync()
+                      child: block.imagePath != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(4),
                               child: Image.file(
@@ -495,21 +495,20 @@ class _ContentGrid extends StatelessWidget {
                             )
                           : null,
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(2),
-                        child: fi.imagePath != null &&
-                                File(fi.imagePath!).existsSync()
-                            ? Image.file(
-                                File(fi.imagePath!),
-                                fit: BoxFit.contain,
-                                errorBuilder: (_, __, ___) => Icon(
-                                  Icons.broken_image,
-                                  size: 16,
-                                  color: AppColors.textFaint,
-                                ),
-                              )
-                            : Icon(Icons.image,
-                                size: 16, color: AppColors.textFaint),
-                      ),
+                      borderRadius: BorderRadius.circular(2),
+                      child: fi.imagePath != null
+                          ? Image.file(
+                              File(fi.imagePath!),
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => Icon(
+                                Icons.broken_image,
+                                size: 16,
+                                color: AppColors.textFaint,
+                              ),
+                            )
+                          : Icon(Icons.image,
+                              size: 16, color: AppColors.textFaint),
+                    ),
                     ),
                     if (isSelected)
                       Positioned(
