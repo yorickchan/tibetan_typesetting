@@ -55,7 +55,8 @@ class PageLayout {
   }) : rows = _legacyRows(flowRows, colCount);
 }
 
-List<_Row> _buildRows(List<TextBlock> blocks, double gapFraction) {
+List<_Row> _buildRows(List<TextBlock> blocks, double gapFraction,
+    [double? contentWidthMm]) {
   final rows = <_Row>[];
   final gap = gapFraction.clamp(0.0, 0.08);
   var current = <LayoutCell>[];
@@ -83,7 +84,7 @@ List<_Row> _buildRows(List<TextBlock> blocks, double gapFraction) {
       pushRow();
     }
 
-    final width = estimateBlockWidthFraction(block);
+    final width = estimateBlockWidthFraction(block, contentWidthMm);
     if (current.isNotEmpty && cursor + width > 1.0) {
       pushRow();
     }
@@ -107,6 +108,7 @@ List<PageLayout> paginateBlocks(
   int colCount, [
   int maxRows = 4,
   double gapFraction = 0.01,
+  double? contentWidthMm,
 ]) {
   final rowsPerPage = maxRows < 1 ? 1 : maxRows;
   final effectiveColCount = colCount < 1 ? 8 : colCount;
@@ -115,7 +117,7 @@ List<PageLayout> paginateBlocks(
     return [PageLayout(colCount: effectiveColCount, flowRows: [])];
   }
 
-  final rows = _buildRows(blocks, gapFraction);
+  final rows = _buildRows(blocks, gapFraction, contentWidthMm);
   final pages = <PageLayout>[];
   var current = <_Row>[];
 
@@ -176,8 +178,15 @@ List<PageLayout> paginateBlocks(
   return pages;
 }
 
-double estimateBlockWidthFraction(TextBlock block) {
-  if (block.isImageBlock) return 0.45;
+double estimateBlockWidthFraction(TextBlock block, [double? contentWidthMm]) {
+  if (block.isImageBlock) {
+    if (block.imageWidthMm != null &&
+        contentWidthMm != null &&
+        contentWidthMm > 0) {
+      return (block.imageWidthMm! / contentWidthMm).clamp(0.05, 1.0);
+    }
+    return 0.45;
+  }
 
   final manual = block.columnSpan;
   if (manual != null) {

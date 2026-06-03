@@ -13,6 +13,7 @@ import '../models/project.dart';
 import '../services/batch_import_service.dart';
 import '../services/database_service.dart';
 import '../services/font_service.dart';
+import '../services/image_storage_service.dart';
 import '../services/settings_service.dart';
 import '../services/undo_service.dart';
 import '../utils/colors.dart';
@@ -234,7 +235,15 @@ class _EditorPageState extends State<EditorPage>
 
     _undoService.pushState(_project!);
     final id = _uuid.v4().replaceAll('-', '');
-    final block = TextBlock(id: id, imagePath: result.files.single.path);
+    final String storedPath;
+    try {
+      storedPath = await ImageStorageService()
+          .copyImageToAppSupport(result.files.single.path!);
+    } catch (e) {
+      _showSnack('Failed to store image: $e', error: true);
+      return;
+    }
+    final block = TextBlock(id: id, imagePath: storedPath);
     final idx = _selectedIndex >= 0
         ? _selectedIndex + 1
         : _project!.blocks.length;
@@ -295,6 +304,10 @@ class _EditorPageState extends State<EditorPage>
     if (_project == null || _selectedId == null) return;
     _undoService.pushState(_project!);
     final idx = _selectedIndex;
+    final deletedBlock = _project!.blocks.firstWhere((b) => b.id == _selectedId);
+    if (deletedBlock.isImageBlock && deletedBlock.imagePath != null) {
+      ImageStorageService().deleteImage(deletedBlock.imagePath!);
+    }
     setState(() {
       final blocks = _project!.blocks
           .where((b) => b.id != _selectedId)
@@ -369,6 +382,27 @@ class _EditorPageState extends State<EditorPage>
     _undoService.pushState(_project!);
     setState(() {
       _updateBlock(BlockUpdate(imageWidthMm: newW, imageHeightMm: newH));
+    });
+  }
+
+  void _onInlineImageResize(String blockId, double dwMm, double dhMm) {
+    final block = _project?.blocks.cast<TextBlock?>().firstWhere(
+      (b) => b!.id == blockId,
+      orElse: () => null,
+    );
+    if (block == null) return;
+    final update = BlockUpdate(
+      imageWidthMm: dwMm != 0
+          ? ((block.imageWidthMm ?? 100) + dwMm).clamp(10, 500).toDouble()
+          : block.imageWidthMm,
+      imageHeightMm: dhMm != 0
+          ? ((block.imageHeightMm ?? 50) + dhMm).clamp(10, 500).toDouble()
+          : block.imageHeightMm,
+    );
+    _undoService.pushState(_project!);
+    setState(() {
+      _updateBlock(update);
+      _cachedPages = null;
     });
   }
 
@@ -471,11 +505,15 @@ class _EditorPageState extends State<EditorPage>
       return _cachedPages!;
     }
 
+    final contentWidthMm = _project!.pageSetup.pageWidthMm -
+        _project!.pageSetup.marginMm.left -
+        _project!.pageSetup.marginMm.right;
     final pages = paginateBlocks(
       _project!.blocks,
       0,
       4,
       _project!.pageSetup.flowGap,
+      contentWidthMm,
     );
 
     _cachedPages = pages.map((page) {
@@ -862,6 +900,8 @@ class _EditorPageState extends State<EditorPage>
                       floatingImages: pageData.page.floatingImages,
                       onFloatImageMove: _onFloatImageMove,
                       onFloatImageResize: _onFloatImageResize,
+                      onInlineImageResize: _onInlineImageResize,
+                      onSelectBlock: (id) => setState(() => _selectedId = id),
                     ),
                   ),
                 ),

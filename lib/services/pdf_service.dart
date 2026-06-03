@@ -200,7 +200,14 @@ class PdfService {
     final sideW = 18 * PdfPageFormat.mm;
     final inset = 2 * PdfPageFormat.mm;
 
-    final pages = paginateBlocks(project.blocks, 0, 4, ps.flowGap);
+    final contentWidthMm = ps.pageWidthMm - ps.marginMm.left - ps.marginMm.right;
+    final pages = paginateBlocks(
+      project.blocks,
+      0,
+      4,
+      ps.flowGap,
+      contentWidthMm,
+    );
 
     // ---- dimensions needed for pre-render sizing ----
 
@@ -699,8 +706,16 @@ class PdfService {
             if (hImg != null && block.isImageBlock) ...[
               pw.Image(
                 hImg.provider,
-                width: hImg.w * (maxW / hImg.w).clamp(0.1, 1.0),
-                height: hImg.h * (maxW / hImg.w).clamp(0.1, 1.0),
+                width: block.imageWidthMm != null
+                    ? (block.imageWidthMm! * PdfPageFormat.mm)
+                        .clamp(10.0, maxW)
+                    : hImg.w * (maxW / hImg.w).clamp(0.1, 1.0),
+                height: block.imageWidthMm != null
+                    ? (hImg.h *
+                        ((block.imageWidthMm! * PdfPageFormat.mm)
+                                .clamp(10.0, maxW) /
+                            hImg.w))
+                    : hImg.h * (maxW / hImg.w).clamp(0.1, 1.0),
               ),
             ] else if (hImg != null)
               pw.Image(hImg.provider, width: hImg.w, height: hImg.h),

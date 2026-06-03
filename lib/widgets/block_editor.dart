@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -568,24 +569,74 @@ class _EditorFieldsState extends State<_EditorFields> {
     }
   }
 
+  Widget _imageSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          height: 120,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: AppColors.inputFill,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.file(
+              File(widget.block.imagePath!),
+              fit: BoxFit.contain,
+              errorBuilder: (_, _, _) => Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.broken_image,
+                        size: 24, color: AppColors.textMuted),
+                    const SizedBox(height: 4),
+                    Text('Image not found',
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 10)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          if (widget.block.isFreeText) {
-            return _freeTextField();
+          if (widget.block.isImageBlock) {
+            return _imageSection();
           }
-          if (constraints.maxWidth > 600) {
-            return Row(
+          if (widget.block.isFreeText) {
+            return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: _tibetanField()),
-                const SizedBox(width: 8),
-                Expanded(child: _pronField()),
-                const SizedBox(width: 8),
-                Expanded(child: _transField()),
+                _freeTextField(),
+              ],
+            );
+          }
+          if (constraints.maxWidth > 600) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: _tibetanField()),
+                    const SizedBox(width: 8),
+                    Expanded(child: _pronField()),
+                    const SizedBox(width: 8),
+                    Expanded(child: _transField()),
+                  ],
+                ),
               ],
             );
           }

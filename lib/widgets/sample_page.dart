@@ -24,6 +24,9 @@ class SamplePageWidget extends StatelessWidget {
   final List<TextBlock> floatingImages;
   final void Function(String id, double dxMm, double dyMm)? onFloatImageMove;
   final void Function(String id, double dwMm, double dhMm)? onFloatImageResize;
+  final void Function(String id, double dwMm, double dhMm)?
+      onInlineImageResize;
+  final void Function(String id)? onSelectBlock;
 
   const SamplePageWidget({
     super.key,
@@ -38,6 +41,8 @@ class SamplePageWidget extends StatelessWidget {
     this.floatingImages = const [],
     this.onFloatImageMove,
     this.onFloatImageResize,
+    this.onInlineImageResize,
+    this.onSelectBlock,
   });
 
   @override
@@ -56,6 +61,7 @@ class SamplePageWidget extends StatelessWidget {
                 fallbackColCount,
                 4,
                 setup.flowGap,
+                setup.pageWidthMm - setup.marginMm.left - setup.marginMm.right,
               ).first.flowRows);
     final effectiveColCount = colCount ?? fallbackColCount;
 
@@ -124,6 +130,8 @@ class SamplePageWidget extends StatelessWidget {
                       floatingImages: floatingImages,
                       onFloatImageMove: onFloatImageMove,
                       onFloatImageResize: onFloatImageResize,
+                      onInlineImageResize: onInlineImageResize,
+                      onSelectBlock: onSelectBlock,
                     ),
                   ),
                 ),
@@ -183,6 +191,8 @@ class _SidePanel extends StatelessWidget {
 }
 
 class _ContentGrid extends StatelessWidget {
+  static int _dragMode = 0;
+
   final List<List<LayoutCell>> rows;
   final int colCount;
   final bool showMark;
@@ -194,6 +204,9 @@ class _ContentGrid extends StatelessWidget {
   final List<TextBlock> floatingImages;
   final void Function(String id, double dxMm, double dyMm)? onFloatImageMove;
   final void Function(String id, double dwMm, double dhMm)? onFloatImageResize;
+  final void Function(String id, double dwMm, double dhMm)?
+      onInlineImageResize;
+  final void Function(String id)? onSelectBlock;
 
   const _ContentGrid({
     required this.rows,
@@ -206,6 +219,8 @@ class _ContentGrid extends StatelessWidget {
     this.floatingImages = const [],
     this.onFloatImageMove,
     this.onFloatImageResize,
+    this.onInlineImageResize,
+    this.onSelectBlock,
   });
   @override
   Widget build(BuildContext context) {
@@ -272,40 +287,129 @@ class _ContentGrid extends StatelessWidget {
             if (block.isImageBlock) {
               final left = cell.leftFraction * totalW;
               final spannedW = cell.widthFraction * totalW;
+              final cellW = spannedW.clamp(0, totalW - left).toDouble();
+              final cellH = rowHs[ri];
+              final imgH = block.imageHeightMm != null
+                  ? (block.imageHeightMm! * kMmToPx)
+                      .clamp(10.0, cellH)
+                      .toDouble()
+                  : cellH;
+              const edgeZone = 12.0;
               children.add(
                 Positioned(
                   left: left,
                   top: rowYs[ri],
-                  width: spannedW.clamp(0, totalW - left).toDouble(),
-                  height: rowHs[ri],
-                  child: Container(
-                    padding: const EdgeInsets.only(top: 16, left: 6, right: 6),
-                    decoration: isHL
-                        ? BoxDecoration(
-                            color: const Color.fromARGB(255, 183, 179, 255)
-                                .withValues(alpha: 0.6),
-                            borderRadius: BorderRadius.circular(4),
-                          )
-                        : null,
-                    child: SizedBox.expand(
-                      child: ColoredBox(
-                        color: AppColors.emerald400.withValues(alpha: 0.15),
-                        child: block.imagePath != null
-                            ? ClipRRect(
+                  width: cellW,
+                  height: cellH,
+                  child: MouseRegion(
+                    onHover: (event) {
+                      if (!isHL) return;
+                    },
+                    cursor: isHL
+                        ? SystemMouseCursors.resizeDownRight
+                        : SystemMouseCursors.click,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => onSelectBlock?.call(block.id),
+                      onPanStart: (details) {
+                        if (!isHL) {
+                          _ContentGrid._dragMode = 0;
+                          return;
+                        }
+                        final pos = details.localPosition;
+                        final nearRight = pos.dx >= cellW - edgeZone;
+                        final nearBottom = pos.dy >= cellH - edgeZone;
+                        if (nearRight && nearBottom) {
+                          _ContentGrid._dragMode = 3;
+                        } else if (nearRight) {
+                          _ContentGrid._dragMode = 1;
+                        } else if (nearBottom) {
+                          _ContentGrid._dragMode = 2;
+                        } else {
+                          _ContentGrid._dragMode = 0;
+                        }
+                      },
+                      onPanUpdate: (details) {
+                        if (_ContentGrid._dragMode == 0) return;
+                        final dw = details.delta.dx / kMmToPx;
+                        final dh = details.delta.dy / kMmToPx;
+                        switch (_ContentGrid._dragMode) {
+                          case 1:
+                            onInlineImageResize?.call(block.id, dw, 0);
+                          case 2:
+                            onInlineImageResize?.call(block.id, 0, dh);
+                          case 3:
+                            onInlineImageResize?.call(block.id, dw, dh);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.only(
+                            top: 16, left: 6, right: 6),
+                        decoration: isHL
+                            ? BoxDecoration(
+                                color: const Color.fromARGB(
+                                        255, 183, 179, 255)
+                                    .withValues(alpha: 0.6),
                                 borderRadius: BorderRadius.circular(4),
-                                child: Image.file(
-                                  File(block.imagePath!),
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (_, __, ___) => const Center(
-                                    child: Icon(Icons.broken_image,
-                                        size: 24, color: AppColors.rose600),
-                                  ),
-                                ),
                               )
-                            : const Center(
-                                child: Icon(Icons.image,
-                                    size: 24, color: AppColors.amber400),
-                              ),
+                            : null,
+                        child: SizedBox(
+                          height: imgH,
+                          child: ColoredBox(
+                            color: AppColors.emerald400
+                                .withValues(alpha: 0.15),
+                            child: block.imagePath != null
+                                ? Stack(
+                                    children: [
+                                      Positioned.fill(
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                          child: Image.file(
+                                            File(block.imagePath!),
+                                            fit: BoxFit.contain,
+                                            errorBuilder: (_, __, ___) =>
+                                                const Center(
+                                              child: Icon(
+                                                  Icons.broken_image,
+                                                  size: 24,
+                                                  color:
+                                                      AppColors.rose600),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      if (isHL) ...[
+                                        Positioned(
+                                          right: 0,
+                                          top: 0,
+                                          bottom: 0,
+                                          width: edgeZone,
+                                          child: Container(
+                                            color: AppColors.sky500
+                                                .withValues(alpha: 0.3),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          bottom: 0,
+                                          left: 0,
+                                          right: 0,
+                                          height: edgeZone,
+                                          child: Container(
+                                            color: AppColors.sky500
+                                                .withValues(alpha: 0.3),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  )
+                                : const Center(
+                                    child: Icon(Icons.image,
+                                        size: 24,
+                                        color: AppColors.amber400),
+                                  ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -472,6 +576,7 @@ class _ContentGrid extends StatelessWidget {
           final imgW = (fi.imageWidthMm ?? 30) * kMmToPx;
           final imgH = (fi.imageHeightMm ?? 30) * kMmToPx;
           final isSelected = fi.id == highlightBlockId;
+          const edgeZone = 12.0;
 
           children.add(
             Positioned(
@@ -479,66 +584,102 @@ class _ContentGrid extends StatelessWidget {
               top: imgY,
               width: imgW,
               height: imgH,
-              child: GestureDetector(
-                onPanUpdate: (details) {
-                  onFloatImageMove?.call(
-                    fi.id,
-                    details.delta.dx / kMmToPx,
-                    details.delta.dy / kMmToPx,
-                  );
-                },
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      decoration: isSelected
-                          ? BoxDecoration(
+              child: MouseRegion(
+                cursor: isSelected
+                    ? SystemMouseCursors.resizeDownRight
+                    : SystemMouseCursors.move,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onPanStart: (details) {
+                    if (!isSelected) {
+                      _ContentGrid._dragMode = 0;
+                      return;
+                    }
+                    final pos = details.localPosition;
+                    final nearRight = pos.dx >= imgW - edgeZone;
+                    final nearBottom = pos.dy >= imgH - edgeZone;
+                    if (nearRight && nearBottom) {
+                      _ContentGrid._dragMode = 3;
+                    } else if (nearRight) {
+                      _ContentGrid._dragMode = 1;
+                    } else if (nearBottom) {
+                      _ContentGrid._dragMode = 2;
+                    } else {
+                      _ContentGrid._dragMode = 0;
+                    }
+                  },
+                  onPanUpdate: (details) {
+                    if (_ContentGrid._dragMode == 0) {
+                      onFloatImageMove?.call(
+                        fi.id,
+                        details.delta.dx / kMmToPx,
+                        details.delta.dy / kMmToPx,
+                      );
+                    } else {
+                      final dw = details.delta.dx / kMmToPx;
+                      final dh = details.delta.dy / kMmToPx;
+                      switch (_ContentGrid._dragMode) {
+                        case 1:
+                          onFloatImageResize?.call(fi.id, dw, 0);
+                        case 2:
+                          onFloatImageResize?.call(fi.id, 0, dh);
+                        case 3:
+                          onFloatImageResize?.call(fi.id, dw, dh);
+                      }
+                    }
+                  },
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(2),
+                          child: fi.imagePath != null
+                              ? Image.file(
+                                  File(fi.imagePath!),
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (_, __, ___) => Icon(
+                                    Icons.broken_image,
+                                    size: 16,
+                                    color: AppColors.textFaint,
+                                  ),
+                                )
+                              : Icon(Icons.image,
+                                  size: 16, color: AppColors.textFaint),
+                        ),
+                      ),
+                      if (isSelected) ...[
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
                               border: Border.all(
                                   color: AppColors.sky500, width: 2),
                               borderRadius: BorderRadius.circular(2),
-                            )
-                          : null,
-                      child: ClipRRect(
-                      borderRadius: BorderRadius.circular(2),
-                      child: fi.imagePath != null
-                          ? Image.file(
-                              File(fi.imagePath!),
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) => Icon(
-                                Icons.broken_image,
-                                size: 16,
-                                color: AppColors.textFaint,
-                              ),
-                            )
-                          : Icon(Icons.image,
-                              size: 16, color: AppColors.textFaint),
-                    ),
-                    ),
-                    if (isSelected)
-                      Positioned(
-                        right: -6,
-                        bottom: -6,
-                        child: GestureDetector(
-                          onPanUpdate: (details) {
-                            onFloatImageResize?.call(
-                              fi.id,
-                              details.delta.dx / kMmToPx,
-                              details.delta.dy / kMmToPx,
-                            );
-                          },
-                          child: Container(
-                            width: 12,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              color: AppColors.sky500,
-                              borderRadius: BorderRadius.circular(2),
                             ),
-                            child: const Icon(Icons.drag_handle,
-                                size: 8, color: Colors.white),
                           ),
                         ),
-                      ),
-                  ],
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: edgeZone,
+                          child: Container(
+                            color:
+                                AppColors.sky500.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          height: edgeZone,
+                          child: Container(
+                            color:
+                                AppColors.sky500.withValues(alpha: 0.3),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ),
             ),

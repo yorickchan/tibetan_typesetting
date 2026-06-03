@@ -24,7 +24,13 @@ class SamplePagesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final setup = project.pageSetup;
-    final pages = paginateBlocks(project.blocks, 0, 4, setup.flowGap);
+    final pages = paginateBlocks(
+      project.blocks,
+      0,
+      4,
+      setup.flowGap,
+      setup.pageWidthMm - setup.marginMm.left - setup.marginMm.right,
+    );
     final showTitlePage = setup.showTitlePage && !skipTitlePage;
 
     final pageWidgets = <Widget>[];

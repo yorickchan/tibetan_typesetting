@@ -48,3 +48,4 @@ app.*.map.json
 *.zip
 *.tar.gz
 *.dmg
+.qoder/
