@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../models/app_settings.dart';
@@ -251,6 +253,44 @@ class _ContentGrid extends StatelessWidget {
             final isSmall = block.smallText;
             final isFreeText = block.isFreeText;
             final isCompact = isSmall || isFreeText;
+
+            if (block.isImageBlock) {
+              final left = cell.leftFraction * totalW;
+              final spannedW = cell.widthFraction * totalW;
+              children.add(
+                Positioned(
+                  left: left,
+                  top: rowYs[ri],
+                  width: spannedW.clamp(0, totalW - left).toDouble(),
+                  height: rowHs[ri],
+                  child: Container(
+                    padding: const EdgeInsets.only(top: 16, left: 6, right: 6),
+                    decoration: isHL
+                        ? BoxDecoration(
+                            color: const Color.fromARGB(255, 183, 179, 255)
+                                .withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(4),
+                          )
+                        : null,
+                    child: Center(
+                      child: block.imagePath != null
+                          ? Image.file(
+                              File(block.imagePath!),
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => Icon(
+                                Icons.broken_image,
+                                size: 24,
+                                color: AppColors.textFaint,
+                              ),
+                            )
+                          : Icon(Icons.image,
+                              size: 24, color: AppColors.textFaint),
+                    ),
+                  ),
+                ),
+              );
+              continue;
+            }
 
             final tibLines = splitLines(block.tibetan);
             final heading = tibLines.isNotEmpty ? tibLines[0] : '';
