@@ -93,6 +93,11 @@ class BlockEditorWidget extends StatelessWidget {
             ),
             onDeleteBlock: onDeleteBlock,
             l10n: l10n,
+            onToggleFloating: selectedBlock!.isImageBlock
+                ? () => onUpdateBlock(
+                      BlockUpdate(floatingImage: !selectedBlock!.floatingImage),
+                    )
+                : null,
           ),
           Container(height: 1, color: AppColors.divider),
           _EditorFields(
@@ -123,6 +128,7 @@ class _Toolbar extends StatelessWidget {
   final ValueChanged<int?> onSetColumnSpan;
   final VoidCallback onDeleteBlock;
   final AppLocalizations l10n;
+  final VoidCallback? onToggleFloating;
 
   const _Toolbar({
     required this.selectedIndex,
@@ -138,6 +144,7 @@ class _Toolbar extends StatelessWidget {
     required this.onSetColumnSpan,
     required this.onDeleteBlock,
     required this.l10n,
+    this.onToggleFloating,
   });
 
   @override
@@ -281,11 +288,20 @@ class _Toolbar extends StatelessWidget {
               AppColors.sky400,
               onToggleFreeTextFormat,
             ),
+            if (block.isImageBlock) ...[
+              const SizedBox(width: 4),
+              _toggleBtn(
+                Icons.layers_outlined,
+                'Floating',
+                block.floatingImage,
+                AppColors.emerald400,
+                onToggleFloating ?? () {},
+              ),
+            ],
             _divider(),
             _iconBtn(
               Icons.delete_outline,
               onDeleteBlock,
-              color: AppColors.rose400,
               size: 18,
             ),
           ],

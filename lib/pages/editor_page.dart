@@ -158,6 +158,15 @@ class _EditorPageState extends State<EditorPage>
           format: update.format,
           columnSpan: update.columnSpan,
           clearColumnSpan: update.clearColumnSpan,
+          floatingImage: update.floatingImage,
+          imageWidthMm: update.imageWidthMm,
+          imageHeightMm: update.imageHeightMm,
+          imageXMm: update.imageXMm,
+          imageYMm: update.imageYMm,
+          clearImageWidthMm: update.clearImageWidthMm,
+          clearImageHeightMm: update.clearImageHeightMm,
+          clearImageXMm: update.clearImageXMm,
+          clearImageYMm: update.clearImageYMm,
         );
       }).toList();
       _project = _project!.copyWith(blocks: blocks);
@@ -334,6 +343,35 @@ class _EditorPageState extends State<EditorPage>
     });
     _bumpSave();
   }
+
+  void _onFloatImageMove(String blockId, double dxMm, double dyMm) {
+    final block = _project?.blocks.cast<TextBlock?>().firstWhere(
+      (b) => b!.id == blockId,
+      orElse: () => null,
+    );
+    if (block == null) return;
+    final newX = (block.imageXMm ?? 0) + dxMm;
+    final newY = (block.imageYMm ?? 0) + dyMm;
+    _undoService.pushState(_project!);
+    setState(() {
+      _updateBlock(BlockUpdate(imageXMm: newX, imageYMm: newY));
+    });
+  }
+
+  void _onFloatImageResize(String blockId, double dwMm, double dhMm) {
+    final block = _project?.blocks.cast<TextBlock?>().firstWhere(
+      (b) => b!.id == blockId,
+      orElse: () => null,
+    );
+    if (block == null) return;
+    final newW = ((block.imageWidthMm ?? 30) + dwMm).clamp(10, 300).toDouble();
+    final newH = ((block.imageHeightMm ?? 30) + dhMm).clamp(10, 300).toDouble();
+    _undoService.pushState(_project!);
+    setState(() {
+      _updateBlock(BlockUpdate(imageWidthMm: newW, imageHeightMm: newH));
+    });
+  }
+
   void _toggleColumnBreak() {
     if (_project == null || _selectedBlock == null) return;
     final selectedId = _selectedId;

@@ -186,6 +186,8 @@ class _ContentGrid extends StatelessWidget {
   final FontConfig translationFont;
 
   final List<TextBlock> floatingImages;
+  final void Function(String id, double dxMm, double dyMm)? onFloatImageMove;
+  final void Function(String id, double dwMm, double dhMm)? onFloatImageResize;
 
   const _ContentGrid({
     required this.rows,
@@ -196,6 +198,8 @@ class _ContentGrid extends StatelessWidget {
     required this.pronunciationFont,
     required this.translationFont,
     this.floatingImages = const [],
+    this.onFloatImageMove,
+    this.onFloatImageResize,
   });
   @override
   Widget build(BuildContext context) {
@@ -465,28 +469,67 @@ class _ContentGrid extends StatelessWidget {
               top: imgY,
               width: imgW,
               height: imgH,
-              child: Container(
-                decoration: isSelected
-                    ? BoxDecoration(
-                        border: Border.all(color: AppColors.sky500, width: 2),
+              child: GestureDetector(
+                onPanUpdate: (details) {
+                  onFloatImageMove?.call(
+                    fi.id,
+                    details.delta.dx / kMmToPx,
+                    details.delta.dy / kMmToPx,
+                  );
+                },
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      decoration: isSelected
+                          ? BoxDecoration(
+                              border: Border.all(
+                                  color: AppColors.sky500, width: 2),
+                              borderRadius: BorderRadius.circular(2),
+                            )
+                          : null,
+                      child: ClipRRect(
                         borderRadius: BorderRadius.circular(2),
-                      )
-                    : null,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(2),
-                  child: fi.imagePath != null &&
-                          File(fi.imagePath!).existsSync()
-                      ? Image.file(
-                          File(fi.imagePath!),
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => Icon(
-                            Icons.broken_image,
-                            size: 16,
-                            color: AppColors.textFaint,
+                        child: fi.imagePath != null &&
+                                File(fi.imagePath!).existsSync()
+                            ? Image.file(
+                                File(fi.imagePath!),
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => Icon(
+                                  Icons.broken_image,
+                                  size: 16,
+                                  color: AppColors.textFaint,
+                                ),
+                              )
+                            : Icon(Icons.image,
+                                size: 16, color: AppColors.textFaint),
+                      ),
+                    ),
+                    if (isSelected)
+                      Positioned(
+                        right: -6,
+                        bottom: -6,
+                        child: GestureDetector(
+                          onPanUpdate: (details) {
+                            onFloatImageResize?.call(
+                              fi.id,
+                              details.delta.dx / kMmToPx,
+                              details.delta.dy / kMmToPx,
+                            );
+                          },
+                          child: Container(
+                            width: 12,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: AppColors.sky500,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                            child: const Icon(Icons.drag_handle,
+                                size: 8, color: Colors.white),
                           ),
-                        )
-                      : Icon(Icons.image,
-                          size: 16, color: AppColors.textFaint),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),
