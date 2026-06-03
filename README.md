@@ -1,12 +1,12 @@
 # Tibetan Typesetting
 
-[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.3**
+[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.10**
 
 <p align="center">
   <img src="assets/images/icon.png" width="128" alt="App Icon"/>
 </p>
 
-A Flutter desktop application for creating and exporting Tibetan text documents with Chinese translations in a traditional layout format.
+A Flutter desktop application for creating and exporting Tibetan text documents with translations in a traditional layout format.
 
 ![Main Screen](screenshot/main%20screen.png)
 
@@ -15,11 +15,26 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 ### 📝 Rich Text Editing
 - Create and manage multiple Tibetan text projects
 - Organize content into blocks with:
-  - Tibetan text (with heading support)
+  - Tibetan text (with heading and free-text format support)
   - Chinese pronunciation (phonetic transcription)
-  - Chinese translation
+  - Translation (Chinese, English, Japanese, or custom language)
 - Visual block navigation and management
-- Auto-save functionality
+- Auto-save functionality with save-state indicator
+- Undo/Redo support (up to 50 states)
+- Wylie transliteration input for Tibetan text
+
+### 🖼️ Floating Images
+- Insert images into text blocks with precise positioning
+- Configurable image dimensions (width/height in mm)
+- Drag-to-position images with X/Y coordinates
+- Toggle between inline and floating image modes
+- Images stored locally in app support directory
+
+### 📥 Batch Import
+- Import text blocks from CSV or TSV files
+- Automatic delimiter detection (tab or comma)
+- Import summary with row counts and warnings
+- Bulk-add large amounts of content at once
 
 ### 🔤 Pronunciation Dictionary
 - Local syllable-level Tibetan-to-Chinese pronunciation dictionary
@@ -38,16 +53,21 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - Traditional Tibetan book layout (landscape orientation)
 - Configurable page dimensions and margins
 - Multi-column layout support (1-8 columns)
+- Per-block column span control
 - Page and column break controls
-- Custom title page with Dharma Wheel symbol
-- Flexible text sizing options
+- Flow gap adjustment between text sections
+- Custom title page with Dharma Wheel symbol and configurable title fonts
+- Flexible text sizing options with per-project font settings
+- Header and footer with configurable fields (file name, page number, date, custom text)
 
-### 🖨️ PDF Export
+### 🖨️ PDF & HTML Export
 - High-quality PDF generation with proper Tibetan script rendering
-- Live preview before export
+- HTML export for web viewing
+- Live preview with zoom controls before export
 - Print directly from the app
 - Share or save PDF files
 - Proper handling of complex Tibetan OpenType features
+- Configurable PDF export settings
 
 ![Export PDF](screenshot/export%20pdf.png)
 
@@ -58,13 +78,20 @@ The application uses a sophisticated approach to handle Tibetan script rendering
 - Pre-renders Tibetan text using Flutter's native text engine
 - Converts text to high-resolution PNG images (288 DPI)
 - Embeds images in PDF to preserve complex OpenType shaping
+- SHA-256 based image caching for efficient re-rendering
 - This workaround ensures perfect Tibetan script display, which standard PDF text rendering cannot achieve
+
+### Wylie Transliteration
+- Built-in Wylie-to-Tibetan Unicode converter
+- Supports consonants, subjoined letters, vowels, and complex stacks
+- Enables Tibetan text input via standard Latin keyboard
 
 ### Data Persistence
 - SQLite database for reliable local storage
 - Projects stored as JSON with indexed metadata
-- Support for project import/export
+- Support for project import/export (JSON)
 - Project duplication and tagging
+- Image files stored in application support directory
 
 ## Getting Started
 
@@ -96,17 +123,21 @@ The application uses system fonts:
 - **Tibetan**: BabelStoneTibetan (or other Tibetan Unicode fonts)
 - **Chinese**: STHeiti (typically pre-installed on macOS)
 
-Make sure these fonts are installed on your system for proper text rendering.
+Fonts can be configured per-project through the font settings panel. Make sure required fonts are installed on your system for proper text rendering.
 
 ## Usage
 
 1. **Create a Project**: Start from the main screen by creating a new project
 2. **Add Content**: Add text blocks with Tibetan text, pronunciation, and translation
-3. **Pronunciation Auto-fill**: The editor auto-fills pronunciation from the dictionary as you type; unknown syllables are highlighted and shown as `X`
-4. **Edit Layout**: Configure page setup, margins, and column count
-5. **Preview**: View live preview of your document layout
-6. **Export**: Generate PDF or print directly from the app
-7. **Manage Dictionary**: Open the Pronunciation Dictionary page to view, search, edit, or delete saved syllable entries and export/import the dictionary as JSON
+3. **Wylie Input**: Type Tibetan using Wylie transliteration via Latin keyboard
+4. **Pronunciation Auto-fill**: The editor auto-fills pronunciation from the dictionary as you type; unknown syllables are highlighted and shown as `X`
+5. **Insert Images**: Add floating images to blocks with position and size control
+6. **Batch Import**: Import multiple text blocks at once from CSV/TSV files
+7. **Edit Layout**: Configure page setup, margins, column count, flow gap, and headers/footers
+8. **Font Settings**: Customize fonts per-project for Tibetan, pronunciation, translation, and title text
+9. **Preview**: View live preview with zoom controls of your document layout
+10. **Export**: Generate PDF, export HTML, or print directly from the app
+11. **Manage Dictionary**: Open the Pronunciation Dictionary page to view, search, edit, or delete saved syllable entries and export/import the dictionary as JSON
 
 ![Pronunciation Dictionary](screenshot/pronunciation%20dictionary.png)
 
@@ -114,38 +145,62 @@ Make sure these fonts are installed on your system for proper text rendering.
 
 ```
 lib/
-├── main.dart                    # Application entry point
-├── models/                      # Data models
-│   ├── project.dart            # Project, TextBlock, PageSetup
-│   ├── app_settings.dart       # Application settings
-│   ├── font_config.dart        # Font configuration
-│   └── pronunciation_entry.dart # Pronunciation dictionary entry
-├── pages/                       # Main application pages
-│   ├── projects_page.dart      # Project management
-│   ├── editor_page.dart        # Text editor
-│   ├── export_page.dart        # PDF export and preview
-│   ├── settings_page.dart      # Application settings
-│   └── dictionary_page.dart    # Pronunciation dictionary management
-├── services/                    # Business logic
-│   ├── database_service.dart   # SQLite persistence
-│   ├── pdf_service.dart        # PDF generation
-│   ├── font_service.dart       # Font management
-│   ├── settings_service.dart   # Settings management
-│   └── pronunciation_service.dart # Pronunciation dictionary CRUD
-├── utils/                       # Utilities
-│   ├── colors.dart             # Color palette
-│   ├── sample_layout.dart      # Pagination logic
-│   ├── text_renderer.dart      # Text to image rendering
-│   ├── font_utils.dart         # Font utilities
-│   └── tibetan_segmenter.dart  # Tsheg-based syllable extraction
-└── widgets/                     # Reusable UI components
-    ├── app_shell.dart          # Common scaffold
-    ├── block_editor.dart       # Block editing panel
-    ├── block_strip.dart        # Block navigation
-    ├── font_picker.dart        # Font selection widget
-    ├── sample_page.dart        # Page preview
-    ├── sample_pages.dart       # Multi-page preview
-    └── title_page_widget.dart  # Title page preview
+├── main.dart                       # Application entry point
+├── l10n/                            # Localization (en, zh, zh_TW)
+│   ├── app_en.arb                  # English translations
+│   ├── app_zh.arb                  # Simplified Chinese translations
+│   ├── app_zh_TW.arb              # Traditional Chinese translations
+│   └── app_localizations.dart      # Generated localization classes
+├── models/                          # Data models
+│   ├── project.dart                # Project, TextBlock, PageSetup, MarginMm
+│   ├── block_update.dart           # Block update descriptor
+│   ├── app_settings.dart           # Application settings
+│   ├── font_config.dart            # Font configuration
+│   └── pronunciation_entry.dart    # Pronunciation dictionary entry
+├── pages/                           # Main application pages
+│   ├── projects_page.dart          # Project management
+│   ├── editor_page.dart            # Text editor
+│   ├── export_page.dart            # PDF/HTML export and preview
+│   ├── settings_page.dart          # Application settings
+│   └── dictionary_page.dart        # Pronunciation dictionary management
+├── services/                        # Business logic
+│   ├── database_service.dart       # SQLite persistence
+│   ├── pdf_service.dart            # PDF generation
+│   ├── html_export_service.dart    # HTML export generation
+│   ├── font_service.dart           # Font management
+│   ├── settings_service.dart       # Settings management
+│   ├── pronunciation_service.dart  # Pronunciation dictionary CRUD
+│   ├── batch_import_service.dart   # CSV/TSV batch import
+│   ├── undo_service.dart           # Undo/Redo state management
+│   ├── image_cache_service.dart    # Rendered text image caching
+│   └── image_storage_service.dart  # Block image file storage
+├── utils/                           # Utilities
+│   ├── colors.dart                 # Color palette
+│   ├── decorations.dart            # Input decoration helpers
+│   ├── font_constants.dart         # Default font constants
+│   ├── sample_layout.dart          # Pagination logic
+│   ├── text_renderer.dart          # Text to image rendering
+│   ├── font_utils.dart             # Font utilities
+│   ├── wylie_converter.dart        # Wylie-to-Tibetan Unicode converter
+│   ├── tibetan_segmenter.dart      # Tsheg-based syllable extraction
+│   ├── save_state_mixin.dart       # Save state UI mixin
+│   └── snackbar.dart               # SnackBar helper
+└── widgets/                         # Reusable UI components
+    ├── app_shell.dart               # Common scaffold
+    ├── block_editor.dart            # Block editing panel
+    ├── block_strip.dart             # Block navigation
+    ├── editor_page_setup_panel.dart # Page setup controls
+    ├── export_pdf_settings_panel.dart # PDF export settings
+    ├── flow_spacing_panel.dart      # Flow gap controls
+    ├── font_picker.dart             # Font selection widget
+    ├── font_settings_panel.dart     # Per-project font settings
+    ├── preview_zoom_toolbar.dart    # Preview zoom controls
+    ├── project_card.dart            # Project list card
+    ├── sample_page.dart             # Page preview
+    ├── sample_pages.dart            # Multi-page preview
+    ├── scaled_preview.dart          # Scaled preview wrapper
+    ├── title_page_settings_panel.dart # Title page configuration
+    └── title_page_widget.dart       # Title page preview
 ```
 
 ## Development
@@ -183,9 +238,15 @@ flutter build linux
 
 - **DatabaseService**: Singleton managing SQLite operations for project persistence
 - **PdfService**: Singleton handling PDF generation with Tibetan text pre-rendering
+- **HtmlExportService**: Generates standalone HTML documents from projects
 - **FontService**: System font discovery and management
 - **SettingsService**: Application settings persistence
 - **PronunciationService**: Singleton CRUD service for the local pronunciation dictionary
+- **BatchImportService**: Parses CSV/TSV files into text blocks
+- **UndoService**: Manages undo/redo state stack (max 50 states)
+- **ImageCacheService**: SHA-256 keyed cache for rendered text images
+- **ImageStorageService**: Manages block image files in app support directory
+- **WylieConverter**: Converts Wylie transliteration to Tibetan Unicode
 - **TibetanSegmenter**: Utility for splitting Tibetan text into syllables by tsheg (་)
 
 ### Page Layout Algorithm
@@ -194,13 +255,15 @@ The `sample_layout.dart` utility implements a two-pass pagination system:
 1. Organizes blocks into rows based on column count
 2. Distributes rows across pages respecting break flags
 3. Handles page and column break controls
+4. Supports per-block column spanning and flow gap spacing
 
 ### Text Rendering Pipeline
 
 1. Text input → `TextPainter` (Flutter's text engine)
-2. Render to `Picture` at 4x scale for high DPI
-3. Convert to PNG bytes
-4. Embed in PDF as image
+2. Check image cache (SHA-256 key from text + font + size)
+3. Render to `Picture` at 4x scale for high DPI
+4. Convert to PNG bytes and cache
+5. Embed in PDF as image
 
 This approach ensures perfect Tibetan script rendering with proper OpenType feature support (GSUB/GPOS).
 

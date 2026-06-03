@@ -1,10 +1,10 @@
-# 藏文排版 &nbsp;·&nbsp; v1.1.3
+# 藏文排版 &nbsp;·&nbsp; v1.1.10
 
 <p align="center">
   <img src="assets/images/icon.png" width="128" alt="應用程式圖示"/>
 </p>
 
-一個用於創建和匯出藏文文檔的 Flutter 桌面應用程式，採用傳統排版格式並包含中文翻譯。
+一個用於創建和匯出藏文文檔的 Flutter 桌面應用程式，採用傳統排版格式並包含翻譯。
 
 ![主畫面](screenshot/main%20screen.png)
 
@@ -13,11 +13,26 @@
 ### 📝 豐富的文字編輯
 - 創建和管理多個藏文文檔專案
 - 將內容組織為文字區塊，包含：
-  - 藏文文字（支援標題）
+  - 藏文文字（支援標題和自由文字格式）
   - 中文讀音（音標轉寫）
-  - 中文翻譯
+  - 翻譯（中文、英文、日文或自訂語言）
 - 視覺化的區塊導航和管理
-- 自動儲存功能
+- 自動儲存功能及儲存狀態指示器
+- 復原/重做支援（最多 50 個狀態）
+- 威利轉寫（Wylie）輸入藏文
+
+### 🖼️ 浮動圖片
+- 在文字區塊中插入圖片並精確定位
+- 可設定圖片尺寸（寬度/高度，單位 mm）
+- 拖曳定位圖片的 X/Y 座標
+- 切換內嵌和浮動圖片模式
+- 圖片儲存於應用程式支援目錄
+
+### 📥 批次匯入
+- 從 CSV 或 TSV 檔案匯入文字區塊
+- 自動偵測分隔符號（定位點或逗號）
+- 匯入摘要顯示列數和警告
+- 一次大量新增內容
 
 ### 🔤 讀音詞典
 - 本地音節級藏文轉中文讀音詞典
@@ -36,16 +51,21 @@
 - 傳統藏文書籍排版（橫向方向）
 - 可自訂的頁面尺寸和邊距
 - 多欄排版支援（1-8 欄）
+- 每區塊欄位跨欄控制
 - 分頁和分欄控制
-- 自訂封面頁，帶有法輪符號
-- 彈性的文字大小選項
+- 文字流間距調整
+- 自訂封面頁，帶有法輪符號及可設定標題字型
+- 彈性的文字大小選項，支援每專案字型設定
+- 頁首和頁尾，可設定欄位（檔案名稱、頁碼、日期、自訂文字）
 
-### 🖨️ PDF 匯出
+### 🖨️ PDF 與 HTML 匯出
 - 高品質的 PDF 生成，完美呈現藏文字型
-- 匯出前即時預覽
+- HTML 匯出供網頁檢視
+- 匯出前即時預覽，支援縮放控制
 - 直接從應用程式列印
 - 分享或儲存 PDF 檔案
 - 正確處理複雜的藏文 OpenType 功能
+- 可設定的 PDF 匯出設定
 
 ![匯出 PDF](screenshot/export%20pdf.png)
 
@@ -56,13 +76,20 @@
 - 使用 Flutter 原生文字引擎預渲染藏文文字
 - 將文字轉換為高解析度 PNG 圖片（288 DPI）
 - 將圖片嵌入 PDF 以保留複雜的 OpenType 字型塑形
+- 基於 SHA-256 的圖片快取，提升重新渲染效率
 - 這個解決方案確保完美的藏文字型顯示，這是標準 PDF 文字渲染無法達成的
+
+### 威利轉寫（Wylie）
+- 內建威利轉藏文 Unicode 轉換器
+- 支援輔音、下加字、母音及複雜疊字
+- 可透過標準拉丁鍵盤輸入藏文
 
 ### 資料持久化
 - 使用 SQLite 資料庫進行可靠的本地儲存
 - 專案以 JSON 格式儲存，並建立索引的中繼資料
-- 支援專案匯入/匯出
+- 支援專案匯入/匯出（JSON）
 - 專案複製和標籤功能
+- 圖片檔案儲存於應用程式支援目錄
 
 ## 開始使用
 
@@ -94,17 +121,21 @@ flutter run
 - **藏文**：BabelStoneTibetan（或其他藏文 Unicode 字型）
 - **中文**：STHeiti（通常在 macOS 上預先安裝）
 
-請確保這些字型已安裝在您的系統上，以正確顯示文字。
+字型可透過字型設定面板依專案設定。請確保所需字型已安裝在您的系統上，以正確顯示文字。
 
 ## 使用方式
 
 1. **創建專案**：從主畫面開始創建新專案
 2. **新增內容**：新增包含藏文文字、讀音和翻譯的文字區塊
-3. **讀音自動填入**：輸入藏文時，編輯器會自動從詞典填入讀音；未知音節以高亮和 `X` 標示
-4. **編輯排版**：設定頁面設定、邊距和欄數
-5. **預覽**：即時預覽您的文檔排版
-6. **匯出**：生成 PDF 或直接從應用程式列印
-7. **管理詞典**：開啟讀音詞典頁面，檢視、搜尋、編輯或刪除已儲存的音節項目，並可匯出／匯入 JSON
+3. **威利輸入**：使用威利轉寫透過拉丁鍵盤輸入藏文
+4. **讀音自動填入**：輸入藏文時，編輯器會自動從詞典填入讀音；未知音節以高亮和 `X` 標示
+5. **插入圖片**：在區塊中新增浮動圖片，可控制位置和尺寸
+6. **批次匯入**：從 CSV/TSV 檔案一次匯入多個文字區塊
+7. **編輯排版**：設定頁面設定、邊距、欄數、流間距和頁首頁尾
+8. **字型設定**：依專案自訂藏文、讀音、翻譯和標題文字的字型
+9. **預覽**：使用縮放控制即時預覽文檔排版
+10. **匯出**：生成 PDF、匯出 HTML 或直接從應用程式列印
+11. **管理詞典**：開啟讀音詞典頁面，檢視、搜尋、編輯或刪除已儲存的音節項目，並可匯出／匯入 JSON
 
 ![讀音詞典](screenshot/pronunciation%20dictionary.png)
 
@@ -112,38 +143,62 @@ flutter run
 
 ```
 lib/
-├── main.dart                    # 應用程式進入點
-├── models/                      # 資料模型
-│   ├── project.dart            # Project、TextBlock、PageSetup
-│   ├── app_settings.dart       # 應用程式設定
-│   ├── font_config.dart        # 字型設定
-│   └── pronunciation_entry.dart # 讀音詞典項目
-├── pages/                       # 主要應用程式頁面
-│   ├── projects_page.dart      # 專案管理
-│   ├── editor_page.dart        # 文字編輯器
-│   ├── export_page.dart        # PDF 匯出和預覽
-│   ├── settings_page.dart      # 應用程式設定
-│   └── dictionary_page.dart    # 讀音詞典管理
-├── services/                    # 業務邏輯
-│   ├── database_service.dart   # SQLite 持久化
-│   ├── pdf_service.dart        # PDF 生成
-│   ├── font_service.dart       # 字型管理
-│   ├── settings_service.dart   # 設定管理
-│   └── pronunciation_service.dart # 讀音詞典 CRUD
-├── utils/                       # 工具程式
-│   ├── colors.dart             # 色彩配置
-│   ├── sample_layout.dart      # 分頁邏輯
-│   ├── text_renderer.dart      # 文字轉圖片渲染
-│   ├── font_utils.dart         # 字型工具
-│   └── tibetan_segmenter.dart  # 藏文音節切分（基於 tsheg）
-└── widgets/                     # 可重複使用的 UI 元件
-    ├── app_shell.dart          # 通用架構
-    ├── block_editor.dart       # 區塊編輯面板
-    ├── block_strip.dart        # 區塊導航
-    ├── font_picker.dart        # 字型選擇器
-    ├── sample_page.dart        # 頁面預覽
-    ├── sample_pages.dart       # 多頁面預覽
-    └── title_page_widget.dart  # 封面頁預覽
+├── main.dart                       # 應用程式進入點
+├── l10n/                            # 本地化（en、zh、zh_TW）
+│   ├── app_en.arb                  # 英文翻譯
+│   ├── app_zh.arb                  # 簡體中文翻譯
+│   ├── app_zh_TW.arb              # 繁體中文翻譯
+│   └── app_localizations.dart      # 產生的本地化類別
+├── models/                          # 資料模型
+│   ├── project.dart                # Project、TextBlock、PageSetup、MarginMm
+│   ├── block_update.dart           # 區塊更新描述器
+│   ├── app_settings.dart           # 應用程式設定
+│   ├── font_config.dart            # 字型設定
+│   └── pronunciation_entry.dart    # 讀音詞典項目
+├── pages/                           # 主要應用程式頁面
+│   ├── projects_page.dart          # 專案管理
+│   ├── editor_page.dart            # 文字編輯器
+│   ├── export_page.dart            # PDF/HTML 匯出和預覽
+│   ├── settings_page.dart          # 應用程式設定
+│   └── dictionary_page.dart        # 讀音詞典管理
+├── services/                        # 業務邏輯
+│   ├── database_service.dart       # SQLite 持久化
+│   ├── pdf_service.dart            # PDF 生成
+│   ├── html_export_service.dart    # HTML 匯出生成
+│   ├── font_service.dart           # 字型管理
+│   ├── settings_service.dart       # 設定管理
+│   ├── pronunciation_service.dart  # 讀音詞典 CRUD
+│   ├── batch_import_service.dart   # CSV/TSV 批次匯入
+│   ├── undo_service.dart           # 復原/重做狀態管理
+│   ├── image_cache_service.dart    # 渲染文字圖片快取
+│   └── image_storage_service.dart  # 區塊圖片檔案儲存
+├── utils/                           # 工具程式
+│   ├── colors.dart                 # 色彩配置
+│   ├── decorations.dart            # 輸入裝飾輔助
+│   ├── font_constants.dart         # 預設字型常數
+│   ├── sample_layout.dart          # 分頁邏輯
+│   ├── text_renderer.dart          # 文字轉圖片渲染
+│   ├── font_utils.dart             # 字型工具
+│   ├── wylie_converter.dart        # 威利轉藏文 Unicode 轉換器
+│   ├── tibetan_segmenter.dart      # 藏文音節切分（基於 tsheg）
+│   ├── save_state_mixin.dart       # 儲存狀態 UI mixin
+│   └── snackbar.dart               # SnackBar 輔助
+└── widgets/                         # 可重複使用的 UI 元件
+    ├── app_shell.dart               # 通用架構
+    ├── block_editor.dart            # 區塊編輯面板
+    ├── block_strip.dart             # 區塊導航
+    ├── editor_page_setup_panel.dart # 頁面設定控制
+    ├── export_pdf_settings_panel.dart # PDF 匯出設定
+    ├── flow_spacing_panel.dart      # 流間距控制
+    ├── font_picker.dart             # 字型選擇器
+    ├── font_settings_panel.dart     # 每專案字型設定
+    ├── preview_zoom_toolbar.dart    # 預覽縮放控制
+    ├── project_card.dart            # 專案列表卡片
+    ├── sample_page.dart             # 頁面預覽
+    ├── sample_pages.dart            # 多頁面預覽
+    ├── scaled_preview.dart          # 縮放預覽包裝器
+    ├── title_page_settings_panel.dart # 封面頁設定
+    └── title_page_widget.dart       # 封面頁預覽
 ```
 
 ## 開發
@@ -181,9 +236,15 @@ flutter build linux
 
 - **DatabaseService**：管理 SQLite 操作的單例服務，用於專案持久化
 - **PdfService**：處理 PDF 生成的單例服務，包含藏文文字預渲染
+- **HtmlExportService**：從專案產生獨立 HTML 文件
 - **FontService**：系統字型探測和管理
 - **SettingsService**：應用程式設定持久化
 - **PronunciationService**：本地讀音詞典的 CRUD 單例服務
+- **BatchImportService**：解析 CSV/TSV 檔案為文字區塊
+- **UndoService**：管理復原/重做狀態堆疊（最多 50 個狀態）
+- **ImageCacheService**：基於 SHA-256 金鑰的渲染文字圖片快取
+- **ImageStorageService**：管理應用程式支援目錄中的區塊圖片檔案
+- **WylieConverter**：將威利轉寫轉換為藏文 Unicode
 - **TibetanSegmenter**：藏文音節切分工具，基於 tsheg（་）分割
 
 ### 頁面排版演算法
@@ -192,13 +253,15 @@ flutter build linux
 1. 根據欄數將區塊組織為列
 2. 將列分配到各頁面，遵循分隔標記
 3. 處理分頁和分欄控制
+4. 支援每區塊跨欄和流間距
 
 ### 文字渲染流程
 
 1. 文字輸入 → `TextPainter`（Flutter 的文字引擎）
-2. 以 4 倍比例渲染為 `Picture`，以達到高 DPI
-3. 轉換為 PNG 位元組
-4. 以圖片形式嵌入 PDF
+2. 檢查圖片快取（基於文字 + 字型 + 大小的 SHA-256 金鑰）
+3. 以 4 倍比例渲染為 `Picture`，以達到高 DPI
+4. 轉換為 PNG 位元組並快取
+5. 以圖片形式嵌入 PDF
 
 這個方法確保完美的藏文字型渲染，並正確支援 OpenType 功能（GSUB/GPOS）。
 
