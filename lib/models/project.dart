@@ -57,6 +57,16 @@ class PageSetup {
   final FontConfig? titleTibetanFont;
   final FontConfig? titleChineseFont;
   final TranslationLanguage translationLang;
+  final HeaderFooterField headerLeft;
+  final HeaderFooterField headerCenter;
+  final HeaderFooterField headerRight;
+  final HeaderFooterField footerLeft;
+  final HeaderFooterField footerCenter;
+  final HeaderFooterField footerRight;
+  final String headerCustomText;
+  final String footerCustomText;
+  final double headerFontSize;
+  final double footerFontSize;
 
   PageSetup({
     this.pageWidthMm = 300,
@@ -76,8 +86,17 @@ class PageSetup {
     this.titleTibetanFont,
     this.titleChineseFont,
     this.translationLang = TranslationLanguage.chinese,
+    this.headerLeft = HeaderFooterField.none,
+    this.headerCenter = HeaderFooterField.none,
+    this.headerRight = HeaderFooterField.none,
+    this.footerLeft = HeaderFooterField.none,
+    this.footerCenter = HeaderFooterField.none,
+    this.footerRight = HeaderFooterField.none,
+    this.headerCustomText = '',
+    this.footerCustomText = '',
+    this.headerFontSize = 9,
+    this.footerFontSize = 9,
   }) : marginMm = marginMm ?? MarginMm();
-
   PageSetup copyWith({
     double? pageWidthMm,
     double? pageHeightMm,
@@ -96,6 +115,16 @@ class PageSetup {
     FontConfig? titleTibetanFont,
     FontConfig? titleChineseFont,
     TranslationLanguage? translationLang,
+    HeaderFooterField? headerLeft,
+    HeaderFooterField? headerCenter,
+    HeaderFooterField? headerRight,
+    HeaderFooterField? footerLeft,
+    HeaderFooterField? footerCenter,
+    HeaderFooterField? footerRight,
+    String? headerCustomText,
+    String? footerCustomText,
+    double? headerFontSize,
+    double? footerFontSize,
     bool clearTibetanFont = false,
     bool clearPronunciationFont = false,
     bool clearTranslationFont = false,
@@ -128,6 +157,16 @@ class PageSetup {
           ? null
           : (titleChineseFont ?? this.titleChineseFont),
       translationLang: translationLang ?? this.translationLang,
+      headerLeft: headerLeft ?? this.headerLeft,
+      headerCenter: headerCenter ?? this.headerCenter,
+      headerRight: headerRight ?? this.headerRight,
+      footerLeft: footerLeft ?? this.footerLeft,
+      footerCenter: footerCenter ?? this.footerCenter,
+      footerRight: footerRight ?? this.footerRight,
+      headerCustomText: headerCustomText ?? this.headerCustomText,
+      footerCustomText: footerCustomText ?? this.footerCustomText,
+      headerFontSize: headerFontSize ?? this.headerFontSize,
+      footerFontSize: footerFontSize ?? this.footerFontSize,
     );
   }
 
@@ -144,6 +183,16 @@ class PageSetup {
     'titleTibetan': titleTibetan,
     'titleChinese': titleChinese,
     'translationLang': translationLang.name,
+    'headerLeft': headerLeft.name,
+    'headerCenter': headerCenter.name,
+    'headerRight': headerRight.name,
+    'footerLeft': footerLeft.name,
+    'footerCenter': footerCenter.name,
+    'footerRight': footerRight.name,
+    'headerCustomText': headerCustomText,
+    'footerCustomText': footerCustomText,
+    'headerFontSize': headerFontSize,
+    'footerFontSize': footerFontSize,
     if (tibetanFont != null) 'tibetanFont': tibetanFont!.toJson(),
     if (pronunciationFont != null)
       'pronunciationFont': pronunciationFont!.toJson(),
@@ -185,6 +234,16 @@ class PageSetup {
         : null,
     translationLang: TranslationLanguage.fromJson(
         json['translationLang'] as String?),
+    headerLeft: HeaderFooterField.fromJson(json['headerLeft'] as String?),
+    headerCenter: HeaderFooterField.fromJson(json['headerCenter'] as String?),
+    headerRight: HeaderFooterField.fromJson(json['headerRight'] as String?),
+    footerLeft: HeaderFooterField.fromJson(json['footerLeft'] as String?),
+    footerCenter: HeaderFooterField.fromJson(json['footerCenter'] as String?),
+    footerRight: HeaderFooterField.fromJson(json['footerRight'] as String?),
+    headerCustomText: json['headerCustomText'] as String? ?? '',
+    footerCustomText: json['footerCustomText'] as String? ?? '',
+    headerFontSize: (json['headerFontSize'] as num?)?.toDouble() ?? 9,
+    footerFontSize: (json['footerFontSize'] as num?)?.toDouble() ?? 9,
   );
 }
 
@@ -209,6 +268,24 @@ enum TranslationLanguage {
       'japanese' => TranslationLanguage.japanese,
       'custom' => TranslationLanguage.custom,
       _ => TranslationLanguage.chinese,
+    };
+  }
+}
+
+enum HeaderFooterField {
+  none,
+  fileName,
+  pageNumber,
+  date,
+  custom;
+
+  static HeaderFooterField fromJson(String? value) {
+    return switch (value) {
+      'fileName' => HeaderFooterField.fileName,
+      'pageNumber' => HeaderFooterField.pageNumber,
+      'date' => HeaderFooterField.date,
+      'custom' => HeaderFooterField.custom,
+      _ => HeaderFooterField.none,
     };
   }
 }
