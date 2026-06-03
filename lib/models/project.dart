@@ -56,6 +56,7 @@ class PageSetup {
   final FontConfig? translationFont;
   final FontConfig? titleTibetanFont;
   final FontConfig? titleChineseFont;
+  final TranslationLanguage translationLang;
 
   PageSetup({
     this.pageWidthMm = 300,
@@ -74,6 +75,7 @@ class PageSetup {
     this.translationFont,
     this.titleTibetanFont,
     this.titleChineseFont,
+    this.translationLang = TranslationLanguage.chinese,
   }) : marginMm = marginMm ?? MarginMm();
 
   PageSetup copyWith({
@@ -93,6 +95,7 @@ class PageSetup {
     FontConfig? translationFont,
     FontConfig? titleTibetanFont,
     FontConfig? titleChineseFont,
+    TranslationLanguage? translationLang,
     bool clearTibetanFont = false,
     bool clearPronunciationFont = false,
     bool clearTranslationFont = false,
@@ -124,6 +127,7 @@ class PageSetup {
       titleChineseFont: clearTitleChineseFont
           ? null
           : (titleChineseFont ?? this.titleChineseFont),
+      translationLang: translationLang ?? this.translationLang,
     );
   }
 
@@ -139,6 +143,7 @@ class PageSetup {
     'showTitlePage': showTitlePage,
     'titleTibetan': titleTibetan,
     'titleChinese': titleChinese,
+    'translationLang': translationLang.name,
     if (tibetanFont != null) 'tibetanFont': tibetanFont!.toJson(),
     if (pronunciationFont != null)
       'pronunciationFont': pronunciationFont!.toJson(),
@@ -178,7 +183,34 @@ class PageSetup {
     titleChineseFont: json['titleChineseFont'] != null
         ? FontConfig.fromJson(json['titleChineseFont'] as Map<String, dynamic>)
         : null,
+    translationLang: TranslationLanguage.fromJson(
+        json['translationLang'] as String?),
   );
+}
+
+enum TranslationLanguage {
+  chinese,
+  english,
+  japanese,
+  custom;
+
+  String get label {
+    return switch (this) {
+      TranslationLanguage.chinese => '中文',
+      TranslationLanguage.english => 'English',
+      TranslationLanguage.japanese => '日本語',
+      TranslationLanguage.custom => 'Custom',
+    };
+  }
+
+  static TranslationLanguage fromJson(String? value) {
+    return switch (value) {
+      'english' => TranslationLanguage.english,
+      'japanese' => TranslationLanguage.japanese,
+      'custom' => TranslationLanguage.custom,
+      _ => TranslationLanguage.chinese,
+    };
+  }
 }
 
 enum TextBlockFormat {
