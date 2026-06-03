@@ -272,15 +272,18 @@ class _ContentGrid extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           )
                         : null,
-                    child: Center(
-                      child: block.imagePath != null
-                          ? Image.file(
-                              File(block.imagePath!),
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) => Icon(
-                                Icons.broken_image,
-                                size: 24,
-                                color: AppColors.textFaint,
+                    child: SizedBox.expand(
+                      child: block.imagePath != null && File(block.imagePath!).existsSync()
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: Image.file(
+                                File(block.imagePath!),
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => Icon(
+                                  Icons.broken_image,
+                                  size: 24,
+                                  color: AppColors.textFaint,
+                                ),
                               ),
                             )
                           : Icon(Icons.image,
