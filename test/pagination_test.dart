@@ -88,6 +88,33 @@ void main() {
       
       expect(longFraction, greaterThan(shortFraction));
     });
+
+  test('image blocks are included in pagination', () {
+    final blocks = [
+      TextBlock(id: 'img', imagePath: '/tmp/test.png'),
+      TextBlock(id: 'text', tibetan: 'བཀྲ་ཤིས།'),
+    ];
+    final pages = paginateBlocks(blocks, 0, 4, 0.01);
+    expect(pages.isNotEmpty, true);
+    // Image block should appear somewhere
+    var foundImage = false;
+    for (final page in pages) {
+      for (final row in page.flowRows) {
+        for (final cell in row) {
+          if (cell.block.isImageBlock) foundImage = true;
+        }
+      }
+    }
+    expect(foundImage, true);
+  });
+
+  test('image blocks get minimum width fraction', () {
+    final block = TextBlock(id: 'img', imagePath: '/tmp/test.png');
+    final fraction = estimateBlockWidthFraction(block);
+    expect(fraction, greaterThanOrEqualTo(0.09));
+    expect(fraction, lessThanOrEqualTo(0.15));
+  });
+
   });
 
   group('splitLines', () {
