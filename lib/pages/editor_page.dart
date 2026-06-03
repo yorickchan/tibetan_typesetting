@@ -862,7 +862,6 @@ class _EditorPageState extends State<EditorPage>
                       floatingImages: pageData.page.floatingImages,
                       onFloatImageMove: _onFloatImageMove,
                       onFloatImageResize: _onFloatImageResize,
-                      onFloatImageSelect: (id) => setState(() => _selectedId = id),
                     ),
                   ),
                 ),
