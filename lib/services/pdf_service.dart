@@ -773,6 +773,34 @@ class PdfService {
         }
       }
 
+      // ---- Floating image overlay ----
+      for (final fi in page.floatingImages) {
+        final imgX = (fi.imageXMm ?? 10) * PdfPageFormat.mm;
+        final imgY = (fi.imageYMm ?? 10) * PdfPageFormat.mm;
+        final imgW = (fi.imageWidthMm ?? 30) * PdfPageFormat.mm;
+        final imgH = (fi.imageHeightMm ?? 30) * PdfPageFormat.mm;
+        if (fi.imagePath != null) {
+          positioned.add(
+            pw.Positioned(
+              left: imgX,
+              top: imgY,
+              child: pw.SizedBox(
+                width: imgW,
+                height: imgH,
+                child: pw.ClipRRect(
+                  horizontalRadius: 2,
+                  verticalRadius: 2,
+                  child: pw.Image(
+                    pw.MemoryImage(await File(fi.imagePath!).readAsBytes()),
+                    fit: pw.BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+      }
+
       return pw.SizedBox(
         width: cW,
         height: cH,
