@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
@@ -8,15 +10,16 @@ import '../l10n/app_localizations.dart';
 import '../models/app_settings.dart';
 import '../models/block_update.dart';
 import '../models/project.dart';
+import '../services/batch_import_service.dart';
 import '../services/database_service.dart';
 import '../services/font_service.dart';
 import '../services/settings_service.dart';
+import '../services/undo_service.dart';
 import '../utils/colors.dart';
 import '../utils/font_constants.dart';
 import '../utils/save_state_mixin.dart';
 import '../utils/font_utils.dart' as font_utils;
 import '../utils/sample_layout.dart';
-import '../services/undo_service.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/block_editor.dart';
 import '../widgets/block_strip.dart';
@@ -210,6 +213,50 @@ class _EditorPageState extends State<EditorPage>
       _selectedId = id;
     });
     _bumpSave();
+  }
+
+  Future<void> _importCsv() async {
+    if (_project == null) return;
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['csv', 'tsv', 'txt'],
+    );
+    if (result == null || result.files.isEmpty) return;
+    if (result.files.single.path == null) return;
+    final file = File(result.files.single.path!);
+
+    final importResult = BatchImportService.parseFile(file);
+    if (importResult.importedRows == 0) {
+      _showSnack('No blocks found in file', error: true);
+      return;
+    }
+
+    _undoService.pushState(_project!);
+    setState(() {
+      final blocks = List<TextBlock>.from(_project!.blocks);
+      final idx = _selectedIndex >= 0 ? _selectedIndex + 1 : blocks.length;
+      blocks.insertAll(idx, importResult.blocks);
+      _project = _project!.copyWith(blocks: blocks);
+      _cachedPages = null;
+      if (importResult.blocks.isNotEmpty) {
+        _selectedId = importResult.blocks.first.id;
+      }
+    });
+    _bumpSave();
+    if (mounted) {
+      _showSnack('Imported ${importResult.importedRows} blocks');
+    }
+  }
+
+  void _showSnack(String msg, {bool error = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: error ? AppColors.rose600 : null,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
   void _deleteBlock() {
     if (_project == null || _selectedId == null) return;
@@ -490,6 +537,27 @@ class _EditorPageState extends State<EditorPage>
                     ),
                   ),
                 ),
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(color: AppColors.border),
+                    ),
+                  ),
+                  onPressed: _project == null ? null : _importCsv,
+                  icon: const Icon(Icons.file_upload, size: 16),
+                  label: const Text(
+                    'Import',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: TextButton(
