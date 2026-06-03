@@ -288,21 +288,25 @@ class _ContentGrid extends StatelessWidget {
                           )
                         : null,
                     child: SizedBox.expand(
-                      child: block.imagePath != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: Image.file(
-                                File(block.imagePath!),
-                                fit: BoxFit.contain,
-                                errorBuilder: (_, __, ___) => Icon(
-                                  Icons.broken_image,
-                                  size: 24,
-                                  color: AppColors.textFaint,
+                      child: ColoredBox(
+                        color: AppColors.emerald400.withValues(alpha: 0.15),
+                        child: block.imagePath != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: Image.file(
+                                  File(block.imagePath!),
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (_, __, ___) => const Center(
+                                    child: Icon(Icons.broken_image,
+                                        size: 24, color: AppColors.rose600),
+                                  ),
                                 ),
+                              )
+                            : const Center(
+                                child: Icon(Icons.image,
+                                    size: 24, color: AppColors.amber400),
                               ),
-                            )
-                          : Icon(Icons.image,
-                              size: 24, color: AppColors.textFaint),
+                      ),
                     ),
                   ),
                 ),
