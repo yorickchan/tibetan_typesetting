@@ -117,6 +117,34 @@ void main() {
 
   });
 
+  group('floating image blocks', () {
+    test('are excluded from flow rows', () {
+      final blocks = [
+        TextBlock(id: 'txt', tibetan: 'text'),
+        TextBlock(id: 'img', imagePath: '/tmp/x.png', floatingImage: true),
+        TextBlock(id: 'txt2', tibetan: 'more text'),
+      ];
+      final pages = paginateBlocks(blocks, 0, 4, 0.01);
+      var totalFlow = 0;
+      for (final page in pages) {
+        for (final row in page.flowRows) {
+          totalFlow += row.length;
+        }
+      }
+      expect(totalFlow, 2);
+    });
+
+    test('are assigned to pages via floatingImages', () {
+      final blocks = [
+        TextBlock(id: 'txt', tibetan: 'text'),
+        TextBlock(id: 'img', imagePath: '/tmp/x.png', floatingImage: true),
+      ];
+      final pages = paginateBlocks(blocks, 0, 4, 0.01);
+      expect(pages[0].floatingImages.length, 1);
+      expect(pages[0].floatingImages.first.id, 'img');
+    });
+  });
+
   group('splitLines', () {
     test('splits by newline', () {
       final lines = splitLines('line1\nline2\nline3');

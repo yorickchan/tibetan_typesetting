@@ -46,9 +46,13 @@ class PageLayout {
   final int colCount;
   final List<List<LayoutCell>> flowRows;
   final List<List<TextBlock?>> rows;
+  final List<TextBlock> floatingImages;
 
-  PageLayout({required this.colCount, required this.flowRows})
-    : rows = _legacyRows(flowRows, colCount);
+  PageLayout({
+    required this.colCount,
+    required this.flowRows,
+    this.floatingImages = const [],
+  }) : rows = _legacyRows(flowRows, colCount);
 }
 
 List<_Row> _buildRows(List<TextBlock> blocks, double gapFraction) {
@@ -66,7 +70,9 @@ List<_Row> _buildRows(List<TextBlock> blocks, double gapFraction) {
     pendingPageBreak = false;
   }
 
+
   for (final block in blocks) {
+    if (block.floatingImage) continue;
     if (block.pageBreakBefore && current.isNotEmpty) {
       pushRow();
     }
@@ -135,6 +141,35 @@ List<PageLayout> paginateBlocks(
   }
 
   if (current.isNotEmpty) pushPage();
+
+  // Assign floating images to pages
+  final floatImages = blocks.where((b) => b.floatingImage).toList();
+  if (floatImages.isNotEmpty && pages.isNotEmpty) {
+    for (final fi in floatImages) {
+      final fiIdx = blocks.indexOf(fi);
+      var nonFloatingSeen = 0;
+      var assignedPage = 0;
+      for (var pi = 0; pi < pages.length; pi++) {
+        final pageBlockCount = pages[pi].flowRows
+            .expand((r) => r)
+            .length;
+        if (fiIdx <= nonFloatingSeen + pageBlockCount) {
+          assignedPage = pi;
+          break;
+        }
+        nonFloatingSeen += pageBlockCount;
+        assignedPage = pi;
+      }
+      final clamped = assignedPage.clamp(0, pages.length - 1);
+      final p = pages[clamped];
+      pages[clamped] = PageLayout(
+        colCount: p.colCount,
+        flowRows: p.flowRows,
+        floatingImages: [...p.floatingImages, fi],
+      );
+    }
+  }
+
   if (pages.isEmpty) {
     pages.add(PageLayout(colCount: effectiveColCount, flowRows: []));
   }
