@@ -313,6 +313,11 @@ class TextBlock {
   final TextBlockFormat format;
   final int? columnSpan;
   final String? imagePath;
+  final bool floatingImage;
+  final double? imageWidthMm;
+  final double? imageHeightMm;
+  final double? imageXMm;
+  final double? imageYMm;
 
   TextBlock({
     required this.id,
@@ -325,6 +330,11 @@ class TextBlock {
     this.format = TextBlockFormat.normal,
     this.columnSpan,
     this.imagePath,
+    this.floatingImage = false,
+    this.imageWidthMm,
+    this.imageHeightMm,
+    this.imageXMm,
+    this.imageYMm,
   });
 
   bool get isFreeText => format == TextBlockFormat.freeText;
@@ -341,8 +351,17 @@ class TextBlock {
     TextBlockFormat? format,
     int? columnSpan,
     String? imagePath,
+    bool? floatingImage,
+    double? imageWidthMm,
+    double? imageHeightMm,
+    double? imageXMm,
+    double? imageYMm,
     bool clearColumnSpan = false,
     bool clearImagePath = false,
+    bool clearImageWidthMm = false,
+    bool clearImageHeightMm = false,
+    bool clearImageXMm = false,
+    bool clearImageYMm = false,
   }) {
     return TextBlock(
       id: id ?? this.id,
@@ -355,6 +374,11 @@ class TextBlock {
       format: format ?? this.format,
       columnSpan: clearColumnSpan ? null : (columnSpan ?? this.columnSpan),
       imagePath: clearImagePath ? null : (imagePath ?? this.imagePath),
+      floatingImage: floatingImage ?? this.floatingImage,
+      imageWidthMm: clearImageWidthMm ? null : (imageWidthMm ?? this.imageWidthMm),
+      imageHeightMm: clearImageHeightMm ? null : (imageHeightMm ?? this.imageHeightMm),
+      imageXMm: clearImageXMm ? null : (imageXMm ?? this.imageXMm),
+      imageYMm: clearImageYMm ? null : (imageYMm ?? this.imageYMm),
     );
   }
 
@@ -369,6 +393,11 @@ class TextBlock {
     'format': format.name,
     if (columnSpan != null) 'columnSpan': columnSpan,
     if (imagePath != null) 'imagePath': imagePath,
+    'floatingImage': floatingImage,
+    if (imageWidthMm != null) 'imageWidthMm': imageWidthMm,
+    if (imageHeightMm != null) 'imageHeightMm': imageHeightMm,
+    if (imageXMm != null) 'imageXMm': imageXMm,
+    if (imageYMm != null) 'imageYMm': imageYMm,
   };
 
   factory TextBlock.fromJson(Map<String, dynamic> json) => TextBlock(
@@ -382,6 +411,11 @@ class TextBlock {
     format: TextBlockFormat.fromJson(json['format'] as String?),
     columnSpan: (json['columnSpan'] as num?)?.toInt(),
     imagePath: json['imagePath'] as String?,
+    floatingImage: json['floatingImage'] as bool? ?? false,
+    imageWidthMm: (json['imageWidthMm'] as num?)?.toDouble(),
+    imageHeightMm: (json['imageHeightMm'] as num?)?.toDouble(),
+    imageXMm: (json['imageXMm'] as num?)?.toDouble(),
+    imageYMm: (json['imageYMm'] as num?)?.toDouble(),
   );
 }
 

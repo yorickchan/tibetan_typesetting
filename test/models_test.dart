@@ -85,6 +85,26 @@ void main() {
       expect(restored.format, original.format);
       expect(restored.columnSpan, original.columnSpan);
     });
+
+    test('floating image fields serialize round-trip', () {
+      final original = TextBlock(
+        id: 'img1',
+        imagePath: '/tmp/foo.png',
+        floatingImage: true,
+        imageWidthMm: 50,
+        imageHeightMm: 40,
+        imageXMm: 10,
+        imageYMm: 20,
+      );
+      final json = original.toJson();
+      final restored = TextBlock.fromJson(json);
+      expect(restored.imagePath, '/tmp/foo.png');
+      expect(restored.floatingImage, true);
+      expect(restored.imageWidthMm, 50);
+      expect(restored.imageHeightMm, 40);
+      expect(restored.imageXMm, 10);
+      expect(restored.imageYMm, 20);
+    });
   });
 
   group('PageSetup', () {
