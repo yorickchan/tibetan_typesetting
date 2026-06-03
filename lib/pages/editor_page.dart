@@ -490,10 +490,15 @@ class _EditorPageState extends State<EditorPage>
           }
         }
       }
+      for (final fi in page.floatingImages) {
+        if (!seen.contains(fi.id)) {
+          seen.add(fi.id);
+          blocks.add(fi);
+        }
+      }
       return _PageWithBlocks(page: page, blocks: blocks);
     }).toList();
 
-    _lastBlocks = _project!.blocks;
     return _cachedPages!;
   }
 
@@ -857,6 +862,7 @@ class _EditorPageState extends State<EditorPage>
                       floatingImages: pageData.page.floatingImages,
                       onFloatImageMove: _onFloatImageMove,
                       onFloatImageResize: _onFloatImageResize,
+                      onFloatImageSelect: (id) => setState(() => _selectedId = id),
                     ),
                   ),
                 ),
