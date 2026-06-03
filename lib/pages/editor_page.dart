@@ -816,6 +816,7 @@ class _EditorPageState extends State<EditorPage>
                         project.pageSetup.pageNumber,
                         pageIdx,
                       ),
+                      floatingImages: pageData.page.floatingImages,
                     ),
                   ),
                 ),

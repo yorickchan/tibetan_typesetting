@@ -21,6 +21,7 @@ class SamplePageWidget extends StatelessWidget {
   final bool showMark;
   final String? pageNumber;
   final String? highlightBlockId;
+  final List<TextBlock> floatingImages;
 
   const SamplePageWidget({
     super.key,
@@ -32,6 +33,7 @@ class SamplePageWidget extends StatelessWidget {
     this.showMark = false,
     this.pageNumber,
     this.highlightBlockId,
+    this.floatingImages = const [],
   });
 
   @override
@@ -115,6 +117,7 @@ class SamplePageWidget extends StatelessWidget {
                       tibetanFont: tibFont,
                       pronunciationFont: pronFont,
                       translationFont: transFont,
+                      floatingImages: floatingImages,
                     ),
                   ),
                 ),
@@ -182,6 +185,8 @@ class _ContentGrid extends StatelessWidget {
   final FontConfig pronunciationFont;
   final FontConfig translationFont;
 
+  final List<TextBlock> floatingImages;
+
   const _ContentGrid({
     required this.rows,
     required this.colCount,
@@ -190,8 +195,8 @@ class _ContentGrid extends StatelessWidget {
     required this.tibetanFont,
     required this.pronunciationFont,
     required this.translationFont,
+    this.floatingImages = const [],
   });
-
   @override
   Widget build(BuildContext context) {
     if (rows.isEmpty) return const SizedBox.expand();
@@ -444,6 +449,48 @@ class _ContentGrid extends StatelessWidget {
               ),
             );
           }
+        }
+
+        // ---- Floating image overlay ----
+        for (final fi in floatingImages) {
+          final imgX = (fi.imageXMm ?? 10) * kMmToPx;
+          final imgY = (fi.imageYMm ?? 10) * kMmToPx;
+          final imgW = (fi.imageWidthMm ?? 30) * kMmToPx;
+          final imgH = (fi.imageHeightMm ?? 30) * kMmToPx;
+          final isSelected = fi.id == highlightBlockId;
+
+          children.add(
+            Positioned(
+              left: imgX,
+              top: imgY,
+              width: imgW,
+              height: imgH,
+              child: Container(
+                decoration: isSelected
+                    ? BoxDecoration(
+                        border: Border.all(color: AppColors.sky500, width: 2),
+                        borderRadius: BorderRadius.circular(2),
+                      )
+                    : null,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(2),
+                  child: fi.imagePath != null &&
+                          File(fi.imagePath!).existsSync()
+                      ? Image.file(
+                          File(fi.imagePath!),
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => Icon(
+                            Icons.broken_image,
+                            size: 16,
+                            color: AppColors.textFaint,
+                          ),
+                        )
+                      : Icon(Icons.image,
+                          size: 16, color: AppColors.textFaint),
+                ),
+              ),
+            ),
+          );
         }
 
         return Stack(clipBehavior: Clip.none, children: children);
