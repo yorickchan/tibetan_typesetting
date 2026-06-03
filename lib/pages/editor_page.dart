@@ -217,7 +217,7 @@ class _EditorPageState extends State<EditorPage>
 
   Future<void> _importCsv() async {
     if (_project == null) return;
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['csv', 'tsv', 'txt'],
     );

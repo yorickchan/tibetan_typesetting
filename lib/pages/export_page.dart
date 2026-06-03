@@ -10,6 +10,7 @@ import '../models/project.dart';
 import '../services/database_service.dart';
 import '../services/font_service.dart';
 import '../services/pdf_service.dart';
+import '../services/html_export_service.dart';
 import '../services/settings_service.dart';
 import '../utils/colors.dart';
 import '../utils/save_state_mixin.dart';
@@ -40,6 +41,7 @@ class _ExportPageState extends State<ExportPage>
   bool _loading = true;
   String? _error;
   bool _pdfBusy = false;
+  bool _exportAsHtml = false;
   double _zoom = 1.0;
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
@@ -134,7 +136,7 @@ class _ExportPageState extends State<ExportPage>
         _project!,
         appSettings: _appSettings,
       );
-      final path = await FilePicker.platform.saveFile(
+      final path = await FilePicker.saveFile(
         dialogTitle: 'Save PDF',
         fileName: '${_project!.name}.pdf',
         type: FileType.custom,
@@ -155,6 +157,31 @@ class _ExportPageState extends State<ExportPage>
       }
     } catch (e, s) {
       debugPrint('PDF export failed: $e\n$s');
+      _showSnack(e.toString(), error: true);
+    } finally {
+      if (mounted) setState(() => _pdfBusy = false);
+    }
+  }
+
+  Future<void> _exportHtml() async {
+    if (_project == null) return;
+    setState(() => _pdfBusy = true);
+    try {
+      final html = HtmlExportService.generateHtml(_project!);
+      final path = await FilePicker.saveFile(
+        dialogTitle: 'Save HTML',
+        fileName: '${_project!.name}.html',
+        type: FileType.custom,
+        allowedExtensions: ['html', 'htm'],
+      );
+      if (path == null) {
+        if (mounted) setState(() => _pdfBusy = false);
+        return;
+      }
+      await File(path).writeAsString(html);
+      _showSnack(_l10n.projectExported);
+    } catch (e, s) {
+      debugPrint('HTML export failed: $e\n$s');
       _showSnack(e.toString(), error: true);
     } finally {
       if (mounted) setState(() => _pdfBusy = false);
@@ -217,10 +244,26 @@ class _ExportPageState extends State<ExportPage>
             ),
           Padding(
             padding: const EdgeInsets.only(right: 8),
+            child: SegmentedButton<bool>(
+              segments: const [
+                ButtonSegment<bool>(value: false, label: Text('PDF')),
+                ButtonSegment<bool>(value: true, label: Text('HTML')),
+              ],
+              selected: {_exportAsHtml},
+              onSelectionChanged: (v) => setState(() => _exportAsHtml = v.first),
+              style: SegmentedButton.styleFrom(
+                selectedBackgroundColor: AppColors.sky500,
+                selectedForegroundColor: Colors.white,
+                textStyle: const TextStyle(fontSize: 12),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
             child: TextButton.icon(
               icon: const Icon(Icons.download, size: 16, color: Colors.white),
               label: Text(
-                _pdfBusy ? _l10n.printing : _l10n.exportPdf,
+                _pdfBusy ? _l10n.printing : (_exportAsHtml ? 'Export HTML' : _l10n.exportPdf),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 13,
@@ -237,7 +280,9 @@ class _ExportPageState extends State<ExportPage>
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              onPressed: _pdfBusy || _project == null ? null : _exportPdf,
+              onPressed: _pdfBusy || _project == null
+                  ? null
+                  : (_exportAsHtml ? _exportHtml : _exportPdf),
             ),
           ),
         ],

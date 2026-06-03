@@ -209,7 +209,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
         '  ',
       ).convert(project.toJson());
 
-      final path = await FilePicker.platform.saveFile(
+      final path = await FilePicker.saveFile(
         dialogTitle: 'Export Project JSON',
         fileName: '${project.name}.json',
         type: FileType.custom,
@@ -225,7 +225,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
 
   Future<void> _importJson() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
       );

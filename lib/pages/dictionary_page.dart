@@ -253,7 +253,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
   Future<void> _exportJson() async {
     try {
       final json = await _pronunciationService.exportToJson();
-      final path = await FilePicker.platform.saveFile(
+      final path = await FilePicker.saveFile(
         dialogTitle: _l10n.exportDictionary,
         fileName: 'pronunciation_dictionary.json',
         type: FileType.custom,
@@ -269,7 +269,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
 
   Future<void> _importJson() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
       );
