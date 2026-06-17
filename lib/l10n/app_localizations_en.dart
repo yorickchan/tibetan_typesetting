@@ -142,6 +142,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get freeTextContent => 'Chinese or English text';
 
   @override
+  String get openingMark => 'Opening mark';
+
+  @override
   String get tibetanText => 'Tibetan text';
 
   @override

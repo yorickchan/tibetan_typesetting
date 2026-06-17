@@ -18,7 +18,6 @@ class SamplePageWidget extends StatelessWidget {
   final List<List<TextBlock?>>? rows;
   final List<List<LayoutCell>>? flowRows;
   final int? colCount;
-  final bool showMark;
   final String? pageNumber;
   final String? highlightBlockId;
   final List<TextBlock> floatingImages;
@@ -34,7 +33,6 @@ class SamplePageWidget extends StatelessWidget {
     this.rows,
     this.flowRows,
     this.colCount,
-    this.showMark = false,
     this.pageNumber,
     this.highlightBlockId,
     this.floatingImages = const [],
@@ -121,7 +119,6 @@ class SamplePageWidget extends StatelessWidget {
                     child: _ContentGrid(
                       rows: effectiveFlowRows,
                       colCount: effectiveColCount,
-                      showMark: showMark,
                       showRowLines: setup.showRowLines,
                       highlightBlockId: highlightBlockId,
                       tibetanFont: tibFont,
@@ -195,7 +192,6 @@ class _ContentGrid extends StatelessWidget {
 
   final List<List<LayoutCell>> rows;
   final int colCount;
-  final bool showMark;
   final bool showRowLines;
   final String? highlightBlockId;
   final FontConfig tibetanFont;
@@ -211,7 +207,6 @@ class _ContentGrid extends StatelessWidget {
   const _ContentGrid({
     required this.rows,
     required this.colCount,
-    required this.showMark,
     required this.showRowLines,
     this.highlightBlockId,
     required this.tibetanFont,
@@ -452,6 +447,50 @@ class _ContentGrid extends StatelessWidget {
               continue;
             }
 
+            if (block.isOpeningMark) {
+              final markLines = splitLines(block.tibetan);
+              final markText = markLines.join(' ');
+              final left = cell.leftFraction * totalW;
+              final spannedW = cell.widthFraction * totalW;
+              final blockW = spannedW.clamp(0, totalW - left).toDouble();
+              children.add(
+                Positioned(
+                  left: left,
+                  top: rowYs[ri],
+                  width: blockW,
+                  height: rowHs[ri],
+                  child: Container(
+                    padding: const EdgeInsets.only(top: 16, left: 6, right: 6),
+                    decoration: isHL
+                        ? BoxDecoration(
+                            color: const Color.fromARGB(
+                              255,
+                              183,
+                              179,
+                              255,
+                            ).withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(4),
+                          )
+                        : null,
+                    child: Text(
+                      markText,
+                      style: TextStyle(
+                        fontFamily: tibFamily,
+                        fontSize: contentTibetanFontSize(
+                          font_utils.previewFontSize(tibSize),
+                          smallText: isSmall,
+                        ),
+                        color: AppColors.rose600,
+                        height: contentTibetanLineHeight(smallText: isSmall),
+                      ),
+                      maxLines: null,
+                    ),
+                  ),
+                ),
+              );
+              continue;
+            }
+
             final tibLines = splitLines(block.tibetan);
             final heading = tibLines.isNotEmpty ? tibLines[0] : '';
             final body = tibLines.length > 1
@@ -461,8 +500,6 @@ class _ContentGrid extends StatelessWidget {
             final trans = isCompact
                 ? ''
                 : splitLines(block.chineseTranslation).join(' ');
-            final doShowMark =
-                !isFreeText && showMark && ri == 0 && cellIndex == 0;
 
             final headingSize = contentTibetanFontSize(
               font_utils.previewFontSize(tibSize),
@@ -512,21 +549,9 @@ class _ContentGrid extends StatelessWidget {
                           ),
                           maxLines: null,
                         ),
-                      if (!isFreeText && (heading.isNotEmpty || doShowMark))
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              if (doShowMark)
-                                TextSpan(
-                                  text: '༄༅།།   ',
-                                  style: TextStyle(
-                                    fontFamily: tibFamily,
-                                    color: AppColors.rose600,
-                                  ),
-                                ),
-                              TextSpan(text: heading),
-                            ],
-                          ),
+                      if (!isFreeText && heading.isNotEmpty)
+                        Text(
+                          heading,
                           style: TextStyle(
                             fontFamily: tibFamily,
                             fontSize: headingSize,
@@ -557,12 +582,7 @@ class _ContentGrid extends StatelessWidget {
                         ),
                       if (!isFreeText && pron.isNotEmpty)
                         Padding(
-                          padding: EdgeInsets.only(
-                            top: 2,
-                            left: doShowMark
-                                ? contentOpeningMarkIndent(headingSize)
-                                : 0,
-                          ),
+                          padding: const EdgeInsets.only(top: 2),
                           child: Text(
                             pron,
                             style: TextStyle(
@@ -577,12 +597,7 @@ class _ContentGrid extends StatelessWidget {
                         ),
                       if (!isFreeText && trans.isNotEmpty)
                         Padding(
-                          padding: EdgeInsets.only(
-                            top: 1,
-                            left: doShowMark
-                                ? contentOpeningMarkIndent(headingSize)
-                                : 0,
-                          ),
+                          padding: const EdgeInsets.only(top: 1),
                           child: Text(
                             trans,
                             style: TextStyle(

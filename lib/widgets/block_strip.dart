@@ -271,6 +271,11 @@ class _BlockTile extends StatelessWidget {
                               'F',
                               style: TextStyle(fontSize: 7, fontWeight: FontWeight.bold, color: AppColors.sky400),
                             ),
+                          if (block.isOpeningMark)
+                            const Text(
+                              'M',
+                              style: TextStyle(fontSize: 7, fontWeight: FontWeight.bold, color: AppColors.rose600),
+                            ),
                           if (block.columnBreakBefore)
                             Container(
                               margin: const EdgeInsets.only(left: 2),
@@ -308,12 +313,20 @@ class _BlockTile extends StatelessWidget {
                       child: Text(
                         tibetanLine.isEmpty ? 'empty' : tibetanLine,
                         style: TextStyle(
-                          fontFamily: block.isFreeText ? translationFontFamily : tibetanFontFamily,
+                          fontFamily: block.isOpeningMark
+                              ? tibetanFontFamily
+                              : (block.isFreeText
+                                  ? translationFontFamily
+                                  : tibetanFontFamily),
                           fontSize: 10,
                           height: 1.2,
-                          color: tibetanLine.isEmpty
-                              ? AppColors.textFaint
-                              : (selected ? AppColors.sky400 : AppColors.textBody),
+                          color: block.isOpeningMark
+                              ? AppColors.rose600
+                              : (tibetanLine.isEmpty
+                                  ? AppColors.textFaint
+                                  : (selected
+                                      ? AppColors.sky400
+                                      : AppColors.textBody)),
                           fontStyle: tibetanLine.isEmpty ? FontStyle.italic : null,
                         ),
                         maxLines: 2,

@@ -357,6 +357,12 @@ abstract class AppLocalizations {
   /// **'Chinese or English text'**
   String get freeTextContent;
 
+  /// No description provided for @openingMark.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening mark'**
+  String get openingMark;
+
   /// No description provided for @tibetanText.
   ///
   /// In en, this message translates to:

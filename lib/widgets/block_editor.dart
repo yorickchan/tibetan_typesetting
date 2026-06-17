@@ -24,6 +24,7 @@ class BlockEditorWidget extends StatelessWidget {
   final VoidCallback onTogglePageBreak;
   final VoidCallback onToggleSmallText;
   final VoidCallback onToggleFreeTextFormat;
+  final VoidCallback onToggleOpeningMarkFormat;
   final VoidCallback onSelectPrev;
   final VoidCallback onSelectNext;
   final String tibetanFontFamily;
@@ -42,6 +43,7 @@ class BlockEditorWidget extends StatelessWidget {
     required this.onTogglePageBreak,
     required this.onToggleSmallText,
     required this.onToggleFreeTextFormat,
+    required this.onToggleOpeningMarkFormat,
     required this.onSelectPrev,
     required this.onSelectNext,
     this.tibetanFontFamily = fallbackTibetanFontFamily,
@@ -89,6 +91,7 @@ class BlockEditorWidget extends StatelessWidget {
             onTogglePageBreak: onTogglePageBreak,
             onToggleSmallText: onToggleSmallText,
             onToggleFreeTextFormat: onToggleFreeTextFormat,
+            onToggleOpeningMarkFormat: onToggleOpeningMarkFormat,
             onSetColumnSpan: (span) => onUpdateBlock(
               BlockUpdate(columnSpan: span, clearColumnSpan: span == null),
             ),
@@ -126,6 +129,7 @@ class _Toolbar extends StatelessWidget {
   final VoidCallback onTogglePageBreak;
   final VoidCallback onToggleSmallText;
   final VoidCallback onToggleFreeTextFormat;
+  final VoidCallback onToggleOpeningMarkFormat;
   final ValueChanged<int?> onSetColumnSpan;
   final VoidCallback onDeleteBlock;
   final AppLocalizations l10n;
@@ -142,6 +146,7 @@ class _Toolbar extends StatelessWidget {
     required this.onTogglePageBreak,
     required this.onToggleSmallText,
     required this.onToggleFreeTextFormat,
+    required this.onToggleOpeningMarkFormat,
     required this.onSetColumnSpan,
     required this.onDeleteBlock,
     required this.l10n,
@@ -288,6 +293,14 @@ class _Toolbar extends StatelessWidget {
               block.isFreeText,
               AppColors.sky400,
               onToggleFreeTextFormat,
+            ),
+            const SizedBox(width: 4),
+            _toggleBtn(
+              Icons.format_quote,
+              l10n.openingMark,
+              block.isOpeningMark,
+              AppColors.rose600,
+              onToggleOpeningMarkFormat,
             ),
             if (block.isImageBlock) ...[
               const SizedBox(width: 4),
@@ -614,6 +627,23 @@ class _EditorFieldsState extends State<_EditorFields> {
         builder: (context, constraints) {
           if (widget.block.isImageBlock) {
             return _imageSection();
+          }
+          if (widget.block.isOpeningMark) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.l10n.openingMark,
+                  style: TextStyle(
+                    color: AppColors.rose600,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                _tibetanField(),
+              ],
+            );
           }
           if (widget.block.isFreeText) {
             return Column(

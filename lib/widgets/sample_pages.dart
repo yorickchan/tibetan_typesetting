@@ -54,7 +54,6 @@ class SamplePagesWidget extends StatelessWidget {
           flowRows: pages[index].flowRows,
           colCount: pages[index].colCount,
           highlightBlockId: highlightBlockId,
-          showMark: index % 2 == 0,
           pageNumber: resolvePageNumber(setup.pageNumber, index),
           floatingImages: pages[index].floatingImages,
         ),

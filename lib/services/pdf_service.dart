@@ -278,7 +278,6 @@ class PdfService {
     // Content blocks
     for (var pi = 0; pi < pages.length; pi++) {
       final page = pages[pi];
-      final showMark = pi % 2 == 0;
       for (var ri = 0; ri < page.flowRows.length; ri++) {
         final row = page.flowRows[ri];
         for (var cellIndex = 0; cellIndex < row.length; cellIndex++) {
@@ -307,14 +306,10 @@ class PdfService {
 
           final key = '${pi}_${ri}_$cellIndex';
           final tibLines = splitLines(block.tibetan);
-          var heading = tibLines.isNotEmpty ? tibLines[0] : '';
+          final heading = tibLines.isNotEmpty ? tibLines[0] : '';
           final body = tibLines.length > 1
               ? tibLines.sublist(1).join('\n')
               : '';
-
-          if (showMark && ri == 0 && cellIndex == 0) {
-            heading = '\u0F04\u0F05\u0F0D\u0F0D   $heading';
-          }
 
           final small = block.smallText;
           final tibContentSize = contentTibetanFontSize(
@@ -671,15 +666,12 @@ class PdfService {
       pw.Widget buildBlock(
         String key,
         TextBlock block,
-        bool hasMark,
         double maxW,
       ) {
         final small = block.smallText;
         final freeText = block.isFreeText;
-        final hSize = contentTibetanFontSize(tibFontSize, smallText: small);
         final pronSize = pronFontSize * (small ? 0.75 : 1.0);
         final transSize = transFontSize * (small || freeText ? 0.75 : 1.0);
-        final markPad = hasMark ? contentOpeningMarkIndent(hSize) : 0.0;
 
         final pron = splitLines(block.chinesePronunciation).join('\n');
         final trans = small || freeText
@@ -689,6 +681,12 @@ class PdfService {
 
         final hImg = imgs['${key}_h'];
         final bImg = imgs['${key}_b'];
+
+        if (block.isOpeningMark) {
+          return hImg != null
+              ? pw.Image(hImg.provider, width: hImg.w, height: hImg.h)
+              : pw.SizedBox();
+        }
 
         return pw.Column(
           mainAxisSize: pw.MainAxisSize.min,
@@ -705,42 +703,41 @@ class PdfService {
                   lineSpacing: transSize * 0.4,
                 ),
               ),
-            if (hImg != null && block.isImageBlock) ...[
-              pw.Image(
-                hImg.provider,
-                width: block.imageWidthMm != null
-                    ? (block.imageWidthMm! * PdfPageFormat.mm).clamp(10.0, maxW)
-                    : hImg.w * (maxW / hImg.w).clamp(0.1, 1.0),
-                height: block.imageWidthMm != null
-                    ? (hImg.h *
-                          ((block.imageWidthMm! * PdfPageFormat.mm).clamp(
-                                10.0,
-                                maxW,
-                              ) /
-                              hImg.w))
-                    : hImg.h * (maxW / hImg.w).clamp(0.1, 1.0),
-              ),
-            ] else if (hImg != null)
-              pw.Image(hImg.provider, width: hImg.w, height: hImg.h),
-            if (bImg != null)
-              pw.Image(bImg.provider, width: bImg.w, height: bImg.h),
+            if (!freeText) ...[
+              if (hImg != null && block.isImageBlock) ...[
+                pw.Image(
+                  hImg.provider,
+                  width: block.imageWidthMm != null
+                      ? (block.imageWidthMm! * PdfPageFormat.mm).clamp(10.0, maxW)
+                      : hImg.w * (maxW / hImg.w).clamp(0.1, 1.0),
+                  height: block.imageWidthMm != null
+                      ? (hImg.h *
+                            ((block.imageWidthMm! * PdfPageFormat.mm).clamp(
+                                  10.0,
+                                  maxW,
+                                ) /
+                                hImg.w))
+                      : hImg.h * (maxW / hImg.w).clamp(0.1, 1.0),
+                ),
+              ] else if (hImg != null)
+                pw.Image(hImg.provider, width: hImg.w, height: hImg.h),
+              if (bImg != null)
+                pw.Image(bImg.provider, width: bImg.w, height: bImg.h),
+            ],
             if (pron.isNotEmpty)
-              pw.Padding(
-                padding: pw.EdgeInsets.only(left: markPad),
-                child: pw.Text(
-                  pron,
-                  style: pw.TextStyle(
-                    font: pronFont,
-                    fontFallback: fontFallback,
-                    fontSize: pronSize,
-                    color: PdfColors.black,
-                    lineSpacing: pronSize * 0.4,
-                  ),
+              pw.Text(
+                pron,
+                style: pw.TextStyle(
+                  font: pronFont,
+                  fontFallback: fontFallback,
+                  fontSize: pronSize,
+                  color: PdfColors.black,
+                  lineSpacing: pronSize * 0.4,
                 ),
               ),
             if (trans.isNotEmpty)
               pw.Padding(
-                padding: pw.EdgeInsets.only(top: 1, left: markPad),
+                padding: const pw.EdgeInsets.only(top: 1),
                 child: pw.Text(
                   trans,
                   style: pw.TextStyle(
@@ -777,7 +774,6 @@ class PdfService {
           );
         }
       }
-      final showMark = pageIdx % 2 == 0;
       for (var ri = 0; ri < rows.length; ri++) {
         final row = rows[ri];
         for (var cellIndex = 0; cellIndex < row.length; cellIndex++) {
@@ -790,15 +786,13 @@ class PdfService {
               (block.smallText || block.isFreeText) && block.columnSpan == null
               ? (cW - left - padX * 2)
               : (spannedW - padX * 2);
-          final hasMark =
-              !block.isFreeText && showMark && ri == 0 && cellIndex == 0;
           positioned.add(
             pw.Positioned(
               left: left + padX,
               top: rowYs[ri],
               child: pw.SizedBox(
                 width: blockW,
-                child: buildBlock(key, block, hasMark, blockW),
+                child: buildBlock(key, block, blockW),
               ),
             ),
           );

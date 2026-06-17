@@ -364,10 +364,6 @@ void main() {
       },
     );
 
-    test('opening mark indent aligns Chinese with first Tibetan character', () {
-      expect(contentOpeningMarkIndent(12), 30);
-    });
-
     test(
       'content Tibetan raster bleed leaves room for tight line-height glyphs',
       () {

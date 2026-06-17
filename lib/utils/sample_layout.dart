@@ -93,7 +93,7 @@ List<_Row> _buildRows(List<TextBlock> blocks, double gapFraction,
       LayoutCell(
         block: block,
         leftFraction: cursor,
-        widthFraction: width.clamp(0.08, 1.0 - cursor),
+        widthFraction: width.clamp(0.08, (1.0 - cursor).clamp(0.08, 1.0)),
       ),
     );
     cursor += width + gap;
@@ -193,6 +193,10 @@ double estimateBlockWidthFraction(TextBlock block, [double? contentWidthMm]) {
     return manual.clamp(1, maxColumnSpan) / maxColumnSpan;
   }
 
+  if (block.isOpeningMark) {
+    return 2.0 / maxColumnSpan;
+  }
+
   final tibetanLen = splitLines(block.tibetan).join('').runes.length;
   final pronLen = block.isFreeText
       ? 0
@@ -215,10 +219,6 @@ double contentTibetanLineHeight({required bool smallText}) {
 
 double contentTibetanFontSize(double fontSize, {required bool smallText}) {
   return fontSize * (smallText ? 0.75 : 1.0);
-}
-
-double contentOpeningMarkIndent(double fontSize) {
-  return fontSize * 2.5;
 }
 
 double contentTibetanRasterBleed(double fontSize) {

@@ -43,6 +43,7 @@
   "smallText": "小字",
   "freeText": "自由文本",
   "freeTextContent": "中文或英文文本",
+  "openingMark": "开篇标记",
   "tibetanText": "藏文",
   "chinesePronunciation": "中文注音",
   "chineseTranslation": "中文翻译",

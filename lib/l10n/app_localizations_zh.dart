@@ -142,6 +142,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get freeTextContent => '中文或英文文本';
 
   @override
+  String get openingMark => '开篇标记';
+
+  @override
   String get tibetanText => '藏文';
 
   @override
@@ -577,6 +580,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get freeTextContent => '中文或英文文字';
+
+  @override
+  String get openingMark => '卷首標記';
 
   @override
   String get tibetanText => '藏文';

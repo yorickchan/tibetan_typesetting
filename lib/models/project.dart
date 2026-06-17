@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'font_config.dart';
 
+const String kDefaultOpeningMark = '༄༅།།';
+
 class MarginMm {
   final double top;
   final double right;
@@ -68,6 +70,7 @@ class PageSetup {
   final String footerCustomText;
   final double headerFontSize;
   final double footerFontSize;
+  final String defaultOpeningMark;
 
   PageSetup({
     this.pageWidthMm = 300,
@@ -98,6 +101,7 @@ class PageSetup {
     this.footerCustomText = '',
     this.headerFontSize = 9,
     this.footerFontSize = 9,
+    this.defaultOpeningMark = kDefaultOpeningMark,
   }) : marginMm = marginMm ?? MarginMm();
   PageSetup copyWith({
     double? pageWidthMm,
@@ -128,6 +132,7 @@ class PageSetup {
     String? footerCustomText,
     double? headerFontSize,
     double? footerFontSize,
+    String? defaultOpeningMark,
     bool clearTibetanFont = false,
     bool clearPronunciationFont = false,
     bool clearTranslationFont = false,
@@ -171,6 +176,7 @@ class PageSetup {
       footerCustomText: footerCustomText ?? this.footerCustomText,
       headerFontSize: headerFontSize ?? this.headerFontSize,
       footerFontSize: footerFontSize ?? this.footerFontSize,
+      defaultOpeningMark: defaultOpeningMark ?? this.defaultOpeningMark,
     );
   }
 
@@ -198,6 +204,7 @@ class PageSetup {
     'footerCustomText': footerCustomText,
     'headerFontSize': headerFontSize,
     'footerFontSize': footerFontSize,
+    'defaultOpeningMark': defaultOpeningMark,
     if (tibetanFont != null) 'tibetanFont': tibetanFont!.toJson(),
     if (pronunciationFont != null)
       'pronunciationFont': pronunciationFont!.toJson(),
@@ -250,6 +257,8 @@ class PageSetup {
     footerCustomText: json['footerCustomText'] as String? ?? '',
     headerFontSize: (json['headerFontSize'] as num?)?.toDouble() ?? 9,
     footerFontSize: (json['footerFontSize'] as num?)?.toDouble() ?? 9,
+    defaultOpeningMark:
+        json['defaultOpeningMark'] as String? ?? kDefaultOpeningMark,
   );
 }
 
@@ -298,11 +307,13 @@ enum HeaderFooterField {
 
 enum TextBlockFormat {
   normal,
-  freeText;
+  freeText,
+  openingMark;
 
   static TextBlockFormat fromJson(String? value) {
     return switch (value) {
       'freeText' => TextBlockFormat.freeText,
+      'openingMark' => TextBlockFormat.openingMark,
       _ => TextBlockFormat.normal,
     };
   }
@@ -344,6 +355,7 @@ class TextBlock {
   });
 
   bool get isFreeText => format == TextBlockFormat.freeText;
+  bool get isOpeningMark => format == TextBlockFormat.openingMark;
   bool get isImageBlock => imagePath != null && imagePath!.isNotEmpty;
 
   TextBlock copyWith({

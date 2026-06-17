@@ -461,6 +461,18 @@ class _EditorPageState extends State<EditorPage>
     _updateBlock(BlockUpdate(format: nextFormat));
   }
 
+  void _toggleOpeningMarkFormat() {
+    if (_project == null || _selectedBlock == null) return;
+    final nextFormat = _selectedBlock!.isOpeningMark
+        ? TextBlockFormat.normal
+        : TextBlockFormat.openingMark;
+    final tibetan = nextFormat == TextBlockFormat.openingMark &&
+            _selectedBlock!.tibetan.trim().isEmpty
+        ? kDefaultOpeningMark
+        : null;
+    _updateBlock(BlockUpdate(format: nextFormat, tibetan: tibetan));
+  }
+
   void _undo() {
     if (_project == null) return;
     final prev = _undoService.undo(_project!);
@@ -871,6 +883,7 @@ class _EditorPageState extends State<EditorPage>
                     onTogglePageBreak: _togglePageBreak,
                     onToggleSmallText: _toggleSmallText,
                     onToggleFreeTextFormat: _toggleFreeTextFormat,
+                    onToggleOpeningMarkFormat: _toggleOpeningMarkFormat,
                     onSelectPrev: _selectPrev,
                     onSelectNext: _selectNext,
                     tibetanFontFamily: tibFont.fontFamily,
@@ -892,7 +905,6 @@ class _EditorPageState extends State<EditorPage>
                       flowRows: pageData.page.flowRows,
                       colCount: pageData.page.colCount,
                       highlightBlockId: _selectedId,
-                      showMark: pageIdx % 2 == 0,
                       pageNumber: resolvePageNumber(
                         project.pageSetup.pageNumber,
                         pageIdx,
