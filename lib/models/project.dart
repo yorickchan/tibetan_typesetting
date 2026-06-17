@@ -45,6 +45,7 @@ class PageSetup {
   final MarginMm marginMm;
   final int columnCount;
   final bool showFrame;
+  final bool showRowLines;
   final String leftVerticalTitle;
   final String pageNumber;
   final double flowGap;
@@ -74,6 +75,7 @@ class PageSetup {
     MarginMm? marginMm,
     this.columnCount = 5,
     this.showFrame = true,
+    this.showRowLines = true,
     this.leftVerticalTitle = '',
     this.pageNumber = '',
     this.flowGap = 0.01,
@@ -103,6 +105,7 @@ class PageSetup {
     MarginMm? marginMm,
     int? columnCount,
     bool? showFrame,
+    bool? showRowLines,
     String? leftVerticalTitle,
     String? pageNumber,
     double? flowGap,
@@ -137,6 +140,7 @@ class PageSetup {
       marginMm: marginMm ?? this.marginMm,
       columnCount: columnCount ?? this.columnCount,
       showFrame: showFrame ?? this.showFrame,
+      showRowLines: showRowLines ?? this.showRowLines,
       leftVerticalTitle: leftVerticalTitle ?? this.leftVerticalTitle,
       pageNumber: pageNumber ?? this.pageNumber,
       flowGap: flowGap ?? this.flowGap,
@@ -176,6 +180,7 @@ class PageSetup {
     'marginMm': marginMm.toJson(),
     'columnCount': columnCount,
     'showFrame': showFrame,
+    'showRowLines': showRowLines,
     'leftVerticalTitle': leftVerticalTitle,
     'pageNumber': pageNumber,
     'flowGap': flowGap,
@@ -211,6 +216,7 @@ class PageSetup {
         : MarginMm(),
     columnCount: (json['columnCount'] as num?)?.toInt() ?? 5,
     showFrame: json['showFrame'] as bool? ?? true,
+    showRowLines: json['showRowLines'] as bool? ?? true,
     leftVerticalTitle: json['leftVerticalTitle'] as String? ?? '',
     pageNumber: json['pageNumber'] as String? ?? '',
     flowGap: (json['flowGap'] as num?)?.toDouble() ?? 0.01,

@@ -195,6 +195,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get showFrame => '显示边框';
 
   @override
+  String get showRowLines => '显示行线';
+
+  @override
   String get leftVerticalTitle => '左侧竖排标题';
 
   @override
@@ -627,6 +630,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get showFrame => '顯示邊框';
+
+  @override
+  String get showRowLines => '顯示行線';
 
   @override
   String get leftVerticalTitle => '左側豎排標題';

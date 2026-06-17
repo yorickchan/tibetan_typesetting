@@ -24,8 +24,7 @@ class SamplePageWidget extends StatelessWidget {
   final List<TextBlock> floatingImages;
   final void Function(String id, double dxMm, double dyMm)? onFloatImageMove;
   final void Function(String id, double dwMm, double dhMm)? onFloatImageResize;
-  final void Function(String id, double dwMm, double dhMm)?
-      onInlineImageResize;
+  final void Function(String id, double dwMm, double dhMm)? onInlineImageResize;
   final void Function(String id)? onSelectBlock;
 
   const SamplePageWidget({
@@ -123,6 +122,7 @@ class SamplePageWidget extends StatelessWidget {
                       rows: effectiveFlowRows,
                       colCount: effectiveColCount,
                       showMark: showMark,
+                      showRowLines: setup.showRowLines,
                       highlightBlockId: highlightBlockId,
                       tibetanFont: tibFont,
                       pronunciationFont: pronFont,
@@ -196,6 +196,7 @@ class _ContentGrid extends StatelessWidget {
   final List<List<LayoutCell>> rows;
   final int colCount;
   final bool showMark;
+  final bool showRowLines;
   final String? highlightBlockId;
   final FontConfig tibetanFont;
   final FontConfig pronunciationFont;
@@ -204,14 +205,14 @@ class _ContentGrid extends StatelessWidget {
   final List<TextBlock> floatingImages;
   final void Function(String id, double dxMm, double dyMm)? onFloatImageMove;
   final void Function(String id, double dwMm, double dhMm)? onFloatImageResize;
-  final void Function(String id, double dwMm, double dhMm)?
-      onInlineImageResize;
+  final void Function(String id, double dwMm, double dhMm)? onInlineImageResize;
   final void Function(String id)? onSelectBlock;
 
   const _ContentGrid({
     required this.rows,
     required this.colCount,
     required this.showMark,
+    required this.showRowLines,
     this.highlightBlockId,
     required this.tibetanFont,
     required this.pronunciationFont,
@@ -273,6 +274,29 @@ class _ContentGrid extends StatelessWidget {
 
         final children = <Widget>[];
 
+        if (showRowLines) {
+          const rowLineColor = Color(0xFFFFD700);
+          const rowLineHeight = 1.0;
+          const rowLineOffset = 18.0;
+          for (var ri = 0; ri < rowCount; ri++) {
+            final hasNormalBlock = rows[ri].any(
+              (cell) =>
+                  !cell.block.smallText &&
+                  !cell.block.isFreeText &&
+                  !cell.block.isImageBlock,
+            );
+            if (!hasNormalBlock) continue;
+            children.add(
+              Positioned(
+                left: 0,
+                top: rowYs[ri] + rowLineOffset,
+                width: totalW,
+                child: Container(height: rowLineHeight, color: rowLineColor),
+              ),
+            );
+          }
+        }
+
         for (var ri = 0; ri < rows.length; ri++) {
           final row = rows[ri];
           for (var cellIndex = 0; cellIndex < row.length; cellIndex++) {
@@ -291,8 +315,8 @@ class _ContentGrid extends StatelessWidget {
               final cellH = rowHs[ri];
               final imgH = block.imageHeightMm != null
                   ? (block.imageHeightMm! * kMmToPx)
-                      .clamp(10.0, cellH)
-                      .toDouble()
+                        .clamp(10.0, cellH)
+                        .toDouble()
                   : cellH;
               const edgeZone = 12.0;
               children.add(
@@ -344,38 +368,44 @@ class _ContentGrid extends StatelessWidget {
                       },
                       child: Container(
                         padding: const EdgeInsets.only(
-                            top: 16, left: 6, right: 6),
+                          top: 16,
+                          left: 6,
+                          right: 6,
+                        ),
                         decoration: isHL
                             ? BoxDecoration(
                                 color: const Color.fromARGB(
-                                        255, 183, 179, 255)
-                                    .withValues(alpha: 0.6),
+                                  255,
+                                  183,
+                                  179,
+                                  255,
+                                ).withValues(alpha: 0.6),
                                 borderRadius: BorderRadius.circular(4),
                               )
                             : null,
                         child: SizedBox(
                           height: imgH,
                           child: ColoredBox(
-                            color: AppColors.emerald400
-                                .withValues(alpha: 0.15),
+                            color: AppColors.emerald400.withValues(alpha: 0.15),
                             child: block.imagePath != null
                                 ? Stack(
                                     children: [
                                       Positioned.fill(
                                         child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(4),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
                                           child: Image.file(
                                             File(block.imagePath!),
                                             fit: BoxFit.contain,
                                             errorBuilder: (_, __, ___) =>
                                                 const Center(
-                                              child: Icon(
-                                                  Icons.broken_image,
-                                                  size: 24,
-                                                  color:
-                                                      AppColors.rose600),
-                                            ),
+                                                  child: Icon(
+                                                    Icons.broken_image,
+                                                    size: 24,
+                                                    color: AppColors.rose600,
+                                                  ),
+                                                ),
                                           ),
                                         ),
                                       ),
@@ -386,8 +416,9 @@ class _ContentGrid extends StatelessWidget {
                                           bottom: 0,
                                           width: edgeZone,
                                           child: Container(
-                                            color: AppColors.sky500
-                                                .withValues(alpha: 0.3),
+                                            color: AppColors.sky500.withValues(
+                                              alpha: 0.3,
+                                            ),
                                           ),
                                         ),
                                         Positioned(
@@ -396,17 +427,20 @@ class _ContentGrid extends StatelessWidget {
                                           right: 0,
                                           height: edgeZone,
                                           child: Container(
-                                            color: AppColors.sky500
-                                                .withValues(alpha: 0.3),
+                                            color: AppColors.sky500.withValues(
+                                              alpha: 0.3,
+                                            ),
                                           ),
                                         ),
                                       ],
                                     ],
                                   )
                                 : const Center(
-                                    child: Icon(Icons.image,
-                                        size: 24,
-                                        color: AppColors.amber400),
+                                    child: Icon(
+                                      Icons.image,
+                                      size: 24,
+                                      color: AppColors.amber400,
+                                    ),
                                   ),
                           ),
                         ),
@@ -643,8 +677,11 @@ class _ContentGrid extends StatelessWidget {
                                     color: AppColors.textFaint,
                                   ),
                                 )
-                              : Icon(Icons.image,
-                                  size: 16, color: AppColors.textFaint),
+                              : Icon(
+                                  Icons.image,
+                                  size: 16,
+                                  color: AppColors.textFaint,
+                                ),
                         ),
                       ),
                       if (isSelected) ...[
@@ -652,7 +689,9 @@ class _ContentGrid extends StatelessWidget {
                           child: Container(
                             decoration: BoxDecoration(
                               border: Border.all(
-                                  color: AppColors.sky500, width: 2),
+                                color: AppColors.sky500,
+                                width: 2,
+                              ),
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -663,8 +702,7 @@ class _ContentGrid extends StatelessWidget {
                           bottom: 0,
                           width: edgeZone,
                           child: Container(
-                            color:
-                                AppColors.sky500.withValues(alpha: 0.3),
+                            color: AppColors.sky500.withValues(alpha: 0.3),
                           ),
                         ),
                         Positioned(
@@ -673,8 +711,7 @@ class _ContentGrid extends StatelessWidget {
                           right: 0,
                           height: edgeZone,
                           child: Container(
-                            color:
-                                AppColors.sky500.withValues(alpha: 0.3),
+                            color: AppColors.sky500.withValues(alpha: 0.3),
                           ),
                         ),
                       ],

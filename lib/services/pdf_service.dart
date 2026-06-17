@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'dart:ui' show Color, TextAlign, instantiateImageCodec;
 
 import 'package:flutter/foundation.dart';
@@ -27,10 +26,10 @@ class PdfGenerationResult {
 }
 
 const _rose = PdfColor.fromInt(0xFFe11d48);
+const _rowLine = PdfColor.fromInt(0xFFFFD700);
 
 const _roseUi = Color(0xFFe11d48);
 const _blackUi = Color(0xFF000000);
-
 
 /// Pre-rendered text image stored for synchronous PDF page construction.
 class _Img {
@@ -78,12 +77,13 @@ class PdfService {
     TextAlign textAlign = TextAlign.left,
   }) async {
     if (text.trim().isEmpty) return null;
-    
-    final key = '${text}_|_${fontFamily}_|_${fontSize}_|_${color.toARGB32()}_|_${maxWidth}_|_${lineHeight}_|_${topPadding}_|_${bottomPadding}_|_${textAlign}';
+
+    final key =
+        '${text}_|_${fontFamily}_|_${fontSize}_|_${color.toARGB32()}_|_${maxWidth}_|_${lineHeight}_|_${topPadding}_|_${bottomPadding}_|_${textAlign}';
     if (_renderCache.containsKey(key)) {
       return _renderCache[key];
     }
-    
+
     final r = await renderTextToPng(
       text,
       fontFamily: fontFamily,
@@ -97,7 +97,7 @@ class PdfService {
       textAlign: textAlign,
     );
     if (r == null) return null;
-    
+
     final img = _Img(pw.MemoryImage(r.pngBytes), r.width, r.height);
     _renderCache[key] = img;
     return img;
@@ -200,7 +200,8 @@ class PdfService {
     final sideW = 18 * PdfPageFormat.mm;
     final inset = 2 * PdfPageFormat.mm;
 
-    final contentWidthMm = ps.pageWidthMm - ps.marginMm.left - ps.marginMm.right;
+    final contentWidthMm =
+        ps.pageWidthMm - ps.marginMm.left - ps.marginMm.right;
     final pages = paginateBlocks(
       project.blocks,
       0,
@@ -322,8 +323,6 @@ class PdfService {
           );
           final hSize = tibContentSize;
           final bSize = tibContentSize;
-          final tibBleed = contentTibetanRasterBleed(tibContentSize);
-          final tibBottomBleed = contentTibetanBottomBleed(tibContentSize);
 
           final left = cell.leftFraction * contentW;
           final spannedW = cell.widthFraction * contentW;
@@ -341,8 +340,8 @@ class PdfService {
                 textMaxW,
                 fontFamily: tibFamily,
                 lineHeight: contentTibetanLineHeight(smallText: small),
-                topPadding: tibBleed,
-                bottomPadding: tibBottomBleed,
+                topPadding: 5 * 72 / 96,
+                bottomPadding: 0,
               ),
             ),
           );
@@ -356,8 +355,8 @@ class PdfService {
                 textMaxW,
                 fontFamily: tibFamily,
                 lineHeight: contentTibetanLineHeight(smallText: small),
-                topPadding: tibBleed,
-                bottomPadding: tibBottomBleed,
+                topPadding: 5 * 72 / 96,
+                bottomPadding: 0,
               ),
             ),
           );
@@ -633,7 +632,6 @@ class PdfService {
 
       final rowCount = rows.length;
       final padX = 2 * PdfPageFormat.mm;
-      final padY = 1 * PdfPageFormat.mm;
       final smallRowShrink = 6 * PdfPageFormat.mm;
 
       final baseRowH = cH / rowCount;
@@ -655,7 +653,6 @@ class PdfService {
           tibetanFontSize: smallTibetanSize,
           chineseFontSize: smallChineseSize,
           topPadding:
-              padY +
               contentTibetanRasterBleed(smallTibetanSize) +
               contentTibetanBottomBleed(smallTibetanSize),
           tibetanLineHeight: contentTibetanLineHeight(smallText: true),
@@ -671,7 +668,12 @@ class PdfService {
             : normalRowH;
       }
 
-      pw.Widget buildBlock(String key, TextBlock block, bool hasMark, double maxW) {
+      pw.Widget buildBlock(
+        String key,
+        TextBlock block,
+        bool hasMark,
+        double maxW,
+      ) {
         final small = block.smallText;
         final freeText = block.isFreeText;
         final hSize = contentTibetanFontSize(tibFontSize, smallText: small);
@@ -707,23 +709,21 @@ class PdfService {
               pw.Image(
                 hImg.provider,
                 width: block.imageWidthMm != null
-                    ? (block.imageWidthMm! * PdfPageFormat.mm)
-                        .clamp(10.0, maxW)
+                    ? (block.imageWidthMm! * PdfPageFormat.mm).clamp(10.0, maxW)
                     : hImg.w * (maxW / hImg.w).clamp(0.1, 1.0),
                 height: block.imageWidthMm != null
                     ? (hImg.h *
-                        ((block.imageWidthMm! * PdfPageFormat.mm)
-                                .clamp(10.0, maxW) /
-                            hImg.w))
+                          ((block.imageWidthMm! * PdfPageFormat.mm).clamp(
+                                10.0,
+                                maxW,
+                              ) /
+                              hImg.w))
                     : hImg.h * (maxW / hImg.w).clamp(0.1, 1.0),
               ),
             ] else if (hImg != null)
               pw.Image(hImg.provider, width: hImg.w, height: hImg.h),
             if (bImg != null)
-              pw.Padding(
-                padding: const pw.EdgeInsets.only(top: 1),
-                child: pw.Image(bImg.provider, width: bImg.w, height: bImg.h),
-              ),
+              pw.Image(bImg.provider, width: bImg.w, height: bImg.h),
             if (pron.isNotEmpty)
               pw.Padding(
                 padding: pw.EdgeInsets.only(left: markPad),
@@ -757,6 +757,26 @@ class PdfService {
       }
 
       final positioned = <pw.Widget>[];
+      final rowLineYOffset = 7 * PdfPageFormat.mm / 3.78;
+      if (ps.showRowLines) {
+        const rowLineH = 0.6;
+        for (var ri = 0; ri < rows.length; ri++) {
+          final hasNormalBlock = rows[ri].any(
+            (cell) =>
+                !cell.block.smallText &&
+                !cell.block.isFreeText &&
+                !cell.block.isImageBlock,
+          );
+          if (!hasNormalBlock) continue;
+          positioned.add(
+            pw.Positioned(
+              left: 0,
+              top: rowYs[ri] + rowLineYOffset,
+              child: pw.Container(width: cW, height: rowLineH, color: _rowLine),
+            ),
+          );
+        }
+      }
       final showMark = pageIdx % 2 == 0;
       for (var ri = 0; ri < rows.length; ri++) {
         final row = rows[ri];
@@ -775,7 +795,7 @@ class PdfService {
           positioned.add(
             pw.Positioned(
               left: left + padX,
-              top: rowYs[ri] + padY,
+              top: rowYs[ri],
               child: pw.SizedBox(
                 width: blockW,
                 child: buildBlock(key, block, hasMark, blockW),

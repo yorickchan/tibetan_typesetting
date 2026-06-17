@@ -159,6 +159,27 @@ class EditorPageSetupPanel extends StatelessWidget {
                           fontSize: 13,
                         ),
                       ),
+                      const SizedBox(width: 16),
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: Checkbox(
+                          value: pageSetup.showRowLines,
+                          onChanged: (value) => onUpdateSetup(
+                            (setup) => setup.copyWith(showRowLines: value),
+                          ),
+                          activeColor: AppColors.sky500,
+                          side: BorderSide(color: AppColors.textMuted),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        l10n.showRowLines,
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
                     ],
                   ),
                 ],

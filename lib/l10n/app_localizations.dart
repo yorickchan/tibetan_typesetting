@@ -459,6 +459,12 @@ abstract class AppLocalizations {
   /// **'Show frame'**
   String get showFrame;
 
+  /// No description provided for @showRowLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Show row lines'**
+  String get showRowLines;
+
   /// No description provided for @leftVerticalTitle.
   ///
   /// In en, this message translates to:

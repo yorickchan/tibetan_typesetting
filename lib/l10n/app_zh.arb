@@ -60,6 +60,7 @@
   "autoPerPage": "每页自动",
   "sentenceSpacing": "句距",
   "showFrame": "显示边框",
+  "showRowLines": "显示行线",
   "leftVerticalTitle": "左侧竖排标题",
   "pageNumberLabel": "页码",
   "exportPdfHint": "使用导出 PDF 输出。缩放：Cmd +/−/0",

@@ -352,8 +352,8 @@ void main() {
     );
 
     test('content Tibetan line height matches preview spacing', () {
-      expect(contentTibetanLineHeight(smallText: false), 0.75);
-      expect(contentTibetanLineHeight(smallText: true), 1.2);
+      expect(contentTibetanLineHeight(smallText: false), 1.0);
+      expect(contentTibetanLineHeight(smallText: true), 1.0);
     });
 
     test(

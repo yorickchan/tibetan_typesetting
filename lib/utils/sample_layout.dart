@@ -210,7 +210,7 @@ double estimateBlockWidthFraction(TextBlock block, [double? contentWidthMm]) {
 }
 
 double contentTibetanLineHeight({required bool smallText}) {
-  return smallText ? 1.2 : 0.75;
+  return 1.0;
 }
 
 double contentTibetanFontSize(double fontSize, {required bool smallText}) {

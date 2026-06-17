@@ -102,7 +102,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(Checkbox));
+      await tester.tap(find.byType(Checkbox).first);
 
       expect(updated.showFrame, isFalse);
     });

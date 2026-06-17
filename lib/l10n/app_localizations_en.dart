@@ -195,6 +195,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get showFrame => 'Show frame';
 
   @override
+  String get showRowLines => 'Show row lines';
+
+  @override
   String get leftVerticalTitle => 'Left vertical title';
 
   @override

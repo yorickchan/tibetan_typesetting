@@ -84,6 +84,7 @@
   "autoPerPage": "Auto per page",
   "sentenceSpacing": "Sentence spacing",
   "showFrame": "Show frame",
+  "showRowLines": "Show row lines",
   "leftVerticalTitle": "Left vertical title",
   "pageNumberLabel": "Page number",
   "exportPdfHint": "Use Export PDF to output. Zoom: Cmd +/−/0",
