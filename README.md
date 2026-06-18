@@ -1,6 +1,6 @@
 # Tibetan Typesetting
 
-[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.10**
+[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.11**
 
 <p align="center">
   <img src="assets/images/icon.png" width="128" alt="App Icon"/>
@@ -57,6 +57,9 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - Page and column break controls
 - Flow gap adjustment between text sections
 - Custom title page with Dharma Wheel symbol and configurable title fonts
+- **Custom SVG title page templates** with configurable insets for template and title text regions
+- Opening mark blocks at the start of content
+- Optional row separator lines in editor preview and PDF export
 - Flexible text sizing options with per-project font settings
 - Header and footer with configurable fields (file name, page number, date, custom text)
 
@@ -127,17 +130,18 @@ Fonts can be configured per-project through the font settings panel. Make sure r
 
 ## Usage
 
-1. **Create a Project**: Start from the main screen by creating a new project
+1. **Create a Project**: Start from the main screen by creating a new project (optionally selecting a custom title page template)
 2. **Add Content**: Add text blocks with Tibetan text, pronunciation, and translation
 3. **Wylie Input**: Type Tibetan using Wylie transliteration via Latin keyboard
 4. **Pronunciation Auto-fill**: The editor auto-fills pronunciation from the dictionary as you type; unknown syllables are highlighted and shown as `X`
 5. **Insert Images**: Add floating images to blocks with position and size control
 6. **Batch Import**: Import multiple text blocks at once from CSV/TSV files
-7. **Edit Layout**: Configure page setup, margins, column count, flow gap, and headers/footers
-8. **Font Settings**: Customize fonts per-project for Tibetan, pronunciation, translation, and title text
-9. **Preview**: View live preview with zoom controls of your document layout
-10. **Export**: Generate PDF, export HTML, or print directly from the app
-11. **Manage Dictionary**: Open the Pronunciation Dictionary page to view, search, edit, or delete saved syllable entries and export/import the dictionary as JSON
+7. **Edit Layout**: Configure page setup, margins, column count, flow gap, row lines, and headers/footers
+8. **Title Page Templates**: Upload SVG templates in Settings, then assign them per project with configurable insets
+9. **Font Settings**: Customize fonts per-project for Tibetan, pronunciation, translation, and title text
+10. **Preview**: View live preview with zoom controls of your document layout
+11. **Export**: Generate PDF, export HTML, or print directly from the app
+12. **Manage Dictionary**: Open the Pronunciation Dictionary page to view, search, edit, or delete saved syllable entries and export/import the dictionary as JSON
 
 ![Pronunciation Dictionary](screenshot/pronunciation%20dictionary.png)
 
@@ -156,7 +160,8 @@ lib/
 │   ├── block_update.dart           # Block update descriptor
 │   ├── app_settings.dart           # Application settings
 │   ├── font_config.dart            # Font configuration
-│   └── pronunciation_entry.dart    # Pronunciation dictionary entry
+│   ├── pronunciation_entry.dart    # Pronunciation dictionary entry
+│   └── title_page_template.dart    # Title page template model
 ├── pages/                           # Main application pages
 │   ├── projects_page.dart          # Project management
 │   ├── editor_page.dart            # Text editor
@@ -173,7 +178,8 @@ lib/
 │   ├── batch_import_service.dart   # CSV/TSV batch import
 │   ├── undo_service.dart           # Undo/Redo state management
 │   ├── image_cache_service.dart    # Rendered text image caching
-│   └── image_storage_service.dart  # Block image file storage
+│   ├── image_storage_service.dart  # Block image file storage
+│   └── title_page_template_service.dart # Title page template CRUD
 ├── utils/                           # Utilities
 │   ├── colors.dart                 # Color palette
 │   ├── decorations.dart            # Input decoration helpers
@@ -184,7 +190,8 @@ lib/
 │   ├── wylie_converter.dart        # Wylie-to-Tibetan Unicode converter
 │   ├── tibetan_segmenter.dart      # Tsheg-based syllable extraction
 │   ├── save_state_mixin.dart       # Save state UI mixin
-│   └── snackbar.dart               # SnackBar helper
+│   ├── snackbar.dart               # SnackBar helper
+│   └── title_page_layout.dart      # Title page template layout utilities
 └── widgets/                         # Reusable UI components
     ├── app_shell.dart               # Common scaffold
     ├── block_editor.dart            # Block editing panel
@@ -246,6 +253,7 @@ flutter build linux
 - **UndoService**: Manages undo/redo state stack (max 50 states)
 - **ImageCacheService**: SHA-256 keyed cache for rendered text images
 - **ImageStorageService**: Manages block image files in app support directory
+- **TitlePageTemplateService**: CRUD singleton for custom SVG title page templates
 - **WylieConverter**: Converts Wylie transliteration to Tibetan Unicode
 - **TibetanSegmenter**: Utility for splitting Tibetan text into syllables by tsheg (་)
 

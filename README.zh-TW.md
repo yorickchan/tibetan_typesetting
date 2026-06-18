@@ -1,4 +1,4 @@
-# 藏文排版 &nbsp;·&nbsp; v1.1.10
+# 藏文排版 &nbsp;·&nbsp; v1.1.11
 
 <p align="center">
   <img src="assets/images/icon.png" width="128" alt="應用程式圖示"/>
@@ -55,6 +55,9 @@
 - 分頁和分欄控制
 - 文字流間距調整
 - 自訂封面頁，帶有法輪符號及可設定標題字型
+- **自訂 SVG 封面頁模板**，支援模板和標題文字區域的可設定內縮距離
+- 內容起始的開頭標記區塊
+- 編輯器預覽和 PDF 匯出中的可選列分隔線
 - 彈性的文字大小選項，支援每專案字型設定
 - 頁首和頁尾，可設定欄位（檔案名稱、頁碼、日期、自訂文字）
 
@@ -125,17 +128,18 @@ flutter run
 
 ## 使用方式
 
-1. **創建專案**：從主畫面開始創建新專案
+1. **創建專案**：從主畫面開始創建新專案（可選擇自訂封面頁模板）
 2. **新增內容**：新增包含藏文文字、讀音和翻譯的文字區塊
 3. **威利輸入**：使用威利轉寫透過拉丁鍵盤輸入藏文
 4. **讀音自動填入**：輸入藏文時，編輯器會自動從詞典填入讀音；未知音節以高亮和 `X` 標示
 5. **插入圖片**：在區塊中新增浮動圖片，可控制位置和尺寸
 6. **批次匯入**：從 CSV/TSV 檔案一次匯入多個文字區塊
-7. **編輯排版**：設定頁面設定、邊距、欄數、流間距和頁首頁尾
-8. **字型設定**：依專案自訂藏文、讀音、翻譯和標題文字的字型
-9. **預覽**：使用縮放控制即時預覽文檔排版
-10. **匯出**：生成 PDF、匯出 HTML 或直接從應用程式列印
-11. **管理詞典**：開啟讀音詞典頁面，檢視、搜尋、編輯或刪除已儲存的音節項目，並可匯出／匯入 JSON
+7. **編輯排版**：設定頁面設定、邊距、欄數、流間距、列分隔線和頁首頁尾
+8. **封面頁模板**：在設定頁面上傳 SVG 模板，然後依專案指定並設定內縮距離
+9. **字型設定**：依專案自訂藏文、讀音、翻譯和標題文字的字型
+10. **預覽**：使用縮放控制即時預覽文檔排版
+11. **匯出**：生成 PDF、匯出 HTML 或直接從應用程式列印
+12. **管理詞典**：開啟讀音詞典頁面，檢視、搜尋、編輯或刪除已儲存的音節項目，並可匯出／匯入 JSON
 
 ![讀音詞典](screenshot/pronunciation%20dictionary.png)
 
@@ -154,7 +158,8 @@ lib/
 │   ├── block_update.dart           # 區塊更新描述器
 │   ├── app_settings.dart           # 應用程式設定
 │   ├── font_config.dart            # 字型設定
-│   └── pronunciation_entry.dart    # 讀音詞典項目
+│   ├── pronunciation_entry.dart    # 讀音詞典項目
+│   └── title_page_template.dart    # 封面頁模板模型
 ├── pages/                           # 主要應用程式頁面
 │   ├── projects_page.dart          # 專案管理
 │   ├── editor_page.dart            # 文字編輯器
@@ -171,7 +176,8 @@ lib/
 │   ├── batch_import_service.dart   # CSV/TSV 批次匯入
 │   ├── undo_service.dart           # 復原/重做狀態管理
 │   ├── image_cache_service.dart    # 渲染文字圖片快取
-│   └── image_storage_service.dart  # 區塊圖片檔案儲存
+│   ├── image_storage_service.dart  # 區塊圖片檔案儲存
+│   └── title_page_template_service.dart # 封面頁模板 CRUD
 ├── utils/                           # 工具程式
 │   ├── colors.dart                 # 色彩配置
 │   ├── decorations.dart            # 輸入裝飾輔助
@@ -182,7 +188,8 @@ lib/
 │   ├── wylie_converter.dart        # 威利轉藏文 Unicode 轉換器
 │   ├── tibetan_segmenter.dart      # 藏文音節切分（基於 tsheg）
 │   ├── save_state_mixin.dart       # 儲存狀態 UI mixin
-│   └── snackbar.dart               # SnackBar 輔助
+│   ├── snackbar.dart               # SnackBar 輔助
+│   └── title_page_layout.dart      # 封面頁模板排版工具
 └── widgets/                         # 可重複使用的 UI 元件
     ├── app_shell.dart               # 通用架構
     ├── block_editor.dart            # 區塊編輯面板
@@ -244,6 +251,7 @@ flutter build linux
 - **UndoService**：管理復原/重做狀態堆疊（最多 50 個狀態）
 - **ImageCacheService**：基於 SHA-256 金鑰的渲染文字圖片快取
 - **ImageStorageService**：管理應用程式支援目錄中的區塊圖片檔案
+- **TitlePageTemplateService**：自訂 SVG 封面頁模板的 CRUD 單例服務
 - **WylieConverter**：將威利轉寫轉換為藏文 Unicode
 - **TibetanSegmenter**：藏文音節切分工具，基於 tsheg（་）分割
 

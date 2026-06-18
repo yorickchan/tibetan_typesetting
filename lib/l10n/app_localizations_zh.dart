@@ -442,6 +442,39 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get translationLabelShort => '翻译';
+
+  @override
+  String get titlePageTemplates => '封面模板';
+
+  @override
+  String get titlePageTemplate => '模板';
+
+  @override
+  String get addTemplate => '添加模板';
+
+  @override
+  String get deleteTemplate => '删除模板';
+
+  @override
+  String get templateName => '模板名称';
+
+  @override
+  String get templateInset => '模板邊距 (mm)';
+
+  @override
+  String get templateInsetHint => '自訂模板周圍的邊距';
+
+  @override
+  String get titleTextInset => '标题文字框邊距 (mm)';
+
+  @override
+  String get titleTextInsetHint => '标题文字框周圍的邊距';
+
+  @override
+  String get invalidSvgFile => '无效的 SVG 文件';
+
+  @override
+  String get defaultLayout => '默认布局';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -882,4 +915,37 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get translationLabelShort => '翻譯';
+
+  @override
+  String get titlePageTemplates => '封面範本';
+
+  @override
+  String get titlePageTemplate => '範本';
+
+  @override
+  String get addTemplate => '新增範本';
+
+  @override
+  String get deleteTemplate => '刪除範本';
+
+  @override
+  String get templateName => '範本名稱';
+
+  @override
+  String get templateInset => '範本邊距 (mm)';
+
+  @override
+  String get templateInsetHint => '自訂範本周圍的邊距';
+
+  @override
+  String get titleTextInset => '標題文字框邊距 (mm)';
+
+  @override
+  String get titleTextInsetHint => '標題文字框周圍的邊距';
+
+  @override
+  String get invalidSvgFile => '無效的 SVG 檔案';
+
+  @override
+  String get defaultLayout => '預設佈局';
 }

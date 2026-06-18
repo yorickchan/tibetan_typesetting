@@ -444,4 +444,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get translationLabelShort => 'TRANSLATION';
+
+  @override
+  String get titlePageTemplates => 'Title Page Templates';
+
+  @override
+  String get titlePageTemplate => 'Template';
+
+  @override
+  String get addTemplate => 'Add Template';
+
+  @override
+  String get deleteTemplate => 'Delete Template';
+
+  @override
+  String get templateName => 'Template name';
+
+  @override
+  String get templateInset => 'Template margin (mm)';
+
+  @override
+  String get templateInsetHint => 'Margin around custom template';
+
+  @override
+  String get titleTextInset => 'Title text box margin (mm)';
+
+  @override
+  String get titleTextInsetHint => 'Margin around title text box';
+
+  @override
+  String get invalidSvgFile => 'Invalid SVG file';
+
+  @override
+  String get defaultLayout => 'Default layout';
 }

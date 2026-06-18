@@ -204,5 +204,16 @@
   "move": "Move",
   "tibetanLabelShort": "TIBETAN",
   "pronunciationLabelShort": "PRONUNCIATION",
-  "translationLabelShort": "TRANSLATION"
+  "translationLabelShort": "TRANSLATION",
+  "titlePageTemplates": "Title Page Templates",
+  "titlePageTemplate": "Template",
+  "addTemplate": "Add Template",
+  "deleteTemplate": "Delete Template",
+  "templateName": "Template name",
+  "templateInset": "Template margin (mm)",
+  "templateInsetHint": "Margin around custom template",
+  "titleTextInset": "Title text box margin (mm)",
+  "titleTextInsetHint": "Margin around title text box",
+  "invalidSvgFile": "Invalid SVG file",
+  "defaultLayout": "Default layout"
 }

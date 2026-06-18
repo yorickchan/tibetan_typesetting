@@ -932,6 +932,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'TRANSLATION'**
   String get translationLabelShort;
+
+  /// No description provided for @titlePageTemplates.
+  ///
+  /// In en, this message translates to:
+  /// **'Title Page Templates'**
+  String get titlePageTemplates;
+
+  /// No description provided for @titlePageTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Template'**
+  String get titlePageTemplate;
+
+  /// No description provided for @addTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Template'**
+  String get addTemplate;
+
+  /// No description provided for @deleteTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Template'**
+  String get deleteTemplate;
+
+  /// No description provided for @templateName.
+  ///
+  /// In en, this message translates to:
+  /// **'Template name'**
+  String get templateName;
+
+  /// No description provided for @templateInset.
+  ///
+  /// In en, this message translates to:
+  /// **'Template margin (mm)'**
+  String get templateInset;
+
+  /// No description provided for @templateInsetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Margin around custom template'**
+  String get templateInsetHint;
+
+  /// No description provided for @titleTextInset.
+  ///
+  /// In en, this message translates to:
+  /// **'Title text box margin (mm)'**
+  String get titleTextInset;
+
+  /// No description provided for @titleTextInsetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Margin around title text box'**
+  String get titleTextInsetHint;
+
+  /// No description provided for @invalidSvgFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid SVG file'**
+  String get invalidSvgFile;
+
+  /// No description provided for @defaultLayout.
+  ///
+  /// In en, this message translates to:
+  /// **'Default layout'**
+  String get defaultLayout;
 }
 
 class _AppLocalizationsDelegate

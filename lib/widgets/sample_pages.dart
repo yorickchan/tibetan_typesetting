@@ -12,6 +12,7 @@ class SamplePagesWidget extends StatelessWidget {
   final AppSettings? appSettings;
   final String? highlightBlockId;
   final bool skipTitlePage;
+  final String? svgContent;
 
   const SamplePagesWidget({
     super.key,
@@ -19,6 +20,7 @@ class SamplePagesWidget extends StatelessWidget {
     this.appSettings,
     this.highlightBlockId,
     this.skipTitlePage = false,
+    this.svgContent,
   });
 
   @override
@@ -41,6 +43,7 @@ class SamplePagesWidget extends StatelessWidget {
           project: project,
           appSettings: appSettings,
           pageNumber: '',
+          svgContent: svgContent,
         ),
       );
     }

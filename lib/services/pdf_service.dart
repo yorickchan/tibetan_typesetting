@@ -9,10 +9,12 @@ import 'package:pdf/widgets.dart' as pw;
 import '../models/app_settings.dart';
 import '../models/font_config.dart';
 import '../models/project.dart';
+import '../services/title_page_template_service.dart';
 import '../utils/font_constants.dart';
 import '../utils/font_utils.dart' as font_utils;
 import '../utils/sample_layout.dart';
 import '../utils/text_renderer.dart';
+import '../utils/title_page_layout.dart';
 import 'font_service.dart';
 import 'settings_service.dart';
 
@@ -45,6 +47,7 @@ class PdfService {
 
   final _fontService = FontService();
   String? _dharmaWheelSvg;
+  final Map<String, String?> _templateSvgCache = {};
   final Map<String, _Img> _renderCache = {};
 
   Future<void> _loadSvg() async {
@@ -56,6 +59,15 @@ class PdfService {
     } catch (e) {
       debugPrint('Failed to load dharma wheel SVG: $e');
     }
+  }
+
+  Future<String?> _loadTemplateSvg(String templateId) async {
+    if (_templateSvgCache.containsKey(templateId)) {
+      return _templateSvgCache[templateId];
+    }
+    final t = await TitlePageTemplateService().getTemplate(templateId);
+    _templateSvgCache[templateId] = t?.svgContent;
+    return t?.svgContent;
   }
 
   // ---------------------------------------------------------------------------
@@ -228,6 +240,15 @@ class PdfService {
         outerW - 2 * (inset + framePad) - 2 * panelWTitle - 2 * titleGap;
     final titleTextW = titleBoxW - 2 * 4 - 2 * 12;
 
+    // Title page template SVG (load before pre-rendering so we can rasterize)
+    String? titlePageSvg;
+    if (ps.titlePageTemplateId != null) {
+      titlePageSvg = await _loadTemplateSvg(ps.titlePageTemplateId!);
+    }
+    final hasTemplate = titlePageSvg != null && titlePageSvg.isNotEmpty;
+
+    final templateBounds = titlePageTemplateBounds(ps);
+
     // ---- pre-render all text as images ----
 
     final tibFontSize = tibConfig.fontSize;
@@ -242,6 +263,7 @@ class PdfService {
 
     // Title page Tibetan
     if (ps.showTitlePage && ps.titleTibetan.trim().isNotEmpty) {
+      final textW = hasTemplate ? titlePageTemplateTextWidthPt(ps) : titleTextW;
       tasks.add(
         put(
           'title_tib',
@@ -249,10 +271,29 @@ class PdfService {
             ps.titleTibetan,
             titleTibConfig.fontSize,
             _blackUi,
-            titleTextW,
+            textW,
             fontFamily: titleTibFamily,
             lineHeight: 1.4,
             textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    // Title page template SVG → PNG
+    if (ps.showTitlePage && hasTemplate) {
+      final svg = titlePageSvg;
+      tasks.add(
+        put(
+          'template_svg',
+          renderSvgToPng(
+            svg,
+            width: templateBounds.widthMm,
+            height: templateBounds.heightMm,
+          ).then(
+            (r) => r != null
+                ? _Img(pw.MemoryImage(r.pngBytes), r.width, r.height)
+                : null,
           ),
         ),
       );
@@ -369,23 +410,26 @@ class PdfService {
       doc.addPage(
         pw.Page(
           pageFormat: pageFormat,
-          margin: pw.EdgeInsets.only(
-            left: marginL,
-            right: marginR,
-            top: marginT,
-            bottom: marginB,
-          ),
+          margin: hasTemplate
+              ? pw.EdgeInsets.zero
+              : pw.EdgeInsets.only(
+                  left: marginL,
+                  right: marginR,
+                  top: marginT,
+                  bottom: marginB,
+                ),
           build: (_) => _buildTitlePage(
             ps: ps,
             projectName: project.name,
             chiFont: titleChiFont,
             chiFontSize: titleChiConfig.fontSize,
             fontFallback: fontFallback,
-            outerW: outerW,
-            outerH: outerH,
+            outerW: hasTemplate ? pageW : outerW,
+            outerH: hasTemplate ? pageH : outerH,
             sideW: sideW,
             inset: inset,
             imgs: imgs,
+            titlePageSvg: titlePageSvg,
           ),
         ),
       );
@@ -444,9 +488,70 @@ class PdfService {
     required double sideW,
     required double inset,
     required Map<String, _Img> imgs,
+    String? titlePageSvg,
   }) {
     final titleChinese =
         (ps.titleChinese.isNotEmpty ? ps.titleChinese : projectName).trim();
+
+    if (titlePageSvg != null && titlePageSvg.isNotEmpty) {
+      final templateBounds = titlePageTemplateBounds(ps);
+      final titleBoxBounds = titlePageTemplateTitleBoxBounds(ps);
+      final il = templateBounds.leftMm * PdfPageFormat.mm;
+      final it = templateBounds.topMm * PdfPageFormat.mm;
+      final titleLeft = titleBoxBounds.leftMm * PdfPageFormat.mm;
+      final titleTop = titleBoxBounds.topMm * PdfPageFormat.mm;
+      final titleW = titleBoxBounds.widthMm * PdfPageFormat.mm;
+      final titleH = titleBoxBounds.heightMm * PdfPageFormat.mm;
+      final tibImg = imgs['title_tib'];
+      final tmplImg = imgs['template_svg'];
+      return pw.Stack(
+        children: [
+          if (tmplImg != null)
+            pw.Positioned(
+              left: il,
+              top: it,
+              child: pw.Image(
+                tmplImg.provider,
+                width: templateBounds.widthMm * PdfPageFormat.mm,
+                height: templateBounds.heightMm * PdfPageFormat.mm,
+              ),
+            ),
+          pw.Positioned(
+            left: titleLeft,
+            top: titleTop,
+            child: pw.SizedBox(
+              width: titleW,
+              height: titleH,
+              child: pw.Center(
+                child: pw.Column(
+                  mainAxisSize: pw.MainAxisSize.min,
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
+                  children: [
+                    if (tibImg != null)
+                      pw.Image(
+                        tibImg.provider,
+                        width: tibImg.w,
+                        height: tibImg.h,
+                      ),
+                    pw.SizedBox(height: tibImg != null ? 6 : 0),
+                    pw.Text(
+                      titleChinese.isEmpty ? ' ' : titleChinese,
+                      style: pw.TextStyle(
+                        font: chiFont,
+                        fontFallback: fontFallback,
+                        fontSize: chiFontSize,
+                        color: PdfColors.black,
+                      ),
+                      textAlign: pw.TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
 
     final framePad = 6 * PdfPageFormat.mm;
     final panelPadY = 2 * PdfPageFormat.mm;
@@ -663,11 +768,7 @@ class PdfService {
             : normalRowH;
       }
 
-      pw.Widget buildBlock(
-        String key,
-        TextBlock block,
-        double maxW,
-      ) {
+      pw.Widget buildBlock(String key, TextBlock block, double maxW) {
         final small = block.smallText;
         final freeText = block.isFreeText;
         final pronSize = pronFontSize * (small ? 0.75 : 1.0);
@@ -708,7 +809,10 @@ class PdfService {
                 pw.Image(
                   hImg.provider,
                   width: block.imageWidthMm != null
-                      ? (block.imageWidthMm! * PdfPageFormat.mm).clamp(10.0, maxW)
+                      ? (block.imageWidthMm! * PdfPageFormat.mm).clamp(
+                          10.0,
+                          maxW,
+                        )
                       : hImg.w * (maxW / hImg.w).clamp(0.1, 1.0),
                   height: block.imageWidthMm != null
                       ? (hImg.h *

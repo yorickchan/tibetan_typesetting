@@ -10,7 +10,12 @@ class MarginMm {
   final double bottom;
   final double left;
 
-  const MarginMm({this.top = 10, this.right = 10, this.bottom = 10, this.left = 10});
+  const MarginMm({
+    this.top = 10,
+    this.right = 10,
+    this.bottom = 10,
+    this.left = 10,
+  });
 
   MarginMm copyWith({
     double? top,
@@ -41,6 +46,48 @@ class MarginMm {
   );
 }
 
+class TemplateInset {
+  final double top;
+  final double right;
+  final double bottom;
+  final double left;
+
+  const TemplateInset({
+    this.top = 0,
+    this.right = 0,
+    this.bottom = 0,
+    this.left = 0,
+  });
+
+  TemplateInset copyWith({
+    double? top,
+    double? right,
+    double? bottom,
+    double? left,
+  }) {
+    return TemplateInset(
+      top: top ?? this.top,
+      right: right ?? this.right,
+      bottom: bottom ?? this.bottom,
+      left: left ?? this.left,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'top': top,
+    'right': right,
+    'bottom': bottom,
+    'left': left,
+  };
+
+  factory TemplateInset.fromJson(Map<String, dynamic> json) => TemplateInset(
+    top: (json['top'] as num?)?.toDouble() ?? 0,
+    right: (json['right'] as num?)?.toDouble() ?? 0,
+    bottom: (json['bottom'] as num?)?.toDouble() ?? 0,
+    left: (json['left'] as num?)?.toDouble() ?? 0,
+  );
+}
+
 class PageSetup {
   final double pageWidthMm;
   final double pageHeightMm;
@@ -51,6 +98,8 @@ class PageSetup {
   final String leftVerticalTitle;
   final String pageNumber;
   final double flowGap;
+  final TemplateInset templateInset;
+  final TemplateInset titleTextInset;
   final bool showTitlePage;
   final String titleTibetan;
   final String titleChinese;
@@ -71,6 +120,7 @@ class PageSetup {
   final double headerFontSize;
   final double footerFontSize;
   final String defaultOpeningMark;
+  final String? titlePageTemplateId;
 
   PageSetup({
     this.pageWidthMm = 300,
@@ -82,6 +132,8 @@ class PageSetup {
     this.leftVerticalTitle = '',
     this.pageNumber = '',
     this.flowGap = 0.01,
+    TemplateInset? templateInset,
+    TemplateInset? titleTextInset,
     this.showTitlePage = true,
     this.titleTibetan = '',
     this.titleChinese = '',
@@ -101,8 +153,13 @@ class PageSetup {
     this.footerCustomText = '',
     this.headerFontSize = 9,
     this.footerFontSize = 9,
+    this.titlePageTemplateId,
     this.defaultOpeningMark = kDefaultOpeningMark,
-  }) : marginMm = marginMm ?? MarginMm();
+  }) : marginMm = marginMm ?? const MarginMm(),
+       templateInset = templateInset ?? const TemplateInset(),
+       titleTextInset =
+           titleTextInset ??
+           const TemplateInset(top: 20, right: 56, bottom: 20, left: 56);
   PageSetup copyWith({
     double? pageWidthMm,
     double? pageHeightMm,
@@ -113,6 +170,8 @@ class PageSetup {
     String? leftVerticalTitle,
     String? pageNumber,
     double? flowGap,
+    TemplateInset? templateInset,
+    TemplateInset? titleTextInset,
     bool? showTitlePage,
     String? titleTibetan,
     String? titleChinese,
@@ -133,11 +192,13 @@ class PageSetup {
     double? headerFontSize,
     double? footerFontSize,
     String? defaultOpeningMark,
+    String? titlePageTemplateId,
     bool clearTibetanFont = false,
     bool clearPronunciationFont = false,
     bool clearTranslationFont = false,
     bool clearTitleTibetanFont = false,
     bool clearTitleChineseFont = false,
+    bool clearTitlePageTemplateId = false,
   }) {
     return PageSetup(
       pageWidthMm: pageWidthMm ?? this.pageWidthMm,
@@ -149,6 +210,8 @@ class PageSetup {
       leftVerticalTitle: leftVerticalTitle ?? this.leftVerticalTitle,
       pageNumber: pageNumber ?? this.pageNumber,
       flowGap: flowGap ?? this.flowGap,
+      templateInset: templateInset ?? this.templateInset,
+      titleTextInset: titleTextInset ?? this.titleTextInset,
       showTitlePage: showTitlePage ?? this.showTitlePage,
       titleTibetan: titleTibetan ?? this.titleTibetan,
       titleChinese: titleChinese ?? this.titleChinese,
@@ -177,6 +240,9 @@ class PageSetup {
       headerFontSize: headerFontSize ?? this.headerFontSize,
       footerFontSize: footerFontSize ?? this.footerFontSize,
       defaultOpeningMark: defaultOpeningMark ?? this.defaultOpeningMark,
+      titlePageTemplateId: clearTitlePageTemplateId
+          ? null
+          : (titlePageTemplateId ?? this.titlePageTemplateId),
     );
   }
 
@@ -192,6 +258,8 @@ class PageSetup {
     'flowGap': flowGap,
     'showTitlePage': showTitlePage,
     'titleTibetan': titleTibetan,
+    'templateInset': templateInset.toJson(),
+    'titleTextInset': titleTextInset.toJson(),
     'titleChinese': titleChinese,
     'translationLang': translationLang.name,
     'headerLeft': headerLeft.name,
@@ -213,6 +281,7 @@ class PageSetup {
       'titleTibetanFont': titleTibetanFont!.toJson(),
     if (titleChineseFont != null)
       'titleChineseFont': titleChineseFont!.toJson(),
+    if (titlePageTemplateId != null) 'titlePageTemplateId': titlePageTemplateId,
   };
 
   factory PageSetup.fromJson(Map<String, dynamic> json) => PageSetup(
@@ -220,13 +289,19 @@ class PageSetup {
     pageHeightMm: (json['pageHeightMm'] as num?)?.toDouble() ?? 120,
     marginMm: json['marginMm'] != null
         ? MarginMm.fromJson(json['marginMm'] as Map<String, dynamic>)
-        : MarginMm(),
+        : const MarginMm(),
     columnCount: (json['columnCount'] as num?)?.toInt() ?? 5,
     showFrame: json['showFrame'] as bool? ?? true,
     showRowLines: json['showRowLines'] as bool? ?? true,
     leftVerticalTitle: json['leftVerticalTitle'] as String? ?? '',
     pageNumber: json['pageNumber'] as String? ?? '',
     flowGap: (json['flowGap'] as num?)?.toDouble() ?? 0.01,
+    templateInset: json['templateInset'] != null
+        ? TemplateInset.fromJson(json['templateInset'] as Map<String, dynamic>)
+        : const TemplateInset(),
+    titleTextInset: json['titleTextInset'] != null
+        ? TemplateInset.fromJson(json['titleTextInset'] as Map<String, dynamic>)
+        : const TemplateInset(top: 20, right: 56, bottom: 20, left: 56),
     showTitlePage: json['showTitlePage'] as bool? ?? true,
     titleTibetan: json['titleTibetan'] as String? ?? '',
     titleChinese: json['titleChinese'] as String? ?? '',
@@ -246,7 +321,8 @@ class PageSetup {
         ? FontConfig.fromJson(json['titleChineseFont'] as Map<String, dynamic>)
         : null,
     translationLang: TranslationLanguage.fromJson(
-        json['translationLang'] as String?),
+      json['translationLang'] as String?,
+    ),
     headerLeft: HeaderFooterField.fromJson(json['headerLeft'] as String?),
     headerCenter: HeaderFooterField.fromJson(json['headerCenter'] as String?),
     headerRight: HeaderFooterField.fromJson(json['headerRight'] as String?),
@@ -259,6 +335,7 @@ class PageSetup {
     footerFontSize: (json['footerFontSize'] as num?)?.toDouble() ?? 9,
     defaultOpeningMark:
         json['defaultOpeningMark'] as String? ?? kDefaultOpeningMark,
+    titlePageTemplateId: json['titlePageTemplateId'] as String?,
   );
 }
 
@@ -393,8 +470,12 @@ class TextBlock {
       columnSpan: clearColumnSpan ? null : (columnSpan ?? this.columnSpan),
       imagePath: clearImagePath ? null : (imagePath ?? this.imagePath),
       floatingImage: floatingImage ?? this.floatingImage,
-      imageWidthMm: clearImageWidthMm ? null : (imageWidthMm ?? this.imageWidthMm),
-      imageHeightMm: clearImageHeightMm ? null : (imageHeightMm ?? this.imageHeightMm),
+      imageWidthMm: clearImageWidthMm
+          ? null
+          : (imageWidthMm ?? this.imageWidthMm),
+      imageHeightMm: clearImageHeightMm
+          ? null
+          : (imageHeightMm ?? this.imageHeightMm),
       imageXMm: clearImageXMm ? null : (imageXMm ?? this.imageXMm),
       imageYMm: clearImageYMm ? null : (imageYMm ?? this.imageYMm),
     );

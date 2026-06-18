@@ -138,5 +138,16 @@
   "move": "移动",
   "tibetanLabelShort": "藏文",
   "pronunciationLabelShort": "注音",
-  "translationLabelShort": "翻译"
+  "translationLabelShort": "翻译",
+  "titlePageTemplates": "封面模板",
+  "titlePageTemplate": "模板",
+  "addTemplate": "添加模板",
+  "deleteTemplate": "删除模板",
+  "templateName": "模板名称",
+  "invalidSvgFile": "无效的 SVG 文件",
+  "templateInset": "模板邊距 (mm)",
+  "templateInsetHint": "自訂模板周圍的邊距",
+  "titleTextInset": "标题文字框邊距 (mm)",
+  "titleTextInsetHint": "标题文字框周圍的邊距",
+  "defaultLayout": "默认布局"
 }

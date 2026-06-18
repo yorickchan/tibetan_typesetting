@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/project.dart';
+import '../models/title_page_template.dart';
+import '../services/title_page_template_service.dart';
 import '../services/database_service.dart';
 import '../services/settings_service.dart';
 import '../utils/colors.dart';
@@ -111,6 +113,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
         pageSetup: PageSetup(
           pageWidthMm: settings.defaultPageWidthMm,
           pageHeightMm: settings.defaultPageHeightMm,
+          titlePageTemplateId: result['templateId'] as String?,
         ),
       );
       _showSnackMsg(_l10n.projectCreated);
@@ -250,101 +253,165 @@ class _ProjectsPageState extends State<ProjectsPage> {
   }) async {
     final nameCtrl = TextEditingController(text: initialName);
     final tagsCtrl = TextEditingController(text: initialTags);
+    String? selectedTemplateId;
+
     try {
     final effectiveL10n = _l10n;
 
+    List<TitlePageTemplate> templates = [];
+    if (isCreate) {
+      templates = await TitlePageTemplateService().listTemplates();
+    }
+
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text(title, style: TextStyle(color: AppColors.textPrimary)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameCtrl,
-              autofocus: true,
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
-              decoration: InputDecoration(
-                labelText: effectiveL10n.name,
-                labelStyle: TextStyle(color: AppColors.textCaption),
-                hintText: effectiveL10n.projectName,
-                hintStyle: TextStyle(
-                  color: AppColors.textMuted.withValues(alpha: 0.5),
-                ),
-                filled: true,
-                fillColor: AppColors.surfaceContainer,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: AppColors.sky500),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: AppColors.surface,
+          title:
+              Text(title, style: TextStyle(color: AppColors.textPrimary)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameCtrl,
+                autofocus: true,
+                style:
+                    TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                decoration: InputDecoration(
+                  labelText: effectiveL10n.name,
+                  labelStyle: TextStyle(color: AppColors.textCaption),
+                  hintText: effectiveL10n.projectName,
+                  hintStyle: TextStyle(
+                    color: AppColors.textMuted.withValues(alpha: 0.5),
+                  ),
+                  filled: true,
+                  fillColor: AppColors.surfaceContainer,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide:
+                        const BorderSide(color: AppColors.sky500),
+                  ),
                 ),
               ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: tagsCtrl,
+                style:
+                    TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                decoration: InputDecoration(
+                  labelText: effectiveL10n.tags,
+                  labelStyle: TextStyle(color: AppColors.textCaption),
+                  hintText: effectiveL10n.tagsHint,
+                  hintStyle: TextStyle(
+                    color: AppColors.textMuted.withValues(alpha: 0.5),
+                  ),
+                  filled: true,
+                  fillColor: AppColors.surfaceContainer,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide:
+                        const BorderSide(color: AppColors.sky500),
+                  ),
+                ),
+              ),
+              if (isCreate && templates.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String?>(
+                  value: selectedTemplateId,
+                  decoration: InputDecoration(
+                    labelText: effectiveL10n.titlePageTemplate,
+                    labelStyle:
+                        TextStyle(color: AppColors.textCaption),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
+                    filled: true,
+                    fillColor: AppColors.inputFill,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide:
+                          const BorderSide(color: AppColors.sky500),
+                    ),
+                  ),
+                  dropdownColor: AppColors.surfaceContainer,
+                  style: TextStyle(
+                      color: AppColors.textPrimary, fontSize: 13),
+                  items: [
+                    DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text(effectiveL10n.defaultLayout),
+                    ),
+                    ...templates.map((t) =>
+                        DropdownMenuItem<String?>(
+                          value: t.id,
+                          child: Text(t.name),
+                        )),
+                  ],
+                  onChanged: (v) {
+                    setDialogState(() => selectedTemplateId = v);
+                  },
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(
+                effectiveL10n.cancel,
+                style: TextStyle(color: AppColors.textCaption),
+              ),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: tagsCtrl,
-              style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
-              decoration: InputDecoration(
-                labelText: effectiveL10n.tags,
-                labelStyle: TextStyle(color: AppColors.textCaption),
-                hintText: effectiveL10n.tagsHint,
-                hintStyle: TextStyle(
-                  color: AppColors.textMuted.withValues(alpha: 0.5),
-                ),
-                filled: true,
-                fillColor: AppColors.surfaceContainer,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: AppColors.sky500),
+            TextButton(
+              onPressed: () {
+                final name = nameCtrl.text.trim();
+                if (name.isEmpty) return;
+                final tags = tagsCtrl.text
+                    .split(',')
+                    .map((s) => s.trim())
+                    .where((s) => s.isNotEmpty)
+                    .toList();
+                Navigator.pop(ctx, {
+                  'name': name,
+                  'tags': tags,
+                  'templateId': selectedTemplateId,
+                });
+              },
+              child: Text(
+                isCreate ? effectiveL10n.create : effectiveL10n.save,
+                style: const TextStyle(
+                  color: AppColors.sky500,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              effectiveL10n.cancel,
-              style: TextStyle(color: AppColors.textCaption),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              final name = nameCtrl.text.trim();
-              if (name.isEmpty) return;
-              final tags = tagsCtrl.text
-                  .split(',')
-                  .map((s) => s.trim())
-                  .where((s) => s.isNotEmpty)
-                  .toList();
-              Navigator.pop(ctx, {'name': name, 'tags': tags});
-            },
-            child: Text(
-              isCreate ? effectiveL10n.create : effectiveL10n.save,
-              style: const TextStyle(
-                color: AppColors.sky500,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
       ),
     );
 

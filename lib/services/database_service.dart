@@ -23,11 +23,12 @@ class DatabaseService {
     final path = '$dbPath/tibetan_typesetting.db';
     return openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: (db, version) async {
         await _createProjectsTable(db);
         await _createAppSettingsTable(db);
         await _createPronunciationDictionaryTable(db);
+        await _createTitlePageTemplatesTable(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -40,6 +41,9 @@ class DatabaseService {
           await db.execute(
             'ALTER TABLE pronunciation_dictionary ADD COLUMN word_count INTEGER NOT NULL DEFAULT 1',
           );
+        }
+        if (oldVersion < 5) {
+          await _createTitlePageTemplatesTable(db);
         }
       },
     );
@@ -78,6 +82,17 @@ class DatabaseService {
         word_count INTEGER NOT NULL DEFAULT 1,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
+      )
+    ''');
+  }
+
+  Future<void> _createTitlePageTemplatesTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS title_page_templates (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        svg_content TEXT NOT NULL,
+        created_at TEXT NOT NULL
       )
     ''');
   }

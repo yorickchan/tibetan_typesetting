@@ -10,11 +10,13 @@ import '../l10n/app_localizations.dart';
 import '../models/app_settings.dart';
 import '../models/block_update.dart';
 import '../models/project.dart';
+import '../models/title_page_template.dart';
 import '../services/batch_import_service.dart';
 import '../services/database_service.dart';
 import '../services/font_service.dart';
 import '../services/image_storage_service.dart';
 import '../services/settings_service.dart';
+import '../services/title_page_template_service.dart';
 import '../services/undo_service.dart';
 import '../utils/colors.dart';
 import '../utils/font_constants.dart';
@@ -53,6 +55,7 @@ class _EditorPageState extends State<EditorPage>
   bool _loading = true;
   String? _error;
   String? _selectedId;
+  List<TitlePageTemplate> _templates = [];
   bool _titleOpen = false;
   bool _fontOpen = false;
   bool _pageSetupOpen = false;
@@ -100,6 +103,9 @@ class _EditorPageState extends State<EditorPage>
         ]) {
           if (c != null) await fontService.loadFontForPreview(c);
         }
+        final templates = await TitlePageTemplateService().listTemplates();
+        if (!mounted) return;
+        _templates = templates;
       }
 
       if (!mounted) return;
@@ -119,6 +125,16 @@ class _EditorPageState extends State<EditorPage>
         _loading = false;
         _error = e.toString();
       });
+    }
+  }
+
+  String? _resolveTemplateSvg() {
+    final id = _project?.pageSetup.titlePageTemplateId;
+    if (id == null) return null;
+    try {
+      return _templates.firstWhere((t) => t.id == id).svgContent;
+    } on StateError {
+      return null;
     }
   }
 
@@ -788,6 +804,7 @@ class _EditorPageState extends State<EditorPage>
           onToggle: () => setState(() => _titleOpen = !_titleOpen),
           onUpdateSetup: _updateSetup,
           l10n: _l10n,
+          templates: _templates,
         ),
         const SizedBox(height: 8),
 
@@ -840,6 +857,7 @@ class _EditorPageState extends State<EditorPage>
                   project: project,
                   appSettings: _appSettings,
                   pageNumber: '',
+                  svgContent: _resolveTemplateSvg(),
                 ),
               ),
             ),

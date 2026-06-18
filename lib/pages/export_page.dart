@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import '../l10n/app_localizations.dart';
 import '../models/app_settings.dart';
 import '../models/project.dart';
+import '../models/title_page_template.dart';
+import '../services/title_page_template_service.dart';
 import '../services/database_service.dart';
 import '../services/font_service.dart';
 import '../services/pdf_service.dart';
@@ -42,6 +44,7 @@ class _ExportPageState extends State<ExportPage>
   String? _error;
   bool _pdfBusy = false;
   bool _exportAsHtml = false;
+  List<TitlePageTemplate> _templates = [];
   double _zoom = 1.0;
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
@@ -55,7 +58,21 @@ class _ExportPageState extends State<ExportPage>
 
   Future<void> _loadSettings() async {
     final s = await _settingsService.getSettings();
-    if (mounted) setState(() => _appSettings = s);
+    final templates = await TitlePageTemplateService().listTemplates();
+    if (mounted) setState(() {
+      _appSettings = s;
+      _templates = templates;
+    });
+  }
+
+  String? _resolveTemplateSvg() {
+    final id = _project?.pageSetup.titlePageTemplateId;
+    if (id == null) return null;
+    try {
+      return _templates.firstWhere((t) => t.id == id).svgContent;
+    } on StateError {
+      return null;
+    }
   }
 
   @override
@@ -351,8 +368,8 @@ class _ExportPageState extends State<ExportPage>
                   ),
                   PreviewZoomToolbar(
                     zoom: _zoom,
-                    onZoomOut: _zoomOut,
                     onZoomIn: _zoomIn,
+                    onZoomOut: _zoomOut,
                     onReset: _zoomReset,
                   ),
                 ],
@@ -369,6 +386,7 @@ class _ExportPageState extends State<ExportPage>
                     child: SamplePagesWidget(
                       project: project,
                       appSettings: _appSettings,
+                      svgContent: _resolveTemplateSvg(),
                     ),
                   ),
                 ),
