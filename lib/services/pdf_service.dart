@@ -247,7 +247,6 @@ class PdfService {
     }
     final hasTemplate = titlePageSvg != null && titlePageSvg.isNotEmpty;
 
-    final templateBounds = titlePageTemplateBounds(ps);
 
     // ---- pre-render all text as images ----
 
@@ -274,30 +273,13 @@ class PdfService {
             textW,
             fontFamily: titleTibFamily,
             lineHeight: 1.4,
+            topPadding: 5,
             textAlign: TextAlign.center,
           ),
         ),
       );
     }
 
-    // Title page template SVG → PNG
-    if (ps.showTitlePage && hasTemplate) {
-      final svg = titlePageSvg;
-      tasks.add(
-        put(
-          'template_svg',
-          renderSvgToPng(
-            svg,
-            width: templateBounds.widthMm,
-            height: templateBounds.heightMm,
-          ).then(
-            (r) => r != null
-                ? _Img(pw.MemoryImage(r.pngBytes), r.width, r.height)
-                : null,
-          ),
-        ),
-      );
-    }
 
     // Left side panel
     if (ps.leftVerticalTitle.trim().isNotEmpty) {
@@ -503,19 +485,18 @@ class PdfService {
       final titleW = titleBoxBounds.widthMm * PdfPageFormat.mm;
       final titleH = titleBoxBounds.heightMm * PdfPageFormat.mm;
       final tibImg = imgs['title_tib'];
-      final tmplImg = imgs['template_svg'];
       return pw.Stack(
         children: [
-          if (tmplImg != null)
-            pw.Positioned(
-              left: il,
-              top: it,
-              child: pw.Image(
-                tmplImg.provider,
-                width: templateBounds.widthMm * PdfPageFormat.mm,
-                height: templateBounds.heightMm * PdfPageFormat.mm,
-              ),
+          pw.Positioned(
+            left: il,
+            top: it,
+            child: pw.SvgImage(
+              svg: titlePageSvg,
+              width: templateBounds.widthMm * PdfPageFormat.mm,
+              height: templateBounds.heightMm * PdfPageFormat.mm,
+              fit: pw.BoxFit.fill,
             ),
+          ),
           pw.Positioned(
             left: titleLeft,
             top: titleTop,

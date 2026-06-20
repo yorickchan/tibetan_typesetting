@@ -57,14 +57,14 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - Page and column break controls
 - Flow gap adjustment between text sections
 - Custom title page with Dharma Wheel symbol and configurable title fonts
-- **Custom SVG title page templates** with configurable insets for template and title text regions
+- **Custom SVG title page templates** with configurable insets — rendered as true vector graphics in PDF for crisp output at any zoom level
 - Opening mark blocks at the start of content
 - Optional row separator lines in editor preview and PDF export
 - Flexible text sizing options with per-project font settings
 - Header and footer with configurable fields (file name, page number, date, custom text)
 
 ### 🖨️ PDF & HTML Export
-- High-quality PDF generation with proper Tibetan script rendering
+- High-quality PDF generation with proper Tibetan script rendering and vector SVG title page templates
 - HTML export for web viewing
 - Live preview with zoom controls before export
 - Print directly from the app

@@ -2,7 +2,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class RenderedText {
   final Uint8List pngBytes;
@@ -96,49 +95,3 @@ Future<RenderedText?> renderTextToPng(
   }
 }
 
-Future<RenderedText?> renderSvgToPng(
-  String svgString, {
-  required double width,
-  required double height,
-  double scale = 460 / 72,
-}) async {
-  if (svgString.trim().isEmpty || width <= 0 || height <= 0) return null;
-
-  final loader = SvgStringLoader(svgString);
-  final PictureInfo info;
-  try {
-    info = await vg.loadPicture(loader, null);
-  } catch (_) {
-    return null;
-  }
-
-  final pxW = (width * scale).ceil();
-  final pxH = (height * scale).ceil();
-  final sx = pxW / info.size.width;
-  final sy = pxH / info.size.height;
-
-  final recorder = ui.PictureRecorder();
-  final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, pxW.toDouble(), pxH.toDouble()));
-  canvas.scale(sx, sy);
-  canvas.drawPicture(info.picture);
-  final picture = recorder.endRecording();
-
-  try {
-    final image = await picture.toImage(pxW, pxH);
-    try {
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) return null;
-      return RenderedText(
-        pngBytes: byteData.buffer
-            .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
-        width: width,
-        height: height,
-      );
-    } finally {
-      image.dispose();
-    }
-  } finally {
-    picture.dispose();
-    info.picture.dispose();
-  }
-}
