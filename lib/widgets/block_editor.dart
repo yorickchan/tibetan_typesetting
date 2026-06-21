@@ -467,6 +467,7 @@ class _EditorFieldsState extends State<_EditorFields> {
   late TextEditingController _pronCtrl;
   late TextEditingController _transCtrl;
   String? _lastBlockId;
+  late TextEditingController _rangeCtrl;
   Timer? _debounce;
   final _pronunciationService = PronunciationService();
   bool _isAutoFilling = false;
@@ -476,6 +477,7 @@ class _EditorFieldsState extends State<_EditorFields> {
     super.initState();
     _tibetanCtrl = TextEditingController(text: widget.block.tibetan);
     _pronCtrl = TextEditingController(text: widget.block.chinesePronunciation);
+    _rangeCtrl = TextEditingController(text: widget.block.redHighlightRange);
     _transCtrl = TextEditingController(text: widget.block.chineseTranslation);
     _lastBlockId = widget.block.id;
   }
@@ -486,6 +488,7 @@ class _EditorFieldsState extends State<_EditorFields> {
     if (widget.block.id != _lastBlockId) {
       _tibetanCtrl.text = widget.block.tibetan;
       _pronCtrl.text = widget.block.chinesePronunciation;
+      _rangeCtrl.text = widget.block.redHighlightRange;
       _transCtrl.text = widget.block.chineseTranslation;
       _lastBlockId = widget.block.id;
     }
@@ -495,6 +498,7 @@ class _EditorFieldsState extends State<_EditorFields> {
   void dispose() {
     _debounce?.cancel();
     _tibetanCtrl.dispose();
+    _rangeCtrl.dispose();
     _pronCtrl.dispose();
     _transCtrl.dispose();
     super.dispose();
@@ -642,6 +646,7 @@ class _EditorFieldsState extends State<_EditorFields> {
                 ),
                 const SizedBox(height: 6),
                 _tibetanField(),
+                _redHighlightSelector(),
               ],
             );
           }
@@ -667,6 +672,7 @@ class _EditorFieldsState extends State<_EditorFields> {
                     Expanded(child: _transField()),
                   ],
                 ),
+                _redHighlightSelector(),
               ],
             );
           }
@@ -677,9 +683,45 @@ class _EditorFieldsState extends State<_EditorFields> {
               _pronField(),
               const SizedBox(height: 8),
               _transField(),
+              const SizedBox(height: 8),
+              _redHighlightSelector(),
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _redHighlightSelector() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: [
+          Text(
+            widget.l10n.redHighlightLabel,
+            style: TextStyle(color: AppColors.textMuted, fontSize: 11),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              controller: _rangeCtrl,
+              onChanged: (v) {
+                widget.onUpdateBlock(BlockUpdate(redHighlightRange: v));
+              },
+              style: TextStyle(fontSize: 12, color: AppColors.textPrimary),
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                hintText: widget.l10n.redHighlightHint,
+                hintStyle: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

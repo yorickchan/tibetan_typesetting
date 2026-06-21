@@ -180,6 +180,7 @@ class _EditorPageState extends State<EditorPage>
           imageHeightMm: update.imageHeightMm,
           imageXMm: update.imageXMm,
           imageYMm: update.imageYMm,
+          redHighlightRange: update.redHighlightRange,
           clearImageWidthMm: update.clearImageWidthMm,
           clearImageHeightMm: update.clearImageHeightMm,
           clearImageXMm: update.clearImageXMm,

@@ -477,4 +477,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get defaultLayout => 'Default layout';
+
+  @override
+  String get redHighlightLabel => 'Red highlight';
+
+  @override
+  String get redHighlightHint => 'e.g. 1-3,5-7';
 }

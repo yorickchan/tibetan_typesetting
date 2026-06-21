@@ -21,6 +21,7 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - Visual block navigation and management
 - Auto-save functionality with save-state indicator
 - Undo/Redo support (up to 50 states)
+- Red character highlight — mark selected words in heading text with red ink using range notation (e.g. `1-4,6-8`) while vowel marks, tshegs, and punctuation remain black
 - Wylie transliteration input for Tibetan text
 
 ### 🖼️ Floating Images
@@ -77,12 +78,11 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 ## Technical Highlights
 
 ### Tibetan Script Rendering
-The application uses a sophisticated approach to handle Tibetan script rendering in PDFs:
-- Pre-renders Tibetan text using Flutter's native text engine
-- Converts text to high-resolution PNG images (288 DPI)
-- Embeds images in PDF to preserve complex OpenType shaping
+The application pre-renders Tibetan text to high-resolution PNG images (460 DPI) before embedding in the PDF. This approach is used because:
+- Tibetan script requires OpenType GSUB/GPOS shaping for correct rendering (stacked glyphs, vowel positioning)
+- The `pdf` package cannot perform OpenType shaping
+- PNG rasterization via Flutter's text engine produces correct Tibetan rendering at the cost of larger file size and minor pixelation at extreme zoom levels (>400%)
 - SHA-256 based image caching for efficient re-rendering
-- This workaround ensures perfect Tibetan script display, which standard PDF text rendering cannot achieve
 
 ### Wylie Transliteration
 - Built-in Wylie-to-Tibetan Unicode converter
@@ -269,7 +269,7 @@ The `sample_layout.dart` utility implements a two-pass pagination system:
 
 1. Text input → `TextPainter` (Flutter's text engine)
 2. Check image cache (SHA-256 key from text + font + size)
-3. Render to `Picture` at 4x scale for high DPI
+3. Render to `Picture` at ~6.4× scale (460 DPI in 72-DPI PDF coordinate space)
 4. Convert to PNG bytes and cache
 5. Embed in PDF as image
 

@@ -149,5 +149,7 @@
   "templateInsetHint": "自訂範本周圍的邊距",
   "titleTextInset": "標題文字框邊距 (mm)",
   "titleTextInsetHint": "標題文字框周圍的邊距",
-  "defaultLayout": "預設佈局"
+  "defaultLayout": "預設佈局",
+  "redHighlightLabel": "首字紅色",
+  "redHighlightHint": "例如 1-3,5-7"
 }

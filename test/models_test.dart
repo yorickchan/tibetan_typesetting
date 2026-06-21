@@ -105,6 +105,40 @@ void main() {
       expect(restored.imageXMm, 10);
       expect(restored.imageYMm, 20);
     });
+
+    test('redHighlightRange round-trip', () {
+      // Default is empty
+      final defaultBlock = TextBlock(id: 'rh0');
+      expect(defaultBlock.redHighlightRange, '');
+      expect(defaultBlock.toJson().containsKey('redHighlightRange'), false);
+
+      // Non-empty round-trip
+      var block = TextBlock(id: 'rh1', redHighlightRange: '1-3');
+      var json = block.toJson();
+      expect(json['redHighlightRange'], '1-3');
+      var restored = TextBlock.fromJson(json);
+      expect(restored.redHighlightRange, '1-3');
+
+      // Multiple ranges
+      block = TextBlock(id: 'rh2', redHighlightRange: '1-2,5-7');
+      json = block.toJson();
+      expect(json['redHighlightRange'], '1-2,5-7');
+      restored = TextBlock.fromJson(json);
+      expect(restored.redHighlightRange, '1-2,5-7');
+
+      // copyWith preserves value
+      final updated = defaultBlock.copyWith(redHighlightRange: '3-4');
+      expect(updated.redHighlightRange, '3-4');
+      expect(updated.id, defaultBlock.id);
+
+      // Backward compat: old redHighlightCount + redHighlightStart
+      final old = TextBlock.fromJson({
+        'id': 'old',
+        'redHighlightCount': 2,
+        'redHighlightStart': 3,
+      });
+      expect(old.redHighlightRange, '3-4');
+    });
   });
 
   group('PageSetup', () {

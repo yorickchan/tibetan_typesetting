@@ -215,5 +215,7 @@
   "titleTextInset": "Title text box margin (mm)",
   "titleTextInsetHint": "Margin around title text box",
   "invalidSvgFile": "Invalid SVG file",
-  "defaultLayout": "Default layout"
+  "defaultLayout": "Default layout",
+  "redHighlightLabel": "Red highlight",
+  "redHighlightHint": "e.g. 1-3,5-7"
 }

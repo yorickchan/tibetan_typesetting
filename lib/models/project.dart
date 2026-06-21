@@ -412,7 +412,7 @@ class TextBlock {
   final double? imageHeightMm;
   final double? imageXMm;
   final double? imageYMm;
-
+  final String redHighlightRange;
   TextBlock({
     required this.id,
     this.tibetan = '',
@@ -429,6 +429,7 @@ class TextBlock {
     this.imageHeightMm,
     this.imageXMm,
     this.imageYMm,
+    this.redHighlightRange = '',
   });
 
   bool get isFreeText => format == TextBlockFormat.freeText;
@@ -451,6 +452,7 @@ class TextBlock {
     double? imageHeightMm,
     double? imageXMm,
     double? imageYMm,
+    String? redHighlightRange,
     bool clearColumnSpan = false,
     bool clearImagePath = false,
     bool clearImageWidthMm = false,
@@ -478,6 +480,7 @@ class TextBlock {
           : (imageHeightMm ?? this.imageHeightMm),
       imageXMm: clearImageXMm ? null : (imageXMm ?? this.imageXMm),
       imageYMm: clearImageYMm ? null : (imageYMm ?? this.imageYMm),
+      redHighlightRange: redHighlightRange ?? this.redHighlightRange,
     );
   }
 
@@ -497,6 +500,7 @@ class TextBlock {
     if (imageHeightMm != null) 'imageHeightMm': imageHeightMm,
     if (imageXMm != null) 'imageXMm': imageXMm,
     if (imageYMm != null) 'imageYMm': imageYMm,
+    if (redHighlightRange.isNotEmpty) 'redHighlightRange': redHighlightRange,
   };
 
   factory TextBlock.fromJson(Map<String, dynamic> json) => TextBlock(
@@ -515,8 +519,21 @@ class TextBlock {
     imageHeightMm: (json['imageHeightMm'] as num?)?.toDouble(),
     imageXMm: (json['imageXMm'] as num?)?.toDouble(),
     imageYMm: (json['imageYMm'] as num?)?.toDouble(),
+    redHighlightRange: _migrateRedHighlightRange(json),
   );
+
+  static String _migrateRedHighlightRange(Map<String, dynamic> json) {
+    final range = json['redHighlightRange'] as String?;
+    if (range != null && range.isNotEmpty) return range;
+    final count = (json['redHighlightCount'] as num?)?.toInt() ?? 0;
+    if (count > 0) {
+      final start = (json['redHighlightStart'] as num?)?.toInt() ?? 1;
+      return '${start}-${start + count - 1}';
+    }
+    return '';
+  }
 }
+
 
 class Project {
   final String id;

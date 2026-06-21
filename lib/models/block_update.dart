@@ -12,6 +12,7 @@ class BlockUpdate {
   final double? imageHeightMm;
   final double? imageXMm;
   final double? imageYMm;
+  final String? redHighlightRange;
   final bool clearImageWidthMm;
   final bool clearImageHeightMm;
   final bool clearImageXMm;
@@ -29,6 +30,7 @@ class BlockUpdate {
     this.imageHeightMm,
     this.imageXMm,
     this.imageYMm,
+    this.redHighlightRange,
     this.clearImageWidthMm = false,
     this.clearImageHeightMm = false,
     this.clearImageXMm = false,

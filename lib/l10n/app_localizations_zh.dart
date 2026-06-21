@@ -475,6 +475,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get defaultLayout => '默认布局';
+
+  @override
+  String get redHighlightLabel => '首字红色';
+
+  @override
+  String get redHighlightHint => '例如 1-3,5-7';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -948,4 +954,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get defaultLayout => '預設佈局';
+
+  @override
+  String get redHighlightLabel => '首字紅色';
+
+  @override
+  String get redHighlightHint => '例如 1-3,5-7';
 }

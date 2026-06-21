@@ -998,6 +998,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Default layout'**
   String get defaultLayout;
+
+  /// No description provided for @redHighlightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Red highlight'**
+  String get redHighlightLabel;
+
+  /// No description provided for @redHighlightHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 1-3,5-7'**
+  String get redHighlightHint;
 }
 
 class _AppLocalizationsDelegate

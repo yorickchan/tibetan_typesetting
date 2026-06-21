@@ -14,6 +14,13 @@ class RenderedText {
   });
 }
 
+
+class TextSpanDef {
+  final String text;
+  final Color color;
+  const TextSpanDef(this.text, this.color);
+}
+
 /// Render text using Flutter's HarfBuzz-powered text engine (which fully
 /// supports OpenType GSUB/GPOS for complex scripts like Tibetan) and return
 /// a high-resolution PNG suitable for embedding in a PDF.
@@ -95,3 +102,81 @@ Future<RenderedText?> renderTextToPng(
   }
 }
 
+
+Future<RenderedText?> renderRichTextToPng(
+  List<TextSpanDef> spans, {
+  required String fontFamily,
+  List<String>? fontFamilyFallback,
+  required double fontSize,
+  required double maxWidth,
+  double scale = 460 / 72,
+  double? lineHeight,
+  double topPadding = 0,
+  double bottomPadding = 0,
+  TextAlign textAlign = TextAlign.left,
+}) async {
+  if (spans.isEmpty) return null;
+
+  final baseStyle = TextStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
+    fontSize: fontSize * scale,
+    height: lineHeight,
+  );
+
+  final textSpan = TextSpan(
+    children: spans
+        .map((s) => TextSpan(
+              text: s.text,
+              style: baseStyle.copyWith(color: s.color),
+            ))
+        .toList(),
+  );
+
+  final painter = TextPainter(
+    text: textSpan,
+    textDirection: TextDirection.ltr,
+    textAlign: textAlign,
+  );
+
+  final useFullWidth =
+      textAlign != TextAlign.left && textAlign != TextAlign.start;
+  final layoutMax = maxWidth * scale;
+  painter.layout(
+    minWidth: useFullWidth ? layoutMax : 0,
+    maxWidth: layoutMax,
+  );
+
+  final w = useFullWidth
+      ? layoutMax.ceilToDouble()
+      : painter.width.ceilToDouble();
+  final scaledTopPadding = topPadding * scale;
+  final scaledBottomPadding = bottomPadding * scale;
+  final h = (painter.height + scaledTopPadding + scaledBottomPadding)
+      .ceilToDouble();
+  if (w <= 0 || h <= 0) return null;
+
+  final recorder = ui.PictureRecorder();
+  final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, w, h));
+  painter.paint(canvas, Offset(0, scaledTopPadding));
+  final picture = recorder.endRecording();
+
+  try {
+    final image = await picture.toImage(w.toInt(), h.toInt());
+    try {
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) return null;
+      return RenderedText(
+        pngBytes: byteData.buffer
+            .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+        width: useFullWidth ? maxWidth : w / scale,
+        height: h / scale,
+      );
+    } finally {
+      image.dispose();
+    }
+  } finally {
+    picture.dispose();
+    painter.dispose();
+  }
+}

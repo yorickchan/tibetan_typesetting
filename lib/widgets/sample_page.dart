@@ -9,9 +9,35 @@ import '../utils/colors.dart';
 import '../utils/font_constants.dart';
 import '../utils/font_utils.dart' as font_utils;
 import '../utils/sample_layout.dart';
+import '../utils/tibetan_segmenter.dart';
 
 const double kMmToPx = 3.78;
 
+
+List<TextSpan> _colorizedChildren(
+  String text,
+  TextStyle style,
+  Color letterColor,
+  Color otherColor,
+) {
+  final spans = <TextSpan>[];
+  String? buf;
+  Color? bufColor;
+  for (int i = 0; i < text.length; i++) {
+    final c = text[i];
+    final color =
+        isTibetanNonLetter(c.codeUnitAt(0)) ? otherColor : letterColor;
+    if (bufColor == color) {
+      buf = buf! + c;
+    } else {
+      if (buf != null) spans.add(TextSpan(text: buf, style: style.copyWith(color: bufColor)));
+      buf = c;
+      bufColor = color;
+    }
+  }
+  if (buf != null) spans.add(TextSpan(text: buf, style: style.copyWith(color: bufColor)));
+  return spans;
+}
 class SamplePageWidget extends StatelessWidget {
   final Project project;
   final AppSettings? appSettings;
@@ -176,7 +202,7 @@ class _SidePanel extends StatelessWidget {
             style: TextStyle(
               fontFamily: fontFamily,
               fontSize: 11,
-              color: AppColors.rose600,
+              color: Colors.black87,
             ),
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
@@ -472,22 +498,31 @@ class _ContentGrid extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           )
                         : null,
-                    child: Text(
-                      markText,
-                      style: TextStyle(
+                    child: Builder(builder: (_) {
+                      final style = TextStyle(
                         fontFamily: tibFamily,
                         fontSize: contentTibetanFontSize(
                           font_utils.previewFontSize(tibSize),
                           smallText: isSmall,
                         ),
-                        color: AppColors.rose600,
                         height: contentTibetanLineHeight(smallText: isSmall),
-                      ),
-                      maxLines: null,
-                    ),
-                  ),
+                      );
+                      final segs = splitByRedHighlightRanges(markText, block.redHighlightRange);
+                      if (segs.isNotEmpty) {
+                        final children = <InlineSpan>[];
+                        for (final s in segs) {
+                          if (s.highlight) {
+                            children.addAll(_colorizedChildren(s.text, style, AppColors.rose600, Colors.black87));
+                          } else {
+                            children.add(TextSpan(text: s.text, style: style.copyWith(color: Colors.black87)));
+                          }
+                        }
+                        return RichText(text: TextSpan(children: children), maxLines: null);
+                      }
+                      return Text(markText, style: style.copyWith(color: Colors.black87), maxLines: null);
+                    }),
                 ),
-              );
+              ));
               continue;
             }
 
@@ -550,19 +585,37 @@ class _ContentGrid extends StatelessWidget {
                           maxLines: null,
                         ),
                       if (!isFreeText && heading.isNotEmpty)
-                        Text(
-                          heading,
-                          style: TextStyle(
+                        Builder(builder: (_) {
+                          final style = TextStyle(
                             fontFamily: tibFamily,
                             fontSize: headingSize,
-                            color: AppColors.rose600,
                             height: contentTibetanLineHeight(
                               smallText: isSmall,
                             ),
-                          ),
-                          maxLines: isSmall ? null : 2,
-                          overflow: isSmall ? null : TextOverflow.ellipsis,
-                        ),
+                          );
+                          final segs = splitByRedHighlightRanges(heading, block.redHighlightRange);
+                          if (segs.isNotEmpty) {
+                            final children = <InlineSpan>[];
+                            for (final s in segs) {
+                              if (s.highlight) {
+                                children.addAll(_colorizedChildren(s.text, style, AppColors.rose600, Colors.black87));
+                              } else {
+                                children.add(TextSpan(text: s.text, style: style.copyWith(color: Colors.black87)));
+                              }
+                            }
+                            return RichText(
+                              text: TextSpan(children: children),
+                              maxLines: isSmall ? null : 2,
+                              overflow: isSmall ? TextOverflow.clip : TextOverflow.ellipsis,
+                            );
+                          }
+                          return Text(
+                            heading,
+                            style: style.copyWith(color: Colors.black87),
+                            maxLines: isSmall ? null : 2,
+                            overflow: isSmall ? null : TextOverflow.ellipsis,
+                          );
+                        }),
                       if (!isFreeText && body.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 1),
