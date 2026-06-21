@@ -51,6 +51,7 @@ class SamplePageWidget extends StatelessWidget {
   final void Function(String id, double dwMm, double dhMm)? onFloatImageResize;
   final void Function(String id, double dwMm, double dhMm)? onInlineImageResize;
   final void Function(String id)? onSelectBlock;
+  final double? smallBlockFontSize;
 
   const SamplePageWidget({
     super.key,
@@ -66,6 +67,7 @@ class SamplePageWidget extends StatelessWidget {
     this.onFloatImageResize,
     this.onInlineImageResize,
     this.onSelectBlock,
+    this.smallBlockFontSize,
   });
 
   @override
@@ -106,6 +108,11 @@ class SamplePageWidget extends StatelessWidget {
       appSettings?.translationFont,
       fallbackChineseFont,
     );
+
+    // Pre-scale small block font size to preview pixels
+    final smallSz = smallBlockFontSize != null
+        ? font_utils.previewFontSize(smallBlockFontSize!)
+        : null;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
@@ -155,6 +162,7 @@ class SamplePageWidget extends StatelessWidget {
                       onFloatImageResize: onFloatImageResize,
                       onInlineImageResize: onInlineImageResize,
                       onSelectBlock: onSelectBlock,
+                      smallBlockFontSize: smallSz,
                     ),
                   ),
                 ),
@@ -223,6 +231,7 @@ class _ContentGrid extends StatelessWidget {
   final FontConfig tibetanFont;
   final FontConfig pronunciationFont;
   final FontConfig translationFont;
+  final double? smallBlockFontSize;
 
   final List<TextBlock> floatingImages;
   final void Function(String id, double dxMm, double dyMm)? onFloatImageMove;
@@ -238,6 +247,7 @@ class _ContentGrid extends StatelessWidget {
     required this.tibetanFont,
     required this.pronunciationFont,
     required this.translationFont,
+    this.smallBlockFontSize,
     this.floatingImages = const [],
     this.onFloatImageMove,
     this.onFloatImageResize,
@@ -271,8 +281,12 @@ class _ContentGrid extends StatelessWidget {
         final smallTibetanSize = contentTibetanFontSize(
           font_utils.previewFontSize(tibSize),
           smallText: true,
+          smallBlockFontSize: smallBlockFontSize,
         );
-        final smallChineseSize = font_utils.previewFontSize(chiSize) * 0.75;
+        final smallScale = smallBlockFontSize != null
+            ? smallBlockFontSize! / font_utils.previewFontSize(tibSize)
+            : 0.75;
+        final smallChineseSize = font_utils.previewFontSize(chiSize) * smallScale;
         for (var ri = 0; ri < rowCount; ri++) {
           rowYs.add(yAccum);
           final minShortRowH = estimateCompactSmallRowHeight(
@@ -500,10 +514,10 @@ class _ContentGrid extends StatelessWidget {
                         : null,
                     child: Builder(builder: (_) {
                       final style = TextStyle(
-                        fontFamily: tibFamily,
                         fontSize: contentTibetanFontSize(
                           font_utils.previewFontSize(tibSize),
                           smallText: isSmall,
+                          smallBlockFontSize: isSmall ? smallBlockFontSize : null,
                         ),
                         height: contentTibetanLineHeight(smallText: isSmall),
                       );
@@ -535,15 +549,15 @@ class _ContentGrid extends StatelessWidget {
             final trans = isCompact
                 ? ''
                 : splitLines(block.chineseTranslation).join(' ');
-
             final headingSize = contentTibetanFontSize(
               font_utils.previewFontSize(tibSize),
               smallText: isSmall,
+              smallBlockFontSize: isSmall ? smallBlockFontSize : null,
             );
             final bodySize = headingSize;
             final chineseSize = isFreeText
-                ? font_utils.previewFontSize(translationFont.fontSize) * 0.75
-                : font_utils.previewFontSize(chiSize) * (isSmall ? 0.75 : 1.0);
+                ? font_utils.previewFontSize(translationFont.fontSize) * smallScale
+                : font_utils.previewFontSize(chiSize) * (isSmall ? smallScale : 1.0);
 
             final left = cell.leftFraction * totalW;
             final spannedW = cell.widthFraction * totalW;

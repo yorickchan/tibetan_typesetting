@@ -1005,6 +1005,24 @@ abstract class AppLocalizations {
   /// **'Red highlight'**
   String get redHighlightLabel;
 
+  /// No description provided for @smallBlockFontSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Small block size'**
+  String get smallBlockFontSize;
+
+  /// No description provided for @smallBlockFontSizeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto (75% of base)'**
+  String get smallBlockFontSizeHint;
+
+  /// No description provided for @smallBlockFontSizeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Small block font size (pt)'**
+  String get smallBlockFontSizeLabel;
+
   /// No description provided for @redHighlightHint.
   ///
   /// In en, this message translates to:

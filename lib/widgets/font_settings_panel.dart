@@ -225,6 +225,97 @@ class FontSettingsPanel extends StatelessWidget {
                       (s) => s.copyWith(clearTranslationFont: true),
                     ),
                   ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Text(
+                        l10n.smallBlockFontSize,
+                        style: TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      const Spacer(),
+                      if (pageSetup.smallBlockFontSize != null)
+                        GestureDetector(
+                          onTap: () => onUpdateSetup(
+                            (s) => s.copyWith(clearSmallBlockFontSize: true),
+                          ),
+                          child: Text(
+                            l10n.resetToDefault,
+                            style: TextStyle(
+                              color: AppColors.sky500,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          width: 70,
+                          child: TextFormField(
+                            initialValue: pageSetup.smallBlockFontSize
+                                ?.toStringAsFixed(1) ?? '',
+                            keyboardType: TextInputType.number,
+                            onChanged: (v) {
+                              if (v.isEmpty) {
+                                onUpdateSetup(
+                                  (s) => s.copyWith(
+                                    clearSmallBlockFontSize: true,
+                                  ),
+                                );
+                                return;
+                              }
+                              final n = double.tryParse(v);
+                              if (n == null || n <= 0) return;
+                              onUpdateSetup(
+                                (s) => s.copyWith(smallBlockFontSize: n),
+                              );
+                            },
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 13,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: l10n.smallBlockFontSizeHint,
+                              hintStyle: TextStyle(
+                                color: AppColors.textFaint,
+                                fontSize: 10,
+                              ),
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 8,
+                              ),
+                              filled: true,
+                              fillColor: AppColors.inputFill,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: AppColors.border),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: AppColors.border),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(
+                                  color: AppColors.sky500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

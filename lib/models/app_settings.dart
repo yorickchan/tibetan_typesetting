@@ -8,6 +8,7 @@ class AppSettings {
   final FontConfig? tibetanFont;
   final FontConfig? pronunciationFont;
   final FontConfig? translationFont;
+  final double? smallBlockFontSize;
   final double defaultPageWidthMm;
   final double defaultPageHeightMm;
   final String? locale;
@@ -17,6 +18,7 @@ class AppSettings {
     this.tibetanFont,
     this.pronunciationFont,
     this.translationFont,
+    this.smallBlockFontSize,
     this.defaultPageWidthMm = 300,
     this.defaultPageHeightMm = 120,
     this.locale,
@@ -30,6 +32,7 @@ class AppSettings {
           tibetanFont == other.tibetanFont &&
           pronunciationFont == other.pronunciationFont &&
           translationFont == other.translationFont &&
+          smallBlockFontSize == other.smallBlockFontSize &&
           defaultPageWidthMm == other.defaultPageWidthMm &&
           defaultPageHeightMm == other.defaultPageHeightMm &&
           locale == other.locale &&
@@ -40,6 +43,7 @@ class AppSettings {
         tibetanFont,
         pronunciationFont,
         translationFont,
+        smallBlockFontSize,
         defaultPageWidthMm,
         defaultPageHeightMm,
         locale,
@@ -55,6 +59,7 @@ class AppSettings {
     FontConfig? tibetanFont,
     FontConfig? pronunciationFont,
     FontConfig? translationFont,
+    double? smallBlockFontSize,
     double? defaultPageWidthMm,
     double? defaultPageHeightMm,
     String? locale,
@@ -62,6 +67,7 @@ class AppSettings {
     bool clearTibetanFont = false,
     bool clearPronunciationFont = false,
     bool clearTranslationFont = false,
+    bool clearSmallBlockFontSize = false,
     bool clearLocale = false,
   }) {
     return AppSettings(
@@ -73,6 +79,9 @@ class AppSettings {
       translationFont: clearTranslationFont
           ? null
           : (translationFont ?? this.translationFont),
+      smallBlockFontSize: clearSmallBlockFontSize
+          ? null
+          : (smallBlockFontSize ?? this.smallBlockFontSize),
       defaultPageWidthMm: defaultPageWidthMm ?? this.defaultPageWidthMm,
       defaultPageHeightMm: defaultPageHeightMm ?? this.defaultPageHeightMm,
       locale: clearLocale ? null : (locale ?? this.locale),
@@ -88,6 +97,7 @@ class AppSettings {
         'defaultPageHeightMm': defaultPageHeightMm,
         'locale': locale,
         'theme': theme.name,
+        if (smallBlockFontSize != null) 'smallBlockFontSize': smallBlockFontSize,
       };
 
   factory AppSettings.fromJson(Map<String, dynamic> json) => AppSettings(
@@ -102,6 +112,7 @@ class AppSettings {
             ? FontConfig.fromJson(
                 json['translationFont'] as Map<String, dynamic>)
             : null,
+        smallBlockFontSize: (json['smallBlockFontSize'] as num?)?.toDouble(),
         defaultPageWidthMm:
             (json['defaultPageWidthMm'] as num?)?.toDouble() ?? 300,
         defaultPageHeightMm:

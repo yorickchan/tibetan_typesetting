@@ -300,6 +300,8 @@ class PdfService {
 
     final tibFontSize = tibConfig.fontSize;
 
+    final smallBlockFontSize = ps.smallBlockFontSize ?? settings.smallBlockFontSize;
+
     final imgs = <String, _Img>{};
     final tasks = <Future<void>>[];
 
@@ -370,6 +372,7 @@ class PdfService {
           final tibContentSize = contentTibetanFontSize(
             tibFontSize,
             smallText: small,
+            smallBlockFontSize: small ? smallBlockFontSize : null,
           );
           if (heading.isNotEmpty) {
             final segs = splitByRedHighlightRanges(heading, block.redHighlightRange);
@@ -465,6 +468,7 @@ class PdfService {
             pronFontSize: pronConfig.fontSize,
             transFontSize: transConfig.fontSize,
             tibFontSize: tibFontSize,
+            smallBlockFontSize: smallBlockFontSize,
             outerW: outerW,
             outerH: outerH,
             sideW: sideW,
@@ -692,6 +696,7 @@ class PdfService {
     required double pronFontSize,
     required double transFontSize,
     required double tibFontSize,
+    required double? smallBlockFontSize,
     required double outerW,
     required double outerH,
     required double sideW,
@@ -749,8 +754,12 @@ class PdfService {
       final smallTibetanSize = contentTibetanFontSize(
         tibFontSize,
         smallText: true,
+        smallBlockFontSize: smallBlockFontSize,
       );
-      final smallChineseSize = pronFontSize * 0.75;
+      final smallScale = smallBlockFontSize != null
+          ? smallBlockFontSize! / tibFontSize
+          : 0.75;
+      final smallChineseSize = pronFontSize * smallScale;
       for (var ri = 0; ri < rowCount; ri++) {
         rowYs.add(yAccum);
         final minShortRowH = estimateCompactSmallRowHeight(
@@ -776,8 +785,8 @@ class PdfService {
       pw.Widget buildBlock(String key, TextBlock block, double maxW) {
         final small = block.smallText;
         final freeText = block.isFreeText;
-        final pronSize = pronFontSize * (small ? 0.75 : 1.0);
-        final transSize = transFontSize * (small || freeText ? 0.75 : 1.0);
+        final pronSize = pronFontSize * (small ? smallScale : 1.0);
+        final transSize = transFontSize * (small || freeText ? smallScale : 1.0);
 
         final pron = splitLines(block.chinesePronunciation).join('\n');
         final trans = small || freeText

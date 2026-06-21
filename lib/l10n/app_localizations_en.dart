@@ -482,5 +482,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get redHighlightLabel => 'Red highlight';
 
   @override
+  String get smallBlockFontSize => 'Small block size';
+
+  @override
+  String get smallBlockFontSizeHint => 'Auto (75% of base)';
+
+  @override
+  String get smallBlockFontSizeLabel => 'Small block font size (pt)';
+
+  @override
   String get redHighlightHint => 'e.g. 1-3,5-7';
 }

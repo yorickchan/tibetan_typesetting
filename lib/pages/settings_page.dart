@@ -49,6 +49,7 @@ class _SettingsPageState extends State<SettingsPage> {
   late TextEditingController _tibSizeCtrl;
   late TextEditingController _pronSizeCtrl;
   late TextEditingController _transSizeCtrl;
+  late TextEditingController _smallBlockSizeCtrl;
 
   @override
   void initState() {
@@ -57,6 +58,7 @@ class _SettingsPageState extends State<SettingsPage> {
     _heightCtrl = TextEditingController();
     _tibSizeCtrl = TextEditingController();
     _pronSizeCtrl = TextEditingController();
+    _smallBlockSizeCtrl = TextEditingController();
     _transSizeCtrl = TextEditingController();
     _load();
   }
@@ -67,6 +69,7 @@ class _SettingsPageState extends State<SettingsPage> {
     _heightCtrl.dispose();
     _tibSizeCtrl.dispose();
     _pronSizeCtrl.dispose();
+    _smallBlockSizeCtrl.dispose();
     _transSizeCtrl.dispose();
     super.dispose();
   }
@@ -86,6 +89,8 @@ class _SettingsPageState extends State<SettingsPage> {
           (settings.pronunciationFont?.fontSize ?? 8).toStringAsFixed(1);
       _transSizeCtrl.text =
           (settings.translationFont?.fontSize ?? 8).toStringAsFixed(1);
+      _smallBlockSizeCtrl.text =
+          settings.smallBlockFontSize?.toStringAsFixed(1) ?? '';
     });
   }
 
@@ -270,11 +275,26 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
+
   bool get _canSave {
     if (widget.requireFonts) {
       return _settings?.hasAnyFontConfigured ?? false;
     }
     return true;
+  }
+
+  void _updateSmallBlockSize(String v) {
+    if (v.isEmpty) {
+      setState(() {
+        _settings = _settings!.copyWith(clearSmallBlockFontSize: true);
+      });
+      return;
+    }
+    final n = double.tryParse(v);
+    if (n == null || n <= 0) return;
+    setState(() {
+      _settings = _settings!.copyWith(smallBlockFontSize: n);
+    });
   }
 
   @override
@@ -358,6 +378,22 @@ class _SettingsPageState extends State<SettingsPage> {
             sizeCtrl: _transSizeCtrl,
             onSizeChanged: _updateTranslationSize,
           ),
+
+          if (_settings!.tibetanFont != null) ...[
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: _numberField(
+                    controller: _smallBlockSizeCtrl,
+                    label: _l10n.smallBlockFontSizeLabel,
+                    onChanged: _updateSmallBlockSize,
+                  ),
+                ),
+              ],
+            ),
+          ],
 
           const SizedBox(height: 24),
 

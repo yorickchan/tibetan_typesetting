@@ -480,6 +480,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get redHighlightLabel => '首字红色';
 
   @override
+  String get smallBlockFontSize => '小字大小';
+
+  @override
+  String get smallBlockFontSizeHint => '自动（基准的75%）';
+
+  @override
+  String get smallBlockFontSizeLabel => '小字字号 (pt)';
+
+  @override
   String get redHighlightHint => '例如 1-3,5-7';
 }
 
@@ -957,6 +966,15 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get redHighlightLabel => '首字紅色';
+
+  @override
+  String get smallBlockFontSize => '小字大小';
+
+  @override
+  String get smallBlockFontSizeHint => '自動（基準的75%）';
+
+  @override
+  String get smallBlockFontSizeLabel => '小字字型大小 (pt)';
 
   @override
   String get redHighlightHint => '例如 1-3,5-7';

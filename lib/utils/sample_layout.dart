@@ -217,8 +217,9 @@ double contentTibetanLineHeight({required bool smallText}) {
   return 1.0;
 }
 
-double contentTibetanFontSize(double fontSize, {required bool smallText}) {
-  return fontSize * (smallText ? 0.75 : 1.0);
+double contentTibetanFontSize(double fontSize, {required bool smallText, double? smallBlockFontSize}) {
+  if (!smallText) return fontSize;
+  return smallBlockFontSize ?? fontSize * 0.75;
 }
 
 double contentTibetanRasterBleed(double fontSize) {

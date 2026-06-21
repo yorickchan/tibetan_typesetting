@@ -120,6 +120,7 @@ class PageSetup {
   final double headerFontSize;
   final double footerFontSize;
   final String defaultOpeningMark;
+  final double? smallBlockFontSize;
   final String? titlePageTemplateId;
 
   PageSetup({
@@ -153,6 +154,7 @@ class PageSetup {
     this.footerCustomText = '',
     this.headerFontSize = 9,
     this.footerFontSize = 9,
+    this.smallBlockFontSize,
     this.titlePageTemplateId,
     this.defaultOpeningMark = kDefaultOpeningMark,
   }) : marginMm = marginMm ?? const MarginMm(),
@@ -193,12 +195,14 @@ class PageSetup {
     double? footerFontSize,
     String? defaultOpeningMark,
     String? titlePageTemplateId,
+    double? smallBlockFontSize,
     bool clearTibetanFont = false,
     bool clearPronunciationFont = false,
     bool clearTranslationFont = false,
     bool clearTitleTibetanFont = false,
     bool clearTitleChineseFont = false,
     bool clearTitlePageTemplateId = false,
+    bool clearSmallBlockFontSize = false,
   }) {
     return PageSetup(
       pageWidthMm: pageWidthMm ?? this.pageWidthMm,
@@ -243,6 +247,9 @@ class PageSetup {
       titlePageTemplateId: clearTitlePageTemplateId
           ? null
           : (titlePageTemplateId ?? this.titlePageTemplateId),
+      smallBlockFontSize: clearSmallBlockFontSize
+          ? null
+          : (smallBlockFontSize ?? this.smallBlockFontSize),
     );
   }
 
@@ -282,6 +289,7 @@ class PageSetup {
     if (titleChineseFont != null)
       'titleChineseFont': titleChineseFont!.toJson(),
     if (titlePageTemplateId != null) 'titlePageTemplateId': titlePageTemplateId,
+    if (smallBlockFontSize != null) 'smallBlockFontSize': smallBlockFontSize,
   };
 
   factory PageSetup.fromJson(Map<String, dynamic> json) => PageSetup(
@@ -336,6 +344,7 @@ class PageSetup {
     defaultOpeningMark:
         json['defaultOpeningMark'] as String? ?? kDefaultOpeningMark,
     titlePageTemplateId: json['titlePageTemplateId'] as String?,
+    smallBlockFontSize: (json['smallBlockFontSize'] as num?)?.toDouble(),
   );
 }
 

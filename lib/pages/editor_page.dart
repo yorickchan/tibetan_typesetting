@@ -789,6 +789,9 @@ class _EditorPageState extends State<EditorPage>
       fallbackChineseFont,
     );
 
+    final smallBlockFontSize = project.pageSetup.smallBlockFontSize ??
+        _appSettings.smallBlockFontSize;
+
     // Precompute id -> global index map so per-block lookups are O(1).
     final blockIndexById = <String, int>{};
     for (var i = 0; i < project.blocks.length; i++) {
@@ -933,6 +936,7 @@ class _EditorPageState extends State<EditorPage>
                       onFloatImageResize: _onFloatImageResize,
                       onInlineImageResize: _onInlineImageResize,
                       onSelectBlock: (id) => setState(() => _selectedId = id),
+                      smallBlockFontSize: smallBlockFontSize,
                     ),
                   ),
                 ),

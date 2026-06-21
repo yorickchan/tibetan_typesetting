@@ -61,6 +61,7 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - **Custom SVG title page templates** with configurable insets — rendered as true vector graphics in PDF for crisp output at any zoom level
 - Opening mark blocks at the start of content
 - Optional row separator lines in editor preview and PDF export
+- Configurable small block font size — independently adjust font size for compact ("small text") blocks in both app settings and per-project font settings
 - Flexible text sizing options with per-project font settings
 - Header and footer with configurable fields (file name, page number, date, custom text)
 

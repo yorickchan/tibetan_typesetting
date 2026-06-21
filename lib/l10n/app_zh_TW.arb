@@ -150,6 +150,9 @@
   "titleTextInset": "標題文字框邊距 (mm)",
   "titleTextInsetHint": "標題文字框周圍的邊距",
   "defaultLayout": "預設佈局",
+  "smallBlockFontSize": "小字大小",
+  "smallBlockFontSizeHint": "自動（基準的75%）",
+  "smallBlockFontSizeLabel": "小字字型大小 (pt)",
   "redHighlightLabel": "首字紅色",
   "redHighlightHint": "例如 1-3,5-7"
 }
