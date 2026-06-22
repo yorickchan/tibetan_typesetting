@@ -10,6 +10,7 @@ import '../models/app_settings.dart';
 import '../models/font_config.dart';
 import '../models/project.dart';
 import '../services/title_page_template_service.dart';
+import '../utils/content_page_template_layout.dart';
 import '../utils/font_constants.dart';
 import '../utils/font_utils.dart' as font_utils;
 import '../utils/sample_layout.dart';
@@ -480,6 +481,14 @@ class PdfService {
           : ps.contentSubsequentPageTemplateInset;
       final hasPageTemplate =
           pageTemplateSvg != null && pageTemplateSvg.isNotEmpty;
+      final templateLayout = hasPageTemplate
+          ? contentPageTemplateLayout(
+              pageWidthMm: ps.pageWidthMm,
+              pageHeightMm: ps.pageHeightMm,
+              contentMargin: pageMargin,
+              templateInset: pageTemplateInset,
+            )
+          : null;
 
       doc.addPage(
         pw.Page(
@@ -510,7 +519,7 @@ class PdfService {
             pageNumber: pageNumber,
             imgs: imgs,
             templateSvg: pageTemplateSvg,
-            templateInset: pageTemplateInset,
+            templateLayout: templateLayout,
           ),
         ),
       );
@@ -741,7 +750,7 @@ class PdfService {
     required String pageNumber,
     required Map<String, _Img> imgs,
     String? templateSvg,
-    TemplateInset? templateInset,
+    ContentPageTemplateLayout? templateLayout,
   }) {
     final hasPageTemplate =
         templateSvg != null && templateSvg.isNotEmpty;
@@ -984,10 +993,28 @@ class PdfService {
       );
     }
 
-    final sidePW = sideW - 2 * inset;
-    final cW = outerW - 2 * inset - 2 * sidePW;
-    final cH = outerH - 4 * inset;
-
+    final templateContent = templateLayout?.content;
+    final contentPadL = hasPageTemplate
+        ? templateContent!.leftMm * PdfPageFormat.mm
+        : inset;
+    final contentPadT = hasPageTemplate
+        ? templateContent!.topMm * PdfPageFormat.mm
+        : inset;
+    final contentPadR = hasPageTemplate
+        ? (outerW - templateContent!.leftMm * PdfPageFormat.mm -
+              templateContent.widthMm * PdfPageFormat.mm)
+        : inset;
+    final contentPadB = hasPageTemplate
+        ? (outerH - templateContent!.topMm * PdfPageFormat.mm -
+              templateContent.heightMm * PdfPageFormat.mm)
+        : inset;
+    final sidePW = hasPageTemplate ? 0.0 : sideW - 2 * inset;
+    final cW = hasPageTemplate
+        ? templateContent!.widthMm * PdfPageFormat.mm
+        : outerW - 2 * inset - 2 * sidePW;
+    final cH = hasPageTemplate
+        ? templateContent!.heightMm * PdfPageFormat.mm
+        : outerH - 4 * inset;
     pw.Widget buildInner() {
       return pw.Row(
         children: [
@@ -1013,17 +1040,23 @@ class PdfService {
         ),
       );
     } else {
-      contentPage =
-          pw.Padding(padding: pw.EdgeInsets.all(inset), child: buildInner());
+      contentPage = pw.Padding(
+          padding: pw.EdgeInsets.only(
+            left: contentPadL,
+            top: contentPadT,
+            right: contentPadR,
+            bottom: contentPadB,
+          ),
+          child: buildInner());
     }
 
     if (!hasPageTemplate) return contentPage;
 
-    final ti = templateInset ?? const TemplateInset();
-    final il = ti.left * PdfPageFormat.mm;
-    final it = ti.top * PdfPageFormat.mm;
-    final svgW = outerW - (ti.left + ti.right) * PdfPageFormat.mm;
-    final svgH = outerH - (ti.top + ti.bottom) * PdfPageFormat.mm;
+    final templateBounds = templateLayout!.template;
+    final il = templateBounds.leftMm * PdfPageFormat.mm;
+    final it = templateBounds.topMm * PdfPageFormat.mm;
+    final svgW = templateBounds.widthMm * PdfPageFormat.mm;
+    final svgH = templateBounds.heightMm * PdfPageFormat.mm;
 
     return pw.Stack(
       children: [
@@ -1038,6 +1071,54 @@ class PdfService {
           ),
         ),
         contentPage,
+        if (ps.leftVerticalTitle.trim().isNotEmpty)
+          pw.Positioned(
+            left: 0,
+            top: 0,
+            child: pw.SizedBox(
+              width: 10 * PdfPageFormat.mm,
+              height: outerH,
+              child: pw.Center(
+                child: pw.Transform.rotateBox(
+                  angle: 1.5708,
+                  child: pw.Text(
+                    ps.leftVerticalTitle,
+                    style: pw.TextStyle(
+                      font: transFont,
+                      fontFallback: fontFallback,
+                      fontSize: 9,
+                      color: _rose,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        if (pageNumber.trim().isNotEmpty)
+          pw.Positioned(
+            left: outerW - 10 * PdfPageFormat.mm,
+            top: 0,
+            child: pw.SizedBox(
+              width: 10 * PdfPageFormat.mm,
+              height: outerH,
+              child: pw.Center(
+                child: pw.Transform.rotateBox(
+                  angle: 1.5708,
+                  child: pw.Text(
+                    pageNumber,
+                    style: pw.TextStyle(
+                      font: transFont,
+                      fontFallback: fontFallback,
+                      fontSize: 9,
+                      color: _rose,
+                    ),
+                    textAlign: pw.TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }

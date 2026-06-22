@@ -13,6 +13,8 @@ import '../utils/sample_layout.dart';
 import '../utils/tibetan_segmenter.dart';
 
 const double kMmToPx = 3.78;
+const double kPreviewTextTopPadding = 5;
+const double kPreviewRowLineOffset = 7;
 
 
 List<TextSpan> _colorizedChildren(
@@ -218,6 +220,50 @@ class SamplePageWidget extends StatelessWidget {
                     ),
                   ),
                   contentWidget,
+                  if (setup.leftVerticalTitle.isNotEmpty)
+                    Positioned(
+                      left: 0,
+                      top: 0,
+                      width: 10 * kMmToPx,
+                      height: pageH,
+                      child: Center(
+                        child: RotatedBox(
+                          quarterTurns: 1,
+                          child: Text(
+                            setup.leftVerticalTitle,
+                            style: TextStyle(
+                              fontFamily: transFont.fontFamily,
+                              fontSize: 11,
+                              color: Colors.black87,
+                            ),
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if ((pageNumber ?? setup.pageNumber).isNotEmpty)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      width: 10 * kMmToPx,
+                      height: pageH,
+                      child: Center(
+                        child: RotatedBox(
+                          quarterTurns: 1,
+                          child: Text(
+                            pageNumber ?? setup.pageNumber,
+                            style: TextStyle(
+                              fontFamily: transFont.fontFamily,
+                              fontSize: 11,
+                              color: Colors.black87,
+                            ),
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               )
             : contentWidget,
@@ -340,7 +386,7 @@ class _ContentGrid extends StatelessWidget {
             rows[ri],
             tibetanFontSize: smallTibetanSize,
             chineseFontSize: smallChineseSize,
-            topPadding: 16,
+            topPadding: kPreviewTextTopPadding,
           );
           final h =
               shouldUseShortRow(
@@ -359,7 +405,7 @@ class _ContentGrid extends StatelessWidget {
         if (showRowLines) {
           const rowLineColor = Color(0xFFFFD700);
           const rowLineHeight = 1.0;
-          const rowLineOffset = 18.0;
+          const rowLineOffset = kPreviewRowLineOffset;
           for (var ri = 0; ri < rowCount; ri++) {
             final hasNormalBlock = rows[ri].any(
               (cell) =>
@@ -547,7 +593,11 @@ class _ContentGrid extends StatelessWidget {
                   width: blockW,
                   height: rowHs[ri],
                   child: Container(
-                    padding: const EdgeInsets.only(top: 16, left: 6, right: 6),
+                    padding: const EdgeInsets.only(
+                      top: kPreviewTextTopPadding,
+                      left: 6,
+                      right: 6,
+                    ),
                     decoration: isHL
                         ? BoxDecoration(
                             color: const Color.fromARGB(
@@ -619,7 +669,11 @@ class _ContentGrid extends StatelessWidget {
                 width: blockW,
                 height: rowHs[ri],
                 child: Container(
-                  padding: const EdgeInsets.only(top: 16, left: 6, right: 6),
+                  padding: const EdgeInsets.only(
+                    top: kPreviewTextTopPadding,
+                    left: 6,
+                    right: 6,
+                  ),
                   decoration: isHL
                       ? BoxDecoration(
                           color: const Color.fromARGB(
@@ -703,7 +757,7 @@ class _ContentGrid extends StatelessWidget {
                               fontFamily: pronFamily,
                               fontSize: chineseSize,
                               color: Colors.black87,
-                              height: 1,
+                              height: 1.4,
                             ),
                             maxLines: isSmall ? null : 2,
                             overflow: isSmall ? null : TextOverflow.ellipsis,
@@ -718,7 +772,7 @@ class _ContentGrid extends StatelessWidget {
                               fontFamily: transFamily,
                               fontSize: chineseSize,
                               color: Colors.black87,
-                              height: 1,
+                              height: 1.4,
                             ),
                             maxLines: isSmall ? null : 2,
                             overflow: isSmall ? null : TextOverflow.ellipsis,
