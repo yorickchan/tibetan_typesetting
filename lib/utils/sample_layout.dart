@@ -230,6 +230,8 @@ double contentTibetanBottomBleed(double fontSize) {
   return fontSize * 0.2;
 }
 
+const double contentTibetanPngTopPadding = 5 * 72 / 96;
+
 bool shouldUseShortRow(
   List<LayoutCell> row, {
   double? availableHeight,
@@ -248,9 +250,6 @@ bool shouldUseShortRow(
       continue;
     }
 
-    if (splitLines(block.chineseTranslation).join('').isNotEmpty) {
-      return false;
-    }
     if (splitLines(block.tibetan).length > 1) return false;
     if (splitLines(block.chinesePronunciation).length > 1) return false;
   }

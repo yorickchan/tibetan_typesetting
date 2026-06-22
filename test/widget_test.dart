@@ -269,6 +269,24 @@ void main() {
       expect(shouldUseShortRow(row), isTrue);
     });
 
+    test('compact small rows ignore hidden translations', () {
+      final row = [
+        LayoutCell(
+          block: TextBlock(
+            id: 'small',
+            tibetan: 'བོད།',
+            chinesePronunciation: 'bod',
+            chineseTranslation: 'hidden when small',
+            smallText: true,
+          ),
+          leftFraction: 0,
+          widthFraction: 0.25,
+        ),
+      ];
+
+      expect(shouldUseShortRow(row), isTrue);
+    });
+
     test('compact free text rows can use short height', () {
       final row = [
         LayoutCell(
@@ -371,6 +389,10 @@ void main() {
         expect(contentTibetanBottomBleed(12), closeTo(2.4, 0.0001));
       },
     );
+
+    test('compact PDF rows use the Tibetan PNG top inset', () {
+      expect(contentTibetanPngTopPadding, 5 * 72 / 96);
+    });
   });
 
   group('TextBlock', () {

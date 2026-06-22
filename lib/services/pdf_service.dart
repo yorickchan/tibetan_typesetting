@@ -394,7 +394,7 @@ class PdfService {
                   _render(heading, tibContentSize, _blackUi, outerW,
                       fontFamily: tibConfig.fontFamily,
                       lineHeight: contentTibetanLineHeight(smallText: small),
-                      topPadding: 5 * 72 / 96)));
+                      topPadding: contentTibetanPngTopPadding)));
             } else {
               final spans = <TextSpanDef>[];
               for (final s in segs) {
@@ -409,7 +409,7 @@ class PdfService {
                     _renderRich(spans, tibContentSize, outerW,
                         fontFamily: tibConfig.fontFamily,
                         lineHeight: contentTibetanLineHeight(smallText: small),
-                        topPadding: 5 * 72 / 96)));
+                        topPadding: contentTibetanPngTopPadding)));
               }
             }
           }
@@ -419,7 +419,7 @@ class PdfService {
                 _render(body, tibContentSize, _blackUi, outerW,
                     fontFamily: tibConfig.fontFamily,
                     lineHeight: contentTibetanLineHeight(smallText: small),
-                    topPadding: 5 * 72 / 96)));
+                    topPadding: contentTibetanPngTopPadding)));
           }
         }
       }
@@ -810,9 +810,7 @@ class PdfService {
           rows[ri],
           tibetanFontSize: smallTibetanSize,
           chineseFontSize: smallChineseSize,
-          topPadding:
-              contentTibetanRasterBleed(smallTibetanSize) +
-              contentTibetanBottomBleed(smallTibetanSize),
+          topPadding: contentTibetanPngTopPadding,
           tibetanLineHeight: contentTibetanLineHeight(smallText: true),
           chineseLineHeight: 1.4,
         ));
