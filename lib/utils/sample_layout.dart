@@ -299,6 +299,49 @@ double estimateCompactSmallRowHeight(
   return maxHeight;
 }
 
+List<double> resolveContentRowHeights(
+  List<List<LayoutCell>> rows, {
+  required double contentHeight,
+  required List<double> compactMinimumHeights,
+}) {
+  if (rows.isEmpty) return const [];
+
+  final baseHeight = contentHeight / rows.length;
+  final rowHeights = List<double>.filled(rows.length, baseHeight);
+  final compactRows = <int>[];
+
+  for (var index = 0; index < rows.length; index++) {
+    final minimumHeight = compactMinimumHeights[index];
+    if (shouldUseShortRow(
+      rows[index],
+      availableHeight: baseHeight,
+      minimumHeight: minimumHeight,
+    )) {
+      rowHeights[index] = minimumHeight;
+      compactRows.add(index);
+    }
+  }
+
+  if (compactRows.isEmpty || compactRows.length == rows.length) {
+    return rowHeights;
+  }
+
+  final releasedHeight = compactRows.fold<double>(
+    0,
+    (sum, index) => sum + baseHeight - rowHeights[index],
+  );
+  final normalRowCount = rows.length - compactRows.length;
+  final normalRowExtraHeight = releasedHeight / normalRowCount;
+
+  for (var index = 0; index < rows.length; index++) {
+    if (!compactRows.contains(index)) {
+      rowHeights[index] += normalRowExtraHeight;
+    }
+  }
+
+  return rowHeights;
+}
+
 List<List<TextBlock?>> _legacyRows(
   List<List<LayoutCell>> flowRows,
   int colCount,

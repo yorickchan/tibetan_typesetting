@@ -793,15 +793,8 @@ class PdfService {
 
       final rowCount = rows.length;
       final padX = 2 * PdfPageFormat.mm;
-      final smallRowShrink = 6 * PdfPageFormat.mm;
-
-      final baseRowH = cH / rowCount;
-      final shortRowH = baseRowH - smallRowShrink;
-      final normalRowH = baseRowH;
-
       // Precompute row Y offsets
       final rowYs = <double>[];
-      double yAccum = 0;
       final smallTibetanSize = contentTibetanFontSize(
         tibFontSize,
         smallText: true,
@@ -811,9 +804,9 @@ class PdfService {
           ? smallBlockFontSize! / tibFontSize
           : 0.75;
       final smallChineseSize = pronFontSize * smallScale;
+      final compactMinimumHeights = <double>[];
       for (var ri = 0; ri < rowCount; ri++) {
-        rowYs.add(yAccum);
-        final minShortRowH = estimateCompactSmallRowHeight(
+        compactMinimumHeights.add(estimateCompactSmallRowHeight(
           rows[ri],
           tibetanFontSize: smallTibetanSize,
           chineseFontSize: smallChineseSize,
@@ -822,15 +815,17 @@ class PdfService {
               contentTibetanBottomBleed(smallTibetanSize),
           tibetanLineHeight: contentTibetanLineHeight(smallText: true),
           chineseLineHeight: 1.4,
-        );
-        yAccum +=
-            shouldUseShortRow(
-              rows[ri],
-              availableHeight: shortRowH,
-              minimumHeight: minShortRowH,
-            )
-            ? shortRowH
-            : normalRowH;
+        ));
+      }
+      final rowHeights = resolveContentRowHeights(
+        rows,
+        contentHeight: cH,
+        compactMinimumHeights: compactMinimumHeights,
+      );
+      double yAccum = 0;
+      for (final rowHeight in rowHeights) {
+        rowYs.add(yAccum);
+        yAccum += rowHeight;
       }
 
       pw.Widget buildBlock(String key, TextBlock block, double maxW) {

@@ -362,15 +362,7 @@ class _ContentGrid extends StatelessWidget {
         final totalW = constraints.maxWidth;
         final totalH = constraints.maxHeight;
         final rowCount = rows.length;
-        const smallRowShrink = 4 * kMmToPx;
-
-        final baseRowH = totalH / rowCount;
-        final shortRowH = baseRowH - smallRowShrink;
-        final normalRowH = baseRowH;
-
         final rowYs = <double>[];
-        final rowHs = <double>[];
-        double yAccum = 0;
         final smallTibetanSize = contentTibetanFontSize(
           font_utils.previewFontSize(tibSize),
           smallText: true,
@@ -380,24 +372,24 @@ class _ContentGrid extends StatelessWidget {
             ? smallBlockFontSize! / font_utils.previewFontSize(tibSize)
             : 0.75;
         final smallChineseSize = font_utils.previewFontSize(chiSize) * smallScale;
+        final compactMinimumHeights = <double>[];
         for (var ri = 0; ri < rowCount; ri++) {
-          rowYs.add(yAccum);
-          final minShortRowH = estimateCompactSmallRowHeight(
+          compactMinimumHeights.add(estimateCompactSmallRowHeight(
             rows[ri],
             tibetanFontSize: smallTibetanSize,
             chineseFontSize: smallChineseSize,
             topPadding: kPreviewTextTopPadding,
-          );
-          final h =
-              shouldUseShortRow(
-                rows[ri],
-                availableHeight: shortRowH,
-                minimumHeight: minShortRowH,
-              )
-              ? shortRowH
-              : normalRowH;
-          rowHs.add(h);
-          yAccum += h;
+          ));
+        }
+        final rowHs = resolveContentRowHeights(
+          rows,
+          contentHeight: totalH,
+          compactMinimumHeights: compactMinimumHeights,
+        );
+        double yAccum = 0;
+        for (final rowHeight in rowHs) {
+          rowYs.add(yAccum);
+          yAccum += rowHeight;
         }
 
         final children = <Widget>[];
