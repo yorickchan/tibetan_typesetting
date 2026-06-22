@@ -21,4 +21,25 @@ void main() {
     expect(layout.template.widthMm, 282);
     expect(layout.template.heightMm, 112);
   });
+
+  test('each page configuration retains its own content margin', () {
+    final first = contentPageTemplateLayout(
+      pageWidthMm: 300,
+      pageHeightMm: 120,
+      contentMargin: const MarginMm(left: 20, right: 20),
+      templateInset: const TemplateInset(left: 5, right: 5),
+    );
+    final subsequent = contentPageTemplateLayout(
+      pageWidthMm: 300,
+      pageHeightMm: 120,
+      contentMargin: const MarginMm(left: 35, right: 15),
+      templateInset: const TemplateInset(left: 9, right: 3),
+    );
+
+    expect(first.content.widthMm, 260);
+    expect(subsequent.content.leftMm, 35);
+    expect(subsequent.content.widthMm, 250);
+    expect(subsequent.template.leftMm, 9);
+    expect(subsequent.template.widthMm, 288);
+  });
 }
