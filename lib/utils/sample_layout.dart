@@ -20,6 +20,8 @@ List<String> splitLines(String s) {
       .toList();
 }
 
+String contentTextForRaster(String text) => splitLines(text).join(' ');
+
 class LayoutCell {
   final TextBlock block;
   final double leftFraction;
@@ -55,8 +57,11 @@ class PageLayout {
   }) : rows = _legacyRows(flowRows, colCount);
 }
 
-List<_Row> _buildRows(List<TextBlock> blocks, double gapFraction,
-    [double? contentWidthMm]) {
+List<_Row> _buildRows(
+  List<TextBlock> blocks,
+  double gapFraction, [
+  double? contentWidthMm,
+]) {
   final rows = <_Row>[];
   final gap = gapFraction.clamp(0.0, 0.08);
   var current = <LayoutCell>[];
@@ -70,7 +75,6 @@ List<_Row> _buildRows(List<TextBlock> blocks, double gapFraction,
     cursor = 0;
     pendingPageBreak = false;
   }
-
 
   for (final block in blocks) {
     if (block.floatingImage) continue;
@@ -152,9 +156,7 @@ List<PageLayout> paginateBlocks(
       var nonFloatingSeen = 0;
       var assignedPage = 0;
       for (var pi = 0; pi < pages.length; pi++) {
-        final pageBlockCount = pages[pi].flowRows
-            .expand((r) => r)
-            .length;
+        final pageBlockCount = pages[pi].flowRows.expand((r) => r).length;
         if (fiIdx <= nonFloatingSeen + pageBlockCount) {
           assignedPage = pi;
           break;
@@ -217,7 +219,11 @@ double contentTibetanLineHeight({required bool smallText}) {
   return 1.0;
 }
 
-double contentTibetanFontSize(double fontSize, {required bool smallText, double? smallBlockFontSize}) {
+double contentTibetanFontSize(
+  double fontSize, {
+  required bool smallText,
+  double? smallBlockFontSize,
+}) {
   if (!smallText) return fontSize;
   return smallBlockFontSize ?? fontSize * 0.75;
 }
@@ -231,6 +237,7 @@ double contentTibetanBottomBleed(double fontSize) {
 }
 
 const double contentTibetanPngTopPadding = 5 * 72 / 96;
+const double contentChineseLineHeight = 1.4;
 
 bool shouldUseShortRow(
   List<LayoutCell> row, {
@@ -269,7 +276,7 @@ double estimateCompactSmallRowHeight(
   required double chineseFontSize,
   double topPadding = 0,
   double tibetanLineHeight = 1.2,
-  double chineseLineHeight = 1.0,
+  double chineseLineHeight = contentChineseLineHeight,
 }) {
   var maxHeight = 0.0;
 

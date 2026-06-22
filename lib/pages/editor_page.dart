@@ -202,6 +202,7 @@ class _EditorPageState extends State<EditorPage>
     });
     _bumpSave();
   }
+
   void _updateSetup(PageSetup Function(PageSetup) updater) {
     if (_project == null) return;
     _undoService.pushState(_project!);
@@ -255,9 +256,7 @@ class _EditorPageState extends State<EditorPage>
 
   Future<void> _addImageBlock() async {
     if (_project == null) return;
-    final result = await FilePicker.pickFiles(
-      type: FileType.image,
-    );
+    final result = await FilePicker.pickFiles(type: FileType.image);
     if (result == null || result.files.isEmpty) return;
     if (result.files.single.path == null) return;
 
@@ -265,8 +264,9 @@ class _EditorPageState extends State<EditorPage>
     final id = _uuid.v4().replaceAll('-', '');
     final String storedPath;
     try {
-      storedPath = await ImageStorageService()
-          .copyImageToAppSupport(result.files.single.path!);
+      storedPath = await ImageStorageService().copyImageToAppSupport(
+        result.files.single.path!,
+      );
     } catch (e) {
       _showSnack('Failed to store image: $e', error: true);
       return;
@@ -328,11 +328,14 @@ class _EditorPageState extends State<EditorPage>
       ),
     );
   }
+
   void _deleteBlock() {
     if (_project == null || _selectedId == null) return;
     _undoService.pushState(_project!);
     final idx = _selectedIndex;
-    final deletedBlock = _project!.blocks.firstWhere((b) => b.id == _selectedId);
+    final deletedBlock = _project!.blocks.firstWhere(
+      (b) => b.id == _selectedId,
+    );
     if (deletedBlock.isImageBlock && deletedBlock.imagePath != null) {
       ImageStorageService().deleteImage(deletedBlock.imagePath!);
     }
@@ -352,6 +355,7 @@ class _EditorPageState extends State<EditorPage>
     });
     _bumpSave();
   }
+
   void _moveBlock(int dir) {
     if (_project == null || _selectedId == null) return;
     final idx = _selectedIndex;
@@ -450,6 +454,7 @@ class _EditorPageState extends State<EditorPage>
     });
     _bumpSave();
   }
+
   void _togglePageBreak() {
     if (_project == null || _selectedBlock == null) return;
     final selectedId = _selectedId;
@@ -466,6 +471,7 @@ class _EditorPageState extends State<EditorPage>
     });
     _bumpSave();
   }
+
   void _toggleSmallText() {
     if (_project == null || _selectedBlock == null) return;
     final selectedId = _selectedId;
@@ -494,7 +500,8 @@ class _EditorPageState extends State<EditorPage>
     final nextFormat = _selectedBlock!.isOpeningMark
         ? TextBlockFormat.normal
         : TextBlockFormat.openingMark;
-    final tibetan = nextFormat == TextBlockFormat.openingMark &&
+    final tibetan =
+        nextFormat == TextBlockFormat.openingMark &&
             _selectedBlock!.tibetan.trim().isEmpty
         ? kDefaultOpeningMark
         : null;
@@ -545,7 +552,8 @@ class _EditorPageState extends State<EditorPage>
       return _cachedPages!;
     }
 
-    final contentWidthMm = _project!.pageSetup.pageWidthMm -
+    final contentWidthMm =
+        _project!.pageSetup.pageWidthMm -
         _project!.pageSetup.marginMm.left -
         _project!.pageSetup.marginMm.right;
     final pages = paginateBlocks(
@@ -597,8 +605,11 @@ class _EditorPageState extends State<EditorPage>
             const _SaveIntent(),
         const SingleActivator(LogicalKeyboardKey.keyZ, control: true):
             const _UndoIntent(),
-        const SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true):
-            const _RedoIntent(),
+        const SingleActivator(
+          LogicalKeyboardKey.keyZ,
+          control: true,
+          shift: true,
+        ): const _RedoIntent(),
         const SingleActivator(LogicalKeyboardKey.delete):
             const _DeleteBlockIntent(),
         const SingleActivator(LogicalKeyboardKey.arrowUp, alt: true):
@@ -614,12 +625,8 @@ class _EditorPageState extends State<EditorPage>
           _SaveIntent: CallbackAction<_SaveIntent>(
             onInvoke: (_) => _saveCurrent(),
           ),
-          _UndoIntent: CallbackAction<_UndoIntent>(
-            onInvoke: (_) => _undo(),
-          ),
-          _RedoIntent: CallbackAction<_RedoIntent>(
-            onInvoke: (_) => _redo(),
-          ),
+          _UndoIntent: CallbackAction<_UndoIntent>(onInvoke: (_) => _undo()),
+          _RedoIntent: CallbackAction<_RedoIntent>(onInvoke: (_) => _redo()),
           _DeleteBlockIntent: CallbackAction<_DeleteBlockIntent>(
             onInvoke: (_) => _deleteBlock(),
           ),
@@ -800,8 +807,8 @@ class _EditorPageState extends State<EditorPage>
       fallbackChineseFont,
     );
 
-    final smallBlockFontSize = project.pageSetup.smallBlockFontSize ??
-        _appSettings.smallBlockFontSize;
+    final smallBlockFontSize =
+        project.pageSetup.smallBlockFontSize ?? _appSettings.smallBlockFontSize;
 
     // Precompute id -> global index map so per-block lookups are O(1).
     final blockIndexById = <String, int>{};
@@ -968,7 +975,8 @@ class _EditorPageState extends State<EditorPage>
                       templateInset: pageIdx == 0
                           ? project.pageSetup.contentFirstPageTemplateInset
                           : project
-                              .pageSetup.contentSubsequentPageTemplateInset,
+                                .pageSetup
+                                .contentSubsequentPageTemplateInset,
                     ),
                   ),
                 ),

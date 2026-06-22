@@ -5,7 +5,9 @@ import 'package:tibetan_typesetting/models/project.dart';
 import 'package:tibetan_typesetting/widgets/sample_page.dart';
 
 void main() {
-  testWidgets('preview block top padding matches PDF text placement', (tester) async {
+  testWidgets('preview block top padding matches PDF text placement', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: SamplePageWidget(
@@ -24,8 +26,7 @@ void main() {
       find.byWidgetPredicate(
         (widget) =>
             widget is Container &&
-            widget.padding ==
-                const EdgeInsets.only(top: 5, left: 6, right: 6),
+            widget.padding == const EdgeInsets.only(top: 5, left: 6, right: 6),
       ),
       findsOneWidget,
     );
@@ -55,5 +56,52 @@ void main() {
 
     expect(tester.widget<Text>(find.text('pinyin')).style!.height, 1.4);
     expect(tester.widget<Text>(find.text('translation')).style!.height, 1.4);
+  });
+
+  testWidgets('non-template preview uses the PDF inner frame inset', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SamplePageWidget(
+          project: Project(
+            id: 'project',
+            name: 'Project',
+            blocks: [TextBlock(id: 'block', tibetan: 'བོད་ཡིག།')],
+            updatedAt: '',
+            createdAt: '',
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Padding &&
+            widget.padding == EdgeInsets.all(2 * kMmToPx - 2),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('preview text can paint beyond a row without flex overflow', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SamplePageWidget(
+          project: Project(
+            id: 'project',
+            name: 'Project',
+            blocks: [TextBlock(id: 'block', tibetan: 'བོད་ཡིག།')],
+            updatedAt: '',
+            createdAt: '',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(OverflowBox), findsWidgets);
   });
 }

@@ -31,9 +31,8 @@ class SamplePagesWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final setup = project.pageSetup;
     final firstMargin = setup.contentFirstPageMargin;
-    final contentWidthMm = setup.pageWidthMm -
-        firstMargin.left -
-        firstMargin.right;
+    final contentWidthMm =
+        setup.pageWidthMm - firstMargin.left - firstMargin.right;
     final pages = paginateBlocks(
       project.blocks,
       0,
@@ -58,8 +57,9 @@ class SamplePagesWidget extends StatelessWidget {
 
     for (var index = 0; index < pages.length; index++) {
       final isFirstPage = index == 0;
-      final pageTemplateSvg =
-          isFirstPage ? contentFirstPageSvg : contentSubsequentPageSvg;
+      final pageTemplateSvg = isFirstPage
+          ? contentFirstPageSvg
+          : contentSubsequentPageSvg;
       final pageTemplateInset = isFirstPage
           ? setup.contentFirstPageTemplateInset
           : setup.contentSubsequentPageTemplateInset;

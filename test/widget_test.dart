@@ -393,6 +393,35 @@ void main() {
     test('compact PDF rows use the Tibetan PNG top inset', () {
       expect(contentTibetanPngTopPadding, 5 * 72 / 96);
     });
+
+    test('compact small rows include Chinese line spacing', () {
+      final row = [
+        LayoutCell(
+          block: TextBlock(
+            id: 'small',
+            tibetan: 'བོད།',
+            chinesePronunciation: 'bod',
+            smallText: true,
+          ),
+          leftFraction: 0,
+          widthFraction: 1,
+        ),
+      ];
+
+      expect(
+        estimateCompactSmallRowHeight(
+          row,
+          tibetanFontSize: 10,
+          chineseFontSize: 12,
+          topPadding: 5,
+        ),
+        closeTo(35.8, 0.001),
+      );
+    });
+
+    test('Chinese raster text uses preview line normalization', () {
+      expect(contentTextForRaster('第一行\n第二行'), '第一行 第二行');
+    });
   });
 
   group('TextBlock', () {

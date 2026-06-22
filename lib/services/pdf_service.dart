@@ -168,8 +168,9 @@ class PdfService {
     Color? bufColor;
     for (int i = 0; i < text.length; i++) {
       final c = text[i];
-      final color =
-          isTibetanNonLetter(c.codeUnitAt(0)) ? otherColor : letterColor;
+      final color = isTibetanNonLetter(c.codeUnitAt(0))
+          ? otherColor
+          : letterColor;
       if (bufColor == color) {
         buf = buf! + c;
       } else {
@@ -299,21 +300,23 @@ class PdfService {
     String? contentFirstPageSvg;
     String? contentSubsequentPageSvg;
     if (ps.contentFirstPageTemplateId != null) {
-      contentFirstPageSvg =
-          await _loadTemplateSvg(ps.contentFirstPageTemplateId!);
+      contentFirstPageSvg = await _loadTemplateSvg(
+        ps.contentFirstPageTemplateId!,
+      );
     }
     if (ps.contentSubsequentPageTemplateId != null) {
-      contentSubsequentPageSvg =
-          await _loadTemplateSvg(ps.contentSubsequentPageTemplateId!);
+      contentSubsequentPageSvg = await _loadTemplateSvg(
+        ps.contentSubsequentPageTemplateId!,
+      );
     }
-
 
     // ---- pre-render all text as images (side panels, images) and shape
     // ---- Tibetan text through HarfBuzz for vector rendering.
 
     final tibFontSize = tibConfig.fontSize;
 
-    final smallBlockFontSize = ps.smallBlockFontSize ?? settings.smallBlockFontSize;
+    final smallBlockFontSize =
+        ps.smallBlockFontSize ?? settings.smallBlockFontSize;
 
     final imgs = <String, _Img>{};
     final tasks = <Future<void>>[];
@@ -325,12 +328,22 @@ class PdfService {
 
     // Title page Tibetan (PNG rasterization)
     if (ps.showTitlePage && ps.titleTibetan.trim().isNotEmpty) {
-      tasks.add(put('title_tib',
-          _render(ps.titleTibetan, titleTibConfig.fontSize, _blackUi, outerW,
-              fontFamily: titleTibConfig.fontFamily,
-              lineHeight: 1.4, topPadding: 5, textAlign: TextAlign.center)));
+      tasks.add(
+        put(
+          'title_tib',
+          _render(
+            ps.titleTibetan,
+            titleTibConfig.fontSize,
+            _blackUi,
+            outerW,
+            fontFamily: titleTibConfig.fontFamily,
+            lineHeight: 1.4,
+            topPadding: 5,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
     }
-
 
     // Left side panel
     if (ps.leftVerticalTitle.trim().isNotEmpty) {
@@ -352,11 +365,31 @@ class PdfService {
     // Content blocks
     for (var pi = 0; pi < pages.length; pi++) {
       final page = pages[pi];
+      final isFirstPage = pi == 0;
+      final pageMargin = isFirstPage
+          ? ps.contentFirstPageMargin
+          : ps.contentSubsequentPageMargin;
+      final pageTemplateSvg = isFirstPage
+          ? contentFirstPageSvg
+          : contentSubsequentPageSvg;
+      final hasPageTemplate =
+          pageTemplateSvg != null && pageTemplateSvg.isNotEmpty;
+      final pageOuterW =
+          pageW - (pageMargin.left + pageMargin.right) * PdfPageFormat.mm;
+      final contentWidth = hasPageTemplate
+          ? pageOuterW
+          : pageOuterW - 2 * inset - 2 * (sideW - 2 * inset);
       for (var ri = 0; ri < page.flowRows.length; ri++) {
         final row = page.flowRows[ri];
         for (var cellIndex = 0; cellIndex < row.length; cellIndex++) {
           final cell = row[cellIndex];
           final block = cell.block;
+          final left = cell.leftFraction * contentWidth;
+          final spannedWidth = cell.widthFraction * contentWidth;
+          final blockWidth =
+              (block.smallText || block.isFreeText) && block.columnSpan == null
+              ? contentWidth - left - 4 * PdfPageFormat.mm
+              : spannedWidth - 4 * PdfPageFormat.mm;
           if (block.isImageBlock) {
             final key = '${pi}_${ri}_$cellIndex';
             final file = File(block.imagePath!);
@@ -378,8 +411,9 @@ class PdfService {
           final key = '${pi}_${ri}_$cellIndex';
           final tibLines = splitLines(block.tibetan);
           final heading = tibLines.isNotEmpty ? tibLines[0] : '';
-          final body =
-              tibLines.length > 1 ? tibLines.sublist(1).join('\n') : '';
+          final body = tibLines.length > 1
+              ? tibLines.sublist(1).join('\n')
+              : '';
 
           final small = block.smallText;
           final tibContentSize = contentTibetanFontSize(
@@ -388,13 +422,25 @@ class PdfService {
             smallBlockFontSize: small ? smallBlockFontSize : null,
           );
           if (heading.isNotEmpty) {
-            final segs = splitByRedHighlightRanges(heading, block.redHighlightRange);
+            final segs = splitByRedHighlightRanges(
+              heading,
+              block.redHighlightRange,
+            );
             if (segs.isEmpty) {
-              tasks.add(put('${key}_h',
-                  _render(heading, tibContentSize, _blackUi, outerW,
-                      fontFamily: tibConfig.fontFamily,
-                      lineHeight: contentTibetanLineHeight(smallText: small),
-                      topPadding: contentTibetanPngTopPadding)));
+              tasks.add(
+                put(
+                  '${key}_h',
+                  _render(
+                    heading,
+                    tibContentSize,
+                    _blackUi,
+                    blockWidth,
+                    fontFamily: tibConfig.fontFamily,
+                    lineHeight: contentTibetanLineHeight(smallText: small),
+                    topPadding: contentTibetanPngTopPadding,
+                  ),
+                ),
+              );
             } else {
               final spans = <TextSpanDef>[];
               for (final s in segs) {
@@ -405,21 +451,98 @@ class PdfService {
                 }
               }
               if (spans.isNotEmpty) {
-                tasks.add(put('${key}_h',
-                    _renderRich(spans, tibContentSize, outerW,
-                        fontFamily: tibConfig.fontFamily,
-                        lineHeight: contentTibetanLineHeight(smallText: small),
-                        topPadding: contentTibetanPngTopPadding)));
+                tasks.add(
+                  put(
+                    '${key}_h',
+                    _renderRich(
+                      spans,
+                      tibContentSize,
+                      blockWidth,
+                      fontFamily: tibConfig.fontFamily,
+                      lineHeight: contentTibetanLineHeight(smallText: small),
+                      topPadding: contentTibetanPngTopPadding,
+                    ),
+                  ),
+                );
               }
             }
           }
           // Tibetan body (PNG rasterization)
           if (body.isNotEmpty) {
-            tasks.add(put('${key}_b',
-                _render(body, tibContentSize, _blackUi, outerW,
-                    fontFamily: tibConfig.fontFamily,
-                    lineHeight: contentTibetanLineHeight(smallText: small),
-                    topPadding: contentTibetanPngTopPadding)));
+            tasks.add(
+              put(
+                '${key}_b',
+                _render(
+                  body,
+                  tibContentSize,
+                  _blackUi,
+                  blockWidth,
+                  fontFamily: tibConfig.fontFamily,
+                  lineHeight: contentTibetanLineHeight(smallText: small),
+                  topPadding: contentTibetanPngTopPadding,
+                ),
+              ),
+            );
+          }
+
+          final smallScale = smallBlockFontSize != null
+              ? smallBlockFontSize / tibFontSize
+              : 0.75;
+          final pronSize = pronConfig.fontSize * (small ? smallScale : 1.0);
+          final transSize = transConfig.fontSize * (small ? smallScale : 1.0);
+          final pron = contentTextForRaster(block.chinesePronunciation);
+          final trans = small || block.isFreeText
+              ? ''
+              : contentTextForRaster(block.chineseTranslation);
+          if (pron.isNotEmpty) {
+            tasks.add(
+              put(
+                '${key}_p',
+                _render(
+                  pron,
+                  pronSize,
+                  _blackUi,
+                  blockWidth,
+                  fontFamily: pronConfig.fontFamily,
+                  lineHeight: contentChineseLineHeight,
+                  topPadding: 2 * 72 / 96,
+                ),
+              ),
+            );
+          }
+          if (trans.isNotEmpty) {
+            tasks.add(
+              put(
+                '${key}_t',
+                _render(
+                  trans,
+                  transSize,
+                  _blackUi,
+                  blockWidth,
+                  fontFamily: transConfig.fontFamily,
+                  lineHeight: contentChineseLineHeight,
+                  topPadding: 1 * 72 / 96,
+                ),
+              ),
+            );
+          }
+          if (block.isFreeText) {
+            final freeText = splitLines(block.tibetan).join('\n');
+            if (freeText.isNotEmpty) {
+              tasks.add(
+                put(
+                  '${key}_f',
+                  _render(
+                    freeText,
+                    transConfig.fontSize * smallScale,
+                    _blackUi,
+                    blockWidth,
+                    fontFamily: transConfig.fontFamily,
+                    lineHeight: 1.2,
+                  ),
+                ),
+              );
+            }
           }
         }
       }
@@ -638,7 +761,6 @@ class PdfService {
 
     final tibImg = imgs['title_tib'];
 
-
     pw.Widget titleBox() {
       final titleBoxW =
           outerW - 2 * (inset + framePad) - 2 * panelW - 2 * titleGap;
@@ -682,8 +804,8 @@ class PdfService {
               ),
             ],
           ),
-          ),
-        );
+        ),
+      );
     }
 
     final content = pw.Row(
@@ -752,8 +874,7 @@ class PdfService {
     String? templateSvg,
     ContentPageTemplateLayout? templateLayout,
   }) {
-    final hasPageTemplate =
-        templateSvg != null && templateSvg.isNotEmpty;
+    final hasPageTemplate = templateSvg != null && templateSvg.isNotEmpty;
     final sideImg = imgs['side_left'];
     pw.Widget sidePanel(String? text, {_Img? image}) {
       if (hasPageTemplate) return pw.SizedBox();
@@ -806,14 +927,16 @@ class PdfService {
       final smallChineseSize = pronFontSize * smallScale;
       final compactMinimumHeights = <double>[];
       for (var ri = 0; ri < rowCount; ri++) {
-        compactMinimumHeights.add(estimateCompactSmallRowHeight(
-          rows[ri],
-          tibetanFontSize: smallTibetanSize,
-          chineseFontSize: smallChineseSize,
-          topPadding: contentTibetanPngTopPadding,
-          tibetanLineHeight: contentTibetanLineHeight(smallText: true),
-          chineseLineHeight: 1.4,
-        ));
+        compactMinimumHeights.add(
+          estimateCompactSmallRowHeight(
+            rows[ri],
+            tibetanFontSize: smallTibetanSize,
+            chineseFontSize: smallChineseSize,
+            topPadding: contentTibetanPngTopPadding,
+            tibetanLineHeight: contentTibetanLineHeight(smallText: true),
+            chineseLineHeight: 1.4,
+          ),
+        );
       }
       final rowHeights = resolveContentRowHeights(
         rows,
@@ -830,7 +953,8 @@ class PdfService {
         final small = block.smallText;
         final freeText = block.isFreeText;
         final pronSize = pronFontSize * (small ? smallScale : 1.0);
-        final transSize = transFontSize * (small || freeText ? smallScale : 1.0);
+        final transSize =
+            transFontSize * (small || freeText ? smallScale : 1.0);
 
         final pron = splitLines(block.chinesePronunciation).join('\n');
         final trans = small || freeText
@@ -840,6 +964,9 @@ class PdfService {
 
         final hImg = imgs['${key}_h'];
         final bImg = imgs['${key}_b'];
+        final pImg = imgs['${key}_p'];
+        final tImg = imgs['${key}_t'];
+        final fImg = imgs['${key}_f'];
 
         if (block.isOpeningMark) {
           return hImg != null
@@ -851,7 +978,9 @@ class PdfService {
           mainAxisSize: pw.MainAxisSize.min,
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            if (freeText && freeTextContent.isNotEmpty)
+            if (freeText && fImg != null)
+              pw.Image(fImg.provider, width: fImg.w, height: fImg.h)
+            else if (freeText && freeTextContent.isNotEmpty)
               pw.Text(
                 freeTextContent,
                 style: pw.TextStyle(
@@ -868,12 +997,16 @@ class PdfService {
                   hImg.provider,
                   width: block.imageWidthMm != null
                       ? (block.imageWidthMm! * PdfPageFormat.mm).clamp(
-                          10.0, maxW)
+                          10.0,
+                          maxW,
+                        )
                       : hImg.w * (maxW / hImg.w).clamp(0.1, 1.0),
                   height: block.imageWidthMm != null
                       ? (hImg.h *
-                            ((block.imageWidthMm! * PdfPageFormat.mm)
-                                    .clamp(10.0, maxW) /
+                            ((block.imageWidthMm! * PdfPageFormat.mm).clamp(
+                                  10.0,
+                                  maxW,
+                                ) /
                                 hImg.w))
                       : hImg.h * (maxW / hImg.w).clamp(0.1, 1.0),
                 ),
@@ -883,24 +1016,34 @@ class PdfService {
                 pw.Image(bImg.provider, width: bImg.w, height: bImg.h),
             ],
             if (pron.isNotEmpty)
-              pw.Text(pron,
-                  style: pw.TextStyle(
-                      font: pronFont,
-                      fontFallback: fontFallback,
-                      fontSize: pronSize,
-                      color: PdfColors.black,
-                      lineSpacing: pronSize * 0.4)),
-            if (trans.isNotEmpty)
-              pw.Padding(
-                padding: const pw.EdgeInsets.only(top: 1),
-                child: pw.Text(trans,
-                    style: pw.TextStyle(
-                        font: transFont,
+              pImg != null
+                  ? pw.Image(pImg.provider, width: pImg.w, height: pImg.h)
+                  : pw.Text(
+                      pron,
+                      style: pw.TextStyle(
+                        font: pronFont,
                         fontFallback: fontFallback,
-                        fontSize: transSize,
+                        fontSize: pronSize,
                         color: PdfColors.black,
-                        lineSpacing: transSize * 0.4)),
-              ),
+                        lineSpacing: pronSize * 0.4,
+                      ),
+                    ),
+            if (trans.isNotEmpty)
+              tImg != null
+                  ? pw.Image(tImg.provider, width: tImg.w, height: tImg.h)
+                  : pw.Padding(
+                      padding: const pw.EdgeInsets.only(top: 1),
+                      child: pw.Text(
+                        trans,
+                        style: pw.TextStyle(
+                          font: transFont,
+                          fontFallback: fontFallback,
+                          fontSize: transSize,
+                          color: PdfColors.black,
+                          lineSpacing: transSize * 0.4,
+                        ),
+                      ),
+                    ),
           ],
         );
       }
@@ -994,11 +1137,13 @@ class PdfService {
         ? templateContent!.topMm * PdfPageFormat.mm
         : inset;
     final contentPadR = hasPageTemplate
-        ? (outerW - templateContent!.leftMm * PdfPageFormat.mm -
+        ? (outerW -
+              templateContent!.leftMm * PdfPageFormat.mm -
               templateContent.widthMm * PdfPageFormat.mm)
         : inset;
     final contentPadB = hasPageTemplate
-        ? (outerH - templateContent!.topMm * PdfPageFormat.mm -
+        ? (outerH -
+              templateContent!.topMm * PdfPageFormat.mm -
               templateContent.heightMm * PdfPageFormat.mm)
         : inset;
     final sidePW = hasPageTemplate ? 0.0 : sideW - 2 * inset;
@@ -1034,13 +1179,14 @@ class PdfService {
       );
     } else {
       contentPage = pw.Padding(
-          padding: pw.EdgeInsets.only(
-            left: contentPadL,
-            top: contentPadT,
-            right: contentPadR,
-            bottom: contentPadB,
-          ),
-          child: buildInner());
+        padding: pw.EdgeInsets.only(
+          left: contentPadL,
+          top: contentPadT,
+          right: contentPadR,
+          bottom: contentPadB,
+        ),
+        child: buildInner(),
+      );
     }
 
     if (!hasPageTemplate) return contentPage;

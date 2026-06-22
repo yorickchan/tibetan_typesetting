@@ -16,7 +16,6 @@ const double kMmToPx = 3.78;
 const double kPreviewTextTopPadding = 5;
 const double kPreviewRowLineOffset = 7;
 
-
 List<TextSpan> _colorizedChildren(
   String text,
   TextStyle style,
@@ -28,19 +27,33 @@ List<TextSpan> _colorizedChildren(
   Color? bufColor;
   for (int i = 0; i < text.length; i++) {
     final c = text[i];
-    final color =
-        isTibetanNonLetter(c.codeUnitAt(0)) ? otherColor : letterColor;
+    final color = isTibetanNonLetter(c.codeUnitAt(0))
+        ? otherColor
+        : letterColor;
     if (bufColor == color) {
       buf = buf! + c;
     } else {
-      if (buf != null) spans.add(TextSpan(text: buf, style: style.copyWith(color: bufColor)));
+      if (buf != null)
+        spans.add(
+          TextSpan(
+            text: buf,
+            style: style.copyWith(color: bufColor),
+          ),
+        );
       buf = c;
       bufColor = color;
     }
   }
-  if (buf != null) spans.add(TextSpan(text: buf, style: style.copyWith(color: bufColor)));
+  if (buf != null)
+    spans.add(
+      TextSpan(
+        text: buf,
+        style: style.copyWith(color: bufColor),
+      ),
+    );
   return spans;
 }
+
 class SamplePageWidget extends StatelessWidget {
   final Project project;
   final AppSettings? appSettings;
@@ -129,6 +142,42 @@ class SamplePageWidget extends StatelessWidget {
         ? font_utils.previewFontSize(smallBlockFontSize!)
         : null;
 
+    final contentRow = Row(
+      children: [
+        if (!hasTemplate)
+          _SidePanel(
+            text: setup.leftVerticalTitle,
+            showFrame: setup.showFrame,
+            fontFamily: transFont.fontFamily,
+          ),
+        Expanded(
+          child: Container(
+            child: _ContentGrid(
+              rows: effectiveFlowRows,
+              colCount: effectiveColCount,
+              showRowLines: setup.showRowLines,
+              highlightBlockId: highlightBlockId,
+              tibetanFont: tibFont,
+              pronunciationFont: pronFont,
+              translationFont: transFont,
+              floatingImages: floatingImages,
+              onFloatImageMove: onFloatImageMove,
+              onFloatImageResize: onFloatImageResize,
+              onInlineImageResize: onInlineImageResize,
+              onSelectBlock: onSelectBlock,
+              smallBlockFontSize: smallSz,
+            ),
+          ),
+        ),
+        if (!hasTemplate)
+          _SidePanel(
+            text: pageNumber ?? setup.pageNumber,
+            showFrame: setup.showFrame,
+            fontFamily: transFont.fontFamily,
+          ),
+      ],
+    );
+
     final contentWidget = Padding(
       padding: EdgeInsets.only(
         top: effectiveMargin.top * kMmToPx,
@@ -136,62 +185,29 @@ class SamplePageWidget extends StatelessWidget {
         bottom: effectiveMargin.bottom * kMmToPx,
         left: effectiveMargin.left * kMmToPx,
       ),
-      child: Container(
-        decoration: hasTemplate
-            ? null
-            : BoxDecoration(
-                border: Border.all(
-                  color: setup.showFrame
-                      ? AppColors.rose600
-                      : Colors.grey.shade300,
-                  width: setup.showFrame ? 2 : 1,
-                ),
-              ),
-        child: Row(
-          children: [
-            if (!hasTemplate)
-              _SidePanel(
-                text: setup.leftVerticalTitle,
-                showFrame: setup.showFrame,
-                fontFamily: transFont.fontFamily,
-              ),
-            Expanded(
-              child: Container(
-                margin: hasTemplate ? EdgeInsets.zero : const EdgeInsets.all(2),
-                decoration: hasTemplate
-                    ? null
-                    : BoxDecoration(
-                        border: Border.all(
-                          color: AppColors.rose600,
-                          width: 1,
-                        ),
-                      ),
-                child: _ContentGrid(
-                  rows: effectiveFlowRows,
-                  colCount: effectiveColCount,
-                  showRowLines: setup.showRowLines,
-                  highlightBlockId: highlightBlockId,
-                  tibetanFont: tibFont,
-                  pronunciationFont: pronFont,
-                  translationFont: transFont,
-                  floatingImages: floatingImages,
-                  onFloatImageMove: onFloatImageMove,
-                  onFloatImageResize: onFloatImageResize,
-                  onInlineImageResize: onInlineImageResize,
-                  onSelectBlock: onSelectBlock,
-                  smallBlockFontSize: smallSz,
+      child: hasTemplate
+          ? contentRow
+          : Container(
+              decoration: setup.showFrame
+                  ? BoxDecoration(
+                      border: Border.all(color: AppColors.rose600, width: 2),
+                    )
+                  : null,
+              child: Padding(
+                padding: EdgeInsets.all(2 * kMmToPx - 2),
+                child: Container(
+                  decoration: setup.showFrame
+                      ? BoxDecoration(
+                          border: Border.all(
+                            color: AppColors.rose600,
+                            width: 0.67,
+                          ),
+                        )
+                      : null,
+                  child: contentRow,
                 ),
               ),
             ),
-            if (!hasTemplate)
-              _SidePanel(
-                text: pageNumber ?? setup.pageNumber,
-                showFrame: setup.showFrame,
-                fontFamily: transFont.fontFamily,
-              ),
-          ],
-        ),
-      ),
     );
 
     return ClipRRect(
@@ -200,77 +216,72 @@ class SamplePageWidget extends StatelessWidget {
         width: pageW,
         height: pageH,
         color: Colors.white,
-        child: hasTemplate
-            ? Stack(
-                children: [
-                  Positioned(
-                    left: (templateInset?.left ?? 0) * kMmToPx,
-                    top: (templateInset?.top ?? 0) * kMmToPx,
-                    width: pageW -
-                        ((templateInset?.left ?? 0) +
-                                (templateInset?.right ?? 0)) *
-                            kMmToPx,
-                    height: pageH -
-                        ((templateInset?.top ?? 0) +
-                                (templateInset?.bottom ?? 0)) *
-                            kMmToPx,
-                    child: SvgPicture.string(
-                      svgContent!,
-                      fit: BoxFit.fill,
+        child: Stack(
+          children: [
+            if (hasTemplate)
+              Positioned(
+                left: (templateInset?.left ?? 0) * kMmToPx,
+                top: (templateInset?.top ?? 0) * kMmToPx,
+                width:
+                    pageW -
+                    ((templateInset?.left ?? 0) + (templateInset?.right ?? 0)) *
+                        kMmToPx,
+                height:
+                    pageH -
+                    ((templateInset?.top ?? 0) + (templateInset?.bottom ?? 0)) *
+                        kMmToPx,
+                child: SvgPicture.string(svgContent!, fit: BoxFit.fill),
+              ),
+            contentWidget,
+            if (hasTemplate && setup.leftVerticalTitle.isNotEmpty)
+              Positioned(
+                left: 0,
+                top: 0,
+                width: 10 * kMmToPx,
+                height: pageH,
+                child: Center(
+                  child: RotatedBox(
+                    quarterTurns: 1,
+                    child: Text(
+                      setup.leftVerticalTitle,
+                      style: TextStyle(
+                        fontFamily: transFont.fontFamily,
+                        fontSize: 11,
+                        color: Colors.black87,
+                      ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  contentWidget,
-                  if (setup.leftVerticalTitle.isNotEmpty)
-                    Positioned(
-                      left: 0,
-                      top: 0,
-                      width: 10 * kMmToPx,
-                      height: pageH,
-                      child: Center(
-                        child: RotatedBox(
-                          quarterTurns: 1,
-                          child: Text(
-                            setup.leftVerticalTitle,
-                            style: TextStyle(
-                              fontFamily: transFont.fontFamily,
-                              fontSize: 11,
-                              color: Colors.black87,
-                            ),
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
+                ),
+              ),
+            if (hasTemplate && (pageNumber ?? setup.pageNumber).isNotEmpty)
+              Positioned(
+                right: 0,
+                top: 0,
+                width: 10 * kMmToPx,
+                height: pageH,
+                child: Center(
+                  child: RotatedBox(
+                    quarterTurns: 1,
+                    child: Text(
+                      pageNumber ?? setup.pageNumber,
+                      style: TextStyle(
+                        fontFamily: transFont.fontFamily,
+                        fontSize: 11,
+                        color: Colors.black87,
                       ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  if ((pageNumber ?? setup.pageNumber).isNotEmpty)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      width: 10 * kMmToPx,
-                      height: pageH,
-                      child: Center(
-                        child: RotatedBox(
-                          quarterTurns: 1,
-                          child: Text(
-                            pageNumber ?? setup.pageNumber,
-                            style: TextStyle(
-                              fontFamily: transFont.fontFamily,
-                              fontSize: 11,
-                              color: Colors.black87,
-                            ),
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              )
-            : contentWidget,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
-
 }
 
 class _SidePanel extends StatelessWidget {
@@ -287,14 +298,12 @@ class _SidePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 56,
-      margin: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: AppColors.rose600,
-          width: showFrame ? 1 : 0.5,
-        ),
-      ),
+      width: 14 * kMmToPx,
+      decoration: showFrame
+          ? BoxDecoration(
+              border: Border.all(color: AppColors.rose600, width: 0.67),
+            )
+          : null,
       child: Center(
         child: RotatedBox(
           quarterTurns: 1,
@@ -371,15 +380,18 @@ class _ContentGrid extends StatelessWidget {
         final smallScale = smallBlockFontSize != null
             ? smallBlockFontSize! / font_utils.previewFontSize(tibSize)
             : 0.75;
-        final smallChineseSize = font_utils.previewFontSize(chiSize) * smallScale;
+        final smallChineseSize =
+            font_utils.previewFontSize(chiSize) * smallScale;
         final compactMinimumHeights = <double>[];
         for (var ri = 0; ri < rowCount; ri++) {
-          compactMinimumHeights.add(estimateCompactSmallRowHeight(
-            rows[ri],
-            tibetanFontSize: smallTibetanSize,
-            chineseFontSize: smallChineseSize,
-            topPadding: kPreviewTextTopPadding,
-          ));
+          compactMinimumHeights.add(
+            estimateCompactSmallRowHeight(
+              rows[ri],
+              tibetanFontSize: smallTibetanSize,
+              chineseFontSize: smallChineseSize,
+              topPadding: kPreviewTextTopPadding,
+            ),
+          );
         }
         final rowHs = resolveContentRowHeights(
           rows,
@@ -601,31 +613,58 @@ class _ContentGrid extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           )
                         : null,
-                    child: Builder(builder: (_) {
-                      final style = TextStyle(
-                        fontSize: contentTibetanFontSize(
-                          font_utils.previewFontSize(tibSize),
-                          smallText: isSmall,
-                          smallBlockFontSize: isSmall ? smallBlockFontSize : null,
-                        ),
-                        height: contentTibetanLineHeight(smallText: isSmall),
-                      );
-                      final segs = splitByRedHighlightRanges(markText, block.redHighlightRange);
-                      if (segs.isNotEmpty) {
-                        final children = <InlineSpan>[];
-                        for (final s in segs) {
-                          if (s.highlight) {
-                            children.addAll(_colorizedChildren(s.text, style, AppColors.rose600, Colors.black87));
-                          } else {
-                            children.add(TextSpan(text: s.text, style: style.copyWith(color: Colors.black87)));
+                    child: Builder(
+                      builder: (_) {
+                        final style = TextStyle(
+                          fontSize: contentTibetanFontSize(
+                            font_utils.previewFontSize(tibSize),
+                            smallText: isSmall,
+                            smallBlockFontSize: isSmall
+                                ? smallBlockFontSize
+                                : null,
+                          ),
+                          height: contentTibetanLineHeight(smallText: isSmall),
+                        );
+                        final segs = splitByRedHighlightRanges(
+                          markText,
+                          block.redHighlightRange,
+                        );
+                        if (segs.isNotEmpty) {
+                          final children = <InlineSpan>[];
+                          for (final s in segs) {
+                            if (s.highlight) {
+                              children.addAll(
+                                _colorizedChildren(
+                                  s.text,
+                                  style,
+                                  AppColors.rose600,
+                                  Colors.black87,
+                                ),
+                              );
+                            } else {
+                              children.add(
+                                TextSpan(
+                                  text: s.text,
+                                  style: style.copyWith(color: Colors.black87),
+                                ),
+                              );
+                            }
                           }
+                          return RichText(
+                            text: TextSpan(children: children),
+                            maxLines: null,
+                          );
                         }
-                        return RichText(text: TextSpan(children: children), maxLines: null);
-                      }
-                      return Text(markText, style: style.copyWith(color: Colors.black87), maxLines: null);
-                    }),
+                        return Text(
+                          markText,
+                          style: style.copyWith(color: Colors.black87),
+                          maxLines: null,
+                        );
+                      },
+                    ),
+                  ),
                 ),
-              ));
+              );
               continue;
             }
 
@@ -645,8 +684,10 @@ class _ContentGrid extends StatelessWidget {
             );
             final bodySize = headingSize;
             final chineseSize = isFreeText
-                ? font_utils.previewFontSize(translationFont.fontSize) * smallScale
-                : font_utils.previewFontSize(chiSize) * (isSmall ? smallScale : 1.0);
+                ? font_utils.previewFontSize(translationFont.fontSize) *
+                      smallScale
+                : font_utils.previewFontSize(chiSize) *
+                      (isSmall ? smallScale : 1.0);
 
             final left = cell.leftFraction * totalW;
             final spannedW = cell.widthFraction * totalW;
@@ -677,100 +718,128 @@ class _ContentGrid extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         )
                       : null,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (isFreeText)
-                        Text(
-                          tibLines.join('\n'),
-                          style: TextStyle(
-                            fontFamily: transFamily,
-                            fontSize: chineseSize,
-                            color: Colors.black87,
-                            height: 1.2,
-                          ),
-                          maxLines: null,
-                        ),
-                      if (!isFreeText && heading.isNotEmpty)
-                        Builder(builder: (_) {
-                          final style = TextStyle(
-                            fontFamily: tibFamily,
-                            fontSize: headingSize,
-                            height: contentTibetanLineHeight(
-                              smallText: isSmall,
-                            ),
-                          );
-                          final segs = splitByRedHighlightRanges(heading, block.redHighlightRange);
-                          if (segs.isNotEmpty) {
-                            final children = <InlineSpan>[];
-                            for (final s in segs) {
-                              if (s.highlight) {
-                                children.addAll(_colorizedChildren(s.text, style, AppColors.rose600, Colors.black87));
-                              } else {
-                                children.add(TextSpan(text: s.text, style: style.copyWith(color: Colors.black87)));
-                              }
-                            }
-                            return RichText(
-                              text: TextSpan(children: children),
-                              maxLines: isSmall ? null : 2,
-                              overflow: isSmall ? TextOverflow.clip : TextOverflow.ellipsis,
-                            );
-                          }
-                          return Text(
-                            heading,
-                            style: style.copyWith(color: Colors.black87),
-                            maxLines: isSmall ? null : 2,
-                            overflow: isSmall ? null : TextOverflow.ellipsis,
-                          );
-                        }),
-                      if (!isFreeText && body.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 1),
-                          child: Text(
-                            body,
-                            style: TextStyle(
-                              fontFamily: tibFamily,
-                              fontSize: bodySize,
-                              color: Colors.black87,
-                              height: contentTibetanLineHeight(
-                                smallText: isSmall,
-                              ),
-                            ),
-                            maxLines: isSmall ? null : 3,
-                            overflow: isSmall ? null : TextOverflow.ellipsis,
-                          ),
-                        ),
-                      if (!isFreeText && pron.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 2),
-                          child: Text(
-                            pron,
-                            style: TextStyle(
-                              fontFamily: pronFamily,
-                              fontSize: chineseSize,
-                              color: Colors.black87,
-                              height: 1.4,
-                            ),
-                            maxLines: isSmall ? null : 2,
-                            overflow: isSmall ? null : TextOverflow.ellipsis,
-                          ),
-                        ),
-                      if (!isFreeText && trans.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 1),
-                          child: Text(
-                            trans,
+                  child: OverflowBox(
+                    maxHeight: double.infinity,
+                    alignment: Alignment.topLeft,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (isFreeText)
+                          Text(
+                            tibLines.join('\n'),
                             style: TextStyle(
                               fontFamily: transFamily,
                               fontSize: chineseSize,
                               color: Colors.black87,
-                              height: 1.4,
+                              height: 1.2,
                             ),
-                            maxLines: isSmall ? null : 2,
-                            overflow: isSmall ? null : TextOverflow.ellipsis,
+                            maxLines: null,
                           ),
-                        ),
-                    ],
+                        if (!isFreeText && heading.isNotEmpty)
+                          Builder(
+                            builder: (_) {
+                              final style = TextStyle(
+                                fontFamily: tibFamily,
+                                fontSize: headingSize,
+                                height: contentTibetanLineHeight(
+                                  smallText: isSmall,
+                                ),
+                              );
+                              final segs = splitByRedHighlightRanges(
+                                heading,
+                                block.redHighlightRange,
+                              );
+                              if (segs.isNotEmpty) {
+                                final children = <InlineSpan>[];
+                                for (final s in segs) {
+                                  if (s.highlight) {
+                                    children.addAll(
+                                      _colorizedChildren(
+                                        s.text,
+                                        style,
+                                        AppColors.rose600,
+                                        Colors.black87,
+                                      ),
+                                    );
+                                  } else {
+                                    children.add(
+                                      TextSpan(
+                                        text: s.text,
+                                        style: style.copyWith(
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                }
+                                return RichText(
+                                  text: TextSpan(children: children),
+                                  maxLines: isSmall ? null : 2,
+                                  overflow: isSmall
+                                      ? TextOverflow.clip
+                                      : TextOverflow.ellipsis,
+                                );
+                              }
+                              return Text(
+                                heading,
+                                style: style.copyWith(color: Colors.black87),
+                                maxLines: isSmall ? null : 2,
+                                overflow: isSmall
+                                    ? null
+                                    : TextOverflow.ellipsis,
+                              );
+                            },
+                          ),
+                        if (!isFreeText && body.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 1),
+                            child: Text(
+                              body,
+                              style: TextStyle(
+                                fontFamily: tibFamily,
+                                fontSize: bodySize,
+                                color: Colors.black87,
+                                height: contentTibetanLineHeight(
+                                  smallText: isSmall,
+                                ),
+                              ),
+                              maxLines: isSmall ? null : 3,
+                              overflow: isSmall ? null : TextOverflow.ellipsis,
+                            ),
+                          ),
+                        if (!isFreeText && pron.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Text(
+                              pron,
+                              style: TextStyle(
+                                fontFamily: pronFamily,
+                                fontSize: chineseSize,
+                                color: Colors.black87,
+                                height: 1.4,
+                              ),
+                              maxLines: isSmall ? null : 2,
+                              overflow: isSmall ? null : TextOverflow.ellipsis,
+                            ),
+                          ),
+                        if (!isFreeText && trans.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 1),
+                            child: Text(
+                              trans,
+                              style: TextStyle(
+                                fontFamily: transFamily,
+                                fontSize: chineseSize,
+                                color: Colors.black87,
+                                height: 1.4,
+                              ),
+                              maxLines: isSmall ? null : 2,
+                              overflow: isSmall ? null : TextOverflow.ellipsis,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
