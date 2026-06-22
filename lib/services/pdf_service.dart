@@ -335,7 +335,10 @@ class PdfService {
             ps.titleTibetan,
             titleTibConfig.fontSize,
             _blackUi,
-            outerW,
+            hasTemplate
+                ? titlePageTemplateTitleBoxBounds(ps).widthMm *
+                      PdfPageFormat.mm
+                : outerW,
             fontFamily: titleTibConfig.fontFamily,
             lineHeight: 1.4,
             topPadding: 5,
@@ -893,7 +896,7 @@ class PdfService {
               font: transFont,
               fontFallback: fontFallback,
               fontSize: 9,
-              color: _rose,
+              color: PdfColors.black,
             ),
             textAlign: pw.TextAlign.center,
           ),
@@ -1210,7 +1213,7 @@ class PdfService {
           ),
         ),
         contentPage,
-        if (ps.leftVerticalTitle.trim().isNotEmpty)
+        if (sideImg != null)
           pw.Positioned(
             left: 0,
             top: 0,
@@ -1220,15 +1223,10 @@ class PdfService {
               child: pw.Center(
                 child: pw.Transform.rotateBox(
                   angle: 1.5708,
-                  child: pw.Text(
-                    ps.leftVerticalTitle,
-                    style: pw.TextStyle(
-                      font: transFont,
-                      fontFallback: fontFallback,
-                      fontSize: 9,
-                      color: _rose,
-                    ),
-                    textAlign: pw.TextAlign.center,
+                  child: pw.Image(
+                    sideImg.provider,
+                    width: sideImg.w,
+                    height: sideImg.h,
                   ),
                 ),
               ),
@@ -1250,7 +1248,7 @@ class PdfService {
                       font: transFont,
                       fontFallback: fontFallback,
                       fontSize: 9,
-                      color: _rose,
+                      color: PdfColors.black,
                     ),
                     textAlign: pw.TextAlign.center,
                   ),

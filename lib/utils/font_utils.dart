@@ -289,6 +289,6 @@ FontConfig effectiveFont(
 ///
 /// Based on the 3.78 px/mm conversion factor used in preview widgets
 /// and the 72 DPI PDF coordinate system: pt / 72 * 25.4 * 3.78 ≈ pt * 1.333
-const double ptToPreviewPx = 1.333;
+double ptToPreviewPx = 1.333;
 
 double previewFontSize(double fontSizePt) => fontSizePt * ptToPreviewPx;

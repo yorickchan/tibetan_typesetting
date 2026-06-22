@@ -158,7 +158,10 @@ class TitlePageSettingsPanel extends StatelessWidget {
                   if (templates.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String?>(
-                      initialValue: pageSetup.titlePageTemplateId,
+                      initialValue: pageSetup.titlePageTemplateId != null &&
+                              templates.any((t) => t.id == pageSetup.titlePageTemplateId)
+                          ? pageSetup.titlePageTemplateId
+                          : null,
                       decoration: InputDecoration(
                         labelText: l10n.titlePageTemplate,
                         labelStyle: TextStyle(

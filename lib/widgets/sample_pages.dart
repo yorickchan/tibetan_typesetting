@@ -73,6 +73,8 @@ class SamplePagesWidget extends StatelessWidget {
           highlightBlockId: highlightBlockId,
           pageNumber: resolvePageNumber(setup.pageNumber, index),
           floatingImages: pages[index].floatingImages,
+          smallBlockFontSize: setup.smallBlockFontSize ??
+              appSettings?.smallBlockFontSize,
           isFirstContentPage: isFirstPage,
           svgContent: pageTemplateSvg,
           templateInset: pageTemplateInset,

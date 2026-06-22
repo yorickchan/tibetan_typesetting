@@ -16,6 +16,8 @@ class MainFlutterWindow: NSWindow {
     channel.setMethodCallHandler { call, result in
       if call.method == "listFonts" {
         result(Self.listSystemFonts())
+      } else if call.method == "getScreenDpi" {
+        result(Self.getScreenDpi())
       } else {
         result(FlutterMethodNotImplemented)
       }
@@ -60,5 +62,16 @@ class MainFlutterWindow: NSWindow {
     }
 
     return fonts
+  }
+
+  private static func getScreenDpi() -> Double {
+    guard let screen = NSScreen.main else { return 96.0 }
+    let screenFrame = screen.frame
+    let displayID = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID ?? 0
+    if displayID == 0 { return 96.0 }
+    let screenSizeMM = CGDisplayScreenSize(displayID)
+    if screenSizeMM.width <= 0 { return 96.0 }
+    let dpi = screenFrame.size.width * 25.4 / screenSizeMM.width
+    return Double(dpi)
   }
 }

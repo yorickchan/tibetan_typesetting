@@ -8,10 +8,16 @@ import 'pages/settings_page.dart';
 import 'services/database_service.dart';
 import 'services/font_service.dart';
 import 'services/settings_service.dart';
+import 'services/screen_dpi_service.dart';
 import 'utils/colors.dart';
+import 'utils/font_utils.dart' as font_utils;
+import 'widgets/sample_page.dart' show kMmToPx;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await ScreenDpiService().init();
+  kMmToPx = ScreenDpiService().mmToPx;
+  font_utils.ptToPreviewPx = ScreenDpiService().ptToPx;
 
   await DatabaseService().database;
 

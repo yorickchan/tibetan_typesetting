@@ -226,7 +226,10 @@ class _ContentSection extends StatelessWidget {
         if (templates.isNotEmpty) ...[
           const SizedBox(height: 8),
           DropdownButtonFormField<String?>(
-            initialValue: templateId,
+            initialValue: templateId != null &&
+                    templates.any((t) => t.id == templateId)
+                ? templateId
+                : null,
             decoration: InputDecoration(
               labelText: templateLabel,
               labelStyle: TextStyle(

@@ -171,7 +171,7 @@ class TitlePageWidget extends StatelessWidget {
                       pageNumber ?? setup.pageNumber,
                       style: TextStyle(
                         fontFamily: bodyTransFont.fontFamily,
-                        fontSize: 11,
+                        fontSize: font_utils.previewFontSize(9),
                         color: Colors.black87,
                       ),
                     ),

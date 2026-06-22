@@ -12,7 +12,7 @@ import '../utils/font_utils.dart' as font_utils;
 import '../utils/sample_layout.dart';
 import '../utils/tibetan_segmenter.dart';
 
-const double kMmToPx = 3.78;
+double kMmToPx = 3.78;
 const double kPreviewTextTopPadding = 5;
 const double kPreviewRowLineOffset = 7;
 
@@ -194,7 +194,7 @@ class SamplePageWidget extends StatelessWidget {
                     )
                   : null,
               child: Padding(
-                padding: EdgeInsets.all(2 * kMmToPx - 2),
+                padding: EdgeInsets.all(2 * kMmToPx),
                 child: Container(
                   decoration: setup.showFrame
                       ? BoxDecoration(
@@ -246,7 +246,7 @@ class SamplePageWidget extends StatelessWidget {
                       setup.leftVerticalTitle,
                       style: TextStyle(
                         fontFamily: transFont.fontFamily,
-                        fontSize: 11,
+                        fontSize: font_utils.previewFontSize(9),
                         color: Colors.black87,
                       ),
                       textAlign: TextAlign.center,
@@ -268,7 +268,7 @@ class SamplePageWidget extends StatelessWidget {
                       pageNumber ?? setup.pageNumber,
                       style: TextStyle(
                         fontFamily: transFont.fontFamily,
-                        fontSize: 11,
+                        fontSize: font_utils.previewFontSize(9),
                         color: Colors.black87,
                       ),
                       textAlign: TextAlign.center,
@@ -311,7 +311,7 @@ class _SidePanel extends StatelessWidget {
             text,
             style: TextStyle(
               fontFamily: fontFamily,
-              fontSize: 11,
+              fontSize: font_utils.previewFontSize(9),
               color: Colors.black87,
             ),
             textAlign: TextAlign.center,
@@ -499,10 +499,10 @@ class _ContentGrid extends StatelessWidget {
                         }
                       },
                       child: Container(
-                        padding: const EdgeInsets.only(
+                        padding: EdgeInsets.only(
                           top: 16,
-                          left: 6,
-                          right: 6,
+                          left: 2 * kMmToPx,
+                          right: 2 * kMmToPx,
                         ),
                         decoration: isHL
                             ? BoxDecoration(
@@ -597,10 +597,10 @@ class _ContentGrid extends StatelessWidget {
                   width: blockW,
                   height: rowHs[ri],
                   child: Container(
-                    padding: const EdgeInsets.only(
+                    padding: EdgeInsets.only(
                       top: kPreviewTextTopPadding,
-                      left: 6,
-                      right: 6,
+                      left: 2 * kMmToPx,
+                      right: 2 * kMmToPx,
                     ),
                     decoration: isHL
                         ? BoxDecoration(
@@ -702,10 +702,10 @@ class _ContentGrid extends StatelessWidget {
                 width: blockW,
                 height: rowHs[ri],
                 child: Container(
-                  padding: const EdgeInsets.only(
+                  padding: EdgeInsets.only(
                     top: kPreviewTextTopPadding,
-                    left: 6,
-                    right: 6,
+                    left: 2 * kMmToPx,
+                    right: 2 * kMmToPx,
                   ),
                   decoration: isHL
                       ? BoxDecoration(

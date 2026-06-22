@@ -26,7 +26,7 @@ void main() {
       find.byWidgetPredicate(
         (widget) =>
             widget is Container &&
-            widget.padding == const EdgeInsets.only(top: 5, left: 6, right: 6),
+            widget.padding == EdgeInsets.only(top: 5, left: 2 * kMmToPx, right: 2 * kMmToPx),
       ),
       findsOneWidget,
     );
@@ -79,7 +79,7 @@ void main() {
       find.byWidgetPredicate(
         (widget) =>
             widget is Padding &&
-            widget.padding == EdgeInsets.all(2 * kMmToPx - 2),
+            widget.padding == EdgeInsets.all(2 * kMmToPx),
       ),
       findsOneWidget,
     );
