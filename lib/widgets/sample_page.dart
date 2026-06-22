@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../models/app_settings.dart';
 import '../models/font_config.dart';
@@ -52,6 +53,9 @@ class SamplePageWidget extends StatelessWidget {
   final void Function(String id, double dwMm, double dhMm)? onInlineImageResize;
   final void Function(String id)? onSelectBlock;
   final double? smallBlockFontSize;
+  final bool isFirstContentPage;
+  final String? svgContent;
+  final TemplateInset? templateInset;
 
   const SamplePageWidget({
     super.key,
@@ -68,6 +72,9 @@ class SamplePageWidget extends StatelessWidget {
     this.onInlineImageResize,
     this.onSelectBlock,
     this.smallBlockFontSize,
+    this.isFirstContentPage = false,
+    this.svgContent,
+    this.templateInset,
   });
 
   @override
@@ -77,6 +84,9 @@ class SamplePageWidget extends StatelessWidget {
     final fallbackColCount = (setup.columnCount > 0)
         ? setup.columnCount.clamp(1, 8)
         : 5;
+    final effectiveMargin = isFirstContentPage
+        ? setup.contentFirstPageMargin
+        : setup.contentSubsequentPageMargin;
     final effectiveFlowRows =
         flowRows ??
         (rows != null
@@ -86,12 +96,15 @@ class SamplePageWidget extends StatelessWidget {
                 fallbackColCount,
                 4,
                 setup.flowGap,
-                setup.pageWidthMm - setup.marginMm.left - setup.marginMm.right,
+                setup.pageWidthMm -
+                    effectiveMargin.left -
+                    effectiveMargin.right,
               ).first.flowRows);
     final effectiveColCount = colCount ?? fallbackColCount;
 
     final pageW = setup.pageWidthMm * kMmToPx;
     final pageH = setup.pageHeightMm * kMmToPx;
+    final hasTemplate = svgContent != null && svgContent!.isNotEmpty;
 
     final tibFont = font_utils.effectiveFont(
       setup.tibetanFont,
@@ -114,70 +127,104 @@ class SamplePageWidget extends StatelessWidget {
         ? font_utils.previewFontSize(smallBlockFontSize!)
         : null;
 
+    final contentWidget = Padding(
+      padding: EdgeInsets.only(
+        top: effectiveMargin.top * kMmToPx,
+        right: effectiveMargin.right * kMmToPx,
+        bottom: effectiveMargin.bottom * kMmToPx,
+        left: effectiveMargin.left * kMmToPx,
+      ),
+      child: Container(
+        decoration: hasTemplate
+            ? null
+            : BoxDecoration(
+                border: Border.all(
+                  color: setup.showFrame
+                      ? AppColors.rose600
+                      : Colors.grey.shade300,
+                  width: setup.showFrame ? 2 : 1,
+                ),
+              ),
+        child: Row(
+          children: [
+            if (!hasTemplate)
+              _SidePanel(
+                text: setup.leftVerticalTitle,
+                showFrame: setup.showFrame,
+                fontFamily: transFont.fontFamily,
+              ),
+            Expanded(
+              child: Container(
+                margin: hasTemplate ? EdgeInsets.zero : const EdgeInsets.all(2),
+                decoration: hasTemplate
+                    ? null
+                    : BoxDecoration(
+                        border: Border.all(
+                          color: AppColors.rose600,
+                          width: 1,
+                        ),
+                      ),
+                child: _ContentGrid(
+                  rows: effectiveFlowRows,
+                  colCount: effectiveColCount,
+                  showRowLines: setup.showRowLines,
+                  highlightBlockId: highlightBlockId,
+                  tibetanFont: tibFont,
+                  pronunciationFont: pronFont,
+                  translationFont: transFont,
+                  floatingImages: floatingImages,
+                  onFloatImageMove: onFloatImageMove,
+                  onFloatImageResize: onFloatImageResize,
+                  onInlineImageResize: onInlineImageResize,
+                  onSelectBlock: onSelectBlock,
+                  smallBlockFontSize: smallSz,
+                ),
+              ),
+            ),
+            if (!hasTemplate)
+              _SidePanel(
+                text: pageNumber ?? setup.pageNumber,
+                showFrame: setup.showFrame,
+                fontFamily: transFont.fontFamily,
+              ),
+          ],
+        ),
+      ),
+    );
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: Container(
         width: pageW,
         height: pageH,
         color: Colors.white,
-        child: Padding(
-          padding: EdgeInsets.only(
-            top: setup.marginMm.top * kMmToPx,
-            right: setup.marginMm.right * kMmToPx,
-            bottom: setup.marginMm.bottom * kMmToPx,
-            left: setup.marginMm.left * kMmToPx,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: setup.showFrame
-                    ? AppColors.rose600
-                    : Colors.grey.shade300,
-                width: setup.showFrame ? 2 : 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                _SidePanel(
-                  text: setup.leftVerticalTitle,
-                  showFrame: setup.showFrame,
-                  fontFamily: transFont.fontFamily,
-                ),
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.rose600, width: 1),
-                    ),
-                    child: _ContentGrid(
-                      rows: effectiveFlowRows,
-                      colCount: effectiveColCount,
-                      showRowLines: setup.showRowLines,
-                      highlightBlockId: highlightBlockId,
-                      tibetanFont: tibFont,
-                      pronunciationFont: pronFont,
-                      translationFont: transFont,
-                      floatingImages: floatingImages,
-                      onFloatImageMove: onFloatImageMove,
-                      onFloatImageResize: onFloatImageResize,
-                      onInlineImageResize: onInlineImageResize,
-                      onSelectBlock: onSelectBlock,
-                      smallBlockFontSize: smallSz,
+        child: hasTemplate
+            ? Stack(
+                children: [
+                  Positioned(
+                    left: (templateInset?.left ?? 0) * kMmToPx,
+                    top: (templateInset?.top ?? 0) * kMmToPx,
+                    width: pageW -
+                        ((templateInset?.left ?? 0) +
+                                (templateInset?.right ?? 0)) *
+                            kMmToPx,
+                    height: pageH -
+                        ((templateInset?.top ?? 0) +
+                                (templateInset?.bottom ?? 0)) *
+                            kMmToPx,
+                    child: SvgPicture.string(
+                      svgContent!,
+                      fit: BoxFit.fill,
                     ),
                   ),
-                ),
-                _SidePanel(
-                  text: pageNumber ?? setup.pageNumber,
-                  showFrame: setup.showFrame,
-                  fontFamily: transFont.fontFamily,
-                ),
-              ],
-            ),
-          ),
-        ),
+                  contentWidget,
+                ],
+              )
+            : contentWidget,
       ),
     );
   }
+
 }
 
 class _SidePanel extends StatelessWidget {

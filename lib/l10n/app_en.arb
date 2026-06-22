@@ -220,5 +220,12 @@
   "smallBlockFontSize": "Small block size",
   "smallBlockFontSizeHint": "Auto (75% of base)",
   "smallBlockFontSizeLabel": "Small block font size (pt)",
-  "redHighlightHint": "e.g. 1-3,5-7"
+  "redHighlightHint": "e.g. 1-3,5-7",
+  "contentPages": "Content pages",
+  "contentFirstPage": "First content page",
+  "contentSubsequentPages": "Subsequent pages",
+  "contentFirstPageTemplate": "First page template",
+  "contentSubsequentPageTemplate": "Subsequent pages template",
+  "contentFirstPageMargin": "First page margin (mm)",
+  "contentSubsequentPageMargin": "Subsequent pages margin (mm)"
 }

@@ -154,5 +154,12 @@
   "smallBlockFontSizeHint": "自动（基准的75%）",
   "smallBlockFontSizeLabel": "小字字号 (pt)",
   "redHighlightLabel": "首字红色",
-  "redHighlightHint": "例如 1-3,5-7"
+  "redHighlightHint": "例如 1-3,5-7",
+  "contentPages": "内容页",
+  "contentFirstPage": "首页内容",
+  "contentSubsequentPages": "后续页面",
+  "contentFirstPageTemplate": "首页模板",
+  "contentSubsequentPageTemplate": "后续页面模板",
+  "contentFirstPageMargin": "首页边距 (mm)",
+  "contentSubsequentPageMargin": "后续页面边距 (mm)"
 }

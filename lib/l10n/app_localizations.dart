@@ -1028,6 +1028,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'e.g. 1-3,5-7'**
   String get redHighlightHint;
+
+  /// No description provided for @contentPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Content pages'**
+  String get contentPages;
+
+  /// No description provided for @contentFirstPage.
+  ///
+  /// In en, this message translates to:
+  /// **'First content page'**
+  String get contentFirstPage;
+
+  /// No description provided for @contentSubsequentPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Subsequent pages'**
+  String get contentSubsequentPages;
+
+  /// No description provided for @contentFirstPageTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'First page template'**
+  String get contentFirstPageTemplate;
+
+  /// No description provided for @contentSubsequentPageTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Subsequent pages template'**
+  String get contentSubsequentPageTemplate;
+
+  /// No description provided for @contentFirstPageMargin.
+  ///
+  /// In en, this message translates to:
+  /// **'First page margin (mm)'**
+  String get contentFirstPageMargin;
+
+  /// No description provided for @contentSubsequentPageMargin.
+  ///
+  /// In en, this message translates to:
+  /// **'Subsequent pages margin (mm)'**
+  String get contentSubsequentPageMargin;
 }
 
 class _AppLocalizationsDelegate

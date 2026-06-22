@@ -13,6 +13,8 @@ class SamplePagesWidget extends StatelessWidget {
   final String? highlightBlockId;
   final bool skipTitlePage;
   final String? svgContent;
+  final String? contentFirstPageSvg;
+  final String? contentSubsequentPageSvg;
 
   const SamplePagesWidget({
     super.key,
@@ -21,17 +23,23 @@ class SamplePagesWidget extends StatelessWidget {
     this.highlightBlockId,
     this.skipTitlePage = false,
     this.svgContent,
+    this.contentFirstPageSvg,
+    this.contentSubsequentPageSvg,
   });
 
   @override
   Widget build(BuildContext context) {
     final setup = project.pageSetup;
+    final firstMargin = setup.contentFirstPageMargin;
+    final contentWidthMm = setup.pageWidthMm -
+        firstMargin.left -
+        firstMargin.right;
     final pages = paginateBlocks(
       project.blocks,
       0,
       4,
       setup.flowGap,
-      setup.pageWidthMm - setup.marginMm.left - setup.marginMm.right,
+      contentWidthMm,
     );
     final showTitlePage = setup.showTitlePage && !skipTitlePage;
 
@@ -49,6 +57,12 @@ class SamplePagesWidget extends StatelessWidget {
     }
 
     for (var index = 0; index < pages.length; index++) {
+      final isFirstPage = index == 0;
+      final pageTemplateSvg =
+          isFirstPage ? contentFirstPageSvg : contentSubsequentPageSvg;
+      final pageTemplateInset = isFirstPage
+          ? setup.contentFirstPageTemplateInset
+          : setup.contentSubsequentPageTemplateInset;
       pageWidgets.add(
         SamplePageWidget(
           project: project,
@@ -59,10 +73,12 @@ class SamplePagesWidget extends StatelessWidget {
           highlightBlockId: highlightBlockId,
           pageNumber: resolvePageNumber(setup.pageNumber, index),
           floatingImages: pages[index].floatingImages,
+          isFirstContentPage: isFirstPage,
+          svgContent: pageTemplateSvg,
+          templateInset: pageTemplateInset,
         ),
       );
     }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

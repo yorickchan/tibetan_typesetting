@@ -154,5 +154,12 @@
   "smallBlockFontSizeHint": "自動（基準的75%）",
   "smallBlockFontSizeLabel": "小字字型大小 (pt)",
   "redHighlightLabel": "首字紅色",
-  "redHighlightHint": "例如 1-3,5-7"
+  "redHighlightHint": "例如 1-3,5-7",
+  "contentPages": "內容頁",
+  "contentFirstPage": "首頁內容",
+  "contentSubsequentPages": "後續頁面",
+  "contentFirstPageTemplate": "首頁範本",
+  "contentSubsequentPageTemplate": "後續頁面範本",
+  "contentFirstPageMargin": "首頁邊距 (mm)",
+  "contentSubsequentPageMargin": "後續頁面邊距 (mm)"
 }

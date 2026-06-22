@@ -122,6 +122,12 @@ class PageSetup {
   final String defaultOpeningMark;
   final double? smallBlockFontSize;
   final String? titlePageTemplateId;
+  final String? contentFirstPageTemplateId;
+  final TemplateInset contentFirstPageTemplateInset;
+  final MarginMm contentFirstPageMargin;
+  final String? contentSubsequentPageTemplateId;
+  final TemplateInset contentSubsequentPageTemplateInset;
+  final MarginMm contentSubsequentPageMargin;
 
   PageSetup({
     this.pageWidthMm = 300,
@@ -157,11 +163,24 @@ class PageSetup {
     this.smallBlockFontSize,
     this.titlePageTemplateId,
     this.defaultOpeningMark = kDefaultOpeningMark,
+    this.contentFirstPageTemplateId,
+    TemplateInset? contentFirstPageTemplateInset,
+    MarginMm? contentFirstPageMargin,
+    this.contentSubsequentPageTemplateId,
+    TemplateInset? contentSubsequentPageTemplateInset,
+    MarginMm? contentSubsequentPageMargin,
   }) : marginMm = marginMm ?? const MarginMm(),
        templateInset = templateInset ?? const TemplateInset(),
        titleTextInset =
            titleTextInset ??
-           const TemplateInset(top: 20, right: 56, bottom: 20, left: 56);
+           const TemplateInset(top: 20, right: 56, bottom: 20, left: 56),
+       contentFirstPageTemplateInset =
+           contentFirstPageTemplateInset ?? const TemplateInset(),
+       contentFirstPageMargin = contentFirstPageMargin ?? const MarginMm(),
+       contentSubsequentPageTemplateInset =
+           contentSubsequentPageTemplateInset ?? const TemplateInset(),
+       contentSubsequentPageMargin =
+           contentSubsequentPageMargin ?? const MarginMm();
   PageSetup copyWith({
     double? pageWidthMm,
     double? pageHeightMm,
@@ -196,6 +215,12 @@ class PageSetup {
     String? defaultOpeningMark,
     String? titlePageTemplateId,
     double? smallBlockFontSize,
+    String? contentFirstPageTemplateId,
+    TemplateInset? contentFirstPageTemplateInset,
+    MarginMm? contentFirstPageMargin,
+    String? contentSubsequentPageTemplateId,
+    TemplateInset? contentSubsequentPageTemplateInset,
+    MarginMm? contentSubsequentPageMargin,
     bool clearTibetanFont = false,
     bool clearPronunciationFont = false,
     bool clearTranslationFont = false,
@@ -203,6 +228,8 @@ class PageSetup {
     bool clearTitleChineseFont = false,
     bool clearTitlePageTemplateId = false,
     bool clearSmallBlockFontSize = false,
+    bool clearContentFirstPageTemplateId = false,
+    bool clearContentSubsequentPageTemplateId = false,
   }) {
     return PageSetup(
       pageWidthMm: pageWidthMm ?? this.pageWidthMm,
@@ -250,6 +277,22 @@ class PageSetup {
       smallBlockFontSize: clearSmallBlockFontSize
           ? null
           : (smallBlockFontSize ?? this.smallBlockFontSize),
+      contentFirstPageTemplateId: clearContentFirstPageTemplateId
+          ? null
+          : (contentFirstPageTemplateId ?? this.contentFirstPageTemplateId),
+      contentFirstPageTemplateInset:
+          contentFirstPageTemplateInset ?? this.contentFirstPageTemplateInset,
+      contentFirstPageMargin:
+          contentFirstPageMargin ?? this.contentFirstPageMargin,
+      contentSubsequentPageTemplateId: clearContentSubsequentPageTemplateId
+          ? null
+          : (contentSubsequentPageTemplateId ??
+              this.contentSubsequentPageTemplateId),
+      contentSubsequentPageTemplateInset:
+          contentSubsequentPageTemplateInset ??
+              this.contentSubsequentPageTemplateInset,
+      contentSubsequentPageMargin:
+          contentSubsequentPageMargin ?? this.contentSubsequentPageMargin,
     );
   }
 
@@ -290,6 +333,15 @@ class PageSetup {
       'titleChineseFont': titleChineseFont!.toJson(),
     if (titlePageTemplateId != null) 'titlePageTemplateId': titlePageTemplateId,
     if (smallBlockFontSize != null) 'smallBlockFontSize': smallBlockFontSize,
+    if (contentFirstPageTemplateId != null)
+      'contentFirstPageTemplateId': contentFirstPageTemplateId,
+    'contentFirstPageTemplateInset': contentFirstPageTemplateInset.toJson(),
+    'contentFirstPageMargin': contentFirstPageMargin.toJson(),
+    if (contentSubsequentPageTemplateId != null)
+      'contentSubsequentPageTemplateId': contentSubsequentPageTemplateId,
+    'contentSubsequentPageTemplateInset':
+        contentSubsequentPageTemplateInset.toJson(),
+    'contentSubsequentPageMargin': contentSubsequentPageMargin.toJson(),
   };
 
   factory PageSetup.fromJson(Map<String, dynamic> json) => PageSetup(
@@ -345,6 +397,29 @@ class PageSetup {
         json['defaultOpeningMark'] as String? ?? kDefaultOpeningMark,
     titlePageTemplateId: json['titlePageTemplateId'] as String?,
     smallBlockFontSize: (json['smallBlockFontSize'] as num?)?.toDouble(),
+    contentFirstPageTemplateId:
+        json['contentFirstPageTemplateId'] as String?,
+    contentFirstPageTemplateInset:
+        json['contentFirstPageTemplateInset'] != null
+            ? TemplateInset.fromJson(
+                json['contentFirstPageTemplateInset'] as Map<String, dynamic>)
+            : const TemplateInset(),
+    contentFirstPageMargin: json['contentFirstPageMargin'] != null
+        ? MarginMm.fromJson(
+            json['contentFirstPageMargin'] as Map<String, dynamic>)
+        : const MarginMm(),
+    contentSubsequentPageTemplateId:
+        json['contentSubsequentPageTemplateId'] as String?,
+    contentSubsequentPageTemplateInset:
+        json['contentSubsequentPageTemplateInset'] != null
+            ? TemplateInset.fromJson(
+                json['contentSubsequentPageTemplateInset']
+                    as Map<String, dynamic>)
+            : const TemplateInset(),
+    contentSubsequentPageMargin: json['contentSubsequentPageMargin'] != null
+        ? MarginMm.fromJson(
+            json['contentSubsequentPageMargin'] as Map<String, dynamic>)
+        : const MarginMm(),
   );
 }
 

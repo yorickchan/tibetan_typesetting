@@ -21,20 +21,6 @@ class EditorPageSetupPanel extends StatelessWidget {
     required this.onUpdateSetup,
   });
 
-  void _updateMargin(String key, double value) {
-    onUpdateSetup((setup) {
-      final margin = setup.marginMm;
-      final updated = switch (key) {
-        'top' => margin.copyWith(top: value),
-        'bottom' => margin.copyWith(bottom: value),
-        'left' => margin.copyWith(left: value),
-        'right' => margin.copyWith(right: value),
-        _ => margin,
-      };
-      return setup.copyWith(marginMm: updated);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -109,29 +95,6 @@ class EditorPageSetupPanel extends StatelessWidget {
                               );
                             }
                           },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      ...[
-                        ('top', l10n.top, pageSetup.marginMm.top),
-                        ('bottom', l10n.bottom, pageSetup.marginMm.bottom),
-                        ('left', l10n.left, pageSetup.marginMm.left),
-                        ('right', l10n.right, pageSetup.marginMm.right),
-                      ].map(
-                        (margin) => Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: _NumberField(
-                              initialValue: margin.$3,
-                              label: '${margin.$2} (mm)',
-                              onChanged: (value) =>
-                                  _updateMargin(margin.$1, value),
-                            ),
-                          ),
                         ),
                       ),
                     ],

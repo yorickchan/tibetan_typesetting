@@ -75,6 +75,15 @@ class _ExportPageState extends State<ExportPage>
     }
   }
 
+  String? _resolveContentTemplateSvg(String? templateId) {
+    if (templateId == null) return null;
+    try {
+      return _templates.firstWhere((t) => t.id == templateId).svgContent;
+    } on StateError {
+      return null;
+    }
+  }
+
   @override
   void dispose() {
     _focusNode.dispose();
@@ -387,6 +396,12 @@ class _ExportPageState extends State<ExportPage>
                       project: project,
                       appSettings: _appSettings,
                       svgContent: _resolveTemplateSvg(),
+                      contentFirstPageSvg: _resolveContentTemplateSvg(
+                        project.pageSetup.contentFirstPageTemplateId,
+                      ),
+                      contentSubsequentPageSvg: _resolveContentTemplateSvg(
+                        project.pageSetup.contentSubsequentPageTemplateId,
+                      ),
                     ),
                   ),
                 ),

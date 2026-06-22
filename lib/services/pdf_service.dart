@@ -294,6 +294,18 @@ class PdfService {
     }
     final hasTemplate = titlePageSvg != null && titlePageSvg.isNotEmpty;
 
+    // Content page template SVGs
+    String? contentFirstPageSvg;
+    String? contentSubsequentPageSvg;
+    if (ps.contentFirstPageTemplateId != null) {
+      contentFirstPageSvg =
+          await _loadTemplateSvg(ps.contentFirstPageTemplateId!);
+    }
+    if (ps.contentSubsequentPageTemplateId != null) {
+      contentSubsequentPageSvg =
+          await _loadTemplateSvg(ps.contentSubsequentPageTemplateId!);
+    }
+
 
     // ---- pre-render all text as images (side panels, images) and shape
     // ---- Tibetan text through HarfBuzz for vector rendering.
@@ -448,16 +460,38 @@ class PdfService {
     for (var pageIdx = 0; pageIdx < pages.length; pageIdx++) {
       final page = pages[pageIdx];
       final pageNumber = resolvePageNumber(ps.pageNumber, pageIdx);
+      final isFirstPage = pageIdx == 0;
+
+      final pageMargin = isFirstPage
+          ? ps.contentFirstPageMargin
+          : ps.contentSubsequentPageMargin;
+      final pageMarginL = pageMargin.left * PdfPageFormat.mm;
+      final pageMarginR = pageMargin.right * PdfPageFormat.mm;
+      final pageMarginT = pageMargin.top * PdfPageFormat.mm;
+      final pageMarginB = pageMargin.bottom * PdfPageFormat.mm;
+      final pageOuterW = pageW - pageMarginL - pageMarginR;
+      final pageOuterH = pageH - pageMarginT - pageMarginB;
+
+      final pageTemplateSvg = isFirstPage
+          ? contentFirstPageSvg
+          : contentSubsequentPageSvg;
+      final pageTemplateInset = isFirstPage
+          ? ps.contentFirstPageTemplateInset
+          : ps.contentSubsequentPageTemplateInset;
+      final hasPageTemplate =
+          pageTemplateSvg != null && pageTemplateSvg.isNotEmpty;
 
       doc.addPage(
         pw.Page(
           pageFormat: pageFormat,
-          margin: pw.EdgeInsets.only(
-            left: marginL,
-            right: marginR,
-            top: marginT,
-            bottom: marginB,
-          ),
+          margin: hasPageTemplate
+              ? pw.EdgeInsets.zero
+              : pw.EdgeInsets.only(
+                  left: pageMarginL,
+                  right: pageMarginR,
+                  top: pageMarginT,
+                  bottom: pageMarginB,
+                ),
           build: (_) => _buildContentPage(
             ps: ps,
             page: page,
@@ -469,14 +503,17 @@ class PdfService {
             transFontSize: transConfig.fontSize,
             tibFontSize: tibFontSize,
             smallBlockFontSize: smallBlockFontSize,
-            outerW: outerW,
-            outerH: outerH,
+            outerW: hasPageTemplate ? pageW : pageOuterW,
+            outerH: hasPageTemplate ? pageH : pageOuterH,
             sideW: sideW,
             inset: inset,
             pageNumber: pageNumber,
             imgs: imgs,
+            templateSvg: pageTemplateSvg,
+            templateInset: pageTemplateInset,
+          ),
         ),
-      ));
+      );
     }
 
     final bytes = await doc.save();
@@ -703,9 +740,14 @@ class PdfService {
     required double inset,
     required String pageNumber,
     required Map<String, _Img> imgs,
+    String? templateSvg,
+    TemplateInset? templateInset,
   }) {
+    final hasPageTemplate =
+        templateSvg != null && templateSvg.isNotEmpty;
     final sideImg = imgs['side_left'];
     pw.Widget sidePanel(String? text, {_Img? image}) {
+      if (hasPageTemplate) return pw.SizedBox();
       pw.Widget? inner;
       if (image != null) {
         inner = pw.Transform.rotateBox(
@@ -956,8 +998,9 @@ class PdfService {
       );
     }
 
-    if (ps.showFrame) {
-      return pw.Container(
+    pw.Widget contentPage;
+    if (ps.showFrame && !hasPageTemplate) {
+      contentPage = pw.Container(
         decoration: pw.BoxDecoration(
           border: pw.Border.all(color: _rose, width: 1.5),
         ),
@@ -969,8 +1012,33 @@ class PdfService {
           child: buildInner(),
         ),
       );
+    } else {
+      contentPage =
+          pw.Padding(padding: pw.EdgeInsets.all(inset), child: buildInner());
     }
 
-    return pw.Padding(padding: pw.EdgeInsets.all(inset), child: buildInner());
+    if (!hasPageTemplate) return contentPage;
+
+    final ti = templateInset ?? const TemplateInset();
+    final il = ti.left * PdfPageFormat.mm;
+    final it = ti.top * PdfPageFormat.mm;
+    final svgW = outerW - (ti.left + ti.right) * PdfPageFormat.mm;
+    final svgH = outerH - (ti.top + ti.bottom) * PdfPageFormat.mm;
+
+    return pw.Stack(
+      children: [
+        pw.Positioned(
+          left: il,
+          top: it,
+          child: pw.SvgImage(
+            svg: templateSvg,
+            width: svgW,
+            height: svgH,
+            fit: pw.BoxFit.fill,
+          ),
+        ),
+        contentPage,
+      ],
+    );
   }
 }

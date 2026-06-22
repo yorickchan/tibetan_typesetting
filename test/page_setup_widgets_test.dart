@@ -64,35 +64,6 @@ void main() {
       expect(updated.pageWidthMm, 232);
     });
 
-    testWidgets('updates each margin from its field', (tester) async {
-      PageSetup updated = PageSetup();
-      await tester.pumpWidget(
-        buildPanel(onUpdateSetup: (updater) => updated = updater(updated)),
-      );
-
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Top (mm)'),
-        '11',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Bottom (mm)'),
-        '12',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Left (mm)'),
-        '13',
-      );
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'Right (mm)'),
-        '14',
-      );
-
-      expect(updated.marginMm.top, 11);
-      expect(updated.marginMm.bottom, 12);
-      expect(updated.marginMm.left, 13);
-      expect(updated.marginMm.right, 14);
-    });
-
     testWidgets('updates show frame from the checkbox', (tester) async {
       PageSetup updated = PageSetup(showFrame: true);
       await tester.pumpWidget(

@@ -490,6 +490,27 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get redHighlightHint => '例如 1-3,5-7';
+
+  @override
+  String get contentPages => '内容页';
+
+  @override
+  String get contentFirstPage => '首页内容';
+
+  @override
+  String get contentSubsequentPages => '后续页面';
+
+  @override
+  String get contentFirstPageTemplate => '首页模板';
+
+  @override
+  String get contentSubsequentPageTemplate => '后续页面模板';
+
+  @override
+  String get contentFirstPageMargin => '首页边距 (mm)';
+
+  @override
+  String get contentSubsequentPageMargin => '后续页面边距 (mm)';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -978,4 +999,25 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get redHighlightHint => '例如 1-3,5-7';
+
+  @override
+  String get contentPages => '內容頁';
+
+  @override
+  String get contentFirstPage => '首頁內容';
+
+  @override
+  String get contentSubsequentPages => '後續頁面';
+
+  @override
+  String get contentFirstPageTemplate => '首頁範本';
+
+  @override
+  String get contentSubsequentPageTemplate => '後續頁面範本';
+
+  @override
+  String get contentFirstPageMargin => '首頁邊距 (mm)';
+
+  @override
+  String get contentSubsequentPageMargin => '後續頁面邊距 (mm)';
 }

@@ -26,6 +26,7 @@ import '../utils/sample_layout.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/block_editor.dart';
 import '../widgets/block_strip.dart';
+import '../widgets/content_page_template_panel.dart';
 import '../widgets/editor_page_setup_panel.dart';
 import '../widgets/flow_spacing_panel.dart';
 import '../widgets/font_settings_panel.dart';
@@ -59,6 +60,7 @@ class _EditorPageState extends State<EditorPage>
   bool _titleOpen = false;
   bool _fontOpen = false;
   bool _pageSetupOpen = false;
+  bool _contentTemplateOpen = false;
   Timer? _saveTimer;
   List<_PageWithBlocks>? _cachedPages;
   List<TextBlock>? _lastBlocks;
@@ -133,6 +135,15 @@ class _EditorPageState extends State<EditorPage>
     if (id == null) return null;
     try {
       return _templates.firstWhere((t) => t.id == id).svgContent;
+    } on StateError {
+      return null;
+    }
+  }
+
+  String? _resolveContentTemplateSvg(String? templateId) {
+    if (templateId == null) return null;
+    try {
+      return _templates.firstWhere((t) => t.id == templateId).svgContent;
     } on StateError {
       return null;
     }
@@ -831,6 +842,17 @@ class _EditorPageState extends State<EditorPage>
         ),
         const SizedBox(height: 8),
 
+        ContentPageTemplatePanel(
+          pageSetup: project.pageSetup,
+          isOpen: _contentTemplateOpen,
+          onToggle: () =>
+              setState(() => _contentTemplateOpen = !_contentTemplateOpen),
+          onUpdateSetup: _updateSetup,
+          l10n: _l10n,
+          templates: _templates,
+        ),
+        const SizedBox(height: 8),
+
         FlowSpacingPanel(
           pageSetup: project.pageSetup,
           l10n: _l10n,
@@ -937,6 +959,16 @@ class _EditorPageState extends State<EditorPage>
                       onInlineImageResize: _onInlineImageResize,
                       onSelectBlock: (id) => setState(() => _selectedId = id),
                       smallBlockFontSize: smallBlockFontSize,
+                      isFirstContentPage: pageIdx == 0,
+                      svgContent: _resolveContentTemplateSvg(
+                        pageIdx == 0
+                            ? project.pageSetup.contentFirstPageTemplateId
+                            : project.pageSetup.contentSubsequentPageTemplateId,
+                      ),
+                      templateInset: pageIdx == 0
+                          ? project.pageSetup.contentFirstPageTemplateInset
+                          : project
+                              .pageSetup.contentSubsequentPageTemplateInset,
                     ),
                   ),
                 ),

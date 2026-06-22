@@ -492,4 +492,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get redHighlightHint => 'e.g. 1-3,5-7';
+
+  @override
+  String get contentPages => 'Content pages';
+
+  @override
+  String get contentFirstPage => 'First content page';
+
+  @override
+  String get contentSubsequentPages => 'Subsequent pages';
+
+  @override
+  String get contentFirstPageTemplate => 'First page template';
+
+  @override
+  String get contentSubsequentPageTemplate => 'Subsequent pages template';
+
+  @override
+  String get contentFirstPageMargin => 'First page margin (mm)';
+
+  @override
+  String get contentSubsequentPageMargin => 'Subsequent pages margin (mm)';
 }
