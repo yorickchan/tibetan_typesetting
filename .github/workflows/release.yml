@@ -26,22 +26,27 @@ jobs:
       - name: Create DMG
         run: |
           brew install create-dmg
+          APP_PATH="$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' -print -quit)"
+          APP_NAME="$(basename "$APP_PATH")"
+          echo "Found app bundle: $APP_NAME"
           create-dmg \
             --volname "Tibetan Typesetting" \
             --window-pos 200 120 \
             --window-size 600 400 \
             --icon-size 100 \
             --app-drop-link 450 185 \
-            --hide-extension "tibetan_typesetting.app" \
+            --hide-extension "$APP_NAME" \
             tibetan-typesetting-macos.dmg \
-            build/macos/Build/Products/Release/tibetan_typesetting.app \
-            || cp -r build/macos/Build/Products/Release/tibetan_typesetting.app tibetan_typesetting.app
+            "$APP_PATH" \
+            || cp -r "$APP_PATH" "$APP_NAME"
         
       - name: Create ZIP (fallback)
         if: failure()
         run: |
           cd build/macos/Build/Products/Release
-          zip -r ../../../../../tibetan-typesetting-macos.zip tibetan_typesetting.app
+          APP_NAME="$(basename "$(find . -maxdepth 1 -name '*.app' -print -quit)")"
+          echo "Zipping app bundle: $APP_NAME"
+          zip -r ../../../../../tibetan-typesetting-macos.zip "$APP_NAME"
           
       - name: Upload artifact
         uses: actions/upload-artifact@v4
