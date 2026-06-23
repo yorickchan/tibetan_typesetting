@@ -1,4 +1,4 @@
-# 藏文排版 &nbsp;·&nbsp; v1.1.11
+# 藏文排版 &nbsp;·&nbsp; v1.1.12
 
 <p align="center">
   <img src="assets/images/icon.png" width="128" alt="應用程式圖示"/>
@@ -56,7 +56,8 @@
 - 分頁和分欄控制
 - 文字流間距調整
 - 自訂封面頁，帶有法輪符號及可設定標題字型
-- **自訂 SVG 封面頁模板**，支援模板和標題文字區域的可設定內縮距離，以純向量圖形嵌入 PDF，任意縮放不失真
+- **自訂 SVG 封面頁模板** — 以純向量圖形嵌入 PDF，支援模板和標題文字區域的可設定內縮距離
+- **內容頁模板** — 為所有內容頁套用 SVG 背景模板，可設定匯出邊距
 - 內容起始的開頭標記區塊
 - 編輯器預覽和 PDF 匯出中的可選列分隔線
 - 可設定的「小字」字型大小 — 在應用設定與各專案字型設定中獨立調整緊湊區塊的字型大小
@@ -79,10 +80,15 @@
 ### 藏文字型渲染
 應用程式採用精密的方式處理 PDF 中的藏文字型渲染：
 - 使用 Flutter 原生文字引擎預渲染藏文文字
-- 將文字轉換為高解析度 PNG 圖片（288 DPI）
+- 將文字轉換為高解析度 PNG 圖片（460 DPI）
 - 將圖片嵌入 PDF 以保留複雜的 OpenType 字型塑形
 - 基於 SHA-256 的圖片快取，提升重新渲染效率
 - 這個解決方案確保完美的藏文字型顯示，這是標準 PDF 文字渲染無法達成的
+
+### DPI 感知預覽
+- `ScreenDpiService` 透過原生平台通道查詢實體螢幕 DPI
+- 編輯器和匯出預覽會依實體螢幕縮放，與匯出 PDF 的物理尺寸一致
+- 確保預覽中的字型大小和列高與最終列印輸出相符
 
 ### 威利轉寫（Wylie）
 - 內建威利轉藏文 Unicode 轉換器
@@ -134,14 +140,16 @@ flutter run
 2. **新增內容**：新增包含藏文文字、讀音和翻譯的文字區塊
 3. **威利輸入**：使用威利轉寫透過拉丁鍵盤輸入藏文
 4. **讀音自動填入**：輸入藏文時，編輯器會自動從詞典填入讀音；未知音節以高亮和 `X` 標示
-5. **插入圖片**：在區塊中新增浮動圖片，可控制位置和尺寸
-6. **批次匯入**：從 CSV/TSV 檔案一次匯入多個文字區塊
-7. **編輯排版**：設定頁面設定、邊距、欄數、流間距、列分隔線和頁首頁尾
-8. **封面頁模板**：在設定頁面上傳 SVG 模板，然後依專案指定並設定內縮距離
-9. **字型設定**：依專案自訂藏文、讀音、翻譯和標題文字的字型
-10. **預覽**：使用縮放控制即時預覽文檔排版
-11. **匯出**：生成 PDF、匯出 HTML 或直接從應用程式列印
-12. **管理詞典**：開啟讀音詞典頁面，檢視、搜尋、編輯或刪除已儲存的音節項目，並可匯出／匯入 JSON
+5. **紅色強調**：在區塊的強調欄位輸入範圍（如 `1-4,6`），讓標題中選定的詞語在預覽和 PDF 中以紅字顯示
+6. **插入圖片**：在區塊中新增浮動圖片，可控制位置和尺寸
+7. **批次匯入**：從 CSV/TSV 檔案一次匯入多個文字區塊
+8. **編輯排版**：設定頁面設定、邊距、欄數、流間距、列分隔線和頁首頁尾
+9. **封面頁模板**：在設定頁面上傳 SVG 模板，然後依專案指定並設定內縮距離
+10. **內容頁模板**：為所有內容頁指定 SVG 背景，並設定匯出邊距
+11. **字型設定**：依專案自訂藏文、讀音、翻譯、標題文字及小字區塊大小的字型
+12. **預覽**：使用縮放控制即時查看 DPI 精確的文檔排版預覽
+13. **匯出**：生成 PDF、匯出 HTML 或直接從應用程式列印
+14. **管理詞典**：開啟讀音詞典頁面，檢視、搜尋、編輯或刪除已儲存的音節項目，並可匯出／匯入 JSON
 
 ![讀音詞典](screenshot/pronunciation%20dictionary.png)
 
@@ -179,16 +187,18 @@ lib/
 │   ├── undo_service.dart           # 復原/重做狀態管理
 │   ├── image_cache_service.dart    # 渲染文字圖片快取
 │   ├── image_storage_service.dart  # 區塊圖片檔案儲存
+│   ├── screen_dpi_service.dart     # 實體螢幕 DPI（用於精確預覽縮放）
 │   └── title_page_template_service.dart # 封面頁模板 CRUD
 ├── utils/                           # 工具程式
 │   ├── colors.dart                 # 色彩配置
+│   ├── content_page_template_layout.dart # 內容頁模板幾何工具
 │   ├── decorations.dart            # 輸入裝飾輔助
 │   ├── font_constants.dart         # 預設字型常數
 │   ├── sample_layout.dart          # 分頁邏輯
 │   ├── text_renderer.dart          # 文字轉圖片渲染
 │   ├── font_utils.dart             # 字型工具
 │   ├── wylie_converter.dart        # 威利轉藏文 Unicode 轉換器
-│   ├── tibetan_segmenter.dart      # 藏文音節切分（基於 tsheg）
+│   ├── tibetan_segmenter.dart      # 藏文音節切分與範圍標記解析
 │   ├── save_state_mixin.dart       # 儲存狀態 UI mixin
 │   ├── snackbar.dart               # SnackBar 輔助
 │   └── title_page_layout.dart      # 封面頁模板排版工具
@@ -196,6 +206,7 @@ lib/
     ├── app_shell.dart               # 通用架構
     ├── block_editor.dart            # 區塊編輯面板
     ├── block_strip.dart             # 區塊導航
+    ├── content_page_template_panel.dart # 內容頁模板控制
     ├── editor_page_setup_panel.dart # 頁面設定控制
     ├── export_pdf_settings_panel.dart # PDF 匯出設定
     ├── flow_spacing_panel.dart      # 流間距控制
@@ -253,9 +264,10 @@ flutter build linux
 - **UndoService**：管理復原/重做狀態堆疊（最多 50 個狀態）
 - **ImageCacheService**：基於 SHA-256 金鑰的渲染文字圖片快取
 - **ImageStorageService**：管理應用程式支援目錄中的區塊圖片檔案
+- **ScreenDpiService**：透過平台通道查詢實體螢幕 DPI，用於精確的預覽縮放
 - **TitlePageTemplateService**：自訂 SVG 封面頁模板的 CRUD 單例服務
 - **WylieConverter**：將威利轉寫轉換為藏文 Unicode
-- **TibetanSegmenter**：藏文音節切分工具，基於 tsheg（་）分割
+- **TibetanSegmenter**：藏文音節切分工具，基於 tsheg（་）分割；解析紅字範圍標記
 
 ### 頁面排版演算法
 

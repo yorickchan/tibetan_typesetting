@@ -5,10 +5,10 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = tibetan_typesetting
+PRODUCT_NAME = Tibetan Typesetting
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.tibetanTypesetting
+PRODUCT_BUNDLE_IDENTIFIER = com.linkomnia.tibetanTypesetting
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 com.linkomnia. All rights reserved.

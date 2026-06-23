@@ -1,6 +1,6 @@
 # Tibetan Typesetting
 
-[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.11**
+[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.12**
 
 <p align="center">
   <img src="assets/images/icon.png" width="128" alt="App Icon"/>
@@ -58,10 +58,11 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - Page and column break controls
 - Flow gap adjustment between text sections
 - Custom title page with Dharma Wheel symbol and configurable title fonts
-- **Custom SVG title page templates** with configurable insets — rendered as true vector graphics in PDF for crisp output at any zoom level
+- **Custom SVG title page templates** rendered as true vector graphics in PDF, with configurable insets for template and title text regions
+- **Content page templates** — apply an SVG background template to all content pages with configurable export margins
 - Opening mark blocks at the start of content
 - Optional row separator lines in editor preview and PDF export
-- Configurable small block font size — independently adjust font size for compact ("small text") blocks in both app settings and per-project font settings
+- Configurable small block font size — independently adjust font size for compact ("small text") blocks in app settings and per-project font settings
 - Flexible text sizing options with per-project font settings
 - Header and footer with configurable fields (file name, page number, date, custom text)
 
@@ -84,6 +85,11 @@ The application pre-renders Tibetan text to high-resolution PNG images (460 DPI)
 - The `pdf` package cannot perform OpenType shaping
 - PNG rasterization via Flutter's text engine produces correct Tibetan rendering at the cost of larger file size and minor pixelation at extreme zoom levels (>400%)
 - SHA-256 based image caching for efficient re-rendering
+
+### DPI-Aware Preview
+- `ScreenDpiService` queries the actual physical screen DPI via a native platform channel
+- The editor and export previews scale content to match the real physical size of the exported PDF
+- Ensures font sizes and row heights in the preview match the final printed output
 
 ### Wylie Transliteration
 - Built-in Wylie-to-Tibetan Unicode converter
@@ -135,14 +141,16 @@ Fonts can be configured per-project through the font settings panel. Make sure r
 2. **Add Content**: Add text blocks with Tibetan text, pronunciation, and translation
 3. **Wylie Input**: Type Tibetan using Wylie transliteration via Latin keyboard
 4. **Pronunciation Auto-fill**: The editor auto-fills pronunciation from the dictionary as you type; unknown syllables are highlighted and shown as `X`
-5. **Insert Images**: Add floating images to blocks with position and size control
-6. **Batch Import**: Import multiple text blocks at once from CSV/TSV files
-7. **Edit Layout**: Configure page setup, margins, column count, flow gap, row lines, and headers/footers
-8. **Title Page Templates**: Upload SVG templates in Settings, then assign them per project with configurable insets
-9. **Font Settings**: Customize fonts per-project for Tibetan, pronunciation, translation, and title text
-10. **Preview**: View live preview with zoom controls of your document layout
-11. **Export**: Generate PDF, export HTML, or print directly from the app
-12. **Manage Dictionary**: Open the Pronunciation Dictionary page to view, search, edit, or delete saved syllable entries and export/import the dictionary as JSON
+5. **Red Highlight**: Enter a range (e.g. `1-4,6`) in the block's highlight field to render selected heading words in red ink in both preview and PDF
+6. **Insert Images**: Add floating images to blocks with position and size control
+7. **Batch Import**: Import multiple text blocks at once from CSV/TSV files
+8. **Edit Layout**: Configure page setup, margins, column count, flow gap, row lines, and headers/footers
+9. **Title Page Templates**: Upload SVG templates in Settings, then assign them per project with configurable insets
+10. **Content Page Templates**: Assign an SVG background to all content pages with configurable export margins
+11. **Font Settings**: Customize fonts per-project for Tibetan, pronunciation, translation, title text, and small block size
+12. **Preview**: View live DPI-accurate preview with zoom controls of your document layout
+13. **Export**: Generate PDF, export HTML, or print directly from the app
+14. **Manage Dictionary**: Open the Pronunciation Dictionary page to view, search, edit, or delete saved syllable entries and export/import the dictionary as JSON
 
 ![Pronunciation Dictionary](screenshot/pronunciation%20dictionary.png)
 
@@ -180,16 +188,18 @@ lib/
 │   ├── undo_service.dart           # Undo/Redo state management
 │   ├── image_cache_service.dart    # Rendered text image caching
 │   ├── image_storage_service.dart  # Block image file storage
+│   ├── screen_dpi_service.dart     # Physical screen DPI for accurate preview
 │   └── title_page_template_service.dart # Title page template CRUD
 ├── utils/                           # Utilities
 │   ├── colors.dart                 # Color palette
+│   ├── content_page_template_layout.dart # Content page template geometry
 │   ├── decorations.dart            # Input decoration helpers
 │   ├── font_constants.dart         # Default font constants
 │   ├── sample_layout.dart          # Pagination logic
 │   ├── text_renderer.dart          # Text to image rendering
 │   ├── font_utils.dart             # Font utilities
 │   ├── wylie_converter.dart        # Wylie-to-Tibetan Unicode converter
-│   ├── tibetan_segmenter.dart      # Tsheg-based syllable extraction
+│   ├── tibetan_segmenter.dart      # Tsheg-based syllable/range extraction
 │   ├── save_state_mixin.dart       # Save state UI mixin
 │   ├── snackbar.dart               # SnackBar helper
 │   └── title_page_layout.dart      # Title page template layout utilities
@@ -197,6 +207,7 @@ lib/
     ├── app_shell.dart               # Common scaffold
     ├── block_editor.dart            # Block editing panel
     ├── block_strip.dart             # Block navigation
+    ├── content_page_template_panel.dart # Content page template controls
     ├── editor_page_setup_panel.dart # Page setup controls
     ├── export_pdf_settings_panel.dart # PDF export settings
     ├── flow_spacing_panel.dart      # Flow gap controls
@@ -254,9 +265,10 @@ flutter build linux
 - **UndoService**: Manages undo/redo state stack (max 50 states)
 - **ImageCacheService**: SHA-256 keyed cache for rendered text images
 - **ImageStorageService**: Manages block image files in app support directory
+- **ScreenDpiService**: Queries physical screen DPI via platform channel for accurate preview scaling
 - **TitlePageTemplateService**: CRUD singleton for custom SVG title page templates
 - **WylieConverter**: Converts Wylie transliteration to Tibetan Unicode
-- **TibetanSegmenter**: Utility for splitting Tibetan text into syllables by tsheg (་)
+- **TibetanSegmenter**: Splits Tibetan text into syllables by tsheg (་); parses range notation for red highlight
 
 ### Page Layout Algorithm
 
