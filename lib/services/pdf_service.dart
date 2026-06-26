@@ -19,6 +19,7 @@ import '../utils/text_renderer.dart';
 import '../utils/title_page_layout.dart';
 import 'font_service.dart';
 import 'settings_service.dart';
+import 'pdf_service_core.dart';
 
 /// Result of a PDF generation: the produced bytes together with any
 /// non-fatal warnings (e.g. fonts that fell back to a default because the
@@ -91,9 +92,17 @@ class PdfService {
     TextAlign textAlign = TextAlign.left,
   }) async {
     if (text.trim().isEmpty) return null;
-
-    final key =
-        '${text}_|_${fontFamily}_|_${fontSize}_|_${color.toARGB32()}_|_${maxWidth}_|_${lineHeight}_|_${topPadding}_|_${bottomPadding}_|_${textAlign}';
+    final key = renderCacheKey(
+      text: text,
+      fontFamily: fontFamily,
+      fontSize: fontSize,
+      color: color,
+      maxWidth: maxWidth,
+      lineHeight: lineHeight,
+      topPadding: topPadding,
+      bottomPadding: bottomPadding,
+      textAlign: textAlign,
+    );
     if (_renderCache.containsKey(key)) {
       return _renderCache[key];
     }
@@ -162,26 +171,8 @@ class PdfService {
     String text,
     Color letterColor,
     Color otherColor,
-  ) {
-    final spans = <TextSpanDef>[];
-    String? buf;
-    Color? bufColor;
-    for (int i = 0; i < text.length; i++) {
-      final c = text[i];
-      final color = isTibetanNonLetter(c.codeUnitAt(0))
-          ? otherColor
-          : letterColor;
-      if (bufColor == color) {
-        buf = buf! + c;
-      } else {
-        if (buf != null) spans.add(TextSpanDef(buf, bufColor!));
-        buf = c;
-        bufColor = color;
-      }
-    }
-    if (buf != null) spans.add(TextSpanDef(buf, bufColor!));
-    return spans;
-  }
+  ) =>
+      makeColorizedSpans(text, letterColor, otherColor);
   // Public API
   // ---------------------------------------------------------------------------
 
