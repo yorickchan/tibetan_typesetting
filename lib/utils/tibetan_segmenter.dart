@@ -2,9 +2,19 @@
 // U+0F0C ་ TIBETAN MARK DELIMITER TSHEG BSTAR (variant tsheg)
 final _splitPattern = RegExp('[\u0F0B\u0F0C]');
 
-// U+0F0D–U+0F14: shad variants and other Tibetan punctuation marks that
-// are not part of a syllable and must be stripped after splitting.
-final _stripPattern = RegExp('[\u0F0D-\u0F14\\s]');
+// U+0F04–U+0F1F: Tibetan marks and punctuation (gter shad, nyis shad,
+// shad variants, etc.). U+0F3A–U+0F3F: brackets and punctuation.
+// U+0FBE–U+0FDA: cantillation marks and signs.
+// These are not part of a syllable and must be stripped after splitting,
+// so that mark-only segments are skipped during pronunciation auto-fill.
+final _stripPattern = RegExp('[\u0F04-\u0F1F\u0F3A-\u0F3F\u0FBE-\u0FDA\\s]');
+
+// U+0F7A–U+0F7F: vowel signs (II, UU, vocalic R/RR/L/LL). These are
+// combining marks that are part of real syllables (e.g. བོད contains
+// U+0F7C). They must NOT be stripped from syllables. Instead, syllables
+// that consist entirely of these vowel signs (no consonant base) are
+// filtered out separately.
+final _vowelSignOnly = RegExp(r'^[\u0F7A-\u0F7F]+$');
 
 List<String> extractSyllables(String tibetanText) {
   if (tibetanText.isEmpty) return [];
@@ -12,7 +22,7 @@ List<String> extractSyllables(String tibetanText) {
   return tibetanText
       .split(_splitPattern)
       .map((s) => s.replaceAll(_stripPattern, ''))
-      .where((s) => s.isNotEmpty)
+      .where((s) => s.isNotEmpty && !_vowelSignOnly.hasMatch(s))
       .toList();
 }
 
