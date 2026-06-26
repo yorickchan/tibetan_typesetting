@@ -180,40 +180,74 @@ List<PageLayout> paginateBlocks(
   return pages;
 }
 
-double estimateBlockWidthFraction(TextBlock block, [double? contentWidthMm]) {
-  if (block.isImageBlock) {
-    if (block.imageWidthMm != null &&
-        contentWidthMm != null &&
-        contentWidthMm > 0) {
-      return (block.imageWidthMm! / contentWidthMm).clamp(0.05, 1.0);
+sealed class BlockWidthEstimate {
+  const BlockWidthEstimate();
+  factory BlockWidthEstimate.from(TextBlock block) {
+    if (block.isImageBlock) return ImageWidth(block.imageWidthMm);
+    final manual = block.columnSpan;
+    if (manual != null) return ManualWidth(manual);
+    if (block.isOpeningMark) return const OpeningMarkWidth();
+    return TextWidth(
+      tibetanLen: splitLines(block.tibetan).join('').runes.length,
+      pronLen: block.isFreeText
+          ? 0
+          : splitLines(block.chinesePronunciation).join('').runes.length,
+      transLen: block.isFreeText
+          ? 0
+          : splitLines(block.chineseTranslation).join('').runes.length,
+    );
+  }
+  double fraction([double? contentWidthMm]);
+}
+
+final class ImageWidth extends BlockWidthEstimate {
+  final double? widthMm;
+  const ImageWidth(this.widthMm);
+  @override
+  double fraction([double? contentWidthMm]) {
+    if (widthMm != null && contentWidthMm != null && contentWidthMm > 0) {
+      return (widthMm! / contentWidthMm).clamp(0.05, 1.0);
     }
     return 0.45;
   }
-
-  final manual = block.columnSpan;
-  if (manual != null) {
-    return manual.clamp(1, maxColumnSpan) / maxColumnSpan;
-  }
-
-  if (block.isOpeningMark) {
-    return 2.0 / maxColumnSpan;
-  }
-
-  final tibetanLen = splitLines(block.tibetan).join('').runes.length;
-  final pronLen = block.isFreeText
-      ? 0
-      : splitLines(block.chinesePronunciation).join('').runes.length;
-  final transLen = block.isFreeText
-      ? 0
-      : splitLines(block.chineseTranslation).join('').runes.length;
-  final score = [
-    tibetanLen * 1.15,
-    pronLen * 0.62,
-    transLen * 0.62,
-  ].reduce((a, b) => a > b ? a : b);
-
-  return (0.07 + score / 260).clamp(0.09, 0.52);
 }
+
+final class ManualWidth extends BlockWidthEstimate {
+  final int span;
+  const ManualWidth(this.span);
+  @override
+  double fraction([double? contentWidthMm]) =>
+      span.clamp(1, maxColumnSpan) / maxColumnSpan;
+}
+
+final class OpeningMarkWidth extends BlockWidthEstimate {
+  const OpeningMarkWidth();
+  @override
+  double fraction([double? contentWidthMm]) => 2.0 / maxColumnSpan;
+}
+
+final class TextWidth extends BlockWidthEstimate {
+  final int tibetanLen;
+  final int pronLen;
+  final int transLen;
+  const TextWidth({
+    required this.tibetanLen,
+    required this.pronLen,
+    required this.transLen,
+  });
+  @override
+  double fraction([double? contentWidthMm]) {
+    final score = [
+      tibetanLen * 1.15,
+      pronLen * 0.62,
+      transLen * 0.62,
+    ].reduce((a, b) => a > b ? a : b);
+    return (0.07 + score / 260).clamp(0.09, 0.52);
+  }
+}
+
+double estimateBlockWidthFraction(TextBlock block, [double? contentWidthMm]) =>
+    BlockWidthEstimate.from(block).fraction(contentWidthMm);
 
 double contentTibetanLineHeight({required bool smallText}) {
   return 1.0;
