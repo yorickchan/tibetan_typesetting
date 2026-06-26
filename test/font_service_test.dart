@@ -26,7 +26,7 @@ void main() {
     });
 
     test('deduplicates visible font families', () {
-      final fonts = FontService.deduplicateFamilies([
+      final fonts = deduplicateFamilies([
         const SystemFontInfo(
           familyName: 'New York Large',
           filePath: '/System/Library/Fonts/NewYorkLarge-Regular.otf',
