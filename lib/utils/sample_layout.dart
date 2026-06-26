@@ -354,29 +354,20 @@ bool shouldUseShortRow(
   double? minimumHeight,
 }) {
   if (row.isEmpty) return false;
-
-  var hasSmallBlock = false;
-  for (final cell in row) {
-    final block = cell.block;
-    if (!block.smallText && !block.isFreeText) return false;
-    hasSmallBlock = true;
-
-    if (block.isFreeText) {
-      if (splitLines(block.tibetan).length > 1) return false;
-      continue;
-    }
-
-    if (splitLines(block.tibetan).length > 1) return false;
-    if (splitLines(block.chinesePronunciation).length > 1) return false;
-  }
-
   if (availableHeight != null &&
       minimumHeight != null &&
       availableHeight < minimumHeight) {
     return false;
   }
-
-  return hasSmallBlock;
+  return row.every((cell) {
+    final block = cell.block;
+    if (!block.smallText && !block.isFreeText) return false;
+    if (block.isFreeText) {
+      return splitLines(block.tibetan).length <= 1;
+    }
+    return splitLines(block.tibetan).length <= 1 &&
+        splitLines(block.chinesePronunciation).length <= 1;
+  });
 }
 
 double estimateCompactSmallRowHeight(
@@ -387,31 +378,26 @@ double estimateCompactSmallRowHeight(
   double tibetanLineHeight = 1.2,
   double chineseLineHeight = contentChineseLineHeight,
 }) {
-  var maxHeight = 0.0;
-
-  for (final cell in row) {
-    final block = cell.block;
-    var height = topPadding;
-
-    if (block.isFreeText) {
-      if (splitLines(block.tibetan).isNotEmpty) {
-        height += chineseFontSize * chineseLineHeight;
+  return row.fold<double>(
+    0,
+    (maxHeight, cell) {
+      final block = cell.block;
+      var height = topPadding;
+      if (block.isFreeText) {
+        if (splitLines(block.tibetan).isNotEmpty) {
+          height += chineseFontSize * chineseLineHeight;
+        }
+        return height > maxHeight ? height : maxHeight;
       }
-      if (height > maxHeight) maxHeight = height;
-      continue;
-    }
-
-    if (splitLines(block.tibetan).isNotEmpty) {
-      height += tibetanFontSize * tibetanLineHeight;
-    }
-    if (splitLines(block.chinesePronunciation).isNotEmpty) {
-      height += 2 + chineseFontSize * chineseLineHeight;
-    }
-
-    if (height > maxHeight) maxHeight = height;
-  }
-
-  return maxHeight;
+      if (splitLines(block.tibetan).isNotEmpty) {
+        height += tibetanFontSize * tibetanLineHeight;
+      }
+      if (splitLines(block.chinesePronunciation).isNotEmpty) {
+        height += 2 + chineseFontSize * chineseLineHeight;
+      }
+      return height > maxHeight ? height : maxHeight;
+    },
+  );
 }
 
 List<double> resolveContentRowHeights(
@@ -422,39 +408,37 @@ List<double> resolveContentRowHeights(
   if (rows.isEmpty) return const [];
 
   final baseHeight = contentHeight / rows.length;
-  final rowHeights = List<double>.filled(rows.length, baseHeight);
-  final compactRows = <int>[];
+  final compactIndices = <int>[
+    for (var i = 0; i < rows.length; i++)
+      if (shouldUseShortRow(
+        rows[i],
+        availableHeight: baseHeight,
+        minimumHeight: compactMinimumHeights[i],
+      ))
+        i,
+  ];
+  final isCompact = {for (final i in compactIndices) i};
 
-  for (var index = 0; index < rows.length; index++) {
-    final minimumHeight = compactMinimumHeights[index];
-    if (shouldUseShortRow(
-      rows[index],
-      availableHeight: baseHeight,
-      minimumHeight: minimumHeight,
-    )) {
-      rowHeights[index] = minimumHeight;
-      compactRows.add(index);
-    }
+  if (compactIndices.isEmpty || compactIndices.length == rows.length) {
+    return [
+      for (var i = 0; i < rows.length; i++)
+        isCompact.contains(i) ? compactMinimumHeights[i] : baseHeight,
+    ];
   }
 
-  if (compactRows.isEmpty || compactRows.length == rows.length) {
-    return rowHeights;
-  }
-
-  final releasedHeight = compactRows.fold<double>(
+  final releasedHeight = compactIndices.fold<double>(
     0,
-    (sum, index) => sum + baseHeight - rowHeights[index],
+    (sum, i) => sum + baseHeight - compactMinimumHeights[i],
   );
-  final normalRowCount = rows.length - compactRows.length;
+  final normalRowCount = rows.length - compactIndices.length;
   final normalRowExtraHeight = releasedHeight / normalRowCount;
 
-  for (var index = 0; index < rows.length; index++) {
-    if (!compactRows.contains(index)) {
-      rowHeights[index] += normalRowExtraHeight;
-    }
-  }
-
-  return rowHeights;
+  return [
+    for (var i = 0; i < rows.length; i++)
+      isCompact.contains(i)
+          ? compactMinimumHeights[i]
+          : baseHeight + normalRowExtraHeight,
+  ];
 }
 
 List<List<TextBlock?>> _legacyRows(

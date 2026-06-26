@@ -105,4 +105,35 @@ void main() {
       expect(allBlockIds, isNot(contains('float')));
     });
   });
+
+  group('resolveContentRowHeights', () {
+    test('all-compact rows return minimums unchanged', () {
+      final rows = [
+        [LayoutCell(block: TextBlock(id: 's1', tibetan: 'x', smallText: true), leftFraction: 0, widthFraction: 1)],
+        [LayoutCell(block: TextBlock(id: 's2', tibetan: 'x', smallText: true), leftFraction: 0, widthFraction: 1)],
+      ];
+      expect(
+        resolveContentRowHeights(rows, contentHeight: 100, compactMinimumHeights: [20, 30]),
+        [20, 30],
+      );
+    });
+
+    test('all-normal rows split content height equally', () {
+      final rows = [
+        [LayoutCell(block: TextBlock(id: 'n1', tibetan: 'x'), leftFraction: 0, widthFraction: 1)],
+        [LayoutCell(block: TextBlock(id: 'n2', tibetan: 'x'), leftFraction: 0, widthFraction: 1)],
+      ];
+      expect(
+        resolveContentRowHeights(rows, contentHeight: 100, compactMinimumHeights: [0, 0]),
+        [50, 50],
+      );
+    });
+
+    test('empty rows returns empty', () {
+      expect(
+        resolveContentRowHeights(const [], contentHeight: 100, compactMinimumHeights: const []),
+        isEmpty,
+      );
+    });
+  });
 }
