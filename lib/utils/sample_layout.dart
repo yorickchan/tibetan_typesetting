@@ -62,49 +62,103 @@ List<_Row> _buildRows(
   double gapFraction, [
   double? contentWidthMm,
 ]) {
-  final rows = <_Row>[];
   final gap = gapFraction.clamp(0.0, 0.08);
-  var current = <LayoutCell>[];
-  var cursor = 0.0;
-  var pendingPageBreak = false;
 
-  void pushRow() {
-    if (current.isEmpty) return;
-    rows.add(_Row(cells: current, pageBreakBefore: pendingPageBreak));
-    current = [];
-    cursor = 0;
-    pendingPageBreak = false;
-  }
-
-  for (final block in blocks) {
-    if (block.floatingImage) continue;
-    if (block.pageBreakBefore && current.isNotEmpty) {
-      pushRow();
+  ({List<LayoutCell> current, double cursor, bool pendingBreak, List<_Row> rows})
+  flush({
+    required List<LayoutCell> current,
+    required double cursor,
+    required bool pendingBreak,
+    required List<_Row> rows,
+  }) {
+    if (current.isEmpty) {
+      return (
+        current: current,
+        cursor: cursor,
+        pendingBreak: pendingBreak,
+        rows: rows,
+      );
     }
-    if (block.pageBreakBefore && current.isEmpty) {
-      pendingPageBreak = true;
-    }
-    if (block.columnBreakBefore && current.isNotEmpty) {
-      pushRow();
-    }
-
-    final width = estimateBlockWidthFraction(block, contentWidthMm);
-    if (current.isNotEmpty && cursor + width > 1.0) {
-      pushRow();
-    }
-
-    current.add(
-      LayoutCell(
-        block: block,
-        leftFraction: cursor,
-        widthFraction: width.clamp(0.08, (1.0 - cursor).clamp(0.08, 1.0)),
-      ),
+    return (
+      current: const [],
+      cursor: 0.0,
+      pendingBreak: false,
+      rows: [...rows, _Row(cells: current, pageBreakBefore: pendingBreak)],
     );
-    cursor += width + gap;
   }
 
-  pushRow();
-  return rows;
+  final flowBlocks = blocks.where((b) => !b.floatingImage);
+
+  final result = flowBlocks
+      .fold<
+        ({
+          List<LayoutCell> current,
+          double cursor,
+          bool pendingBreak,
+          List<_Row> rows,
+        })
+      >(
+        (current: const [], cursor: 0.0, pendingBreak: false, rows: const []),
+        (acc, block) {
+          var s = acc;
+          if (block.pageBreakBefore && s.current.isNotEmpty) {
+            s = flush(
+              current: s.current,
+              cursor: s.cursor,
+              pendingBreak: s.pendingBreak,
+              rows: s.rows,
+            );
+          }
+          if (block.pageBreakBefore && s.current.isEmpty) {
+            s = (
+              current: s.current,
+              cursor: s.cursor,
+              pendingBreak: true,
+              rows: s.rows,
+            );
+          }
+          if (block.columnBreakBefore && s.current.isNotEmpty) {
+            s = flush(
+              current: s.current,
+              cursor: s.cursor,
+              pendingBreak: s.pendingBreak,
+              rows: s.rows,
+            );
+          }
+          final width = estimateBlockWidthFraction(block, contentWidthMm);
+          if (s.current.isNotEmpty && s.cursor + width > 1.0) {
+            s = flush(
+              current: s.current,
+              cursor: s.cursor,
+              pendingBreak: s.pendingBreak,
+              rows: s.rows,
+            );
+          }
+          final clampedWidth =
+              width.clamp(0.08, (1.0 - s.cursor).clamp(0.08, 1.0));
+          return (
+            current: [
+              ...s.current,
+              LayoutCell(
+                block: block,
+                leftFraction: s.cursor,
+                widthFraction: clampedWidth,
+              ),
+            ],
+            cursor: s.cursor + width + gap,
+            pendingBreak: s.pendingBreak,
+            rows: s.rows,
+          );
+        },
+      );
+
+  final finalFlushed = flush(
+    current: result.current,
+    cursor: result.cursor,
+    pendingBreak: result.pendingBreak,
+    rows: result.rows,
+  );
+  return finalFlushed.rows;
 }
 
 List<PageLayout> paginateBlocks(

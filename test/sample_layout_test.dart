@@ -62,4 +62,47 @@ void main() {
       expect(estimate.fraction(), 2.0 / maxColumnSpan);
     });
   });
+
+  group('_buildRows via paginateBlocks', () {
+    test('packs blocks into rows respecting 1.0 width limit', () {
+      final blocks = List.generate(
+        10,
+        (i) => TextBlock(id: 'b$i', tibetan: 'text $i', columnSpan: 8),
+      );
+      final pages = paginateBlocks(blocks, 4, 4);
+      final rows = pages[0].flowRows;
+      expect(rows.length, greaterThan(1));
+      for (final row in rows) {
+        final totalWidth = row.fold<double>(
+          0,
+          (sum, cell) => sum + cell.widthFraction,
+        );
+        expect(totalWidth, lessThanOrEqualTo(1.0 + 0.0001));
+      }
+    });
+
+    test('pageBreakBefore on empty start sets pending break', () {
+      final blocks = [
+        TextBlock(id: 'b1', tibetan: 'a', pageBreakBefore: true),
+      ];
+      final pages = paginateBlocks(blocks, 4, 4);
+      expect(pages.length, 1);
+      expect(pages[0].flowRows[0].single.block.id, 'b1');
+    });
+
+    test('floating images are excluded from rows', () {
+      final blocks = [
+        TextBlock(id: 'b1', tibetan: 'a'),
+        TextBlock(id: 'float', tibetan: '', floatingImage: true),
+        TextBlock(id: 'b2', tibetan: 'b'),
+      ];
+      final pages = paginateBlocks(blocks, 4, 4);
+      final allBlockIds = pages
+          .expand((p) => p.flowRows)
+          .expand((r) => r)
+          .map((c) => c.block.id)
+          .toList();
+      expect(allBlockIds, isNot(contains('float')));
+    });
+  });
 }
