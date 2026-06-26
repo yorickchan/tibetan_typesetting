@@ -176,62 +176,83 @@ List<PageLayout> paginateBlocks(
   }
 
   final rows = _buildRows(blocks, gapFraction, contentWidthMm);
-  final pages = <PageLayout>[];
-  var current = <_Row>[];
 
-  void pushPage() {
-    if (current.isEmpty) return;
-    pages.add(
-      PageLayout(
-        colCount: effectiveColCount,
-        flowRows: current.map((row) => row.cells).toList(),
-      ),
-    );
-    current = [];
-  }
-
-  for (final row in rows) {
-    if (row.pageBreakBefore && current.isNotEmpty) {
-      pushPage();
-    }
-    current.add(row);
-    if (current.length >= rowsPerPage) {
-      pushPage();
-    }
-  }
-
-  if (current.isNotEmpty) pushPage();
-
-  // Assign floating images to pages
-  final floatImages = blocks.where((b) => b.floatingImage).toList();
-  if (floatImages.isNotEmpty && pages.isNotEmpty) {
-    for (final fi in floatImages) {
-      final fiIdx = blocks.indexOf(fi);
-      var nonFloatingSeen = 0;
-      var assignedPage = 0;
-      for (var pi = 0; pi < pages.length; pi++) {
-        final pageBlockCount = pages[pi].flowRows.expand((r) => r).length;
-        if (fiIdx <= nonFloatingSeen + pageBlockCount) {
-          assignedPage = pi;
-          break;
-        }
-        nonFloatingSeen += pageBlockCount;
-        assignedPage = pi;
+  final result = rows.fold<
+    ({List<List<_Row>> pages, List<_Row> current})
+  >(
+    (pages: const [], current: const []),
+    (acc, row) {
+      var current = acc.current;
+      var pages = acc.pages;
+      if (row.pageBreakBefore && current.isNotEmpty) {
+        pages = [...pages, current];
+        current = const [];
       }
-      final clamped = assignedPage.clamp(0, pages.length - 1);
-      final p = pages[clamped];
-      pages[clamped] = PageLayout(
-        colCount: p.colCount,
-        flowRows: p.flowRows,
-        floatingImages: [...p.floatingImages, fi],
-      );
-    }
-  }
+      current = [...current, row];
+      if (current.length >= rowsPerPage) {
+        pages = [...pages, current];
+        current = const [];
+      }
+      return (pages: pages, current: current);
+    },
+  );
+  final builtPages = result.current.isEmpty
+      ? result.pages
+      : [...result.pages, result.current];
+  var pages = builtPages
+      .map((rows) => PageLayout(
+            colCount: effectiveColCount,
+            flowRows: rows.map((r) => r.cells).toList(),
+          ))
+      .toList();
 
   if (pages.isEmpty) {
-    pages.add(PageLayout(colCount: effectiveColCount, flowRows: []));
+    pages = [PageLayout(colCount: effectiveColCount, flowRows: const [])];
+  }
+
+  pages = _assignFloatingImages(blocks, pages);
+
+  if (pages.isEmpty) {
+    pages = [PageLayout(colCount: effectiveColCount, flowRows: const [])];
   }
   return pages;
+}
+
+List<PageLayout> _assignFloatingImages(
+  List<TextBlock> blocks,
+  List<PageLayout> pages,
+) {
+  final floatImages = blocks.where((b) => b.floatingImage);
+  return floatImages.fold<List<PageLayout>>(
+    pages,
+    (currentPages, fi) {
+      final fiIdx = blocks.indexOf(fi);
+      final targetIndex = _findFloatingImagePage(fiIdx, currentPages);
+      return [
+        for (var pi = 0; pi < currentPages.length; pi++)
+          if (pi == targetIndex)
+            PageLayout(
+              colCount: currentPages[pi].colCount,
+              flowRows: currentPages[pi].flowRows,
+              floatingImages: [...currentPages[pi].floatingImages, fi],
+            )
+          else
+            currentPages[pi],
+      ];
+    },
+  );
+}
+
+int _findFloatingImagePage(int fiIdx, List<PageLayout> pages) {
+  var nonFloatingSeen = 0;
+  for (var pi = 0; pi < pages.length; pi++) {
+    final pageBlockCount = pages[pi].flowRows.expand((r) => r).length;
+    if (fiIdx <= nonFloatingSeen + pageBlockCount) {
+      return pi;
+    }
+    nonFloatingSeen += pageBlockCount;
+  }
+  return (pages.length - 1).clamp(0, pages.isEmpty ? 0 : pages.length - 1);
 }
 
 sealed class BlockWidthEstimate {

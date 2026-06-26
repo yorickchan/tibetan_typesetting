@@ -143,6 +143,31 @@ void main() {
       expect(pages[0].floatingImages.length, 1);
       expect(pages[0].floatingImages.first.id, 'img');
     });
+
+    test('multiple floating images assign to correct pages', () {
+      final blocks = [
+        TextBlock(id: 'b1', tibetan: 'a', columnSpan: 24),
+        TextBlock(id: 'b2', tibetan: 'b', columnSpan: 24),
+        TextBlock(id: 'b3', tibetan: 'c', columnSpan: 24),
+        TextBlock(id: 'b4', tibetan: 'd', columnSpan: 24),
+        TextBlock(id: 'f1', tibetan: '', floatingImage: true),
+        TextBlock(id: 'f2', tibetan: '', floatingImage: true),
+      ];
+      final pages = paginateBlocks(blocks, 4, 1);
+      final allFloating =
+          pages.expand((p) => p.floatingImages).map((b) => b.id);
+      expect(allFloating, containsAll(['f1', 'f2']));
+    });
+
+    test('floating image before all content assigns to first page', () {
+      final blocks = [
+        TextBlock(id: 'f', tibetan: '', floatingImage: true),
+        TextBlock(id: 'b1', tibetan: 'a', columnSpan: 24),
+        TextBlock(id: 'b2', tibetan: 'b', columnSpan: 24),
+      ];
+      final pages = paginateBlocks(blocks, 4, 1);
+      expect(pages.first.floatingImages.any((b) => b.id == 'f'), isTrue);
+    });
   });
 
   group('splitLines', () {
