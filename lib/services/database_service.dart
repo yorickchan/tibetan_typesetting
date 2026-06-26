@@ -4,6 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/project.dart';
+import 'database_service_core.dart';
 
 const _uuid = Uuid();
 
@@ -96,46 +97,17 @@ class DatabaseService {
       )
     ''');
   }
-
   Future<List<ProjectListItem>> listProjects({String? query, String? tag}) async {
     final db = await database;
-
-    final q = (query ?? '').trim().toLowerCase();
-    final t = (tag ?? '').trim().toLowerCase();
-
-    // Build WHERE clauses for SQL-level filtering
-    final whereClauses = <String>[];
-    final whereArgs = <dynamic>[];
-
-    if (q.isNotEmpty) {
-      whereClauses.add('(LOWER(name) LIKE ? OR LOWER(tags_json) LIKE ?)');
-      whereArgs.add('%$q%');
-      whereArgs.add('%$q%');
-    }
-    if (t.isNotEmpty) {
-      whereClauses.add('LOWER(tags_json) LIKE ?');
-      whereArgs.add('%"$t"%');
-    }
-
-    final where = whereClauses.isNotEmpty ? whereClauses.join(' AND ') : null;
-
+    final queryResult = buildProjectQuery(query: query, tag: tag);
     final rows = await db.query(
       'projects',
       columns: ['id', 'name', 'tags_json', 'updated_at'],
-      where: where,
-      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
+      where: queryResult.where,
+      whereArgs: queryResult.args.isNotEmpty ? queryResult.args : null,
       orderBy: 'updated_at DESC',
     );
-
-    return rows.map((row) {
-      final tags = (jsonDecode(row['tags_json'] as String) as List<dynamic>).cast<String>();
-      return ProjectListItem(
-        id: row['id'] as String,
-        name: row['name'] as String,
-        tags: tags,
-        updatedAt: row['updated_at'] as String,
-      );
-    }).toList();
+    return rows.map(rowToProjectListItem).toList();
   }
 
   Future<Project> createProject({
@@ -241,31 +213,17 @@ class DatabaseService {
 
   Future<Project> importProject(Project project) async {
     final now = nowIso();
-    final blocks = project.blocks
-        .map((b) => b.id.isEmpty
-            ? b.copyWith(id: _uuid.v4().replaceAll('-', ''))
-            : b)
-        .toList();
-    final finalBlocks = blocks.isEmpty
-        ? [TextBlock(id: _uuid.v4().replaceAll('-', ''))]
-        : blocks;
+    String genId() => _uuid.v4().replaceAll('-', '');
     final finalImported = project.copyWith(
-      id: _uuid.v4().replaceAll('-', ''),
+      id: genId(),
       createdAt: now,
       updatedAt: now,
-      blocks: finalBlocks,
+      blocks: normalizeImportedBlocks(project.blocks, genId),
     );
 
     final db = await database;
     await db.transaction((txn) async {
-      await txn.insert('projects', {
-        'id': finalImported.id,
-        'name': finalImported.name,
-        'tags_json': jsonEncode(finalImported.tags),
-        'project_json': finalImported.toJsonString(),
-        'created_at': finalImported.createdAt,
-        'updated_at': finalImported.updatedAt,
-      });
+      await txn.insert('projects', projectToRow(finalImported));
     });
 
     return finalImported;
