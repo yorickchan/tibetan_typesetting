@@ -497,7 +497,7 @@ class TextBlock {
   final double? imageXMm;
   final double? imageYMm;
   final String redHighlightRange;
-  TextBlock({
+  const TextBlock({
     required this.id,
     this.tibetan = '',
     this.chinesePronunciation = '',
