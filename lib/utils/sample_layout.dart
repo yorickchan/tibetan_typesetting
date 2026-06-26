@@ -62,49 +62,103 @@ List<_Row> _buildRows(
   double gapFraction, [
   double? contentWidthMm,
 ]) {
-  final rows = <_Row>[];
   final gap = gapFraction.clamp(0.0, 0.08);
-  var current = <LayoutCell>[];
-  var cursor = 0.0;
-  var pendingPageBreak = false;
 
-  void pushRow() {
-    if (current.isEmpty) return;
-    rows.add(_Row(cells: current, pageBreakBefore: pendingPageBreak));
-    current = [];
-    cursor = 0;
-    pendingPageBreak = false;
-  }
-
-  for (final block in blocks) {
-    if (block.floatingImage) continue;
-    if (block.pageBreakBefore && current.isNotEmpty) {
-      pushRow();
+  ({List<LayoutCell> current, double cursor, bool pendingBreak, List<_Row> rows})
+  flush({
+    required List<LayoutCell> current,
+    required double cursor,
+    required bool pendingBreak,
+    required List<_Row> rows,
+  }) {
+    if (current.isEmpty) {
+      return (
+        current: current,
+        cursor: cursor,
+        pendingBreak: pendingBreak,
+        rows: rows,
+      );
     }
-    if (block.pageBreakBefore && current.isEmpty) {
-      pendingPageBreak = true;
-    }
-    if (block.columnBreakBefore && current.isNotEmpty) {
-      pushRow();
-    }
-
-    final width = estimateBlockWidthFraction(block, contentWidthMm);
-    if (current.isNotEmpty && cursor + width > 1.0) {
-      pushRow();
-    }
-
-    current.add(
-      LayoutCell(
-        block: block,
-        leftFraction: cursor,
-        widthFraction: width.clamp(0.08, (1.0 - cursor).clamp(0.08, 1.0)),
-      ),
+    return (
+      current: const [],
+      cursor: 0.0,
+      pendingBreak: false,
+      rows: [...rows, _Row(cells: current, pageBreakBefore: pendingBreak)],
     );
-    cursor += width + gap;
   }
 
-  pushRow();
-  return rows;
+  final flowBlocks = blocks.where((b) => !b.floatingImage);
+
+  final result = flowBlocks
+      .fold<
+        ({
+          List<LayoutCell> current,
+          double cursor,
+          bool pendingBreak,
+          List<_Row> rows,
+        })
+      >(
+        (current: const [], cursor: 0.0, pendingBreak: false, rows: const []),
+        (acc, block) {
+          var s = acc;
+          if (block.pageBreakBefore && s.current.isNotEmpty) {
+            s = flush(
+              current: s.current,
+              cursor: s.cursor,
+              pendingBreak: s.pendingBreak,
+              rows: s.rows,
+            );
+          }
+          if (block.pageBreakBefore && s.current.isEmpty) {
+            s = (
+              current: s.current,
+              cursor: s.cursor,
+              pendingBreak: true,
+              rows: s.rows,
+            );
+          }
+          if (block.columnBreakBefore && s.current.isNotEmpty) {
+            s = flush(
+              current: s.current,
+              cursor: s.cursor,
+              pendingBreak: s.pendingBreak,
+              rows: s.rows,
+            );
+          }
+          final width = estimateBlockWidthFraction(block, contentWidthMm);
+          if (s.current.isNotEmpty && s.cursor + width > 1.0) {
+            s = flush(
+              current: s.current,
+              cursor: s.cursor,
+              pendingBreak: s.pendingBreak,
+              rows: s.rows,
+            );
+          }
+          final clampedWidth =
+              width.clamp(0.08, (1.0 - s.cursor).clamp(0.08, 1.0));
+          return (
+            current: [
+              ...s.current,
+              LayoutCell(
+                block: block,
+                leftFraction: s.cursor,
+                widthFraction: clampedWidth,
+              ),
+            ],
+            cursor: s.cursor + width + gap,
+            pendingBreak: s.pendingBreak,
+            rows: s.rows,
+          );
+        },
+      );
+
+  final finalFlushed = flush(
+    current: result.current,
+    cursor: result.cursor,
+    pendingBreak: result.pendingBreak,
+    rows: result.rows,
+  );
+  return finalFlushed.rows;
 }
 
 List<PageLayout> paginateBlocks(
@@ -122,98 +176,153 @@ List<PageLayout> paginateBlocks(
   }
 
   final rows = _buildRows(blocks, gapFraction, contentWidthMm);
-  final pages = <PageLayout>[];
-  var current = <_Row>[];
 
-  void pushPage() {
-    if (current.isEmpty) return;
-    pages.add(
-      PageLayout(
-        colCount: effectiveColCount,
-        flowRows: current.map((row) => row.cells).toList(),
-      ),
-    );
-    current = [];
-  }
-
-  for (final row in rows) {
-    if (row.pageBreakBefore && current.isNotEmpty) {
-      pushPage();
-    }
-    current.add(row);
-    if (current.length >= rowsPerPage) {
-      pushPage();
-    }
-  }
-
-  if (current.isNotEmpty) pushPage();
-
-  // Assign floating images to pages
-  final floatImages = blocks.where((b) => b.floatingImage).toList();
-  if (floatImages.isNotEmpty && pages.isNotEmpty) {
-    for (final fi in floatImages) {
-      final fiIdx = blocks.indexOf(fi);
-      var nonFloatingSeen = 0;
-      var assignedPage = 0;
-      for (var pi = 0; pi < pages.length; pi++) {
-        final pageBlockCount = pages[pi].flowRows.expand((r) => r).length;
-        if (fiIdx <= nonFloatingSeen + pageBlockCount) {
-          assignedPage = pi;
-          break;
-        }
-        nonFloatingSeen += pageBlockCount;
-        assignedPage = pi;
+  final result = rows.fold<
+    ({List<List<_Row>> pages, List<_Row> current})
+  >(
+    (pages: const [], current: const []),
+    (acc, row) {
+      var current = acc.current;
+      var pages = acc.pages;
+      if (row.pageBreakBefore && current.isNotEmpty) {
+        pages = [...pages, current];
+        current = const [];
       }
-      final clamped = assignedPage.clamp(0, pages.length - 1);
-      final p = pages[clamped];
-      pages[clamped] = PageLayout(
-        colCount: p.colCount,
-        flowRows: p.flowRows,
-        floatingImages: [...p.floatingImages, fi],
-      );
-    }
-  }
+      current = [...current, row];
+      if (current.length >= rowsPerPage) {
+        pages = [...pages, current];
+        current = const [];
+      }
+      return (pages: pages, current: current);
+    },
+  );
+  final builtPages = result.current.isEmpty
+      ? result.pages
+      : [...result.pages, result.current];
+  var pages = builtPages
+      .map((rows) => PageLayout(
+            colCount: effectiveColCount,
+            flowRows: rows.map((r) => r.cells).toList(),
+          ))
+      .toList();
 
   if (pages.isEmpty) {
-    pages.add(PageLayout(colCount: effectiveColCount, flowRows: []));
+    pages = [PageLayout(colCount: effectiveColCount, flowRows: const [])];
+  }
+
+  pages = _assignFloatingImages(blocks, pages);
+
+  if (pages.isEmpty) {
+    pages = [PageLayout(colCount: effectiveColCount, flowRows: const [])];
   }
   return pages;
 }
 
-double estimateBlockWidthFraction(TextBlock block, [double? contentWidthMm]) {
-  if (block.isImageBlock) {
-    if (block.imageWidthMm != null &&
-        contentWidthMm != null &&
-        contentWidthMm > 0) {
-      return (block.imageWidthMm! / contentWidthMm).clamp(0.05, 1.0);
+List<PageLayout> _assignFloatingImages(
+  List<TextBlock> blocks,
+  List<PageLayout> pages,
+) {
+  final floatImages = blocks.where((b) => b.floatingImage);
+  return floatImages.fold<List<PageLayout>>(
+    pages,
+    (currentPages, fi) {
+      final fiIdx = blocks.indexOf(fi);
+      final targetIndex = _findFloatingImagePage(fiIdx, currentPages);
+      return [
+        for (var pi = 0; pi < currentPages.length; pi++)
+          if (pi == targetIndex)
+            PageLayout(
+              colCount: currentPages[pi].colCount,
+              flowRows: currentPages[pi].flowRows,
+              floatingImages: [...currentPages[pi].floatingImages, fi],
+            )
+          else
+            currentPages[pi],
+      ];
+    },
+  );
+}
+
+int _findFloatingImagePage(int fiIdx, List<PageLayout> pages) {
+  var nonFloatingSeen = 0;
+  for (var pi = 0; pi < pages.length; pi++) {
+    final pageBlockCount = pages[pi].flowRows.expand((r) => r).length;
+    if (fiIdx <= nonFloatingSeen + pageBlockCount) {
+      return pi;
+    }
+    nonFloatingSeen += pageBlockCount;
+  }
+  return (pages.length - 1).clamp(0, pages.isEmpty ? 0 : pages.length - 1);
+}
+
+sealed class BlockWidthEstimate {
+  const BlockWidthEstimate();
+  factory BlockWidthEstimate.from(TextBlock block) {
+    if (block.isImageBlock) return ImageWidth(block.imageWidthMm);
+    final manual = block.columnSpan;
+    if (manual != null) return ManualWidth(manual);
+    if (block.isOpeningMark) return const OpeningMarkWidth();
+    return TextWidth(
+      tibetanLen: splitLines(block.tibetan).join('').runes.length,
+      pronLen: block.isFreeText
+          ? 0
+          : splitLines(block.chinesePronunciation).join('').runes.length,
+      transLen: block.isFreeText
+          ? 0
+          : splitLines(block.chineseTranslation).join('').runes.length,
+    );
+  }
+  double fraction([double? contentWidthMm]);
+}
+
+final class ImageWidth extends BlockWidthEstimate {
+  final double? widthMm;
+  const ImageWidth(this.widthMm);
+  @override
+  double fraction([double? contentWidthMm]) {
+    if (widthMm != null && contentWidthMm != null && contentWidthMm > 0) {
+      return (widthMm! / contentWidthMm).clamp(0.05, 1.0);
     }
     return 0.45;
   }
-
-  final manual = block.columnSpan;
-  if (manual != null) {
-    return manual.clamp(1, maxColumnSpan) / maxColumnSpan;
-  }
-
-  if (block.isOpeningMark) {
-    return 2.0 / maxColumnSpan;
-  }
-
-  final tibetanLen = splitLines(block.tibetan).join('').runes.length;
-  final pronLen = block.isFreeText
-      ? 0
-      : splitLines(block.chinesePronunciation).join('').runes.length;
-  final transLen = block.isFreeText
-      ? 0
-      : splitLines(block.chineseTranslation).join('').runes.length;
-  final score = [
-    tibetanLen * 1.15,
-    pronLen * 0.62,
-    transLen * 0.62,
-  ].reduce((a, b) => a > b ? a : b);
-
-  return (0.07 + score / 260).clamp(0.09, 0.52);
 }
+
+final class ManualWidth extends BlockWidthEstimate {
+  final int span;
+  const ManualWidth(this.span);
+  @override
+  double fraction([double? contentWidthMm]) =>
+      span.clamp(1, maxColumnSpan) / maxColumnSpan;
+}
+
+final class OpeningMarkWidth extends BlockWidthEstimate {
+  const OpeningMarkWidth();
+  @override
+  double fraction([double? contentWidthMm]) => 2.0 / maxColumnSpan;
+}
+
+final class TextWidth extends BlockWidthEstimate {
+  final int tibetanLen;
+  final int pronLen;
+  final int transLen;
+  const TextWidth({
+    required this.tibetanLen,
+    required this.pronLen,
+    required this.transLen,
+  });
+  @override
+  double fraction([double? contentWidthMm]) {
+    final score = [
+      tibetanLen * 1.15,
+      pronLen * 0.62,
+      transLen * 0.62,
+    ].reduce((a, b) => a > b ? a : b);
+    return (0.07 + score / 260).clamp(0.09, 0.52);
+  }
+}
+
+double estimateBlockWidthFraction(TextBlock block, [double? contentWidthMm]) =>
+    BlockWidthEstimate.from(block).fraction(contentWidthMm);
 
 double contentTibetanLineHeight({required bool smallText}) {
   return 1.0;
@@ -245,29 +354,20 @@ bool shouldUseShortRow(
   double? minimumHeight,
 }) {
   if (row.isEmpty) return false;
-
-  var hasSmallBlock = false;
-  for (final cell in row) {
-    final block = cell.block;
-    if (!block.smallText && !block.isFreeText) return false;
-    hasSmallBlock = true;
-
-    if (block.isFreeText) {
-      if (splitLines(block.tibetan).length > 1) return false;
-      continue;
-    }
-
-    if (splitLines(block.tibetan).length > 1) return false;
-    if (splitLines(block.chinesePronunciation).length > 1) return false;
-  }
-
   if (availableHeight != null &&
       minimumHeight != null &&
       availableHeight < minimumHeight) {
     return false;
   }
-
-  return hasSmallBlock;
+  return row.every((cell) {
+    final block = cell.block;
+    if (!block.smallText && !block.isFreeText) return false;
+    if (block.isFreeText) {
+      return splitLines(block.tibetan).length <= 1;
+    }
+    return splitLines(block.tibetan).length <= 1 &&
+        splitLines(block.chinesePronunciation).length <= 1;
+  });
 }
 
 double estimateCompactSmallRowHeight(
@@ -278,31 +378,26 @@ double estimateCompactSmallRowHeight(
   double tibetanLineHeight = 1.2,
   double chineseLineHeight = contentChineseLineHeight,
 }) {
-  var maxHeight = 0.0;
-
-  for (final cell in row) {
-    final block = cell.block;
-    var height = topPadding;
-
-    if (block.isFreeText) {
-      if (splitLines(block.tibetan).isNotEmpty) {
-        height += chineseFontSize * chineseLineHeight;
+  return row.fold<double>(
+    0,
+    (maxHeight, cell) {
+      final block = cell.block;
+      var height = topPadding;
+      if (block.isFreeText) {
+        if (splitLines(block.tibetan).isNotEmpty) {
+          height += chineseFontSize * chineseLineHeight;
+        }
+        return height > maxHeight ? height : maxHeight;
       }
-      if (height > maxHeight) maxHeight = height;
-      continue;
-    }
-
-    if (splitLines(block.tibetan).isNotEmpty) {
-      height += tibetanFontSize * tibetanLineHeight;
-    }
-    if (splitLines(block.chinesePronunciation).isNotEmpty) {
-      height += 2 + chineseFontSize * chineseLineHeight;
-    }
-
-    if (height > maxHeight) maxHeight = height;
-  }
-
-  return maxHeight;
+      if (splitLines(block.tibetan).isNotEmpty) {
+        height += tibetanFontSize * tibetanLineHeight;
+      }
+      if (splitLines(block.chinesePronunciation).isNotEmpty) {
+        height += 2 + chineseFontSize * chineseLineHeight;
+      }
+      return height > maxHeight ? height : maxHeight;
+    },
+  );
 }
 
 List<double> resolveContentRowHeights(
@@ -313,39 +408,37 @@ List<double> resolveContentRowHeights(
   if (rows.isEmpty) return const [];
 
   final baseHeight = contentHeight / rows.length;
-  final rowHeights = List<double>.filled(rows.length, baseHeight);
-  final compactRows = <int>[];
+  final compactIndices = <int>[
+    for (var i = 0; i < rows.length; i++)
+      if (shouldUseShortRow(
+        rows[i],
+        availableHeight: baseHeight,
+        minimumHeight: compactMinimumHeights[i],
+      ))
+        i,
+  ];
+  final isCompact = {for (final i in compactIndices) i};
 
-  for (var index = 0; index < rows.length; index++) {
-    final minimumHeight = compactMinimumHeights[index];
-    if (shouldUseShortRow(
-      rows[index],
-      availableHeight: baseHeight,
-      minimumHeight: minimumHeight,
-    )) {
-      rowHeights[index] = minimumHeight;
-      compactRows.add(index);
-    }
+  if (compactIndices.isEmpty || compactIndices.length == rows.length) {
+    return [
+      for (var i = 0; i < rows.length; i++)
+        isCompact.contains(i) ? compactMinimumHeights[i] : baseHeight,
+    ];
   }
 
-  if (compactRows.isEmpty || compactRows.length == rows.length) {
-    return rowHeights;
-  }
-
-  final releasedHeight = compactRows.fold<double>(
+  final releasedHeight = compactIndices.fold<double>(
     0,
-    (sum, index) => sum + baseHeight - rowHeights[index],
+    (sum, i) => sum + baseHeight - compactMinimumHeights[i],
   );
-  final normalRowCount = rows.length - compactRows.length;
+  final normalRowCount = rows.length - compactIndices.length;
   final normalRowExtraHeight = releasedHeight / normalRowCount;
 
-  for (var index = 0; index < rows.length; index++) {
-    if (!compactRows.contains(index)) {
-      rowHeights[index] += normalRowExtraHeight;
-    }
-  }
-
-  return rowHeights;
+  return [
+    for (var i = 0; i < rows.length; i++)
+      isCompact.contains(i)
+          ? compactMinimumHeights[i]
+          : baseHeight + normalRowExtraHeight,
+  ];
 }
 
 List<List<TextBlock?>> _legacyRows(
