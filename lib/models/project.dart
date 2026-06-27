@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'chinese_script.dart';
 import 'font_config.dart';
 
 const String kDefaultOpeningMark = '༄༅།།';
@@ -622,6 +623,7 @@ class TextBlock {
 class Project {
   final String id;
   final String name;
+  final ChineseScript chineseScript;
   final List<String> tags;
   final List<TextBlock> blocks;
   final PageSetup pageSetup;
@@ -631,6 +633,7 @@ class Project {
   Project({
     required this.id,
     required this.name,
+    this.chineseScript = ChineseScript.unknown,
     List<String>? tags,
     List<TextBlock>? blocks,
     PageSetup? pageSetup,
@@ -643,6 +646,7 @@ class Project {
   Project copyWith({
     String? id,
     String? name,
+    ChineseScript? chineseScript,
     List<String>? tags,
     List<TextBlock>? blocks,
     PageSetup? pageSetup,
@@ -652,6 +656,7 @@ class Project {
     return Project(
       id: id ?? this.id,
       name: name ?? this.name,
+      chineseScript: chineseScript ?? this.chineseScript,
       tags: tags ?? this.tags,
       blocks: blocks ?? this.blocks,
       pageSetup: pageSetup ?? this.pageSetup,
@@ -665,6 +670,7 @@ class Project {
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,
+    'chineseScript': chineseScript.name,
     'tags': tags,
     'blocks': blocks.map((b) => b.toJson()).toList(),
     'pageSetup': pageSetup.toJson(),
@@ -675,6 +681,7 @@ class Project {
   factory Project.fromJson(Map<String, dynamic> json) => Project(
     id: json['id'] as String,
     name: json['name'] as String,
+    chineseScript: ChineseScript.fromJson(json['chineseScript']),
     tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
     blocks:
         (json['blocks'] as List<dynamic>?)

@@ -577,4 +577,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get continueLabel => 'Continue';
+
+  @override
+  String get chineseScript => 'Chinese text';
+
+  @override
+  String get simplifiedChinese => 'Simplified Chinese';
+
+  @override
+  String get traditionalChinese => 'Traditional Chinese';
+
+  @override
+  String convertChineseScriptTitle(String script) {
+    return 'Convert to $script?';
+  }
+
+  @override
+  String get convertChineseScriptWarning =>
+      'This rewrites all Chinese document text. Some characters may not convert back exactly.';
+
+  @override
+  String get convertChineseScriptAction => 'Convert';
+
+  @override
+  String get chineseConversionFailed =>
+      'Failed to convert and save Chinese text.';
 }

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:tibetan_typesetting/models/chinese_script.dart';
 import 'package:tibetan_typesetting/services/database_service.dart';
 
 void main() {
@@ -48,5 +49,21 @@ void main() {
       isNotEmpty,
     );
     await db.close();
+  });
+
+  test('new projects default to Simplified Chinese', () async {
+    final path = '${directory.path}/default.db';
+    final service = DatabaseService.withDependencies(
+      databaseFactory: databaseFactoryFfi,
+      defaultDatabasesPath: () async => directory.path,
+    );
+    service.configurePath(path, allowCreate: true);
+
+    final created = await service.createProject(name: 'Project');
+    final restored = await service.getProject(created.id);
+
+    expect(created.chineseScript, ChineseScript.simplified);
+    expect(restored?.chineseScript, ChineseScript.simplified);
+    await (await service.database).close();
   });
 }

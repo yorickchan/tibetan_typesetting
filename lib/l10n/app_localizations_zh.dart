@@ -569,6 +569,29 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get continueLabel => '继续';
+
+  @override
+  String get chineseScript => '中文文字';
+
+  @override
+  String get simplifiedChinese => '简体中文';
+
+  @override
+  String get traditionalChinese => '繁体中文';
+
+  @override
+  String convertChineseScriptTitle(String script) {
+    return '转换为$script？';
+  }
+
+  @override
+  String get convertChineseScriptWarning => '这会重写文档中的所有中文文字。部分字符可能无法完全还原。';
+
+  @override
+  String get convertChineseScriptAction => '转换';
+
+  @override
+  String get chineseConversionFailed => '无法转换并保存中文文字。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -1136,4 +1159,27 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get continueLabel => '繼續';
+
+  @override
+  String get chineseScript => '中文文字';
+
+  @override
+  String get simplifiedChinese => '簡體中文';
+
+  @override
+  String get traditionalChinese => '繁體中文';
+
+  @override
+  String convertChineseScriptTitle(String script) {
+    return '轉換為$script？';
+  }
+
+  @override
+  String get convertChineseScriptWarning => '這會重寫文件中的所有中文文字。部分字元可能無法完全還原。';
+
+  @override
+  String get convertChineseScriptAction => '轉換';
+
+  @override
+  String get chineseConversionFailed => '無法轉換並儲存中文文字。';
 }

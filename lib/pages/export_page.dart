@@ -6,18 +6,21 @@ import 'package:flutter/services.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/app_settings.dart';
+import '../models/chinese_script.dart';
 import '../models/project.dart';
 import '../models/title_page_template.dart';
-import '../services/title_page_template_service.dart';
+import '../services/chinese_conversion_service.dart';
 import '../services/database_service.dart';
 import '../services/font_service.dart';
-import '../services/pdf_service.dart';
 import '../services/html_export_service.dart';
+import '../services/pdf_service.dart';
 import '../services/settings_service.dart';
+import '../services/title_page_template_service.dart';
 import '../utils/colors.dart';
 import '../utils/save_state_mixin.dart';
 import '../utils/snackbar.dart';
 import '../widgets/app_shell.dart';
+import '../widgets/chinese_script_switch.dart';
 import '../widgets/export_pdf_settings_panel.dart';
 import '../widgets/preview_zoom_toolbar.dart';
 import '../widgets/sample_pages.dart';
@@ -33,6 +36,7 @@ class ExportPage extends StatefulWidget {
 class _ExportPageState extends State<ExportPage>
     with SaveStateMixin<ExportPage> {
   final _db = DatabaseService();
+  final _chineseConversionService = const ChineseConversionService();
   final _pdfService = PdfService();
   final _settingsService = SettingsService();
   final _fontService = FontService();
@@ -43,6 +47,7 @@ class _ExportPageState extends State<ExportPage>
   bool _loading = true;
   String? _error;
   bool _pdfBusy = false;
+  bool _scriptBusy = false;
   bool _exportAsHtml = false;
   List<TitlePageTemplate> _templates = [];
   double _zoom = 1.0;
@@ -105,8 +110,14 @@ class _ExportPageState extends State<ExportPage>
   Future<void> _loadProject() async {
     setState(() => _loading = true);
     try {
-      final project = await _db.getProject(widget.projectId);
+      var project = await _db.getProject(widget.projectId);
       if (!mounted) return;
+
+      if (project?.chineseScript == ChineseScript.unknown) {
+        project = project!.copyWith(
+          chineseScript: _chineseConversionService.effectiveScript(project),
+        );
+      }
 
       if (project != null) {
         final ps = project.pageSetup;
@@ -152,6 +163,28 @@ class _ExportPageState extends State<ExportPage>
   Future<void> _saveProject() async {
     if (_project == null) return;
     await performSave(() => _db.updateProject(_project!));
+  }
+
+  Future<void> _switchChineseScript(ChineseScript target) async {
+    if (_project == null || _scriptBusy) return;
+    final confirmed = await showChineseScriptConversionDialog(context, target);
+    if (!confirmed || !mounted || _project == null) return;
+
+    final original = _project!;
+    setState(() => _scriptBusy = true);
+    try {
+      final saved = await _chineseConversionService.convertAndSave(
+        original,
+        target,
+        _db.updateProject,
+      );
+      if (!mounted) return;
+      setState(() => _project = saved);
+    } on Object catch (_) {
+      _showSnack(_l10n.chineseConversionFailed, error: true);
+    } finally {
+      if (mounted) setState(() => _scriptBusy = false);
+    }
   }
 
   Future<void> _exportPdf() async {
@@ -306,7 +339,7 @@ class _ExportPageState extends State<ExportPage>
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              onPressed: _pdfBusy || _project == null
+              onPressed: _pdfBusy || _scriptBusy || _project == null
                   ? null
                   : (_exportAsHtml ? _exportHtml : _exportPdf),
             ),
@@ -323,7 +356,7 @@ class _ExportPageState extends State<ExportPage>
                   style: const TextStyle(color: AppColors.rose300),
                 ),
               )
-            : _buildContent(),
+            : AbsorbPointer(absorbing: _scriptBusy, child: _buildContent()),
       ),
     );
   }
@@ -340,6 +373,13 @@ class _ExportPageState extends State<ExportPage>
           onUpdateSetup: _updateSetup,
         ),
         const SizedBox(height: 16),
+
+        ChineseScriptSwitch(
+          selectedScript: project.chineseScript,
+          busy: _scriptBusy,
+          onSelected: _switchChineseScript,
+        ),
+        const SizedBox(height: 12),
 
         Container(
           padding: const EdgeInsets.all(16),

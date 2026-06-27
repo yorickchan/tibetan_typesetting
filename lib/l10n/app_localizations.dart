@@ -1184,6 +1184,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue'**
   String get continueLabel;
+
+  /// No description provided for @chineseScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese text'**
+  String get chineseScript;
+
+  /// No description provided for @simplifiedChinese.
+  ///
+  /// In en, this message translates to:
+  /// **'Simplified Chinese'**
+  String get simplifiedChinese;
+
+  /// No description provided for @traditionalChinese.
+  ///
+  /// In en, this message translates to:
+  /// **'Traditional Chinese'**
+  String get traditionalChinese;
+
+  /// No description provided for @convertChineseScriptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to {script}?'**
+  String convertChineseScriptTitle(String script);
+
+  /// No description provided for @convertChineseScriptWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This rewrites all Chinese document text. Some characters may not convert back exactly.'**
+  String get convertChineseScriptWarning;
+
+  /// No description provided for @convertChineseScriptAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert'**
+  String get convertChineseScriptAction;
+
+  /// No description provided for @chineseConversionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to convert and save Chinese text.'**
+  String get chineseConversionFailed;
 }
 
 class _AppLocalizationsDelegate

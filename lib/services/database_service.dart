@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
+import '../models/chinese_script.dart';
 import '../models/project.dart';
 import 'database_file_validator.dart';
 import 'database_service_core.dart';
@@ -169,6 +170,7 @@ class DatabaseService {
     final project = Project(
       id: projectId,
       name: name,
+      chineseScript: ChineseScript.simplified,
       tags: projectTags,
       blocks: [TextBlock(id: _uuid.v4().replaceAll('-', ''))],
       pageSetup: pageSetup,

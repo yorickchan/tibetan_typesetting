@@ -246,5 +246,19 @@
   "databaseFolderAccessRequired": "Select the database again and grant access to its containing folder.",
   "cloudDatabaseConfirmationTitle": "Open Cloud Database?",
   "cloudDatabaseConfirmation": "Do not open this database on multiple devices at the same time. Cloud-drive synchronization cannot coordinate SQLite writes.",
-  "continueLabel": "Continue"
+  "continueLabel": "Continue",
+  "chineseScript": "Chinese text",
+  "simplifiedChinese": "Simplified Chinese",
+  "traditionalChinese": "Traditional Chinese",
+  "convertChineseScriptTitle": "Convert to {script}?",
+  "@convertChineseScriptTitle": {
+    "placeholders": {
+      "script": {
+        "type": "String"
+      }
+    }
+  },
+  "convertChineseScriptWarning": "This rewrites all Chinese document text. Some characters may not convert back exactly.",
+  "convertChineseScriptAction": "Convert",
+  "chineseConversionFailed": "Failed to convert and save Chinese text."
 }

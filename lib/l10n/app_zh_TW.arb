@@ -180,5 +180,19 @@
   "databaseFolderAccessRequired": "請重新選擇資料庫，並授權存取其所在的資料夾。",
   "cloudDatabaseConfirmationTitle": "開啟雲端資料庫？",
   "cloudDatabaseConfirmation": "請勿在多台裝置上同時開啟此資料庫。雲端同步無法協調 SQLite 寫入。",
-  "continueLabel": "繼續"
+  "continueLabel": "繼續",
+  "chineseScript": "中文文字",
+  "simplifiedChinese": "簡體中文",
+  "traditionalChinese": "繁體中文",
+  "convertChineseScriptTitle": "轉換為{script}？",
+  "@convertChineseScriptTitle": {
+    "placeholders": {
+      "script": {
+        "type": "String"
+      }
+    }
+  },
+  "convertChineseScriptWarning": "這會重寫文件中的所有中文文字。部分字元可能無法完全還原。",
+  "convertChineseScriptAction": "轉換",
+  "chineseConversionFailed": "無法轉換並儲存中文文字。"
 }

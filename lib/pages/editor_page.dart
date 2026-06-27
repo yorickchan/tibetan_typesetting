@@ -9,9 +9,11 @@ import 'package:uuid/uuid.dart';
 import '../l10n/app_localizations.dart';
 import '../models/app_settings.dart';
 import '../models/block_update.dart';
+import '../models/chinese_script.dart';
 import '../models/project.dart';
 import '../models/title_page_template.dart';
 import '../services/batch_import_service.dart';
+import '../services/chinese_conversion_service.dart';
 import '../services/database_service.dart';
 import '../services/font_service.dart';
 import '../services/image_storage_service.dart';
@@ -26,6 +28,7 @@ import '../utils/sample_layout.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/block_editor.dart';
 import '../widgets/block_strip.dart';
+import '../widgets/chinese_script_switch.dart';
 import '../widgets/content_page_template_panel.dart';
 import '../widgets/editor_page_setup_panel.dart';
 import '../widgets/flow_spacing_panel.dart';
@@ -50,6 +53,7 @@ class EditorPage extends StatefulWidget {
 class _EditorPageState extends State<EditorPage>
     with SaveStateMixin<EditorPage> {
   final _db = DatabaseService();
+  final _chineseConversionService = const ChineseConversionService();
   final _settingsService = SettingsService();
   Project? _project;
   AppSettings _appSettings = AppSettings();
@@ -65,6 +69,7 @@ class _EditorPageState extends State<EditorPage>
   List<_PageWithBlocks>? _cachedPages;
   List<TextBlock>? _lastBlocks;
   final _undoService = UndoService();
+  bool _scriptBusy = false;
   double _zoom = 1.0;
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
@@ -90,8 +95,14 @@ class _EditorPageState extends State<EditorPage>
   Future<void> _loadProject() async {
     setState(() => _loading = true);
     try {
-      final project = await _db.getProject(widget.projectId);
+      var project = await _db.getProject(widget.projectId);
       if (!mounted) return;
+
+      if (project?.chineseScript == ChineseScript.unknown) {
+        project = project!.copyWith(
+          chineseScript: _chineseConversionService.effectiveScript(project),
+        );
+      }
 
       if (project != null) {
         final ps = project.pageSetup;
@@ -170,6 +181,33 @@ class _EditorPageState extends State<EditorPage>
   Future<void> _saveCurrent() async {
     if (!mounted || _project == null) return;
     await performSave(() => _db.updateProject(_project!));
+  }
+
+  Future<void> _switchChineseScript(ChineseScript target) async {
+    if (_project == null || _scriptBusy) return;
+    final confirmed = await showChineseScriptConversionDialog(context, target);
+    if (!confirmed || !mounted || _project == null) return;
+
+    final original = _project!;
+    _saveTimer?.cancel();
+    setState(() => _scriptBusy = true);
+    try {
+      final saved = await _chineseConversionService.convertAndSave(
+        original,
+        target,
+        _db.updateProject,
+      );
+      if (!mounted) return;
+      _undoService.pushState(original);
+      setState(() {
+        _project = saved;
+        _cachedPages = null;
+      });
+    } on Object catch (_) {
+      _showSnack(_l10n.chineseConversionFailed, error: true);
+    } finally {
+      if (mounted) setState(() => _scriptBusy = false);
+    }
   }
 
   void _updateBlock(BlockUpdate update) {
@@ -777,7 +815,7 @@ class _EditorPageState extends State<EditorPage>
                       style: const TextStyle(color: AppColors.rose300),
                     ),
                   )
-                : _buildEditor(),
+                : AbsorbPointer(absorbing: _scriptBusy, child: _buildEditor()),
           ),
         ),
       ),
@@ -867,14 +905,24 @@ class _EditorPageState extends State<EditorPage>
         ),
         const SizedBox(height: 12),
 
-        Align(
-          alignment: Alignment.centerRight,
-          child: PreviewZoomToolbar(
-            zoom: _zoom,
-            onZoomOut: _zoomOut,
-            onZoomIn: _zoomIn,
-            onReset: _zoomReset,
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: ChineseScriptSwitch(
+                selectedScript: project.chineseScript,
+                busy: _scriptBusy,
+                onSelected: _switchChineseScript,
+              ),
+            ),
+            const SizedBox(width: 12),
+            PreviewZoomToolbar(
+              zoom: _zoom,
+              onZoomOut: _zoomOut,
+              onZoomIn: _zoomIn,
+              onReset: _zoomReset,
+            ),
+          ],
         ),
         const SizedBox(height: 12),
 
