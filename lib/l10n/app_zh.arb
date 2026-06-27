@@ -161,5 +161,22 @@
   "contentFirstPageTemplate": "首页模板",
   "contentSubsequentPageTemplate": "后续页面模板",
   "contentFirstPageMargin": "首页边距 (mm)",
-  "contentSubsequentPageMargin": "后续页面边距 (mm)"
+  "contentSubsequentPageMargin": "后续页面边距 (mm)",
+  "database": "数据库",
+  "currentDatabase": "当前数据库",
+  "openExistingDatabase": "打开现有数据库…",
+  "useDefaultDatabase": "使用默认数据库",
+  "cloudDatabaseWarning": "云端文件夹仅适合一次由一台设备打开此数据库。",
+  "databaseRestartRequired": "请重新启动应用程序以使用此数据库。",
+  "databaseRecoveryTitle": "数据库不可用",
+  "databaseNotFound": "找不到所选数据库。",
+  "databaseInvalid": "所选文件不是有效的藏文排版数据库。",
+  "databaseNewerVersion": "此数据库由较新版本的应用程序创建。",
+  "databaseUnreadable": "无法打开所选数据库。请检查权限和云端可用性。",
+  "retry": "重试",
+  "chooseAnotherDatabase": "选择其他数据库…",
+  "databaseSelectionFailed": "未保存数据库选择。",
+  "cloudDatabaseConfirmationTitle": "打开云端数据库？",
+  "cloudDatabaseConfirmation": "请勿在多台设备上同时打开此数据库。云端同步无法协调 SQLite 写入。",
+  "continueLabel": "继续"
 }

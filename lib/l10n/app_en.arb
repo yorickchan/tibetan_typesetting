@@ -227,5 +227,22 @@
   "contentFirstPageTemplate": "First page template",
   "contentSubsequentPageTemplate": "Subsequent pages template",
   "contentFirstPageMargin": "First page margin (mm)",
-  "contentSubsequentPageMargin": "Subsequent pages margin (mm)"
+  "contentSubsequentPageMargin": "Subsequent pages margin (mm)",
+  "database": "Database",
+  "currentDatabase": "Current database",
+  "openExistingDatabase": "Open Existing Database…",
+  "useDefaultDatabase": "Use Default Database",
+  "cloudDatabaseWarning": "Cloud folders are safe only when this database is open on one device at a time.",
+  "databaseRestartRequired": "Restart the application to use this database.",
+  "databaseRecoveryTitle": "Database Unavailable",
+  "databaseNotFound": "The selected database could not be found.",
+  "databaseInvalid": "The selected file is not a valid Tibetan Typesetting database.",
+  "databaseNewerVersion": "This database was created by a newer version of the application.",
+  "databaseUnreadable": "The selected database could not be opened. Check its permissions and cloud availability.",
+  "retry": "Retry",
+  "chooseAnotherDatabase": "Choose Another Database…",
+  "databaseSelectionFailed": "The database selection was not saved.",
+  "cloudDatabaseConfirmationTitle": "Open Cloud Database?",
+  "cloudDatabaseConfirmation": "Do not open this database on multiple devices at the same time. Cloud-drive synchronization cannot coordinate SQLite writes.",
+  "continueLabel": "Continue"
 }

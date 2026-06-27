@@ -1070,6 +1070,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Subsequent pages margin (mm)'**
   String get contentSubsequentPageMargin;
+
+  /// No description provided for @database.
+  ///
+  /// In en, this message translates to:
+  /// **'Database'**
+  String get database;
+
+  /// No description provided for @currentDatabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Current database'**
+  String get currentDatabase;
+
+  /// No description provided for @openExistingDatabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Existing Database…'**
+  String get openExistingDatabase;
+
+  /// No description provided for @useDefaultDatabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Default Database'**
+  String get useDefaultDatabase;
+
+  /// No description provided for @cloudDatabaseWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud folders are safe only when this database is open on one device at a time.'**
+  String get cloudDatabaseWarning;
+
+  /// No description provided for @databaseRestartRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart the application to use this database.'**
+  String get databaseRestartRequired;
+
+  /// No description provided for @databaseRecoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Database Unavailable'**
+  String get databaseRecoveryTitle;
+
+  /// No description provided for @databaseNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected database could not be found.'**
+  String get databaseNotFound;
+
+  /// No description provided for @databaseInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected file is not a valid Tibetan Typesetting database.'**
+  String get databaseInvalid;
+
+  /// No description provided for @databaseNewerVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'This database was created by a newer version of the application.'**
+  String get databaseNewerVersion;
+
+  /// No description provided for @databaseUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected database could not be opened. Check its permissions and cloud availability.'**
+  String get databaseUnreadable;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @chooseAnotherDatabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Another Database…'**
+  String get chooseAnotherDatabase;
+
+  /// No description provided for @databaseSelectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The database selection was not saved.'**
+  String get databaseSelectionFailed;
+
+  /// No description provided for @cloudDatabaseConfirmationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Cloud Database?'**
+  String get cloudDatabaseConfirmationTitle;
+
+  /// No description provided for @cloudDatabaseConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not open this database on multiple devices at the same time. Cloud-drive synchronization cannot coordinate SQLite writes.'**
+  String get cloudDatabaseConfirmation;
+
+  /// No description provided for @continueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueLabel;
 }
 
 class _AppLocalizationsDelegate

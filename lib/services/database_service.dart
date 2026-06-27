@@ -1,52 +1,95 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/project.dart';
+import 'database_file_validator.dart';
 import 'database_service_core.dart';
 
 const _uuid = Uuid();
 
 class DatabaseService {
-  static final DatabaseService _instance = DatabaseService._internal();
+  static final DatabaseService _instance = DatabaseService._internal(
+    databaseFactory: databaseFactory,
+    defaultDatabasesPath: getDatabasesPath,
+  );
   factory DatabaseService() => _instance;
-  DatabaseService._internal();
+  DatabaseService._internal({
+    required DatabaseFactory databaseFactory,
+    required Future<String> Function() defaultDatabasesPath,
+  }) : _databaseFactory = databaseFactory,
+       _defaultDatabasesPath = defaultDatabasesPath;
+
+  DatabaseService.withDependencies({
+    required DatabaseFactory databaseFactory,
+    required Future<String> Function() defaultDatabasesPath,
+  }) : _databaseFactory = databaseFactory,
+       _defaultDatabasesPath = defaultDatabasesPath;
+
+  final DatabaseFactory _databaseFactory;
+  final Future<String> Function() _defaultDatabasesPath;
 
   Future<Database>? _dbFuture;
+  String? _configuredPath;
+  bool _allowCreate = true;
+
+  void configurePath(String path, {required bool allowCreate}) {
+    if (_dbFuture != null) {
+      throw StateError('Database path cannot change after opening');
+    }
+    _configuredPath = path;
+    _allowCreate = allowCreate;
+  }
 
   Future<Database> get database async {
-    return _dbFuture ??= _initDb();
+    final existing = _dbFuture;
+    if (existing != null) return existing;
+    final pending = _initDb();
+    _dbFuture = pending;
+    try {
+      return await pending;
+    } catch (_) {
+      if (identical(_dbFuture, pending)) _dbFuture = null;
+      rethrow;
+    }
   }
 
   Future<Database> _initDb() async {
-    final dbPath = await getDatabasesPath();
-    final path = '$dbPath/tibetan_typesetting.db';
-    return openDatabase(
+    final path =
+        _configuredPath ??
+        '${await _defaultDatabasesPath()}/tibetan_typesetting.db';
+    if (!_allowCreate && !await File(path).exists()) {
+      throw FileSystemException('Selected database does not exist', path);
+    }
+    return _databaseFactory.openDatabase(
       path,
-      version: 5,
-      onCreate: (db, version) async {
-        await _createProjectsTable(db);
-        await _createAppSettingsTable(db);
-        await _createPronunciationDictionaryTable(db);
-        await _createTitlePageTemplatesTable(db);
-      },
-      onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 2) {
+      options: OpenDatabaseOptions(
+        version: currentDatabaseVersion,
+        onCreate: (db, version) async {
+          await _createProjectsTable(db);
           await _createAppSettingsTable(db);
-        }
-        if (oldVersion < 3) {
           await _createPronunciationDictionaryTable(db);
-        }
-        if (oldVersion < 4) {
-          await db.execute(
-            'ALTER TABLE pronunciation_dictionary ADD COLUMN word_count INTEGER NOT NULL DEFAULT 1',
-          );
-        }
-        if (oldVersion < 5) {
           await _createTitlePageTemplatesTable(db);
-        }
-      },
+        },
+        onUpgrade: (db, oldVersion, newVersion) async {
+          if (oldVersion < 2) {
+            await _createAppSettingsTable(db);
+          }
+          if (oldVersion < 3) {
+            await _createPronunciationDictionaryTable(db);
+          }
+          if (oldVersion < 4) {
+            await db.execute(
+              'ALTER TABLE pronunciation_dictionary ADD COLUMN word_count INTEGER NOT NULL DEFAULT 1',
+            );
+          }
+          if (oldVersion < 5) {
+            await _createTitlePageTemplatesTable(db);
+          }
+        },
+      ),
     );
   }
 
@@ -97,7 +140,11 @@ class DatabaseService {
       )
     ''');
   }
-  Future<List<ProjectListItem>> listProjects({String? query, String? tag}) async {
+
+  Future<List<ProjectListItem>> listProjects({
+    String? query,
+    String? tag,
+  }) async {
     final db = await database;
     final queryResult = buildProjectQuery(query: query, tag: tag);
     final rows = await db.query(

@@ -161,5 +161,22 @@
   "contentFirstPageTemplate": "首頁範本",
   "contentSubsequentPageTemplate": "後續頁面範本",
   "contentFirstPageMargin": "首頁邊距 (mm)",
-  "contentSubsequentPageMargin": "後續頁面邊距 (mm)"
+  "contentSubsequentPageMargin": "後續頁面邊距 (mm)",
+  "database": "資料庫",
+  "currentDatabase": "目前資料庫",
+  "openExistingDatabase": "開啟現有資料庫…",
+  "useDefaultDatabase": "使用預設資料庫",
+  "cloudDatabaseWarning": "雲端資料夾僅適合一次由一台裝置開啟此資料庫。",
+  "databaseRestartRequired": "請重新啟動應用程式以使用此資料庫。",
+  "databaseRecoveryTitle": "資料庫無法使用",
+  "databaseNotFound": "找不到所選資料庫。",
+  "databaseInvalid": "所選檔案不是有效的藏文排版資料庫。",
+  "databaseNewerVersion": "此資料庫由較新版本的應用程式建立。",
+  "databaseUnreadable": "無法開啟所選資料庫。請檢查權限和雲端可用性。",
+  "retry": "重試",
+  "chooseAnotherDatabase": "選擇其他資料庫…",
+  "databaseSelectionFailed": "未儲存資料庫選擇。",
+  "cloudDatabaseConfirmationTitle": "開啟雲端資料庫？",
+  "cloudDatabaseConfirmation": "請勿在多台裝置上同時開啟此資料庫。雲端同步無法協調 SQLite 寫入。",
+  "continueLabel": "繼續"
 }

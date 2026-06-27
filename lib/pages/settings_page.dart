@@ -9,12 +9,15 @@ import '../models/app_settings.dart';
 import '../models/font_config.dart';
 import '../models/title_page_template.dart';
 import '../pages/dictionary_page.dart';
+import '../services/database_file_validator.dart';
+import '../services/database_location_provider.dart';
 import '../services/font_service.dart';
 import '../services/settings_service.dart';
 import '../utils/snackbar.dart';
 import '../services/title_page_template_service.dart';
 import '../utils/colors.dart';
 import '../widgets/font_picker.dart';
+import '../widgets/database_location_panel.dart';
 
 /// Application-level settings dialog for default fonts and page size.
 class SettingsPage extends StatefulWidget {
@@ -31,6 +34,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   final _settingsService = SettingsService();
   final _fontService = FontService();
+  final _databaseLocationService = createDatabaseLocationService();
   AppSettings? _settings;
   List<TitlePageTemplate> _templates = [];
   bool _templatesLoading = true;
@@ -41,6 +45,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
   bool _loading = true;
   bool _saving = false;
+  bool _databaseBusy = false;
+  bool _databaseRestartRequired = false;
+  bool _usesDefaultDatabase = true;
+  String _databasePath = '';
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
 
@@ -76,21 +84,93 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _load() async {
     final settings = await _settingsService.getSettings();
+    final databasePreference = await _databaseLocationService.getPreference();
+    final databasePath = await _databaseLocationService.getDisplayPath();
     if (!mounted) return;
     setState(() {
       _settings = settings;
+      _usesDefaultDatabase = databasePreference.usesDefault;
+      _databasePath = databasePath;
       _loadTemplates();
       _loading = false;
       _widthCtrl.text = settings.defaultPageWidthMm.toStringAsFixed(0);
       _heightCtrl.text = settings.defaultPageHeightMm.toStringAsFixed(0);
-      _tibSizeCtrl.text =
-          (settings.tibetanFont?.fontSize ?? 10).toStringAsFixed(1);
-      _pronSizeCtrl.text =
-          (settings.pronunciationFont?.fontSize ?? 8).toStringAsFixed(1);
-      _transSizeCtrl.text =
-          (settings.translationFont?.fontSize ?? 8).toStringAsFixed(1);
+      _tibSizeCtrl.text = (settings.tibetanFont?.fontSize ?? 10)
+          .toStringAsFixed(1);
+      _pronSizeCtrl.text = (settings.pronunciationFont?.fontSize ?? 8)
+          .toStringAsFixed(1);
+      _transSizeCtrl.text = (settings.translationFont?.fontSize ?? 8)
+          .toStringAsFixed(1);
       _smallBlockSizeCtrl.text =
           settings.smallBlockFontSize?.toStringAsFixed(1) ?? '';
+    });
+  }
+
+  String _databaseError(DatabaseValidationIssue? issue) {
+    return switch (issue) {
+      DatabaseValidationIssue.notFound => _l10n.databaseNotFound,
+      DatabaseValidationIssue.newerVersion => _l10n.databaseNewerVersion,
+      DatabaseValidationIssue.invalidSqlite ||
+      DatabaseValidationIssue.incompatibleSchema ||
+      DatabaseValidationIssue.notAFile => _l10n.databaseInvalid,
+      _ => _l10n.databaseUnreadable,
+    };
+  }
+
+  Future<void> _openExistingDatabase() async {
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const ['db'],
+      dialogTitle: _l10n.openExistingDatabase,
+    );
+    final path = result?.files.single.path;
+    if (path == null || !mounted) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(_l10n.cloudDatabaseConfirmationTitle),
+        content: Text(_l10n.cloudDatabaseConfirmation),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(_l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(_l10n.continueLabel),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _databaseBusy = true);
+    final selection = await _databaseLocationService.selectExisting(path);
+    if (!mounted) return;
+    setState(() => _databaseBusy = false);
+    if (!selection.isValid) {
+      _showSnackMsg(_databaseError(selection.issue), error: true);
+      return;
+    }
+    setState(() {
+      _databasePath = path;
+      _usesDefaultDatabase = false;
+      _databaseRestartRequired = true;
+    });
+  }
+
+  Future<void> _useDefaultDatabase() async {
+    setState(() => _databaseBusy = true);
+    await _databaseLocationService.useDefault();
+    final path = await _databaseLocationService.getDisplayPath();
+    if (!mounted) return;
+    setState(() {
+      _databaseBusy = false;
+      _databasePath = path;
+      _usesDefaultDatabase = true;
+      _databaseRestartRequired = true;
     });
   }
 
@@ -146,8 +226,10 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text(_l10n.deleteTemplate,
-            style: TextStyle(color: AppColors.textPrimary)),
+        title: Text(
+          _l10n.deleteTemplate,
+          style: TextStyle(color: AppColors.textPrimary),
+        ),
         content: Text(
           _l10n.areYouSureDelete(t.name),
           style: TextStyle(color: AppColors.textBody, fontSize: 13),
@@ -155,14 +237,20 @@ class _SettingsPageState extends State<SettingsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(_l10n.cancel,
-                style: TextStyle(color: AppColors.textCaption)),
+            child: Text(
+              _l10n.cancel,
+              style: TextStyle(color: AppColors.textCaption),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(_l10n.delete,
-                style: const TextStyle(
-                    color: AppColors.rose600, fontWeight: FontWeight.w600)),
+            child: Text(
+              _l10n.delete,
+              style: const TextStyle(
+                color: AppColors.rose600,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -259,8 +347,7 @@ class _SettingsPageState extends State<SettingsPage> {
     if (n == null || n <= 0 || _settings!.pronunciationFont == null) return;
     setState(() {
       _settings = _settings!.copyWith(
-        pronunciationFont:
-            _settings!.pronunciationFont!.copyWith(fontSize: n),
+        pronunciationFont: _settings!.pronunciationFont!.copyWith(fontSize: n),
       );
     });
   }
@@ -274,7 +361,6 @@ class _SettingsPageState extends State<SettingsPage> {
       );
     });
   }
-
 
   bool get _canSave {
     if (widget.requireFonts) {
@@ -337,8 +423,11 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               if (!widget.requireFonts)
                 IconButton(
-                  icon: Icon(Icons.close,
-                      size: 18, color: AppColors.textCaption),
+                  icon: Icon(
+                    Icons.close,
+                    size: 18,
+                    color: AppColors.textCaption,
+                  ),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
             ],
@@ -408,8 +497,11 @@ class _SettingsPageState extends State<SettingsPage> {
                   onChanged: (v) {
                     final n = double.tryParse(v);
                     if (n != null && n >= 50) {
-                      setState(() => _settings = _settings!
-                          .copyWith(defaultPageWidthMm: n));
+                      setState(
+                        () => _settings = _settings!.copyWith(
+                          defaultPageWidthMm: n,
+                        ),
+                      );
                     }
                   },
                 ),
@@ -422,8 +514,11 @@ class _SettingsPageState extends State<SettingsPage> {
                   onChanged: (v) {
                     final n = double.tryParse(v);
                     if (n != null && n >= 50) {
-                      setState(() => _settings = _settings!
-                          .copyWith(defaultPageHeightMm: n));
+                      setState(
+                        () => _settings = _settings!.copyWith(
+                          defaultPageHeightMm: n,
+                        ),
+                      );
                     }
                   },
                 ),
@@ -435,42 +530,51 @@ class _SettingsPageState extends State<SettingsPage> {
 
           _sectionLabel(_l10n.titlePageTemplates.toUpperCase()),
           const SizedBox(height: 12),
-          ..._templates.map((t) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.cardBg,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => _renameTemplateDialog(t),
-                          child: Text(
-                            t.name,
-                            style: TextStyle(
-                              color: AppColors.textBody,
-                              fontSize: 13,
-                            ),
+          ..._templates.map(
+            (t) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.cardBg,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => _renameTemplateDialog(t),
+                        child: Text(
+                          t.name,
+                          style: TextStyle(
+                            color: AppColors.textBody,
+                            fontSize: 13,
                           ),
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.delete_outline,
-                            size: 16, color: AppColors.rose600),
-                        onPressed: () => _deleteTemplateDialog(t),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                            minWidth: 28, minHeight: 28),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.delete_outline,
+                        size: 16,
+                        color: AppColors.rose600,
                       ),
-                    ],
-                  ),
+                      onPressed: () => _deleteTemplateDialog(t),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 28,
+                        minHeight: 28,
+                      ),
+                    ),
+                  ],
                 ),
-              )),
+              ),
+            ),
+          ),
           if (_templates.isEmpty && !_templatesLoading)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
@@ -484,7 +588,10 @@ class _SettingsPageState extends State<SettingsPage> {
             child: TextButton.icon(
               onPressed: _addTemplate,
               icon: const Icon(Icons.add, size: 16),
-              label: Text(_l10n.addTemplate, style: const TextStyle(fontSize: 12)),
+              label: Text(
+                _l10n.addTemplate,
+                style: const TextStyle(fontSize: 12),
+              ),
               style: TextButton.styleFrom(foregroundColor: AppColors.sky500),
             ),
           ),
@@ -495,11 +602,9 @@ class _SettingsPageState extends State<SettingsPage> {
           GestureDetector(
             onTap: () {
               Navigator.of(context).pop();
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const DictionaryPage(),
-                ),
-              );
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const DictionaryPage()));
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -517,10 +622,27 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: TextStyle(color: AppColors.textBody, fontSize: 13),
                   ),
                   const Spacer(),
-                  Icon(Icons.chevron_right, size: 16, color: AppColors.textMuted),
+                  Icon(
+                    Icons.chevron_right,
+                    size: 16,
+                    color: AppColors.textMuted,
+                  ),
                 ],
               ),
             ),
+          ),
+
+          const SizedBox(height: 24),
+
+          _sectionLabel(_l10n.database.toUpperCase()),
+          const SizedBox(height: 12),
+          DatabaseLocationPanel(
+            path: _databasePath,
+            usesDefault: _usesDefaultDatabase,
+            restartRequired: _databaseRestartRequired,
+            busy: _databaseBusy,
+            onOpenExisting: _openExistingDatabase,
+            onUseDefault: _useDefaultDatabase,
           ),
 
           const SizedBox(height: 24),
@@ -543,8 +665,10 @@ class _SettingsPageState extends State<SettingsPage> {
               if (!widget.requireFonts)
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text(_l10n.cancel,
-                      style: TextStyle(color: AppColors.textCaption)),
+                  child: Text(
+                    _l10n.cancel,
+                    style: TextStyle(color: AppColors.textCaption),
+                  ),
                 ),
               const SizedBox(width: 8),
               TextButton(
@@ -553,8 +677,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   backgroundColor: _canSave
                       ? AppColors.sky500
                       : AppColors.border,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -642,8 +768,10 @@ class _SettingsPageState extends State<SettingsPage> {
           style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
           decoration: InputDecoration(
             isDense: true,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 10,
+            ),
             filled: true,
             fillColor: AppColors.inputFill,
             border: OutlineInputBorder(
@@ -676,7 +804,10 @@ class _SettingsPageState extends State<SettingsPage> {
       initialValue: _settings?.locale,
       decoration: InputDecoration(
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 12,
+        ),
         filled: true,
         fillColor: AppColors.inputFill,
         border: OutlineInputBorder(
@@ -695,10 +826,7 @@ class _SettingsPageState extends State<SettingsPage> {
       dropdownColor: AppColors.surfaceContainer,
       style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
       items: languages.map((lang) {
-        return DropdownMenuItem<String>(
-          value: lang.$1,
-          child: Text(lang.$2),
-        );
+        return DropdownMenuItem<String>(value: lang.$1, child: Text(lang.$2));
       }).toList(),
       onChanged: (value) {
         setState(() {
@@ -722,7 +850,10 @@ class _SettingsPageState extends State<SettingsPage> {
       initialValue: _settings?.theme ?? AppTheme.dark,
       decoration: InputDecoration(
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 12,
+        ),
         filled: true,
         fillColor: AppColors.inputFill,
         border: OutlineInputBorder(
@@ -741,10 +872,7 @@ class _SettingsPageState extends State<SettingsPage> {
       dropdownColor: AppColors.surfaceContainer,
       style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
       items: themes.map((t) {
-        return DropdownMenuItem<AppTheme>(
-          value: t.$1,
-          child: Text(t.$2),
-        );
+        return DropdownMenuItem<AppTheme>(value: t.$1, child: Text(t.$2));
       }).toList(),
       onChanged: (value) {
         if (value != null) {
@@ -788,8 +916,7 @@ class _TextFieldDialogState extends State<_TextFieldDialog> {
     final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
       backgroundColor: AppColors.surface,
-      title: Text(widget.title,
-          style: TextStyle(color: AppColors.textPrimary)),
+      title: Text(widget.title, style: TextStyle(color: AppColors.textPrimary)),
       content: TextField(
         controller: _ctrl,
         autofocus: true,
@@ -808,14 +935,20 @@ class _TextFieldDialogState extends State<_TextFieldDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(l10n.cancel,
-              style: TextStyle(color: AppColors.textCaption)),
+          child: Text(
+            l10n.cancel,
+            style: TextStyle(color: AppColors.textCaption),
+          ),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context, _ctrl.text.trim()),
-          child: Text(widget.confirmLabel,
-              style: const TextStyle(
-                  color: AppColors.sky500, fontWeight: FontWeight.w600)),
+          child: Text(
+            widget.confirmLabel,
+            style: const TextStyle(
+              color: AppColors.sky500,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ],
     );

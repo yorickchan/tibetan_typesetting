@@ -1,11 +1,16 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'l10n/app_localizations.dart';
 import 'models/app_settings.dart';
+import 'pages/database_recovery_page.dart';
 import 'pages/projects_page.dart';
 import 'pages/settings_page.dart';
+import 'services/database_location_provider.dart';
+import 'services/database_location_service.dart';
 import 'services/database_service.dart';
+import 'services/database_startup_controller.dart';
 import 'services/font_service.dart';
 import 'services/settings_service.dart';
 import 'services/screen_dpi_service.dart';
@@ -19,20 +24,148 @@ void main() async {
   kMmToPx = ScreenDpiService().mmToPx;
   font_utils.ptToPreviewPx = ScreenDpiService().ptToPx;
 
-  await DatabaseService().database;
+  runApp(const _DatabaseStartupGate());
+}
 
-  // Pre-load app settings and register configured fonts for preview
-  final settings = await SettingsService().getSettings();
-  final fontService = FontService();
-  for (final c in [
-    settings.tibetanFont,
-    settings.pronunciationFont,
-    settings.translationFont,
-  ]) {
-    if (c != null) await fontService.loadFontForPreview(c);
+class _DatabaseStartupGate extends StatefulWidget {
+  const _DatabaseStartupGate();
+
+  @override
+  State<_DatabaseStartupGate> createState() => _DatabaseStartupGateState();
+}
+
+class _DatabaseStartupGateState extends State<_DatabaseStartupGate> {
+  late final DatabaseLocationService _locationService;
+  late final DatabaseStartupController _startupController;
+  DatabaseStartupResult? _startupResult;
+  AppSettings? _settings;
+  bool _busy = true;
+
+  @override
+  void initState() {
+    super.initState();
+    final databaseService = DatabaseService();
+    _locationService = createDatabaseLocationService();
+    _startupController = DatabaseStartupController(
+      resolveLocation: _locationService.resolveForStartup,
+      configureDatabase: databaseService.configurePath,
+      openDatabase: () async {
+        await databaseService.database;
+      },
+    );
+    _initialize();
   }
 
-  runApp(TibetanTypesettingApp(initialSettings: settings));
+  Future<void> _initialize() async {
+    if (mounted) setState(() => _busy = true);
+    final result = await _startupController.initialize();
+    if (!mounted) return;
+    if (!result.isSuccess) {
+      setState(() {
+        _startupResult = result;
+        _busy = false;
+      });
+      return;
+    }
+
+    final settings = await SettingsService().getSettings();
+    final fontService = FontService();
+    for (final config in [
+      settings.tibetanFont,
+      settings.pronunciationFont,
+      settings.translationFont,
+    ]) {
+      if (config != null) await fontService.loadFontForPreview(config);
+    }
+    if (!mounted) return;
+    setState(() {
+      _startupResult = result;
+      _settings = settings;
+      _busy = false;
+    });
+  }
+
+  Future<bool> _confirmCloudUse() async {
+    final l10n = AppLocalizations.of(context)!;
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(l10n.cloudDatabaseConfirmationTitle),
+            content: Text(l10n.cloudDatabaseConfirmation),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(l10n.continueLabel),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  Future<void> _chooseAnotherDatabase() async {
+    final l10n = AppLocalizations.of(context)!;
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const ['db'],
+      dialogTitle: l10n.chooseAnotherDatabase,
+    );
+    final path = result?.files.single.path;
+    if (path == null || !mounted || !await _confirmCloudUse()) return;
+    setState(() => _busy = true);
+    final selection = await _locationService.selectExisting(path);
+    if (!mounted) return;
+    if (!selection.isValid) {
+      setState(() {
+        _startupResult = DatabaseStartupResult.failure(
+          selection.issue,
+          version: selection.version,
+        );
+        _busy = false;
+      });
+      return;
+    }
+    await _initialize();
+  }
+
+  Future<void> _useDefaultDatabase() async {
+    setState(() => _busy = true);
+    await _locationService.useDefault();
+    await _initialize();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = _settings;
+    if (settings != null) {
+      return TibetanTypesettingApp(initialSettings: settings);
+    }
+    AppColors.setBrightness(Brightness.dark);
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      theme: ThemeData.dark(),
+      home: Scaffold(
+        backgroundColor: AppColors.slate950,
+        body: _startupResult == null
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.sky500),
+              )
+            : DatabaseRecoveryPage(
+                issue: _startupResult!.issue,
+                busy: _busy,
+                onRetry: _initialize,
+                onChooseAnother: _chooseAnotherDatabase,
+                onUseDefault: _useDefaultDatabase,
+              ),
+      ),
+    );
+  }
 }
 
 /// Global key used to open the settings dialog from the platform menu.

@@ -513,4 +513,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contentSubsequentPageMargin => 'Subsequent pages margin (mm)';
+
+  @override
+  String get database => 'Database';
+
+  @override
+  String get currentDatabase => 'Current database';
+
+  @override
+  String get openExistingDatabase => 'Open Existing Database…';
+
+  @override
+  String get useDefaultDatabase => 'Use Default Database';
+
+  @override
+  String get cloudDatabaseWarning =>
+      'Cloud folders are safe only when this database is open on one device at a time.';
+
+  @override
+  String get databaseRestartRequired =>
+      'Restart the application to use this database.';
+
+  @override
+  String get databaseRecoveryTitle => 'Database Unavailable';
+
+  @override
+  String get databaseNotFound => 'The selected database could not be found.';
+
+  @override
+  String get databaseInvalid =>
+      'The selected file is not a valid Tibetan Typesetting database.';
+
+  @override
+  String get databaseNewerVersion =>
+      'This database was created by a newer version of the application.';
+
+  @override
+  String get databaseUnreadable =>
+      'The selected database could not be opened. Check its permissions and cloud availability.';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get chooseAnotherDatabase => 'Choose Another Database…';
+
+  @override
+  String get databaseSelectionFailed => 'The database selection was not saved.';
+
+  @override
+  String get cloudDatabaseConfirmationTitle => 'Open Cloud Database?';
+
+  @override
+  String get cloudDatabaseConfirmation =>
+      'Do not open this database on multiple devices at the same time. Cloud-drive synchronization cannot coordinate SQLite writes.';
+
+  @override
+  String get continueLabel => 'Continue';
 }

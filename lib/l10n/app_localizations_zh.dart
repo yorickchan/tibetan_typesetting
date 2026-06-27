@@ -511,6 +511,58 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get contentSubsequentPageMargin => '后续页面边距 (mm)';
+
+  @override
+  String get database => '数据库';
+
+  @override
+  String get currentDatabase => '当前数据库';
+
+  @override
+  String get openExistingDatabase => '打开现有数据库…';
+
+  @override
+  String get useDefaultDatabase => '使用默认数据库';
+
+  @override
+  String get cloudDatabaseWarning => '云端文件夹仅适合一次由一台设备打开此数据库。';
+
+  @override
+  String get databaseRestartRequired => '请重新启动应用程序以使用此数据库。';
+
+  @override
+  String get databaseRecoveryTitle => '数据库不可用';
+
+  @override
+  String get databaseNotFound => '找不到所选数据库。';
+
+  @override
+  String get databaseInvalid => '所选文件不是有效的藏文排版数据库。';
+
+  @override
+  String get databaseNewerVersion => '此数据库由较新版本的应用程序创建。';
+
+  @override
+  String get databaseUnreadable => '无法打开所选数据库。请检查权限和云端可用性。';
+
+  @override
+  String get retry => '重试';
+
+  @override
+  String get chooseAnotherDatabase => '选择其他数据库…';
+
+  @override
+  String get databaseSelectionFailed => '未保存数据库选择。';
+
+  @override
+  String get cloudDatabaseConfirmationTitle => '打开云端数据库？';
+
+  @override
+  String get cloudDatabaseConfirmation =>
+      '请勿在多台设备上同时打开此数据库。云端同步无法协调 SQLite 写入。';
+
+  @override
+  String get continueLabel => '继续';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -1020,4 +1072,56 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get contentSubsequentPageMargin => '後續頁面邊距 (mm)';
+
+  @override
+  String get database => '資料庫';
+
+  @override
+  String get currentDatabase => '目前資料庫';
+
+  @override
+  String get openExistingDatabase => '開啟現有資料庫…';
+
+  @override
+  String get useDefaultDatabase => '使用預設資料庫';
+
+  @override
+  String get cloudDatabaseWarning => '雲端資料夾僅適合一次由一台裝置開啟此資料庫。';
+
+  @override
+  String get databaseRestartRequired => '請重新啟動應用程式以使用此資料庫。';
+
+  @override
+  String get databaseRecoveryTitle => '資料庫無法使用';
+
+  @override
+  String get databaseNotFound => '找不到所選資料庫。';
+
+  @override
+  String get databaseInvalid => '所選檔案不是有效的藏文排版資料庫。';
+
+  @override
+  String get databaseNewerVersion => '此資料庫由較新版本的應用程式建立。';
+
+  @override
+  String get databaseUnreadable => '無法開啟所選資料庫。請檢查權限和雲端可用性。';
+
+  @override
+  String get retry => '重試';
+
+  @override
+  String get chooseAnotherDatabase => '選擇其他資料庫…';
+
+  @override
+  String get databaseSelectionFailed => '未儲存資料庫選擇。';
+
+  @override
+  String get cloudDatabaseConfirmationTitle => '開啟雲端資料庫？';
+
+  @override
+  String get cloudDatabaseConfirmation =>
+      '請勿在多台裝置上同時開啟此資料庫。雲端同步無法協調 SQLite 寫入。';
+
+  @override
+  String get continueLabel => '繼續';
 }
