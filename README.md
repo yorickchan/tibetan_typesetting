@@ -1,6 +1,6 @@
 # Tibetan Typesetting
 
-[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.12**
+[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.13**
 
 <p align="center">
   <img src="assets/images/icon.png" width="128" alt="App Icon"/>
@@ -22,6 +22,7 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - Auto-save functionality with save-state indicator
 - Undo/Redo support (up to 50 states)
 - Red character highlight — mark selected words in heading text with red ink using range notation (e.g. `1-4,6-8`) while vowel marks, tshegs, and punctuation remain black
+- **Chinese script switch** — convert all Chinese text in a project between Simplified and Traditional with one click; script is auto-detected from content when unset
 - Wylie transliteration input for Tibetan text
 
 ### 🖼️ Floating Images
@@ -102,6 +103,8 @@ The application pre-renders Tibetan text to high-resolution PNG images (460 DPI)
 - Support for project import/export (JSON)
 - Project duplication and tagging
 - Image files stored in application support directory
+- **Selectable database location** — choose a custom folder for the database file and persist the choice across launches via security-scoped bookmarks
+- **Database recovery page** — guides the user through retry, choose another file, or reset to default when the database cannot be opened
 
 ## Getting Started
 
@@ -168,20 +171,32 @@ lib/
 │   ├── project.dart                # Project, TextBlock, PageSetup, MarginMm
 │   ├── block_update.dart           # Block update descriptor
 │   ├── app_settings.dart           # Application settings
+│   ├── chinese_script.dart         # ChineseScript enum (simplified/traditional/unknown)
 │   ├── font_config.dart            # Font configuration
 │   ├── pronunciation_entry.dart    # Pronunciation dictionary entry
 │   └── title_page_template.dart    # Title page template model
 ├── pages/                           # Main application pages
 │   ├── projects_page.dart          # Project management
+│   ├── database_recovery_page.dart # Database open failure recovery
 │   ├── editor_page.dart            # Text editor
 │   ├── export_page.dart            # PDF/HTML export and preview
 │   ├── settings_page.dart          # Application settings
 │   └── dictionary_page.dart        # Pronunciation dictionary management
 ├── services/                        # Business logic
+│   ├── chinese_conversion_service.dart  # Simplified ↔ Traditional Chinese conversion
+│   ├── database_bookmark_service.dart   # Security-scoped bookmark persistence
+│   ├── database_file_validator.dart     # Database file integrity checks
+│   ├── database_location_core.dart      # Pure database location resolution logic
+│   ├── database_location_provider.dart  # Database location dependency provider
+│   ├── database_location_service.dart   # Database location selection and startup
 │   ├── database_service.dart       # SQLite persistence
+│   ├── database_service_core.dart  # Pure database query logic
+│   ├── database_startup_controller.dart # Startup resolution and recovery flow
 │   ├── pdf_service.dart            # PDF generation
+│   ├── pdf_service_core.dart       # Pure PDF rendering helpers
 │   ├── html_export_service.dart    # HTML export generation
 │   ├── font_service.dart           # Font management
+│   ├── font_service_core.dart      # Pure font discovery logic
 │   ├── settings_service.dart       # Settings management
 │   ├── pronunciation_service.dart  # Pronunciation dictionary CRUD
 │   ├── batch_import_service.dart   # CSV/TSV batch import
@@ -207,7 +222,9 @@ lib/
     ├── app_shell.dart               # Common scaffold
     ├── block_editor.dart            # Block editing panel
     ├── block_strip.dart             # Block navigation
+    ├── chinese_script_switch.dart   # Simplified/Traditional toggle
     ├── content_page_template_panel.dart # Content page template controls
+    ├── database_location_panel.dart # Database location settings
     ├── editor_page_setup_panel.dart # Page setup controls
     ├── export_pdf_settings_panel.dart # PDF export settings
     ├── flow_spacing_panel.dart      # Flow gap controls
@@ -256,6 +273,9 @@ flutter build linux
 ### Key Components
 
 - **DatabaseService**: Singleton managing SQLite operations for project persistence
+- **DatabaseLocationService**: Selectable database location with security-scoped bookmark persistence and startup resolution
+- **DatabaseStartupController**: Guides the app through database open failures and recovery flows
+- **ChineseConversionService**: Converts all Chinese text in a project between Simplified and Traditional; auto-detects script from content
 - **PdfService**: Singleton handling PDF generation with Tibetan text pre-rendering
 - **HtmlExportService**: Generates standalone HTML documents from projects
 - **FontService**: System font discovery and management

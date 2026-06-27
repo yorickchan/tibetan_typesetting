@@ -1,4 +1,4 @@
-# 藏文排版 &nbsp;·&nbsp; v1.1.12
+# 藏文排版 &nbsp;·&nbsp; v1.1.13
 
 <p align="center">
   <img src="assets/images/icon.png" width="128" alt="應用程式圖示"/>
@@ -19,8 +19,9 @@
 - 視覺化的區塊導航和管理
 - 自動儲存功能及儲存狀態指示器
 - 復原/重做支援（最多 50 個狀態）
-- 威利轉寫（Wylie）輸入藏文
 - 紅色字元強調 — 使用範圍標記（如 `1-4,6-8`）將標題中選定的詞語以紅字標示，母音符號、tsheg 和標點保持黑色
+- **中文字體切換** — 一鍵將專案內所有中文文字在繁體與簡體之間相互轉換；未設定時自動從內容偵測字體
+- 威利轉寫（Wylie）輸入藏文
 
 ### 🖼️ 浮動圖片
 - 在文字區塊中插入圖片並精確定位
@@ -101,6 +102,8 @@
 - 支援專案匯入/匯出（JSON）
 - 專案複製和標籤功能
 - 圖片檔案儲存於應用程式支援目錄
+- **可選擇資料庫位置** — 自訂資料庫檔案的儲存資料夾，並透過安全範圍書籤在啟動時持續保留選擇
+- **資料庫還原頁面** — 當資料庫無法開啟時，引導使用者重試、選擇其他檔案或重設為預設值
 
 ## 開始使用
 
@@ -167,20 +170,32 @@ lib/
 │   ├── project.dart                # Project、TextBlock、PageSetup、MarginMm
 │   ├── block_update.dart           # 區塊更新描述器
 │   ├── app_settings.dart           # 應用程式設定
+│   ├── chinese_script.dart         # ChineseScript 列舉（簡體/繁體/未知）
 │   ├── font_config.dart            # 字型設定
 │   ├── pronunciation_entry.dart    # 讀音詞典項目
 │   └── title_page_template.dart    # 封面頁模板模型
 ├── pages/                           # 主要應用程式頁面
 │   ├── projects_page.dart          # 專案管理
+│   ├── database_recovery_page.dart # 資料庫開啟失敗還原
 │   ├── editor_page.dart            # 文字編輯器
 │   ├── export_page.dart            # PDF/HTML 匯出和預覽
 │   ├── settings_page.dart          # 應用程式設定
 │   └── dictionary_page.dart        # 讀音詞典管理
 ├── services/                        # 業務邏輯
+│   ├── chinese_conversion_service.dart  # 簡繁中文相互轉換
+│   ├── database_bookmark_service.dart   # 安全範圍書籤持久化
+│   ├── database_file_validator.dart     # 資料庫檔案完整性驗證
+│   ├── database_location_core.dart      # 純資料庫位置解析邏輯
+│   ├── database_location_provider.dart  # 資料庫位置相依提供者
+│   ├── database_location_service.dart   # 資料庫位置選擇與啟動
 │   ├── database_service.dart       # SQLite 持久化
+│   ├── database_service_core.dart  # 純資料庫查詢邏輯
+│   ├── database_startup_controller.dart # 啟動解析與還原流程
 │   ├── pdf_service.dart            # PDF 生成
+│   ├── pdf_service_core.dart       # 純 PDF 渲染輔助
 │   ├── html_export_service.dart    # HTML 匯出生成
 │   ├── font_service.dart           # 字型管理
+│   ├── font_service_core.dart      # 純字型探索邏輯
 │   ├── settings_service.dart       # 設定管理
 │   ├── pronunciation_service.dart  # 讀音詞典 CRUD
 │   ├── batch_import_service.dart   # CSV/TSV 批次匯入
@@ -206,7 +221,9 @@ lib/
     ├── app_shell.dart               # 通用架構
     ├── block_editor.dart            # 區塊編輯面板
     ├── block_strip.dart             # 區塊導航
+    ├── chinese_script_switch.dart   # 簡體/繁體切換
     ├── content_page_template_panel.dart # 內容頁模板控制
+    ├── database_location_panel.dart # 資料庫位置設定
     ├── editor_page_setup_panel.dart # 頁面設定控制
     ├── export_pdf_settings_panel.dart # PDF 匯出設定
     ├── flow_spacing_panel.dart      # 流間距控制
@@ -255,6 +272,9 @@ flutter build linux
 ### 核心元件
 
 - **DatabaseService**：管理 SQLite 操作的單例服務，用於專案持久化
+- **DatabaseLocationService**：可選擇的資料庫位置，透過安全範圍書籤持久化並在啟動時解析
+- **DatabaseStartupController**：引導應用程式完成資料庫開啟失敗的還原流程
+- **ChineseConversionService**：將專案內所有中文在簡體與繁體之間轉換；自動從內容偵測字體
 - **PdfService**：處理 PDF 生成的單例服務，包含藏文文字預渲染
 - **HtmlExportService**：從專案產生獨立 HTML 文件
 - **FontService**：系統字型探測和管理
