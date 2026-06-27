@@ -143,7 +143,13 @@ class MainFlutterWindow: NSWindow {
             includingResourceValuesForKeys: nil,
             relativeTo: nil).base64EncodedString()
         : encoded
-      result(["path": url.path, "bookmark": refreshed])
+      let isDirectory = try url.resourceValues(
+        forKeys: [.isDirectoryKey]).isDirectory ?? false
+      result([
+        "path": url.path,
+        "bookmark": refreshed,
+        "isDirectory": isDirectory,
+      ])
     } catch {
       result(FlutterError(
         code: "bookmark_resolution_failed",

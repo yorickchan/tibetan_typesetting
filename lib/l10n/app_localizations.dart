@@ -1155,6 +1155,18 @@ abstract class AppLocalizations {
   /// **'The database selection was not saved.'**
   String get databaseSelectionFailed;
 
+  /// No description provided for @authorizeDatabaseFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Database Folder'**
+  String get authorizeDatabaseFolder;
+
+  /// No description provided for @databaseFolderAccessRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the database again and grant access to its containing folder.'**
+  String get databaseFolderAccessRequired;
+
   /// No description provided for @cloudDatabaseConfirmationTitle.
   ///
   /// In en, this message translates to:

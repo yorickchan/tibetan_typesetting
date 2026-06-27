@@ -11,6 +11,7 @@ enum DatabaseValidationIssue {
   invalidSqlite,
   newerVersion,
   incompatibleSchema,
+  directoryAccessRequired,
   unreadable,
 }
 

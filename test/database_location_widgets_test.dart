@@ -89,4 +89,27 @@ void main() {
     expect(chose, isTrue);
     expect(reset, isTrue);
   });
+
+  testWidgets('recovery explains that containing-folder access is required', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        DatabaseRecoveryPage(
+          issue: DatabaseValidationIssue.directoryAccessRequired,
+          busy: false,
+          onRetry: () {},
+          onChooseAnother: () {},
+          onUseDefault: () {},
+        ),
+      ),
+    );
+
+    expect(
+      find.text(
+        'Select the database again and grant access to its containing folder.',
+      ),
+      findsOneWidget,
+    );
+  });
 }

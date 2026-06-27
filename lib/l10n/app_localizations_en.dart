@@ -562,6 +562,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get databaseSelectionFailed => 'The database selection was not saved.';
 
   @override
+  String get authorizeDatabaseFolder => 'Select Database Folder';
+
+  @override
+  String get databaseFolderAccessRequired =>
+      'Select the database again and grant access to its containing folder.';
+
+  @override
   String get cloudDatabaseConfirmationTitle => 'Open Cloud Database?';
 
   @override

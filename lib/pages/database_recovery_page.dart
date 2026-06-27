@@ -24,6 +24,8 @@ class DatabaseRecoveryPage extends StatelessWidget {
     return switch (issue) {
       DatabaseValidationIssue.notFound => l10n.databaseNotFound,
       DatabaseValidationIssue.newerVersion => l10n.databaseNewerVersion,
+      DatabaseValidationIssue.directoryAccessRequired =>
+        l10n.databaseFolderAccessRequired,
       DatabaseValidationIssue.invalidSqlite ||
       DatabaseValidationIssue.incompatibleSchema ||
       DatabaseValidationIssue.notAFile => l10n.databaseInvalid,

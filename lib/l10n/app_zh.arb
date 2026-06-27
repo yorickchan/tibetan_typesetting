@@ -176,6 +176,8 @@
   "retry": "重试",
   "chooseAnotherDatabase": "选择其他数据库…",
   "databaseSelectionFailed": "未保存数据库选择。",
+  "authorizeDatabaseFolder": "选择数据库文件夹",
+  "databaseFolderAccessRequired": "请重新选择数据库，并授权访问其所在的文件夹。",
   "cloudDatabaseConfirmationTitle": "打开云端数据库？",
   "cloudDatabaseConfirmation": "请勿在多台设备上同时打开此数据库。云端同步无法协调 SQLite 写入。",
   "continueLabel": "继续"

@@ -64,25 +64,23 @@ void main() {
       bookmarkService: bookmarks,
     );
 
-    await service.selectExisting('/cloud/library.db');
+    await service.selectExisting(
+      '/cloud/library.db',
+      bookmarkRootPath: '/cloud',
+    );
 
     expect(
       await store.read(),
       const DatabaseLocationPreference.custom(
         path: '/cloud/library.db',
-        macOsBookmark: 'bookmark:/cloud/library.db',
+        macOsBookmark: 'bookmark:/cloud',
       ),
     );
+    expect(bookmarks.createdPath, '/cloud');
   });
 
-  test('startup resolution refreshes a moved bookmarked path', () async {
-    await store.write(
-      const DatabaseLocationPreference.custom(
-        path: '/cloud/old.db',
-        macOsBookmark: 'bookmark:/cloud/old.db',
-      ),
-    );
-    final bookmarks = _FakeBookmarkService(resolvedPath: '/cloud/moved.db');
+  test('macOS selection rejects access to a different folder', () async {
+    final bookmarks = _FakeBookmarkService();
     final service = DatabaseLocationService(
       store: store,
       validateFile: (_) async =>
@@ -91,13 +89,71 @@ void main() {
       bookmarkService: bookmarks,
     );
 
-    final result = await service.resolveForStartup();
+    final result = await service.selectExisting(
+      '/cloud/library.db',
+      bookmarkRootPath: '/other',
+    );
 
-    expect(result.path, '/cloud/moved.db');
-    expect(result.issue, isNull);
-    expect((await store.read()).path, '/cloud/moved.db');
-    expect((await store.read()).macOsBookmark, 'refreshed-bookmark');
+    expect(result.issue, DatabaseValidationIssue.directoryAccessRequired);
+    expect(
+      await store.read(),
+      const DatabaseLocationPreference.defaultLocation(),
+    );
   });
+
+  test(
+    'startup resolution keeps the filename when bookmarked folder moves',
+    () async {
+      await store.write(
+        const DatabaseLocationPreference.custom(
+          path: '/cloud/old.db',
+          macOsBookmark: 'bookmark:/cloud',
+        ),
+      );
+      final bookmarks = _FakeBookmarkService(resolvedPath: '/moved');
+      final service = DatabaseLocationService(
+        store: store,
+        validateFile: (_) async =>
+            const DatabaseValidationResult.valid(currentDatabaseVersion),
+        defaultDatabasePath: () async => '/local/default.db',
+        bookmarkService: bookmarks,
+      );
+
+      final result = await service.resolveForStartup();
+
+      expect(result.path, '/moved/old.db');
+      expect(result.issue, isNull);
+      expect((await store.read()).path, '/moved/old.db');
+      expect((await store.read()).macOsBookmark, 'refreshed-bookmark');
+    },
+  );
+
+  test(
+    'startup rejects legacy bookmarks that authorize only the file',
+    () async {
+      await store.write(
+        const DatabaseLocationPreference.custom(
+          path: '/cloud/old.db',
+          macOsBookmark: 'bookmark:/cloud/old.db',
+        ),
+      );
+      final bookmarks = _FakeBookmarkService(
+        resolvedPath: '/cloud/old.db',
+        resolvedIsDirectory: false,
+      );
+      final service = DatabaseLocationService(
+        store: store,
+        validateFile: (_) async =>
+            const DatabaseValidationResult.valid(currentDatabaseVersion),
+        defaultDatabasePath: () async => '/local/default.db',
+        bookmarkService: bookmarks,
+      );
+
+      final result = await service.resolveForStartup();
+
+      expect(result.issue, DatabaseValidationIssue.directoryAccessRequired);
+    },
+  );
 
   test('using default clears the custom location', () async {
     await store.write(
@@ -120,11 +176,16 @@ void main() {
 
 class _FakeBookmarkService implements DatabaseBookmarkService {
   final String? resolvedPath;
+  final bool resolvedIsDirectory;
+  String? createdPath;
 
-  _FakeBookmarkService({this.resolvedPath});
+  _FakeBookmarkService({this.resolvedPath, this.resolvedIsDirectory = true});
 
   @override
-  Future<String> create(String path) async => 'bookmark:$path';
+  Future<String> create(String path) async {
+    createdPath = path;
+    return 'bookmark:$path';
+  }
 
   @override
   Future<ResolvedDatabaseBookmark> resolveAndStartAccess(
@@ -132,5 +193,6 @@ class _FakeBookmarkService implements DatabaseBookmarkService {
   ) async => ResolvedDatabaseBookmark(
     path: resolvedPath ?? bookmark.substring('bookmark:'.length),
     bookmark: resolvedPath == null ? bookmark : 'refreshed-bookmark',
+    isDirectory: resolvedIsDirectory,
   );
 }

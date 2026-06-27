@@ -22,18 +22,24 @@ class MacOsDatabaseBookmarkService implements DatabaseBookmarkService {
   Future<ResolvedDatabaseBookmark> resolveAndStartAccess(
     String bookmark,
   ) async {
-    final resolved = await _channel.invokeMapMethod<String, String>(
+    final resolved = await _channel.invokeMethod<Map<Object?, Object?>>(
       'resolveAndStartAccess',
       {'bookmark': bookmark},
     );
-    final path = resolved?['path'];
-    final refreshedBookmark = resolved?['bookmark'];
+    final path = resolved?['path'] as String?;
+    final refreshedBookmark = resolved?['bookmark'] as String?;
+    final isDirectory = resolved?['isDirectory'] as bool?;
     if (path == null ||
         path.isEmpty ||
         refreshedBookmark == null ||
-        refreshedBookmark.isEmpty) {
+        refreshedBookmark.isEmpty ||
+        isDirectory == null) {
       throw PlatformException(code: 'bookmark_resolution_failed');
     }
-    return ResolvedDatabaseBookmark(path: path, bookmark: refreshedBookmark);
+    return ResolvedDatabaseBookmark(
+      path: path,
+      bookmark: refreshedBookmark,
+      isDirectory: isDirectory,
+    );
   }
 }

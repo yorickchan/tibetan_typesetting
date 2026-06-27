@@ -16,8 +16,9 @@ void main() {
           return switch (call.method) {
             'create' => 'stored-bookmark',
             'resolveAndStartAccess' => {
-              'path': '/cloud/moved.db',
+              'path': '/cloud',
               'bookmark': 'refreshed-bookmark',
+              'isDirectory': true,
             },
             _ => null,
           };
@@ -32,11 +33,11 @@ void main() {
   test('creates a bookmark for a selected path', () async {
     final service = MacOsDatabaseBookmarkService();
 
-    final bookmark = await service.create('/cloud/library.db');
+    final bookmark = await service.create('/cloud');
 
     expect(bookmark, 'stored-bookmark');
     expect(calls.single.method, 'create');
-    expect(calls.single.arguments, {'path': '/cloud/library.db'});
+    expect(calls.single.arguments, {'path': '/cloud'});
   });
 
   test('resolves a bookmark and starts persistent access', () async {
@@ -44,8 +45,9 @@ void main() {
 
     final resolved = await service.resolveAndStartAccess('stored-bookmark');
 
-    expect(resolved.path, '/cloud/moved.db');
+    expect(resolved.path, '/cloud');
     expect(resolved.bookmark, 'refreshed-bookmark');
+    expect(resolved.isDirectory, isTrue);
     expect(calls.single.method, 'resolveAndStartAccess');
     expect(calls.single.arguments, {'bookmark': 'stored-bookmark'});
   });

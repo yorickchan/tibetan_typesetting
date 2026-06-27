@@ -110,6 +110,8 @@ class _SettingsPageState extends State<SettingsPage> {
     return switch (issue) {
       DatabaseValidationIssue.notFound => _l10n.databaseNotFound,
       DatabaseValidationIssue.newerVersion => _l10n.databaseNewerVersion,
+      DatabaseValidationIssue.directoryAccessRequired =>
+        _l10n.databaseFolderAccessRequired,
       DatabaseValidationIssue.invalidSqlite ||
       DatabaseValidationIssue.incompatibleSchema ||
       DatabaseValidationIssue.notAFile => _l10n.databaseInvalid,
@@ -146,8 +148,20 @@ class _SettingsPageState extends State<SettingsPage> {
     );
     if (confirmed != true || !mounted) return;
 
+    String? bookmarkRootPath;
+    if (Platform.isMacOS) {
+      bookmarkRootPath = await FilePicker.getDirectoryPath(
+        dialogTitle: _l10n.authorizeDatabaseFolder,
+        initialDirectory: File(path).parent.path,
+      );
+      if (bookmarkRootPath == null || !mounted) return;
+    }
+
     setState(() => _databaseBusy = true);
-    final selection = await _databaseLocationService.selectExisting(path);
+    final selection = await _databaseLocationService.selectExisting(
+      path,
+      bookmarkRootPath: bookmarkRootPath,
+    );
     if (!mounted) return;
     setState(() => _databaseBusy = false);
     if (!selection.isValid) {

@@ -176,6 +176,8 @@
   "retry": "重試",
   "chooseAnotherDatabase": "選擇其他資料庫…",
   "databaseSelectionFailed": "未儲存資料庫選擇。",
+  "authorizeDatabaseFolder": "選擇資料庫資料夾",
+  "databaseFolderAccessRequired": "請重新選擇資料庫，並授權存取其所在的資料夾。",
   "cloudDatabaseConfirmationTitle": "開啟雲端資料庫？",
   "cloudDatabaseConfirmation": "請勿在多台裝置上同時開啟此資料庫。雲端同步無法協調 SQLite 寫入。",
   "continueLabel": "繼續"

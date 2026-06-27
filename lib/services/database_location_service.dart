@@ -1,3 +1,5 @@
+import 'package:path/path.dart' as p;
+
 import 'database_file_validator.dart';
 import 'database_location_core.dart';
 
@@ -13,8 +15,13 @@ abstract interface class DatabaseBookmarkService {
 class ResolvedDatabaseBookmark {
   final String path;
   final String bookmark;
+  final bool isDirectory;
 
-  const ResolvedDatabaseBookmark({required this.path, required this.bookmark});
+  const ResolvedDatabaseBookmark({
+    required this.path,
+    required this.bookmark,
+    required this.isDirectory,
+  });
 }
 
 class DatabaseStartupResolution {
@@ -56,13 +63,24 @@ class DatabaseLocationService {
     return preference.path ?? await defaultDatabasePath();
   }
 
-  Future<DatabaseValidationResult> selectExisting(String path) async {
+  Future<DatabaseValidationResult> selectExisting(
+    String path, {
+    String? bookmarkRootPath,
+  }) async {
     final validation = await validateFile(path);
     if (!validation.isValid) return validation;
 
     String? bookmark;
     try {
-      bookmark = await bookmarkService?.create(path);
+      if (bookmarkService != null) {
+        if (bookmarkRootPath == null ||
+            p.normalize(p.dirname(path)) != p.normalize(bookmarkRootPath)) {
+          return const DatabaseValidationResult.invalid(
+            DatabaseValidationIssue.directoryAccessRequired,
+          );
+        }
+        bookmark = await bookmarkService!.create(bookmarkRootPath);
+      }
     } on Object catch (_) {
       return const DatabaseValidationResult.invalid(
         DatabaseValidationIssue.unreadable,
@@ -94,7 +112,12 @@ class DatabaseLocationService {
         final resolved = await bookmarkService!.resolveAndStartAccess(
           preference.macOsBookmark!,
         );
-        path = resolved.path;
+        if (!resolved.isDirectory) {
+          return const DatabaseStartupResolution.failure(
+            issue: DatabaseValidationIssue.directoryAccessRequired,
+          );
+        }
+        path = p.join(resolved.path, p.basename(preference.path!));
         bookmark = resolved.bookmark;
       } on Object catch (_) {
         return const DatabaseStartupResolution.failure(

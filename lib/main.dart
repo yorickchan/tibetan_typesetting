@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -116,8 +118,19 @@ class _DatabaseStartupGateState extends State<_DatabaseStartupGate> {
     );
     final path = result?.files.single.path;
     if (path == null || !mounted || !await _confirmCloudUse()) return;
+    String? bookmarkRootPath;
+    if (Platform.isMacOS) {
+      bookmarkRootPath = await FilePicker.getDirectoryPath(
+        dialogTitle: l10n.authorizeDatabaseFolder,
+        initialDirectory: File(path).parent.path,
+      );
+      if (bookmarkRootPath == null || !mounted) return;
+    }
     setState(() => _busy = true);
-    final selection = await _locationService.selectExisting(path);
+    final selection = await _locationService.selectExisting(
+      path,
+      bookmarkRootPath: bookmarkRootPath,
+    );
     if (!mounted) return;
     if (!selection.isValid) {
       setState(() {

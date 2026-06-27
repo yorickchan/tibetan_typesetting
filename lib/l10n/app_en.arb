@@ -242,6 +242,8 @@
   "retry": "Retry",
   "chooseAnotherDatabase": "Choose Another Database…",
   "databaseSelectionFailed": "The database selection was not saved.",
+  "authorizeDatabaseFolder": "Select Database Folder",
+  "databaseFolderAccessRequired": "Select the database again and grant access to its containing folder.",
   "cloudDatabaseConfirmationTitle": "Open Cloud Database?",
   "cloudDatabaseConfirmation": "Do not open this database on multiple devices at the same time. Cloud-drive synchronization cannot coordinate SQLite writes.",
   "continueLabel": "Continue"

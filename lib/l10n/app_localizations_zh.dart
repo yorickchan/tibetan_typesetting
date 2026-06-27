@@ -555,6 +555,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get databaseSelectionFailed => '未保存数据库选择。';
 
   @override
+  String get authorizeDatabaseFolder => '选择数据库文件夹';
+
+  @override
+  String get databaseFolderAccessRequired => '请重新选择数据库，并授权访问其所在的文件夹。';
+
+  @override
   String get cloudDatabaseConfirmationTitle => '打开云端数据库？';
 
   @override
@@ -1114,6 +1120,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get databaseSelectionFailed => '未儲存資料庫選擇。';
+
+  @override
+  String get authorizeDatabaseFolder => '選擇資料庫資料夾';
+
+  @override
+  String get databaseFolderAccessRequired => '請重新選擇資料庫，並授權存取其所在的資料夾。';
 
   @override
   String get cloudDatabaseConfirmationTitle => '開啟雲端資料庫？';
