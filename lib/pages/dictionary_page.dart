@@ -1,4 +1,9 @@
 import 'dart:io';
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+
+import '../utils/file_save_helper.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -260,7 +265,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
         allowedExtensions: ['json'],
       );
       if (path == null) return;
-      await File(path).writeAsString(json);
+      await saveTextFile(path, json);
       _showSnack(_l10n.projectExported);
     } catch (e) {
       _showSnack(_l10n.failedToExportProject, error: true);
@@ -274,8 +279,10 @@ class _DictionaryPageState extends State<DictionaryPage> {
         allowedExtensions: ['json'],
       );
       if (result == null || result.files.isEmpty) return;
-      final file = File(result.files.single.path!);
-      final json = await file.readAsString();
+      final file = result.files.single;
+      final json = file.bytes != null
+          ? utf8.decode(file.bytes!)
+          : await File(file.path!).readAsString();
       final count = await _pronunciationService.importFromJson(json);
       _showSnack(_l10n.importedCount(count));
       _loadEntries();

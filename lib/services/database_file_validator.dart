@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:sqflite/sqflite.dart';
-
 const currentDatabaseVersion = 5;
 
 enum DatabaseValidationIssue {
@@ -37,15 +37,18 @@ class DatabaseFileValidator {
     'updated_at',
   };
 
-  final DatabaseFactory databaseFactory;
+  final DatabaseFactory? _databaseFactory;
   final int supportedVersion;
 
   DatabaseFileValidator({
-    required this.databaseFactory,
+    DatabaseFactory? databaseFactory,
     this.supportedVersion = currentDatabaseVersion,
-  });
+  }) : _databaseFactory = databaseFactory;
+
+  DatabaseFactory get _factory => _databaseFactory ?? databaseFactory;
 
   Future<DatabaseValidationResult> validate(String path) async {
+    if (kIsWeb) return const DatabaseValidationResult.valid(null);
     final file = File(path);
     if (!await file.exists()) {
       return const DatabaseValidationResult.invalid(
@@ -69,7 +72,7 @@ class DatabaseFileValidator {
         );
       }
 
-      final db = await databaseFactory.openDatabase(
+      final db = await _factory.openDatabase(
         path,
         options: OpenDatabaseOptions(readOnly: true, singleInstance: false),
       );

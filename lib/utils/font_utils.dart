@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 
 import '../models/font_config.dart';
@@ -236,34 +234,6 @@ String? parseFontFamilyName(ByteData data) {
   return (name != null && name.isNotEmpty) ? name : null;
 }
 
-/// Try to read the font family name from a file on disk.
-///
-/// Handles both plain TTF/OTF and TTC files (reads the first font in the
-/// collection).
-Future<String?> readFontFamilyName(String filePath) async {
-  try {
-    final file = File(filePath);
-    final bytes = await file.readAsBytes();
-    final data = ByteData.sublistView(bytes);
-
-    // Check if TTC
-    if (bytes.length >= 4 &&
-        bytes[0] == 0x74 && // 't'
-        bytes[1] == 0x74 && // 't'
-        bytes[2] == 0x63 && // 'c'
-        bytes[3] == 0x66) {
-      // 'f'
-      final ttf = extractTtfFromTtc(data, fontIndex: 0);
-      if (ttf == null) return null;
-      return parseFontFamilyName(ttf);
-    }
-
-    return parseFontFamilyName(data);
-  } catch (e) {
-    debugPrint('Failed to read font family name: $e');
-    return null;
-  }
-}
 
 /// Derive a human-readable name from a font file path, used as fallback when
 /// the name table cannot be parsed.

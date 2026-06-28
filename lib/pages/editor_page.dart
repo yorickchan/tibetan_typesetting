@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -330,10 +331,12 @@ class _EditorPageState extends State<EditorPage>
       allowedExtensions: ['csv', 'tsv', 'txt'],
     );
     if (result == null || result.files.isEmpty) return;
-    if (result.files.single.path == null) return;
-    final file = File(result.files.single.path!);
+    final file = result.files.single;
+    final text = file.path != null
+        ? await File(file.path!).readAsString()
+        : utf8.decode(file.bytes!);
 
-    final importResult = BatchImportService.parseFile(file);
+    final importResult = BatchImportService.parseContent(text);
     if (importResult.importedRows == 0) {
       _showSnack('No blocks found in file', error: true);
       return;

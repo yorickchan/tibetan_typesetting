@@ -1,12 +1,13 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/widgets.dart' as pw;
-
+import 'dart:typed_data';
+import 'dart:ui' show ByteData, FontLoader;
+import '../utils/font_utils.dart';
 import '../models/font_config.dart';
-import '../utils/font_utils.dart' as font_utils;
 import 'font_service_core.dart';
+import 'font_service_native_helpers.dart'
+  if (dart.library.html) 'font_service_web_helpers.dart';
 
 export 'font_service_core.dart';
 
@@ -15,11 +16,16 @@ class FontService {
   static final FontService _instance = FontService._();
   factory FontService() => _instance;
 
+  static const _bundledFonts = <SystemFontInfo>[
+    SystemFontInfo(
+      familyName: 'Jomolhari',
+      filePath: 'Jomolhari',
+      fileType: 'ttf',
+    ),
+  ];
   List<SystemFontInfo>? _cachedFonts;
   final _loadedPreviewFamilies = <String>{};
   final _pdfFontCache = <String, pw.Font>{};
-
-  static const _channel = MethodChannel('tibetan_typesetting/system_fonts');
 
   Future<List<SystemFontInfo>> scanSystemFonts() async {
     if (_cachedFonts != null) return _cachedFonts!;
@@ -27,45 +33,22 @@ class FontService {
     final fonts = <SystemFontInfo>[];
     final seen = <String>{};
 
-    for (final font in await _scanNativeSystemFonts()) {
-      if (seen.contains(font.filePath)) continue;
-      seen.add(font.filePath);
-      fonts.add(font);
-    }
+    if (kIsWeb) {
+      fonts.addAll(_bundledFonts.where((b) => !seen.contains(b.filePath)));
+      for (final b in _bundledFonts) {
+        seen.add(b.filePath);
+      }
+    } else {
+      for (final font in await scanMacOsNativeChannel()) {
+        if (seen.contains(font.filePath)) continue;
+        seen.add(font.filePath);
+        fonts.add(font);
+      }
 
-    final homeDir =
-        Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'] ?? '';
-    final dirs = resolveFontDirs(
-      home: homeDir.isEmpty ? null : homeDir,
-      windir: Platform.environment['WINDIR'],
-      mac: Platform.isMacOS,
-      win: Platform.isWindows,
-      linux: Platform.isLinux,
-    );
-
-    for (final dirPath in dirs) {
-      final dir = Directory(dirPath);
-      if (!await dir.exists()) continue;
-
-      await for (final entity in dir.list(recursive: true)) {
-        if (entity is! File) continue;
-        final path = entity.path;
-        final ext = extensionLower(path);
-        if (!supportedFontExtensions.contains(ext)) continue;
-        if (seen.contains(path)) continue;
-        seen.add(path);
-
-        final familyName =
-            await font_utils.readFontFamilyName(path) ??
-            font_utils.fontNameFromPath(path);
-
-        fonts.add(
-          SystemFontInfo(
-            familyName: familyName,
-            filePath: path,
-            fileType: ext.substring(1),
-          ),
-        );
+      for (final font in await scanNativeFonts(seen)) {
+        if (seen.contains(font.filePath)) continue;
+        seen.add(font.filePath);
+        fonts.add(font);
       }
     }
 
@@ -90,8 +73,6 @@ class FontService {
         );
         loaded.add(font);
       } on UnsupportedFontError {
-        // Fallback scan: many system fonts are CFF / missing tables.
-        // This is expected and not actionable, so don't log it.
       } catch (e) {
         debugPrint('Failed to load CJK fallback font ${info.filePath}: $e');
       }
@@ -101,88 +82,63 @@ class FontService {
 
   Future<void> loadFontForPreview(FontConfig config) async {
     if (_loadedPreviewFamilies.contains(config.fontFamily)) return;
-
+    final loader = FontLoader(config.fontFamily);
     try {
-      final file = File(config.fontPath);
-      if (!await file.exists()) return;
-
-      final bytes = await file.readAsBytes();
-      ByteData fontData = ByteData.sublistView(bytes);
-
-      if (isTtc(bytes)) {
-        final extracted = font_utils.extractTtfFromTtc(fontData, fontIndex: 0);
-        if (extracted == null) return;
-        fontData = extracted;
-      }
-
-      final loader = FontLoader(config.fontFamily);
-      loader.addFont(Future.value(fontData));
+      loader.addFont(_loadFontBytes(config));
       await loader.load();
       _loadedPreviewFamilies.add(config.fontFamily);
+    } on UnsupportedFontError {
     } catch (e) {
-      debugPrint('Failed to load font ${config.fontFamily} for preview: $e');
+      debugPrint('Failed to load preview font ${config.fontFamily}: $e');
     }
   }
 
   Future<pw.Font> loadFontForPdf(FontConfig config) async {
-    final cached = _pdfFontCache[config.fontPath];
-    if (cached != null) return cached;
+    final cacheKey = config.fontPath ?? config.fontFamily;
+    if (_pdfFontCache.containsKey(cacheKey)) return _pdfFontCache[cacheKey]!;
 
-    final file = File(config.fontPath);
-    final bytes = await file.readAsBytes();
-    ByteData fontData = ByteData.sublistView(bytes);
-
-    if (isTtc(bytes)) {
-      final extracted = font_utils.extractFirstTrueTypeFromTtc(fontData);
-      if (extracted == null) {
-        throw UnsupportedFontError(
-          'Font "${config.fontFamily}" (${config.fontPath}) cannot be embedded '
-          'in PDFs (no TrueType-outline variant with the required tables). '
-          'Please choose a different font.',
-        );
-      }
-      fontData = extracted;
-    } else {
-      if (!font_utils.isTrueTypeOutlineFont(fontData)) {
-        throw UnsupportedFontError(
-          'Font "${config.fontFamily}" (${config.fontPath}) uses OpenType/CFF '
-          'outlines which are not supported by the PDF engine for CJK text. '
-          'Please choose a TrueType-flavored font (.ttf).',
-        );
-      }
-      final missing = font_utils.missingPdfEmbeddingTables(fontData);
-      if (missing.isNotEmpty) {
-        throw UnsupportedFontError(
-          'Font "${config.fontFamily}" (${config.fontPath}) is missing '
-          'required font tables (${missing.join(', ')}) and cannot be '
-          'embedded in PDFs. Please choose a different font.',
-        );
-      }
-    }
-
+    final fontData = await _loadFontBytes(config);
     final font = pw.Font.ttf(fontData);
-    _pdfFontCache[config.fontPath] = font;
+    _pdfFontCache[cacheKey] = font;
     return font;
   }
 
-  Future<List<SystemFontInfo>> _scanNativeSystemFonts() async {
-    if (!Platform.isMacOS) return const [];
-
-    try {
-      final result = await _channel.invokeListMethod<Object?>('listFonts');
-      if (result == null) return const [];
-
-      return result
-          .whereType<Map<Object?, Object?>>()
-          .map(SystemFontInfo.fromNativeMap)
-          .whereType<SystemFontInfo>()
-          .where((font) => supportedFontExtensions.contains('.${font.fileType}'))
-          .toList();
-    } on MissingPluginException {
-      return const [];
-    } on PlatformException catch (e) {
-      debugPrint('Failed to list native system fonts: ${e.message}');
-      return const [];
+  Future<ByteData> _loadFontBytes(FontConfig config) async {
+    final path = config.fontPath;
+    if (path != null && path.isNotEmpty) {
+      final bytes = await _readFontFile(path);
+      if (bytes.isNotEmpty) {
+        final data = ByteData.sublistView(bytes);
+        if (!isTrueTypeOutlineFont(data)) {
+          throw UnsupportedFontError(
+            '${config.fontFamily}: not a TrueType outline font (CFF/OTTO).',
+          );
+        }
+        return await _ensureTtf(data);
+      }
+      // Fall through to asset loading on web (bytes empty from stub)
     }
+
+    final assetKey = 'assets/fonts/${config.fontFamily}.ttf';
+    final byteData = await rootBundle.load(assetKey);
+    if (!isTrueTypeOutlineFont(byteData)) {
+      throw UnsupportedFontError(
+        '${config.fontFamily}: not a TrueType outline font (CFF/OTTO).',
+      );
+    }
+    return await _ensureTtf(byteData);
+  }
+
+  Future<Uint8List> _readFontFile(String path) async {
+    return readFontFileBytes(path);
+  }
+
+  Future<ByteData> _ensureTtf(ByteData data) async {
+    if (isTtc(data.buffer.asUint8List())) {
+      final ttf = extractTtfFromTtc(data, fontIndex: 0);
+      if (ttf == null) throw UnsupportedFontError('Failed to extract TTF from TTC.');
+      return ttf;
+    }
+    return data;
   }
 }

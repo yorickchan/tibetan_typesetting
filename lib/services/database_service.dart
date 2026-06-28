@@ -1,38 +1,33 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:sqflite/sqflite.dart';
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/chinese_script.dart';
 import '../models/project.dart';
+import 'app_database.dart';
+import 'app_database_factory.dart';
 import 'database_file_validator.dart';
 import 'database_service_core.dart';
 
 const _uuid = Uuid();
 
 class DatabaseService {
-  static final DatabaseService _instance = DatabaseService._internal(
-    databaseFactory: databaseFactory,
-    defaultDatabasesPath: getDatabasesPath,
-  );
-  factory DatabaseService() => _instance;
-  DatabaseService._internal({
-    required DatabaseFactory databaseFactory,
-    required Future<String> Function() defaultDatabasesPath,
-  }) : _databaseFactory = databaseFactory,
-       _defaultDatabasesPath = defaultDatabasesPath;
+  static DatabaseService? _instance;
+  factory DatabaseService() {
+    _instance ??= DatabaseService._internal();
+    return _instance!;
+  }
 
-  DatabaseService.withDependencies({
-    required DatabaseFactory databaseFactory,
-    required Future<String> Function() defaultDatabasesPath,
-  }) : _databaseFactory = databaseFactory,
-       _defaultDatabasesPath = defaultDatabasesPath;
+  DatabaseService._internal();
 
-  final DatabaseFactory _databaseFactory;
-  final Future<String> Function() _defaultDatabasesPath;
+  DatabaseService.withDependencies({required AppDatabase appDatabase})
+    : _appDatabase = appDatabase;
 
-  Future<Database>? _dbFuture;
+  AppDatabase? _appDatabase;
+
+  Future<AppDatabase>? _dbFuture;
   String? _configuredPath;
   bool _allowCreate = true;
 
@@ -44,7 +39,7 @@ class DatabaseService {
     _allowCreate = allowCreate;
   }
 
-  Future<Database> get database async {
+  Future<AppDatabase> get database async {
     final existing = _dbFuture;
     if (existing != null) return existing;
     final pending = _initDb();
@@ -57,44 +52,48 @@ class DatabaseService {
     }
   }
 
-  Future<Database> _initDb() async {
-    final path =
-        _configuredPath ??
-        '${await _defaultDatabasesPath()}/tibetan_typesetting.db';
-    if (!_allowCreate && !await File(path).exists()) {
-      throw FileSystemException('Selected database does not exist', path);
+  Future<AppDatabase> _initDb() async {
+    if (!kIsWeb && !_allowCreate && _configuredPath != null) {
+      if (!await File(_configuredPath!).exists()) {
+        throw FileSystemException(
+          'Selected database does not exist',
+          _configuredPath!,
+        );
+      }
     }
-    return _databaseFactory.openDatabase(
-      path,
-      options: OpenDatabaseOptions(
-        version: currentDatabaseVersion,
-        onCreate: (db, version) async {
-          await _createProjectsTable(db);
-          await _createAppSettingsTable(db);
-          await _createPronunciationDictionaryTable(db);
-          await _createTitlePageTemplatesTable(db);
-        },
-        onUpgrade: (db, oldVersion, newVersion) async {
-          if (oldVersion < 2) {
-            await _createAppSettingsTable(db);
-          }
-          if (oldVersion < 3) {
-            await _createPronunciationDictionaryTable(db);
-          }
-          if (oldVersion < 4) {
-            await db.execute(
-              'ALTER TABLE pronunciation_dictionary ADD COLUMN word_count INTEGER NOT NULL DEFAULT 1',
-            );
-          }
-          if (oldVersion < 5) {
-            await _createTitlePageTemplatesTable(db);
-          }
-        },
-      ),
+    if (_appDatabase != null) return _appDatabase!;
+
+    final db = await createAppDatabase(
+      name: 'tibetan_typesetting',
+      path: _configuredPath,
+      version: currentDatabaseVersion,
+      onCreate: (appDb, version) async {
+        await _createProjectsTable(appDb);
+        await _createAppSettingsTable(appDb);
+        await _createPronunciationDictionaryTable(appDb);
+        await _createTitlePageTemplatesTable(appDb);
+      },
+      onUpgrade: (appDb, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await _createAppSettingsTable(appDb);
+        }
+        if (oldVersion < 3) {
+          await _createPronunciationDictionaryTable(appDb);
+        }
+        if (oldVersion < 4) {
+          await appDb.execute(
+            'ALTER TABLE pronunciation_dictionary ADD COLUMN word_count INTEGER NOT NULL DEFAULT 1',
+          );
+        }
+        if (oldVersion < 5) {
+          await _createTitlePageTemplatesTable(appDb);
+        }
+      },
     );
+    return db;
   }
 
-  Future<void> _createProjectsTable(Database db) async {
+  Future<void> _createProjectsTable(AppDatabase db) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS projects (
         id TEXT PRIMARY KEY,
@@ -110,7 +109,7 @@ class DatabaseService {
     );
   }
 
-  Future<void> _createAppSettingsTable(Database db) async {
+  Future<void> _createAppSettingsTable(AppDatabase db) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS app_settings (
         key TEXT PRIMARY KEY,
@@ -119,7 +118,7 @@ class DatabaseService {
     ''');
   }
 
-  Future<void> _createPronunciationDictionaryTable(Database db) async {
+  Future<void> _createPronunciationDictionaryTable(AppDatabase db) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS pronunciation_dictionary (
         tibetan_syllable TEXT PRIMARY KEY,
@@ -131,7 +130,7 @@ class DatabaseService {
     ''');
   }
 
-  Future<void> _createTitlePageTemplatesTable(Database db) async {
+  Future<void> _createTitlePageTemplatesTable(AppDatabase db) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS title_page_templates (
         id TEXT PRIMARY KEY,

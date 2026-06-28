@@ -1,7 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+
 import 'package:flutter_svg/flutter_svg.dart';
+import 'platform_image.dart';
 
 import '../models/app_settings.dart';
 import '../models/font_config.dart';
@@ -527,8 +527,8 @@ class _ContentGrid extends StatelessWidget {
                                           borderRadius: BorderRadius.circular(
                                             4,
                                           ),
-                                          child: Image.file(
-                                            File(block.imagePath!),
+                                          child: platformImage(
+                                            imagePath: block.imagePath,
                                             fit: BoxFit.contain,
                                             errorBuilder: (_, __, ___) =>
                                                 const Center(
@@ -912,8 +912,8 @@ class _ContentGrid extends StatelessWidget {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(2),
                           child: fi.imagePath != null
-                              ? Image.file(
-                                  File(fi.imagePath!),
+                              ? platformImage(
+                                  imagePath: fi.imagePath,
                                   fit: BoxFit.contain,
                                   errorBuilder: (_, __, ___) => Icon(
                                     Icons.broken_image,

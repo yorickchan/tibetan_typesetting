@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-
+import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
@@ -149,10 +151,10 @@ class _SettingsPageState extends State<SettingsPage> {
     if (confirmed != true || !mounted) return;
 
     String? bookmarkRootPath;
-    if (Platform.isMacOS) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
       bookmarkRootPath = await FilePicker.getDirectoryPath(
         dialogTitle: _l10n.authorizeDatabaseFolder,
-        initialDirectory: File(path).parent.path,
+        initialDirectory: p.dirname(path),
       );
       if (bookmarkRootPath == null || !mounted) return;
     }
@@ -205,9 +207,9 @@ class _SettingsPageState extends State<SettingsPage> {
     if (result == null || result.files.isEmpty) return;
 
     final file = result.files.first;
-    if (file.path == null) return;
-
-    final content = await File(file.path!).readAsString();
+    final content = !kIsWeb && file.path != null
+        ? await File(file.path!).readAsString()
+        : utf8.decode(file.bytes!);
     if (!content.contains('<svg')) {
       if (mounted) {
         _showSnackMsg(_l10n.invalidSvgFile, error: true);
@@ -645,21 +647,20 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
-
-          const SizedBox(height: 24),
-
-          _sectionLabel(_l10n.database.toUpperCase()),
-          const SizedBox(height: 12),
-          DatabaseLocationPanel(
-            path: _databasePath,
-            usesDefault: _usesDefaultDatabase,
-            restartRequired: _databaseRestartRequired,
-            busy: _databaseBusy,
-            onOpenExisting: _openExistingDatabase,
-            onUseDefault: _useDefaultDatabase,
-          ),
-
-          const SizedBox(height: 24),
+          if (!kIsWeb) ...[
+            const SizedBox(height: 24),
+            _sectionLabel(_l10n.database.toUpperCase()),
+            const SizedBox(height: 12),
+            DatabaseLocationPanel(
+              path: _databasePath,
+              usesDefault: _usesDefaultDatabase,
+              restartRequired: _databaseRestartRequired,
+              busy: _databaseBusy,
+              onOpenExisting: _openExistingDatabase,
+              onUseDefault: _useDefaultDatabase,
+            ),
+            const SizedBox(height: 24),
+          ],
 
           _sectionLabel(_l10n.language.toUpperCase()),
           const SizedBox(height: 12),

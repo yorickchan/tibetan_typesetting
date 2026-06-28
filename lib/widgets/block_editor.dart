@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'platform_image.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/block_update.dart';
@@ -599,9 +599,8 @@ class _EditorFieldsState extends State<_EditorFields> {
             border: Border.all(color: AppColors.border),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.file(
-              File(widget.block.imagePath!),
+            child: platformImage(
+              imagePath: widget.block.imagePath,
               fit: BoxFit.contain,
               errorBuilder: (_, _, _) => Center(
                 child: Column(

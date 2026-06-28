@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ import '../services/title_page_template_service.dart';
 import '../utils/colors.dart';
 import '../utils/save_state_mixin.dart';
 import '../utils/snackbar.dart';
+import '../utils/file_save_helper.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/chinese_script_switch.dart';
 import '../widgets/export_pdf_settings_panel.dart';
@@ -205,7 +207,7 @@ class _ExportPageState extends State<ExportPage>
         if (mounted) setState(() => _pdfBusy = false);
         return;
       }
-      await File(path).writeAsBytes(result.bytes);
+      await saveBytesFile(path, result.bytes);
       if (result.warnings.isNotEmpty) {
         _showSnack(
           '${_l10n.projectExported}\n${result.warnings.join('\n')}',
@@ -237,7 +239,7 @@ class _ExportPageState extends State<ExportPage>
         if (mounted) setState(() => _pdfBusy = false);
         return;
       }
-      await File(path).writeAsString(html);
+      await saveTextFile(path, html);
       _showSnack(_l10n.projectExported);
     } catch (e, s) {
       debugPrint('HTML export failed: $e\n$s');

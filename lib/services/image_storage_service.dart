@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -9,6 +11,7 @@ class ImageStorageService {
   ImageStorageService._internal();
 
   Directory? _imagesDir;
+  final Map<String, Uint8List> _webStorage = {};
 
   Future<Directory> _ensureDir() async {
     if (_imagesDir != null) return _imagesDir!;
@@ -21,6 +24,11 @@ class ImageStorageService {
   }
 
   Future<String> copyImageToAppSupport(String sourcePath) async {
+    if (kIsWeb) {
+      // On web, image data is stored as bytes in the block model, not filesystem paths.
+      // Return the source path as-is — it should be a data URL or blob URL.
+      return sourcePath;
+    }
     final dir = await _ensureDir();
     final ext = sourcePath.split('.').last.toLowerCase();
     final fileName = '${const Uuid().v4().replaceAll('-', '')}.$ext';
@@ -30,6 +38,10 @@ class ImageStorageService {
   }
 
   Future<void> deleteImage(String path) async {
+    if (kIsWeb) {
+      _webStorage.remove(path);
+      return;
+    }
     final dir = await _ensureDir();
     if (path.startsWith(dir.path)) {
       final file = File(path);

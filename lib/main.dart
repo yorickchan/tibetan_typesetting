@@ -1,11 +1,13 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as p;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'l10n/app_localizations.dart';
 import 'models/app_settings.dart';
+import 'models/font_config.dart';
 import 'pages/database_recovery_page.dart';
 import 'pages/projects_page.dart';
 import 'pages/settings_page.dart';
@@ -70,7 +72,27 @@ class _DatabaseStartupGateState extends State<_DatabaseStartupGate> {
       return;
     }
 
-    final settings = await SettingsService().getSettings();
+    var settings = await SettingsService().getSettings();
+    if (kIsWeb && !settings.hasAnyFontConfigured) {
+      settings = settings.copyWith(
+        tibetanFont: const FontConfig(
+          fontFamily: 'Jomolhari',
+          fontPath: 'Jomolhari',
+          fontSize: 10,
+        ),
+        pronunciationFont: const FontConfig(
+          fontFamily: 'Jomolhari',
+          fontPath: 'Jomolhari',
+          fontSize: 8,
+        ),
+        translationFont: const FontConfig(
+          fontFamily: 'Jomolhari',
+          fontPath: 'Jomolhari',
+          fontSize: 8,
+        ),
+      );
+      await SettingsService().updateSettings(settings);
+    }
     final fontService = FontService();
     for (final config in [
       settings.tibetanFont,
@@ -119,10 +141,10 @@ class _DatabaseStartupGateState extends State<_DatabaseStartupGate> {
     final path = result?.files.single.path;
     if (path == null || !mounted || !await _confirmCloudUse()) return;
     String? bookmarkRootPath;
-    if (Platform.isMacOS) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS) {
       bookmarkRootPath = await FilePicker.getDirectoryPath(
         dialogTitle: l10n.authorizeDatabaseFolder,
-        initialDirectory: File(path).parent.path,
+        initialDirectory: p.dirname(path),
       );
       if (bookmarkRootPath == null || !mounted) return;
     }
@@ -293,8 +315,8 @@ class _TibetanTypesettingAppState extends State<TibetanTypesettingApp> {
     if (ctx == null) return;
     final result = await showDialog<AppSettings>(
       context: ctx,
-      barrierDismissible: !require,
-      builder: (_) => SettingsPage(requireFonts: require),
+      barrierDismissible: !(require && !kIsWeb),
+      builder: (_) => SettingsPage(requireFonts: require && !kIsWeb),
     );
     if (result != null && mounted) {
       setState(() => _settings = result);
@@ -440,7 +462,7 @@ class _TibetanTypesettingAppState extends State<TibetanTypesettingApp> {
         debugShowCheckedModeBanner: false,
         theme: _buildTheme(),
         home: _HomeWrapper(
-          needsSetup: !_settings.hasAnyFontConfigured,
+          needsSetup: !kIsWeb && !_settings.hasAnyFontConfigured,
           onOpenSettings: () => _openSettings(require: true),
         ),
       ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ import '../utils/snackbar.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/project_card.dart';
 import 'editor_page.dart';
+import '../utils/file_save_helper.dart';
 import 'export_page.dart';
 
 class ProjectsPage extends StatefulWidget {
@@ -219,7 +221,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
         allowedExtensions: ['json'],
       );
       if (path == null) return;
-      await File(path).writeAsString(jsonStr);
+      await saveTextFile(path, jsonStr);
       _showSnackMsg(_l10n.projectExported);
     } catch (e) {
       _showSnackMsg(_l10n.failedToExportProject, error: true);
@@ -233,8 +235,10 @@ class _ProjectsPageState extends State<ProjectsPage> {
         allowedExtensions: ['json'],
       );
       if (result == null || result.files.isEmpty) return;
-      final file = File(result.files.single.path!);
-      final text = await file.readAsString();
+      final file = result.files.single;
+      final text = !kIsWeb && file.path != null
+          ? await File(file.path!).readAsString()
+          : utf8.decode(file.bytes!);
       final parsed = jsonDecode(text) as Map<String, dynamic>;
       final project = Project.fromJson(parsed);
       final imported = await _db.importProject(project);

@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:sqflite/sqflite.dart';
+import 'app_database.dart';
 
 import '../models/app_settings.dart';
 import 'database_service.dart';
@@ -43,7 +43,7 @@ class SettingsService {
     await db.insert(
       'app_settings',
       {'key': _settingsKey, 'value_json': json},
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      conflictAlgorithm: DbConflictAlgorithm.replace,
     );
     _cached = settings;
   }

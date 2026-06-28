@@ -386,18 +386,20 @@ class PdfService {
               : spannedWidth - 4 * PdfPageFormat.mm;
           if (block.isImageBlock) {
             final key = '${pi}_${ri}_$cellIndex';
-            final file = File(block.imagePath!);
-            if (await file.exists()) {
-              final bytes = await file.readAsBytes();
-              double w = 120, h = 120;
-              try {
-                final codec = await instantiateImageCodec(bytes);
-                final frame = await codec.getNextFrame();
-                w = frame.image.width.toDouble();
-                h = frame.image.height.toDouble();
-                frame.image.dispose();
-              } catch (_) {}
-              imgs['${key}_h'] = _Img(pw.MemoryImage(bytes), w, h);
+            if (!kIsWeb) {
+              final file = File(block.imagePath!);
+              if (await file.exists()) {
+                final bytes = await file.readAsBytes();
+                double w = 120, h = 120;
+                try {
+                  final codec = await instantiateImageCodec(bytes);
+                  final frame = await codec.getNextFrame();
+                  w = frame.image.width.toDouble();
+                  h = frame.image.height.toDouble();
+                  frame.image.dispose();
+                } catch (_) {}
+                imgs['${key}_h'] = _Img(pw.MemoryImage(bytes), w, h);
+              }
             }
             continue;
           }
@@ -1106,7 +1108,7 @@ class PdfService {
                   horizontalRadius: 2,
                   verticalRadius: 2,
                   child: pw.Image(
-                    pw.MemoryImage(File(fi.imagePath!).readAsBytesSync()),
+                    pw.MemoryImage(!kIsWeb ? File(fi.imagePath!).readAsBytesSync() : Uint8List(0)),
                     fit: pw.BoxFit.contain,
                   ),
                 ),

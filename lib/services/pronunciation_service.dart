@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:sqflite/sqflite.dart';
+import 'app_database.dart';
 
 import '../models/pronunciation_entry.dart';
 import '../models/project.dart' show nowIso;
@@ -99,7 +99,7 @@ class PronunciationService {
       'word_count': wordCount.clamp(1, 10),
       'created_at': now,
       'updated_at': now,
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    }, conflictAlgorithm: DbConflictAlgorithm.replace);
     return true;
   }
 
@@ -216,10 +216,10 @@ class PronunciationService {
         'word_count': entry.wordCount,
         'created_at': now,
         'updated_at': now,
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      }, conflictAlgorithm: DbConflictAlgorithm.replace);
       imported++;
     }
-    await batch.commit(noResult: true);
+    await db.commitBatch(batch, noResult: true);
     return imported;
   }
 }

@@ -1,9 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+
+import 'dart:io';
 
 class ImageCacheService {
   static final ImageCacheService _instance = ImageCacheService._internal();
@@ -11,6 +13,7 @@ class ImageCacheService {
   ImageCacheService._internal();
 
   Directory? _cacheDir;
+  final Map<String, Uint8List> _webCache = {};
 
   Future<Directory> get cacheDir async {
     if (_cacheDir != null) return _cacheDir!;
@@ -31,6 +34,9 @@ class ImageCacheService {
   Future<Uint8List?> get(
       String text, String fontFamily, double fontSize, double maxWidth) async {
     final key = _cacheKey(text, fontFamily, fontSize, maxWidth);
+    if (kIsWeb) {
+      return _webCache[key];
+    }
     final file = File('${(await cacheDir).path}/$key.png');
     if (await file.exists()) {
       return await file.readAsBytes();
@@ -41,11 +47,19 @@ class ImageCacheService {
   Future<void> put(String text, String fontFamily, double fontSize,
       double maxWidth, Uint8List png) async {
     final key = _cacheKey(text, fontFamily, fontSize, maxWidth);
+    if (kIsWeb) {
+      _webCache[key] = png;
+      return;
+    }
     final file = File('${(await cacheDir).path}/$key.png');
     await file.writeAsBytes(png);
   }
 
   Future<void> clear() async {
+    if (kIsWeb) {
+      _webCache.clear();
+      return;
+    }
     final dir = await cacheDir;
     if (await dir.exists()) {
       await dir.delete(recursive: true);

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:uuid/uuid.dart';
 
 import '../models/project.dart';
@@ -21,8 +19,7 @@ class ImportResult {
 }
 
 class BatchImportService {
-  static ImportResult parseFile(File file) {
-    final text = file.readAsStringSync();
+  static ImportResult parseContent(String text) {
     final delimiter = text.contains('\t') ? '\t' : ',';
     var lines = text.split(RegExp(r'\r?\n'));
     if (lines.isNotEmpty && lines.last.isEmpty) {
