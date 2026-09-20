@@ -49,3 +49,4 @@ app.*.map.json
 *.tar.gz
 *.dmg
 .qoder/
+.opencode/

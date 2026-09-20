@@ -1,5 +1,11 @@
 # CLAUDE.md
 
+Use agent-memories tools proactively:
+- Every major task → memory.write a summary
+- New entity (file, function, module) → kg.upsert_node
+- Session context → wm.put "context"
+- Before any task → memory.search + kg.neighborhood
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
