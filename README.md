@@ -23,7 +23,6 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - Undo/Redo support (up to 50 states)
 - Red character highlight — mark selected words in heading text with red ink using range notation (e.g. `1-4,6-8`) while vowel marks, tshegs, and punctuation remain black
 - **Chinese script switch** — convert all Chinese text in a project between Simplified and Traditional with one click; script is auto-detected from content when unset
-- Wylie transliteration input for Tibetan text
 
 ### 🖼️ Floating Images
 - Insert images into text blocks with precise positioning
@@ -92,11 +91,6 @@ The application pre-renders Tibetan text to high-resolution PNG images (460 DPI)
 - The editor and export previews scale content to match the real physical size of the exported PDF
 - Ensures font sizes and row heights in the preview match the final printed output
 
-### Wylie Transliteration
-- Built-in Wylie-to-Tibetan Unicode converter
-- Supports consonants, subjoined letters, vowels, and complex stacks
-- Enables Tibetan text input via standard Latin keyboard
-
 ### Data Persistence
 - SQLite database for reliable local storage
 - Projects stored as JSON with indexed metadata
@@ -142,18 +136,17 @@ Fonts can be configured per-project through the font settings panel. Make sure r
 
 1. **Create a Project**: Start from the main screen by creating a new project (optionally selecting a custom title page template)
 2. **Add Content**: Add text blocks with Tibetan text, pronunciation, and translation
-3. **Wylie Input**: Type Tibetan using Wylie transliteration via Latin keyboard
-4. **Pronunciation Auto-fill**: The editor auto-fills pronunciation from the dictionary as you type; unknown syllables are highlighted and shown as `X`
-5. **Red Highlight**: Enter a range (e.g. `1-4,6`) in the block's highlight field to render selected heading words in red ink in both preview and PDF
-6. **Insert Images**: Add floating images to blocks with position and size control
-7. **Batch Import**: Import multiple text blocks at once from CSV/TSV files
-8. **Edit Layout**: Configure page setup, margins, column count, flow gap, row lines, and headers/footers
-9. **Title Page Templates**: Upload SVG templates in Settings, then assign them per project with configurable insets
-10. **Content Page Templates**: Assign an SVG background to all content pages with configurable export margins
-11. **Font Settings**: Customize fonts per-project for Tibetan, pronunciation, translation, title text, and small block size
-12. **Preview**: View live DPI-accurate preview with zoom controls of your document layout
-13. **Export**: Generate PDF, export HTML, or print directly from the app
-14. **Manage Dictionary**: Open the Pronunciation Dictionary page to view, search, edit, or delete saved syllable entries and export/import the dictionary as JSON
+3. **Pronunciation Auto-fill**: The editor auto-fills pronunciation from the dictionary as you type; unknown syllables are highlighted and shown as `X`
+4. **Red Highlight**: Enter a range (e.g. `1-4,6`) in the block's highlight field to render selected heading words in red ink in both preview and PDF
+5. **Insert Images**: Add floating images to blocks with position and size control
+6. **Batch Import**: Import multiple text blocks at once from CSV/TSV files
+7. **Edit Layout**: Configure page setup, margins, column count, flow gap, row lines, and headers/footers
+8. **Title Page Templates**: Upload SVG templates in Settings, then assign them per project with configurable insets
+9. **Content Page Templates**: Assign an SVG background to all content pages with configurable export margins
+10. **Font Settings**: Customize fonts per-project for Tibetan, pronunciation, translation, title text, and small block size
+11. **Preview**: View live DPI-accurate preview with zoom controls of your document layout
+12. **Export**: Generate PDF, export HTML, or print directly from the app
+13. **Manage Dictionary**: Open the Pronunciation Dictionary page to view, search, edit, or delete saved syllable entries and export/import the dictionary as JSON
 
 ![Pronunciation Dictionary](screenshot/pronunciation%20dictionary.png)
 
@@ -213,7 +206,6 @@ lib/
 │   ├── sample_layout.dart          # Pagination logic
 │   ├── text_renderer.dart          # Text to image rendering
 │   ├── font_utils.dart             # Font utilities
-│   ├── wylie_converter.dart        # Wylie-to-Tibetan Unicode converter
 │   ├── tibetan_segmenter.dart      # Tsheg-based syllable/range extraction
 │   ├── save_state_mixin.dart       # Save state UI mixin
 │   ├── snackbar.dart               # SnackBar helper
@@ -287,7 +279,6 @@ flutter build linux
 - **ImageStorageService**: Manages block image files in app support directory
 - **ScreenDpiService**: Queries physical screen DPI via platform channel for accurate preview scaling
 - **TitlePageTemplateService**: CRUD singleton for custom SVG title page templates
-- **WylieConverter**: Converts Wylie transliteration to Tibetan Unicode
 - **TibetanSegmenter**: Splits Tibetan text into syllables by tsheg (་); parses range notation for red highlight
 
 ### Page Layout Algorithm

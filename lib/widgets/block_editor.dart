@@ -99,8 +99,8 @@ class BlockEditorWidget extends StatelessWidget {
             l10n: l10n,
             onToggleFloating: selectedBlock!.isImageBlock
                 ? () => onUpdateBlock(
-                      BlockUpdate(floatingImage: !selectedBlock!.floatingImage),
-                    )
+                    BlockUpdate(floatingImage: !selectedBlock!.floatingImage),
+                  )
                 : null,
           ),
           Container(height: 1, color: AppColors.divider),
@@ -313,11 +313,7 @@ class _Toolbar extends StatelessWidget {
               ),
             ],
             _divider(),
-            _iconBtn(
-              Icons.delete_outline,
-              onDeleteBlock,
-              size: 18,
-            ),
+            _iconBtn(Icons.delete_outline, onDeleteBlock, size: 18),
           ],
         ),
       ),
@@ -607,12 +603,19 @@ class _EditorFieldsState extends State<_EditorFields> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.broken_image,
-                        size: 24, color: AppColors.textMuted),
+                    Icon(
+                      Icons.broken_image,
+                      size: 24,
+                      color: AppColors.textMuted,
+                    ),
                     const SizedBox(height: 4),
-                    Text('Image not found',
-                        style: TextStyle(
-                            color: AppColors.textMuted, fontSize: 10)),
+                    Text(
+                      'Image not found',
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 10,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -638,7 +641,7 @@ class _EditorFieldsState extends State<_EditorFields> {
               children: [
                 Text(
                   widget.l10n.openingMark,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.rose600,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -653,9 +656,7 @@ class _EditorFieldsState extends State<_EditorFields> {
           if (widget.block.isFreeText) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _freeTextField(),
-              ],
+              children: [_freeTextField()],
             );
           }
           if (constraints.maxWidth > 600) {
@@ -711,7 +712,10 @@ class _EditorFieldsState extends State<_EditorFields> {
               style: TextStyle(fontSize: 12, color: AppColors.textPrimary),
               decoration: InputDecoration(
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
                 hintText: widget.l10n.redHighlightHint,
                 hintStyle: TextStyle(fontSize: 11, color: AppColors.textMuted),
                 border: OutlineInputBorder(
@@ -783,7 +787,8 @@ class _EditorFieldsState extends State<_EditorFields> {
   Widget _transField() {
     return TextField(
       controller: _transCtrl,
-      onChanged: (v) => widget.onUpdateBlock(BlockUpdate(chineseTranslation: v)),
+      onChanged: (v) =>
+          widget.onUpdateBlock(BlockUpdate(chineseTranslation: v)),
       style: TextStyle(
         fontFamily: widget.translationFontFamily,
         fontSize: 13,
