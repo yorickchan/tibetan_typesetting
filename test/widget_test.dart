@@ -97,9 +97,9 @@ void main() {
 
     test('respects pageBreakBefore', () {
       final blocks = [
-        TextBlock(id: 'b1', tibetan: 'text 1'),
-        TextBlock(id: 'b2', tibetan: 'text 2', pageBreakBefore: true),
-        TextBlock(id: 'b3', tibetan: 'text 3'),
+        const TextBlock(id: 'b1', tibetan: 'text 1'),
+        const TextBlock(id: 'b2', tibetan: 'text 2', pageBreakBefore: true),
+        const TextBlock(id: 'b3', tibetan: 'text 3'),
       ];
       final pages = paginateBlocks(blocks, 3, 4);
       expect(pages.length, 2);
@@ -107,9 +107,9 @@ void main() {
 
     test('flows blocks using manual column spans', () {
       final blocks = [
-        TextBlock(id: 'b1', tibetan: 'short', columnSpan: 8),
-        TextBlock(id: 'b2', tibetan: 'short', columnSpan: 8),
-        TextBlock(id: 'b3', tibetan: 'short', columnSpan: 8),
+        const TextBlock(id: 'b1', tibetan: 'short', columnSpan: 8),
+        const TextBlock(id: 'b2', tibetan: 'short', columnSpan: 8),
+        const TextBlock(id: 'b3', tibetan: 'short', columnSpan: 8),
       ];
 
       final pages = paginateBlocks(blocks, 4, 4);
@@ -122,9 +122,9 @@ void main() {
 
     test('flows blocks continuously without fixed column starts', () {
       final blocks = [
-        TextBlock(id: 'b1', tibetan: 'བོད།'),
-        TextBlock(id: 'b2', tibetan: 'བོད།'),
-        TextBlock(id: 'b3', tibetan: 'བོད།'),
+        const TextBlock(id: 'b1', tibetan: 'བོད།'),
+        const TextBlock(id: 'b2', tibetan: 'བོད།'),
+        const TextBlock(id: 'b3', tibetan: 'བོད།'),
       ];
 
       final page = paginateBlocks(blocks, 5, 4, 0).single;
@@ -142,8 +142,8 @@ void main() {
 
     test('flow gap controls distance between consecutive blocks', () {
       final blocks = [
-        TextBlock(id: 'b1', tibetan: 'བོད།'),
-        TextBlock(id: 'b2', tibetan: 'བོད།'),
+        const TextBlock(id: 'b1', tibetan: 'བོད།'),
+        const TextBlock(id: 'b2', tibetan: 'བོད།'),
       ];
 
       final tight = paginateBlocks(blocks, 0, 4, 0.005).single.flowRows.single;
@@ -162,8 +162,8 @@ void main() {
     });
 
     test('auto span gives longer blocks more width', () {
-      final short = TextBlock(id: 'short', tibetan: 'བོད།');
-      final long = TextBlock(
+      const short = TextBlock(id: 'short', tibetan: 'བོད།');
+      const long = TextBlock(
         id: 'long',
         tibetan: 'བདེ་ཆེན་སྨོན་ལམ་གྱི་ཚིག་རིང་པོ་ཞིག་འདིར་བཀོད་པ་ཡིན།',
         chineseTranslation: '這是一段較長的翻譯文字，用來測試自動欄寬。',
@@ -177,13 +177,13 @@ void main() {
 
     test('manual width levels use twenty-four equal divisions', () {
       final width1 = estimateBlockWidthFraction(
-        TextBlock(id: 'manual-1', tibetan: 'བོད།', columnSpan: 1),
+        const TextBlock(id: 'manual-1', tibetan: 'བོད།', columnSpan: 1),
       );
       final width12 = estimateBlockWidthFraction(
-        TextBlock(id: 'manual-12', tibetan: 'བོད།', columnSpan: 12),
+        const TextBlock(id: 'manual-12', tibetan: 'བོད།', columnSpan: 12),
       );
       final width24 = estimateBlockWidthFraction(
-        TextBlock(id: 'manual-24', tibetan: 'བོད།', columnSpan: 24),
+        const TextBlock(id: 'manual-24', tibetan: 'བོད།', columnSpan: 24),
       );
 
       expect(width1, closeTo(1 / 24, 0.0001));
@@ -193,7 +193,7 @@ void main() {
 
     test('manual width clamps above twenty-four divisions', () {
       final width = estimateBlockWidthFraction(
-        TextBlock(id: 'manual-oversize', tibetan: 'བོད།', columnSpan: 25),
+        const TextBlock(id: 'manual-oversize', tibetan: 'བོད།', columnSpan: 25),
       );
 
       expect(width, closeTo(1, 0.0001));
@@ -201,7 +201,7 @@ void main() {
 
     test('manual width level one is compact', () {
       final width = estimateBlockWidthFraction(
-        TextBlock(id: 'manual', tibetan: 'བོད།', columnSpan: 1),
+        const TextBlock(id: 'manual', tibetan: 'བོད།', columnSpan: 1),
       );
 
       expect(width, lessThanOrEqualTo(0.09));
@@ -209,7 +209,7 @@ void main() {
 
     test('manual width level three leaves less blank space', () {
       final width = estimateBlockWidthFraction(
-        TextBlock(id: 'manual', tibetan: 'བོད།', columnSpan: 3),
+        const TextBlock(id: 'manual', tibetan: 'བོད།', columnSpan: 3),
       );
 
       expect(width, lessThanOrEqualTo(0.30));
@@ -219,7 +219,7 @@ void main() {
       'small rows stay normal height when small text has multiple lines',
       () {
         final row = [
-          LayoutCell(
+          const LayoutCell(
             block: TextBlock(
               id: 'small',
               tibetan: 'བོད།\nབོད།',
@@ -237,12 +237,12 @@ void main() {
 
     test('small rows stay normal height when mixed with normal blocks', () {
       final row = [
-        LayoutCell(
+        const LayoutCell(
           block: TextBlock(id: 'small', tibetan: 'བོད།', smallText: true),
           leftFraction: 0,
           widthFraction: 0.25,
         ),
-        LayoutCell(
+        const LayoutCell(
           block: TextBlock(id: 'normal', tibetan: 'བོད།'),
           leftFraction: 0.3,
           widthFraction: 0.25,
@@ -254,7 +254,7 @@ void main() {
 
     test('compact one-line small rows can use short height', () {
       final row = [
-        LayoutCell(
+        const LayoutCell(
           block: TextBlock(
             id: 'small',
             tibetan: 'བོད།',
@@ -271,7 +271,7 @@ void main() {
 
     test('compact small rows ignore hidden translations', () {
       final row = [
-        LayoutCell(
+        const LayoutCell(
           block: TextBlock(
             id: 'small',
             tibetan: 'བོད།',
@@ -289,7 +289,7 @@ void main() {
 
     test('compact free text rows can use short height', () {
       final row = [
-        LayoutCell(
+        const LayoutCell(
           block: TextBlock(
             id: 'free',
             tibetan: 'A short note',
@@ -305,7 +305,7 @@ void main() {
 
     test('free text width is estimated from free text content only', () {
       final normalWidth = estimateBlockWidthFraction(
-        TextBlock(
+        const TextBlock(
           id: 'normal',
           tibetan: 'Short',
           chinesePronunciation: 'ignored pronunciation that is much longer',
@@ -314,7 +314,7 @@ void main() {
         ),
       );
       final freeTextWidth = estimateBlockWidthFraction(
-        TextBlock(
+        const TextBlock(
           id: 'free',
           tibetan: 'Short',
           chinesePronunciation: 'ignored pronunciation that is much longer',
@@ -331,7 +331,7 @@ void main() {
       'compact small rows stay normal height when enlarged text would overflow',
       () {
         final row = [
-          LayoutCell(
+          const LayoutCell(
             block: TextBlock(
               id: 'small',
               tibetan: 'བོད།',
@@ -396,7 +396,7 @@ void main() {
 
     test('compact small rows include Chinese line spacing', () {
       final row = [
-        LayoutCell(
+        const LayoutCell(
           block: TextBlock(
             id: 'small',
             tibetan: 'བོད།',
@@ -426,7 +426,7 @@ void main() {
 
   group('TextBlock', () {
     test('serializes to and from JSON', () {
-      final block = TextBlock(
+      const block = TextBlock(
         id: 'test-id',
         tibetan: 'བོད་སྐད',
         chinesePronunciation: 'bod skad',
@@ -464,7 +464,7 @@ void main() {
     });
 
     test('copyWith creates modified copy', () {
-      final block = TextBlock(id: 'test', tibetan: 'original');
+      const block = TextBlock(id: 'test', tibetan: 'original');
       final modified = block.copyWith(tibetan: 'modified');
 
       expect(block.tibetan, 'original');
@@ -527,7 +527,7 @@ void main() {
         id: 'proj-1',
         name: 'Test Project',
         tags: ['tag1', 'tag2'],
-        blocks: [TextBlock(id: 'b1', tibetan: 'text')],
+        blocks: [const TextBlock(id: 'b1', tibetan: 'text')],
         pageSetup: PageSetup(columnCount: 4),
         updatedAt: '2024-01-01T00:00:00Z',
         createdAt: '2024-01-01T00:00:00Z',
@@ -544,7 +544,7 @@ void main() {
     });
 
     test('fromJsonString parses JSON string', () {
-      final jsonStr = '''
+      const jsonStr = '''
         {
           "id": "proj-1",
           "name": "Test",
@@ -565,7 +565,7 @@ void main() {
       final project = Project(
         id: 'p1',
         name: 'Original',
-        blocks: [TextBlock(id: 'b1', tibetan: 'text')],
+        blocks: [const TextBlock(id: 'b1', tibetan: 'text')],
         updatedAt: '2024-01-01T00:00:00Z',
         createdAt: '2024-01-01T00:00:00Z',
       );
@@ -579,7 +579,7 @@ void main() {
 
   group('MarginMm', () {
     test('serializes to and from JSON', () {
-      final margin = MarginMm(top: 15, right: 20, bottom: 15, left: 20);
+      const margin = MarginMm(top: 15, right: 20, bottom: 15, left: 20);
       final json = margin.toJson();
       final restored = MarginMm.fromJson(json);
 

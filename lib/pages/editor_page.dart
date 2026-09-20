@@ -56,7 +56,7 @@ class _EditorPageState extends State<EditorPage>
   final _chineseConversionService = const ChineseConversionService();
   final _settingsService = SettingsService();
   Project? _project;
-  AppSettings _appSettings = AppSettings();
+  AppSettings _appSettings = const AppSettings();
   bool _loading = true;
   String? _error;
   String? _selectedId;
@@ -67,7 +67,9 @@ class _EditorPageState extends State<EditorPage>
   bool _contentTemplateOpen = false;
   Timer? _saveTimer;
   List<_PageWithBlocks>? _cachedPages;
-  List<TextBlock>? _lastBlocks;
+  List<TextBlock>? _cachedBlocks;
+  double? _cachedFlowGap;
+  double? _cachedContentWidthMm;
   final _undoService = UndoService();
   bool _scriptBusy = false;
   double _zoom = 1.0;
@@ -173,9 +175,7 @@ class _EditorPageState extends State<EditorPage>
 
   void _bumpSave() {
     _saveTimer?.cancel();
-    _saveTimer = Timer(const Duration(milliseconds: 800), () {
-      _saveCurrent();
-    });
+    _saveTimer = Timer(const Duration(milliseconds: 800), _saveCurrent);
   }
 
   Future<void> _saveCurrent() async {
@@ -201,7 +201,6 @@ class _EditorPageState extends State<EditorPage>
       _undoService.pushState(original);
       setState(() {
         _project = saved;
-        _cachedPages = null;
       });
     } on Object catch (_) {
       _showSnack(_l10n.chineseConversionFailed, error: true);
@@ -318,7 +317,6 @@ class _EditorPageState extends State<EditorPage>
       blocks.insert(idx, block);
       _project = _project!.copyWith(blocks: blocks);
       _selectedId = id;
-      _cachedPages = null;
     });
     _bumpSave();
   }
@@ -345,7 +343,6 @@ class _EditorPageState extends State<EditorPage>
       final idx = _selectedIndex >= 0 ? _selectedIndex + 1 : blocks.length;
       blocks.insertAll(idx, importResult.blocks);
       _project = _project!.copyWith(blocks: blocks);
-      _cachedPages = null;
       if (importResult.blocks.isNotEmpty) {
         _selectedId = importResult.blocks.first.id;
       }
@@ -422,7 +419,6 @@ class _EditorPageState extends State<EditorPage>
           : _project!.blocks.indexOf(pageBlocks[newIndex]);
       blocks.insert(globalNew, item);
       _project = _project!.copyWith(blocks: blocks);
-      _cachedPages = null;
     });
     _bumpSave();
   }
@@ -472,7 +468,6 @@ class _EditorPageState extends State<EditorPage>
     _undoService.pushState(_project!);
     setState(() {
       _updateBlock(update);
-      _cachedPages = null;
     });
   }
 
@@ -552,7 +547,6 @@ class _EditorPageState extends State<EditorPage>
     if (prev != null) {
       setState(() {
         _project = prev;
-        _cachedPages = null;
       });
       _bumpSave();
     }
@@ -564,7 +558,6 @@ class _EditorPageState extends State<EditorPage>
     if (next != null) {
       setState(() {
         _project = next;
-        _cachedPages = null;
       });
       _bumpSave();
     }
@@ -585,22 +578,25 @@ class _EditorPageState extends State<EditorPage>
   List<_PageWithBlocks> get _pagesWithBlocks {
     if (_project == null) return [];
 
-    // Return cached result if blocks haven't changed
-    if (_cachedPages != null && identical(_project!.blocks, _lastBlocks)) {
-      return _cachedPages!;
-    }
-
+    final blocks = _project!.blocks;
+    final flowGap = _project!.pageSetup.flowGap;
     final contentWidthMm =
         _project!.pageSetup.pageWidthMm -
         _project!.pageSetup.marginMm.left -
         _project!.pageSetup.marginMm.right;
-    final pages = paginateBlocks(
-      _project!.blocks,
-      0,
-      4,
-      _project!.pageSetup.flowGap,
-      contentWidthMm,
-    );
+
+    if (_cachedPages != null &&
+        identical(blocks, _cachedBlocks) &&
+        flowGap == _cachedFlowGap &&
+        contentWidthMm == _cachedContentWidthMm) {
+      return _cachedPages!;
+    }
+
+    final pages = paginateBlocks(blocks, 0, 4, flowGap, contentWidthMm);
+
+    _cachedBlocks = blocks;
+    _cachedFlowGap = flowGap;
+    _cachedContentWidthMm = contentWidthMm;
 
     _cachedPages = pages.map((page) {
       final seen = <String>{};

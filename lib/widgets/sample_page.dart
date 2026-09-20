@@ -33,24 +33,26 @@ List<TextSpan> _colorizedChildren(
     if (bufColor == color) {
       buf = buf! + c;
     } else {
-      if (buf != null)
+      if (buf != null) {
         spans.add(
           TextSpan(
             text: buf,
             style: style.copyWith(color: bufColor),
           ),
         );
+      }
       buf = c;
       bufColor = color;
     }
   }
-  if (buf != null)
+  if (buf != null) {
     spans.add(
       TextSpan(
         text: buf,
         style: style.copyWith(color: bufColor),
       ),
     );
+  }
   return spans;
 }
 
@@ -151,22 +153,20 @@ class SamplePageWidget extends StatelessWidget {
             fontFamily: transFont.fontFamily,
           ),
         Expanded(
-          child: Container(
-            child: _ContentGrid(
-              rows: effectiveFlowRows,
-              colCount: effectiveColCount,
-              showRowLines: setup.showRowLines,
-              highlightBlockId: highlightBlockId,
-              tibetanFont: tibFont,
-              pronunciationFont: pronFont,
-              translationFont: transFont,
-              floatingImages: floatingImages,
-              onFloatImageMove: onFloatImageMove,
-              onFloatImageResize: onFloatImageResize,
-              onInlineImageResize: onInlineImageResize,
-              onSelectBlock: onSelectBlock,
-              smallBlockFontSize: smallSz,
-            ),
+          child: _ContentGrid(
+            rows: effectiveFlowRows,
+            colCount: effectiveColCount,
+            showRowLines: setup.showRowLines,
+            highlightBlockId: highlightBlockId,
+            tibetanFont: tibFont,
+            pronunciationFont: pronFont,
+            translationFont: transFont,
+            floatingImages: floatingImages,
+            onFloatImageMove: onFloatImageMove,
+            onFloatImageResize: onFloatImageResize,
+            onInlineImageResize: onInlineImageResize,
+            onSelectBlock: onSelectBlock,
+            smallBlockFontSize: smallSz,
           ),
         ),
         if (!hasTemplate)
@@ -530,7 +530,7 @@ class _ContentGrid extends StatelessWidget {
                                           child: Image.file(
                                             File(block.imagePath!),
                                             fit: BoxFit.contain,
-                                            errorBuilder: (_, __, ___) =>
+                                            errorBuilder: (_, _, _) =>
                                                 const Center(
                                                   child: Icon(
                                                     Icons.broken_image,
@@ -915,7 +915,7 @@ class _ContentGrid extends StatelessWidget {
                               ? Image.file(
                                   File(fi.imagePath!),
                                   fit: BoxFit.contain,
-                                  errorBuilder: (_, __, ___) => Icon(
+                                  errorBuilder: (_, _, _) => Icon(
                                     Icons.broken_image,
                                     size: 16,
                                     color: AppColors.textFaint,

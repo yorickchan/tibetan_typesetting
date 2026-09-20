@@ -33,7 +33,7 @@ class PronunciationService {
   static List<String> savablePronunciationCharacters(String value) {
     return value.runes
         .map(String.fromCharCode)
-        .where((c) => _savablePronunciationChar.hasMatch(c))
+        .where(_savablePronunciationChar.hasMatch)
         .toList();
   }
 

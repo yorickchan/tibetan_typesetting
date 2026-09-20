@@ -27,7 +27,7 @@ void main() {
 
   group('TextBlock', () {
     test('copyWith preserves unchanged fields', () {
-      final original = TextBlock(
+      const original = TextBlock(
         id: 'test-id',
         tibetan: 'བོད་སྐད',
         chinesePronunciation: 'bod skad',
@@ -53,14 +53,14 @@ void main() {
     });
 
     test('copyWith with clearColumnSpan', () {
-      final original = TextBlock(id: 'test', columnSpan: 2);
+      const original = TextBlock(id: 'test', columnSpan: 2);
       final copy = original.copyWith(clearColumnSpan: true);
 
       expect(copy.columnSpan, null);
     });
 
     test('serialization round-trip', () {
-      final original = TextBlock(
+      const original = TextBlock(
         id: 'test-id',
         tibetan: 'བོད་སྐད',
         chinesePronunciation: 'bod skad',
@@ -87,7 +87,7 @@ void main() {
     });
 
     test('floating image fields serialize round-trip', () {
-      final original = TextBlock(
+      const original = TextBlock(
         id: 'img1',
         imagePath: '/tmp/foo.png',
         floatingImage: true,
@@ -108,19 +108,19 @@ void main() {
 
     test('redHighlightRange round-trip', () {
       // Default is empty
-      final defaultBlock = TextBlock(id: 'rh0');
+      const defaultBlock = TextBlock(id: 'rh0');
       expect(defaultBlock.redHighlightRange, '');
       expect(defaultBlock.toJson().containsKey('redHighlightRange'), false);
 
       // Non-empty round-trip
-      var block = TextBlock(id: 'rh1', redHighlightRange: '1-3');
+      var block = const TextBlock(id: 'rh1', redHighlightRange: '1-3');
       var json = block.toJson();
       expect(json['redHighlightRange'], '1-3');
       var restored = TextBlock.fromJson(json);
       expect(restored.redHighlightRange, '1-3');
 
       // Multiple ranges
-      block = TextBlock(id: 'rh2', redHighlightRange: '1-2,5-7');
+      block = const TextBlock(id: 'rh2', redHighlightRange: '1-2,5-7');
       json = block.toJson();
       expect(json['redHighlightRange'], '1-2,5-7');
       restored = TextBlock.fromJson(json);
@@ -229,7 +229,7 @@ void main() {
         id: 'test-id',
         name: 'Test Project',
         tags: ['tag1', 'tag2'],
-        blocks: [TextBlock(id: 'block1')],
+        blocks: [const TextBlock(id: 'block1')],
         updatedAt: '2026-01-01T00:00:00Z',
         createdAt: '2026-01-01T00:00:00Z',
       );
@@ -250,8 +250,8 @@ void main() {
         name: 'Test Project',
         tags: ['tag1', 'tag2'],
         blocks: [
-          TextBlock(id: 'block1', tibetan: 'བོད་སྐད'),
-          TextBlock(id: 'block2', tibetan: 'བོད་ཡིག'),
+          const TextBlock(id: 'block1', tibetan: 'བོད་སྐད'),
+          const TextBlock(id: 'block2', tibetan: 'བོད་ཡིག'),
         ],
         updatedAt: '2026-01-01T00:00:00Z',
         createdAt: '2026-01-01T00:00:00Z',

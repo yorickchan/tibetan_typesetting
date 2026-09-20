@@ -613,7 +613,7 @@ class TextBlock {
     final count = (json['redHighlightCount'] as num?)?.toInt() ?? 0;
     if (count > 0) {
       final start = (json['redHighlightStart'] as num?)?.toInt() ?? 1;
-      return '${start}-${start + count - 1}';
+      return '$start-${start + count - 1}';
     }
     return '';
   }

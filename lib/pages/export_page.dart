@@ -43,7 +43,7 @@ class _ExportPageState extends State<ExportPage>
   final _focusNode = FocusNode();
   final _txController = TransformationController();
   Project? _project;
-  AppSettings _appSettings = AppSettings();
+  AppSettings _appSettings = const AppSettings();
   bool _loading = true;
   String? _error;
   bool _pdfBusy = false;
@@ -64,10 +64,12 @@ class _ExportPageState extends State<ExportPage>
   Future<void> _loadSettings() async {
     final s = await _settingsService.getSettings();
     final templates = await TitlePageTemplateService().listTemplates();
-    if (mounted) setState(() {
+    if (mounted) {
+      setState(() {
       _appSettings = s;
       _templates = templates;
     });
+    }
   }
 
   String? _resolveTemplateSvg() {

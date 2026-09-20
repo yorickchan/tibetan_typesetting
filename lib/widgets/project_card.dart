@@ -147,7 +147,7 @@ class ProjectCard extends StatelessWidget {
                     onTap: onExportPrint,
                     child: Text(
                       l10n.exportPdf,
-                      style: TextStyle(color: AppColors.sky400, fontSize: 12),
+                      style: const TextStyle(color: AppColors.sky400, fontSize: 12),
                     ),
                   ),
                   const SizedBox(width: 12),

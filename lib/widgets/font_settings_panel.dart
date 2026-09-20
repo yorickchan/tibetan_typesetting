@@ -245,7 +245,7 @@ class FontSettingsPanel extends StatelessWidget {
                           ),
                           child: Text(
                             l10n.resetToDefault,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppColors.sky500,
                               fontSize: 10,
                               fontWeight: FontWeight.w500,
@@ -376,7 +376,7 @@ class _FontOverrideRow extends StatelessWidget {
                 onTap: onReset,
                 child: Text(
                   l10n.resetToDefault,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.sky500,
                     fontSize: 10,
                     fontWeight: FontWeight.w500,

@@ -7,14 +7,14 @@ void main() {
   test('compact rows use their content height and expand normal rows', () {
     final rows = [
       [
-        LayoutCell(
+        const LayoutCell(
           block: TextBlock(id: 'small', tibetan: 'བོད།', smallText: true),
           leftFraction: 0,
           widthFraction: 1,
         ),
       ],
       [
-        LayoutCell(
+        const LayoutCell(
           block: TextBlock(id: 'normal', tibetan: 'བོད།'),
           leftFraction: 0,
           widthFraction: 1,

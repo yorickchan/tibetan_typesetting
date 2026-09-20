@@ -10,7 +10,7 @@ void main() {
       updatedAt: '',
       createdAt: '',
       blocks: [
-        TextBlock(id: 'b1', tibetan: 'བཀྲ་ཤིས།', chineseTranslation: '吉祥'),
+        const TextBlock(id: 'b1', tibetan: 'བཀྲ་ཤིས།', chineseTranslation: '吉祥'),
       ],
     );
     final html = HtmlExportService.generateHtml(project);
@@ -27,7 +27,7 @@ void main() {
       updatedAt: '',
       createdAt: '',
       blocks: [
-        TextBlock(id: 'b1', tibetan: 'a & b', chineseTranslation: ''),
+        const TextBlock(id: 'b1', tibetan: 'a & b', chineseTranslation: ''),
       ],
     );
     final html = HtmlExportService.generateHtml(project);
@@ -74,9 +74,9 @@ void main() {
       updatedAt: '',
       createdAt: '',
       blocks: [
-        TextBlock(id: 'b1', tibetan: 'one'),
-        TextBlock(id: 'b2', tibetan: 'two', pageBreakBefore: true),
-        TextBlock(id: 'b3', tibetan: 'three'),
+        const TextBlock(id: 'b1', tibetan: 'one'),
+        const TextBlock(id: 'b2', tibetan: 'two', pageBreakBefore: true),
+        const TextBlock(id: 'b3', tibetan: 'three'),
       ],
     );
     final html = HtmlExportService.generateHtml(project);

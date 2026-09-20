@@ -46,7 +46,7 @@ class AppColors {
   static Color cardBorder = slate800;
   static Color surface = slate900;
   static Color surfaceContainer = slate800;
-  static Color inputFill = Color(0x66020617);
+  static Color inputFill = const Color(0x66020617);
 
   // Borders & dividers
   static Color border = slate700;

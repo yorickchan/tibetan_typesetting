@@ -308,9 +308,9 @@ class _TibetanTypesettingAppState extends State<TibetanTypesettingApp> {
         PlatformMenu(
           label: 'Tibetan Typesetting',
           menus: [
-            PlatformMenuItemGroup(
+            const PlatformMenuItemGroup(
               members: [
-                const PlatformProvidedMenuItem(
+                PlatformProvidedMenuItem(
                   type: PlatformProvidedMenuItemType.about,
                 ),
               ],
@@ -323,7 +323,7 @@ class _TibetanTypesettingAppState extends State<TibetanTypesettingApp> {
                     LogicalKeyboardKey.comma,
                     meta: true,
                   ),
-                  onSelected: () => _openSettings(),
+                  onSelected: _openSettings,
                 ),
               ],
             ),
@@ -411,21 +411,21 @@ class _TibetanTypesettingAppState extends State<TibetanTypesettingApp> {
             ),
           ],
         ),
-        PlatformMenu(
+        const PlatformMenu(
           label: 'View',
           menus: [
-            const PlatformProvidedMenuItem(
+            PlatformProvidedMenuItem(
               type: PlatformProvidedMenuItemType.toggleFullScreen,
             ),
           ],
         ),
-        PlatformMenu(
+        const PlatformMenu(
           label: 'Window',
           menus: [
-            const PlatformProvidedMenuItem(
+            PlatformProvidedMenuItem(
               type: PlatformProvidedMenuItemType.minimizeWindow,
             ),
-            const PlatformProvidedMenuItem(
+            PlatformProvidedMenuItem(
               type: PlatformProvidedMenuItemType.zoomWindow,
             ),
           ],

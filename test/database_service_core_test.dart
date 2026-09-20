@@ -36,8 +36,8 @@ void main() {
   group('normalizeImportedBlocks', () {
     test('fills empty ids with generated ids', () {
       final blocks = [
-        TextBlock(id: '', tibetan: 'a'),
-        TextBlock(id: 'existing', tibetan: 'b'),
+        const TextBlock(id: '', tibetan: 'a'),
+        const TextBlock(id: 'existing', tibetan: 'b'),
       ];
       final result = normalizeImportedBlocks(blocks, () => 'generated-id');
       expect(result[0].id, 'generated-id');

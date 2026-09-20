@@ -24,7 +24,7 @@ class SettingsService {
       whereArgs: [_settingsKey],
     );
     if (rows.isEmpty) {
-      _cached = AppSettings();
+      _cached = const AppSettings();
       return _cached!;
     }
     try {

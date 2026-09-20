@@ -14,7 +14,7 @@ void main() {
           project: Project(
             id: 'project',
             name: 'Project',
-            blocks: [TextBlock(id: 'block', tibetan: 'བོད་ཡིག།')],
+            blocks: [const TextBlock(id: 'block', tibetan: 'བོད་ཡིག།')],
             updatedAt: '',
             createdAt: '',
           ),
@@ -40,7 +40,7 @@ void main() {
             id: 'project',
             name: 'Project',
             blocks: [
-              TextBlock(
+              const TextBlock(
                 id: 'block',
                 tibetan: 'བོད་ཡིག།',
                 chinesePronunciation: 'pinyin',
@@ -67,7 +67,7 @@ void main() {
           project: Project(
             id: 'project',
             name: 'Project',
-            blocks: [TextBlock(id: 'block', tibetan: 'བོད་ཡིག།')],
+            blocks: [const TextBlock(id: 'block', tibetan: 'བོད་ཡིག།')],
             updatedAt: '',
             createdAt: '',
           ),
@@ -94,7 +94,7 @@ void main() {
           project: Project(
             id: 'project',
             name: 'Project',
-            blocks: [TextBlock(id: 'block', tibetan: 'བོད་ཡིག།')],
+            blocks: [const TextBlock(id: 'block', tibetan: 'བོད་ཡིག།')],
             updatedAt: '',
             createdAt: '',
           ),

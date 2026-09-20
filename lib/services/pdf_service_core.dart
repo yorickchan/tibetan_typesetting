@@ -28,6 +28,7 @@ List<TextSpanDef> makeColorizedSpans(
 String renderCacheKey({
   required String text,
   required String fontFamily,
+  List<String>? fontFamilyFallback,
   required double fontSize,
   required Color color,
   required double maxWidth,
@@ -36,4 +37,4 @@ String renderCacheKey({
   required double bottomPadding,
   required TextAlign textAlign,
 }) =>
-    '${text}_|_${fontFamily}_|_${fontSize}_|_${color.toARGB32()}_|_${maxWidth}_|_${lineHeight}_|_${topPadding}_|_${bottomPadding}_|_${textAlign}';
+    '${text}_|_${fontFamily}_|_${fontFamilyFallback?.join(',') ?? ''}_|_${fontSize}_|_${color.toARGB32()}_|_${maxWidth}_|_${lineHeight}_|_${topPadding}_|_${bottomPadding}_|_$textAlign';

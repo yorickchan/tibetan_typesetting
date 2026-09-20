@@ -178,7 +178,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(
               l10n.delete,
-              style: TextStyle(color: AppColors.rose400),
+              style: const TextStyle(color: AppColors.rose400),
             ),
           ),
         ],
@@ -262,6 +262,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
     if (isCreate) {
       templates = await TitlePageTemplateService().listTemplates();
     }
+    if (!mounted) return null;
 
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
@@ -334,7 +335,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
               if (isCreate && templates.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String?>(
-                  value: selectedTemplateId,
+                  initialValue: selectedTemplateId,
                   decoration: InputDecoration(
                     labelText: effectiveL10n.titlePageTemplate,
                     labelStyle:
@@ -446,7 +447,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
             icon: const Icon(Icons.add, size: 18, color: Colors.white),
             label: Text(
               _l10n.newProject,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,

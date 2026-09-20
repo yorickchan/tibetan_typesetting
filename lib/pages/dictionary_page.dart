@@ -94,7 +94,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(
               _l10n.delete,
-              style: TextStyle(color: AppColors.rose400),
+              style: const TextStyle(color: AppColors.rose400),
             ),
           ),
         ],
@@ -470,7 +470,7 @@ class _EntryCard extends StatelessWidget {
             tooltip: l10n.edit,
           ),
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.delete_outline,
               size: 18,
               color: AppColors.rose400,

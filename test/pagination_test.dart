@@ -12,7 +12,7 @@ void main() {
     });
 
     test('single block returns single page with one row', () {
-      final blocks = [TextBlock(id: 'block1', tibetan: 'བོད་སྐད')];
+      final blocks = [const TextBlock(id: 'block1', tibetan: 'བོད་སྐད')];
       final pages = paginateBlocks(blocks, 5);
       
       expect(pages.length, 1);
@@ -23,8 +23,8 @@ void main() {
 
     test('page break creates new page', () {
       final blocks = [
-        TextBlock(id: 'block1', tibetan: 'བོད་སྐད'),
-        TextBlock(id: 'block2', tibetan: 'བོད་ཡིག', pageBreakBefore: true),
+        const TextBlock(id: 'block1', tibetan: 'བོད་སྐད'),
+        const TextBlock(id: 'block2', tibetan: 'བོད་ཡིག', pageBreakBefore: true),
       ];
       final pages = paginateBlocks(blocks, 5);
       
@@ -35,8 +35,8 @@ void main() {
 
     test('column break creates new row', () {
       final blocks = [
-        TextBlock(id: 'block1', tibetan: 'བོད་སྐད'),
-        TextBlock(id: 'block2', tibetan: 'བོད་ཡིག', columnBreakBefore: true),
+        const TextBlock(id: 'block1', tibetan: 'བོད་སྐད'),
+        const TextBlock(id: 'block2', tibetan: 'བོད་ཡིག', columnBreakBefore: true),
       ];
       final pages = paginateBlocks(blocks, 5);
       
@@ -66,22 +66,22 @@ void main() {
 
   group('estimateBlockWidthFraction', () {
     test('block with columnSpan uses manual span', () {
-      final block = TextBlock(id: 'test', columnSpan: 3);
+      const block = TextBlock(id: 'test', columnSpan: 3);
       final fraction = estimateBlockWidthFraction(block);
       
       expect(fraction, closeTo(3 / 24, 0.01));
     });
 
     test('empty block returns minimum fraction', () {
-      final block = TextBlock(id: 'test');
+      const block = TextBlock(id: 'test');
       final fraction = estimateBlockWidthFraction(block);
       
       expect(fraction, greaterThanOrEqualTo(0.09));
     });
 
     test('long text returns larger fraction', () {
-      final shortBlock = TextBlock(id: 'short', tibetan: 'བོད');
-      final longBlock = TextBlock(id: 'long', tibetan: 'བོད་སྐད་ཆེན་པོ་ཞིག');
+      const shortBlock = TextBlock(id: 'short', tibetan: 'བོད');
+      const longBlock = TextBlock(id: 'long', tibetan: 'བོད་སྐད་ཆེན་པོ་ཞིག');
       
       final shortFraction = estimateBlockWidthFraction(shortBlock);
       final longFraction = estimateBlockWidthFraction(longBlock);
@@ -91,8 +91,8 @@ void main() {
 
   test('image blocks are included in pagination', () {
     final blocks = [
-      TextBlock(id: 'img', imagePath: '/tmp/test.png'),
-      TextBlock(id: 'text', tibetan: 'བཀྲ་ཤིས།'),
+      const TextBlock(id: 'img', imagePath: '/tmp/test.png'),
+      const TextBlock(id: 'text', tibetan: 'བཀྲ་ཤིས།'),
     ];
     final pages = paginateBlocks(blocks, 0, 4, 0.01);
     expect(pages.isNotEmpty, true);
@@ -109,7 +109,7 @@ void main() {
   });
 
   test('image blocks get wider default width fraction', () {
-    final block = TextBlock(id: 'img', imagePath: '/tmp/test.png');
+    const block = TextBlock(id: 'img', imagePath: '/tmp/test.png');
     final fraction = estimateBlockWidthFraction(block);
     expect(fraction, greaterThanOrEqualTo(0.4));
     expect(fraction, lessThanOrEqualTo(0.5));
@@ -120,9 +120,9 @@ void main() {
   group('floating image blocks', () {
     test('are excluded from flow rows', () {
       final blocks = [
-        TextBlock(id: 'txt', tibetan: 'text'),
-        TextBlock(id: 'img', imagePath: '/tmp/x.png', floatingImage: true),
-        TextBlock(id: 'txt2', tibetan: 'more text'),
+        const TextBlock(id: 'txt', tibetan: 'text'),
+        const TextBlock(id: 'img', imagePath: '/tmp/x.png', floatingImage: true),
+        const TextBlock(id: 'txt2', tibetan: 'more text'),
       ];
       final pages = paginateBlocks(blocks, 0, 4, 0.01);
       var totalFlow = 0;
@@ -136,8 +136,8 @@ void main() {
 
     test('are assigned to pages via floatingImages', () {
       final blocks = [
-        TextBlock(id: 'txt', tibetan: 'text'),
-        TextBlock(id: 'img', imagePath: '/tmp/x.png', floatingImage: true),
+        const TextBlock(id: 'txt', tibetan: 'text'),
+        const TextBlock(id: 'img', imagePath: '/tmp/x.png', floatingImage: true),
       ];
       final pages = paginateBlocks(blocks, 0, 4, 0.01);
       expect(pages[0].floatingImages.length, 1);
@@ -146,12 +146,12 @@ void main() {
 
     test('multiple floating images assign to correct pages', () {
       final blocks = [
-        TextBlock(id: 'b1', tibetan: 'a', columnSpan: 24),
-        TextBlock(id: 'b2', tibetan: 'b', columnSpan: 24),
-        TextBlock(id: 'b3', tibetan: 'c', columnSpan: 24),
-        TextBlock(id: 'b4', tibetan: 'd', columnSpan: 24),
-        TextBlock(id: 'f1', tibetan: '', floatingImage: true),
-        TextBlock(id: 'f2', tibetan: '', floatingImage: true),
+        const TextBlock(id: 'b1', tibetan: 'a', columnSpan: 24),
+        const TextBlock(id: 'b2', tibetan: 'b', columnSpan: 24),
+        const TextBlock(id: 'b3', tibetan: 'c', columnSpan: 24),
+        const TextBlock(id: 'b4', tibetan: 'd', columnSpan: 24),
+        const TextBlock(id: 'f1', tibetan: '', floatingImage: true),
+        const TextBlock(id: 'f2', tibetan: '', floatingImage: true),
       ];
       final pages = paginateBlocks(blocks, 4, 1);
       final allFloating =
@@ -161,9 +161,9 @@ void main() {
 
     test('floating image before all content assigns to first page', () {
       final blocks = [
-        TextBlock(id: 'f', tibetan: '', floatingImage: true),
-        TextBlock(id: 'b1', tibetan: 'a', columnSpan: 24),
-        TextBlock(id: 'b2', tibetan: 'b', columnSpan: 24),
+        const TextBlock(id: 'f', tibetan: '', floatingImage: true),
+        const TextBlock(id: 'b1', tibetan: 'a', columnSpan: 24),
+        const TextBlock(id: 'b2', tibetan: 'b', columnSpan: 24),
       ];
       final pages = paginateBlocks(blocks, 4, 1);
       expect(pages.first.floatingImages.any((b) => b.id == 'f'), isTrue);

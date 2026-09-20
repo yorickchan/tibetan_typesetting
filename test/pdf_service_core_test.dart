@@ -105,5 +105,24 @@ void main() {
       );
       expect(k1, isNot(k2));
     });
+
+    test('different font family fallback produces different key', () {
+      String keyWith(List<String>? fallback) => renderCacheKey(
+        text: 'x',
+        fontFamily: 'f',
+        fontFamilyFallback: fallback,
+        fontSize: 12,
+        color: const Color(0xFF000000),
+        maxWidth: 100,
+        lineHeight: null,
+        topPadding: 0,
+        bottomPadding: 0,
+        textAlign: TextAlign.left,
+      );
+
+      expect(keyWith(null), isNot(keyWith(['STHeiti'])));
+      expect(keyWith(['STHeiti']), isNot(keyWith(['PingFang SC'])));
+      expect(keyWith(['STHeiti']), keyWith(['STHeiti']));
+    });
   });
 }

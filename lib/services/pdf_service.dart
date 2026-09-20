@@ -95,6 +95,7 @@ class PdfService {
     final key = renderCacheKey(
       text: text,
       fontFamily: fontFamily,
+      fontFamilyFallback: fontFamilyFallback,
       fontSize: fontSize,
       color: color,
       maxWidth: maxWidth,
@@ -142,7 +143,7 @@ class PdfService {
     if (spans.isEmpty) return null;
 
     final key =
-        'rich_${spans.map((s) => '${s.text}_${s.color.toARGB32()}').join('|')}_|_${fontFamily}_|_${fontSize}_|_${maxWidth}_|_${lineHeight}_|_${topPadding}_|_${bottomPadding}_|_${textAlign}';
+        'rich_${spans.map((s) => '${s.text}_${s.color.toARGB32()}').join('|')}_|_${fontFamily}_|_${fontFamilyFallback?.join(',') ?? ''}_|_${fontSize}_|_${maxWidth}_|_${lineHeight}_|_${topPadding}_|_${bottomPadding}_|_$textAlign';
     if (_renderCache.containsKey(key)) {
       return _renderCache[key];
     }
@@ -265,8 +266,8 @@ class PdfService {
 
     final outerW = pageW - marginL - marginR;
     final outerH = pageH - marginT - marginB;
-    final sideW = 18 * PdfPageFormat.mm;
-    final inset = 2 * PdfPageFormat.mm;
+    const sideW = 18 * PdfPageFormat.mm;
+    const inset = 2 * PdfPageFormat.mm;
 
     final contentWidthMm =
         ps.pageWidthMm - ps.marginMm.left - ps.marginMm.right;
@@ -725,12 +726,12 @@ class PdfService {
       );
     }
 
-    final framePad = 6 * PdfPageFormat.mm;
-    final panelPadY = 2 * PdfPageFormat.mm;
-    final panelInnerPadX = 6 * PdfPageFormat.mm;
+    const framePad = 6 * PdfPageFormat.mm;
+    const panelPadY = 2 * PdfPageFormat.mm;
+    const panelInnerPadX = 6 * PdfPageFormat.mm;
     final innerH = outerH - 2 * inset - 2 * panelPadY;
     final panelW = innerH * 0.6;
-    final titleGap = 3 * PdfPageFormat.mm;
+    const titleGap = 3 * PdfPageFormat.mm;
 
     pw.Widget crestPanel() {
       return pw.Container(
@@ -745,7 +746,7 @@ class PdfService {
         child: _dharmaWheelSvg != null
             ? pw.Center(
                 child: pw.Padding(
-                  padding: pw.EdgeInsets.all(panelInnerPadX),
+                  padding: const pw.EdgeInsets.all(panelInnerPadX),
                   child: pw.SvgImage(svg: _dharmaWheelSvg!),
                 ),
               )
@@ -807,14 +808,14 @@ class PdfService {
       children: [
         pw.SizedBox(width: framePad - inset),
         pw.Padding(
-          padding: pw.EdgeInsets.symmetric(vertical: panelPadY),
+          padding: const pw.EdgeInsets.symmetric(vertical: panelPadY),
           child: crestPanel(),
         ),
         pw.SizedBox(width: titleGap),
         pw.Expanded(child: pw.Center(child: titleBox())),
         pw.SizedBox(width: titleGap),
         pw.Padding(
-          padding: pw.EdgeInsets.symmetric(vertical: panelPadY),
+          padding: const pw.EdgeInsets.symmetric(vertical: panelPadY),
           child: crestPanel(),
         ),
         pw.SizedBox(width: framePad - inset),
@@ -907,7 +908,7 @@ class PdfService {
       if (rows.isEmpty) return pw.SizedBox.expand();
 
       final rowCount = rows.length;
-      final padX = 2 * PdfPageFormat.mm;
+      const padX = 2 * PdfPageFormat.mm;
       // Precompute row Y offsets
       final rowYs = <double>[];
       final smallTibetanSize = contentTibetanFontSize(
@@ -916,7 +917,7 @@ class PdfService {
         smallBlockFontSize: smallBlockFontSize,
       );
       final smallScale = smallBlockFontSize != null
-          ? smallBlockFontSize! / tibFontSize
+          ? smallBlockFontSize / tibFontSize
           : 0.75;
       final smallChineseSize = pronFontSize * smallScale;
       final compactMinimumHeights = <double>[];
@@ -1043,7 +1044,7 @@ class PdfService {
       }
 
       final positioned = <pw.Widget>[];
-      final rowLineYOffset = 7 * PdfPageFormat.mm / 3.78;
+      const rowLineYOffset = 7 * PdfPageFormat.mm / 3.78;
       if (ps.showRowLines) {
         const rowLineH = 0.6;
         for (var ri = 0; ri < rows.length; ri++) {
