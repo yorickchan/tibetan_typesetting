@@ -88,13 +88,12 @@
 ## 技術亮點
 
 ### 藏文字型渲染
-應用程式採用精密的方式處理 PDF 中的藏文字型渲染：
-- 使用 Flutter 原生文字引擎預渲染藏文文字
-- 將文字轉換為高解析度 PNG 圖片（460 DPI）
-- 將圖片嵌入 PDF 以保留複雜的 OpenType 字型塑形
-- 點陣圖保留上下內距，避免升部與降部（例如 ཧཱུྃ 的 ུ）被裁切
-- 基於 SHA-256 的圖片快取，提升重新渲染效率
-- 這個解決方案確保完美的藏文字型顯示，這是標準 PDF 文字渲染無法達成的
+PDF 中的藏文以**向量字形輪廓**嵌入，而非圖片：
+- `pdf` 套件不實作 OpenType GSUB/GPOS 塑形，因此改用 HarfBuzz（`harfbuzz_ffi`，透過 Dart FFI）塑形
+- 每個字形以 PDF 路徑繪製，並只儲存一份可重用的 form XObject，重複的音節不會膨脹檔案（40 個區塊的文件約 140 KB，若逐字內嵌則約 4 MB）
+- 同時輸出一層隱形的 Unicode 文字，使匯出的 PDF 仍可搜尋、複製與無障礙讀取
+- 換行位置與行高與 Flutter 的 `TextPainter` 完全一致，匯出結果與畫面預覽對齊
+- 中文與自由文字區塊仍使用 PDF 原生文字搭配 CJK 備援字型
 
 ### DPI 感知預覽
 - `ScreenDpiService` 透過原生平台通道查詢實體螢幕 DPI
@@ -309,13 +308,16 @@ flutter build linux
 
 ### 文字渲染流程
 
-1. 文字輸入 → `TextPainter`（Flutter 的文字引擎）
-2. 檢查圖片快取（基於文字 + 字型 + 大小的 SHA-256 金鑰）
-3. 以約 6.4 倍比例渲染為 `Picture`（72-DPI PDF 座標空間中的 460 DPI）
-4. 轉換為 PNG 位元組並快取
-5. 以圖片形式嵌入 PDF
+**藏文**（`lib/utils/shaped_text_pdf.dart`）：
+1. HarfBuzz 依字型涵蓋範圍切段並塑形，套用 GSUB/GPOS
+2. 貪婪換行只在空白、音節點（tsheg）、隔符（shad）之後或 CJK 字元之間斷行，絕不切開音節
+3. 每個字形輪廓以字型單位快取為 form XObject
+4. 以 `drawXObject` 縮放繪製，並疊加隱形 Unicode 文字層供搜尋／複製
 
-這個方法確保完美的藏文字型渲染，並正確支援 OpenType 功能（GSUB/GPOS）。
+**中文與側邊欄**仍使用 Flutter 的 `TextPainter`：
+1. 以約 6.4 倍比例渲染為 `Picture`（72-DPI PDF 座標空間中的 460 DPI）
+2. 轉換為 PNG 位元組，並以 SHA-256 金鑰快取
+3. 以圖片形式嵌入 PDF
 
 ## 授權條款
 

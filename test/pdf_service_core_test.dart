@@ -4,41 +4,49 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tibetan_typesetting/services/pdf_service_core.dart';
 
 void main() {
-  group('makeColorizedSpans', () {
-    test('single color text returns one span', () {
-      final spans = makeColorizedSpans(
-        'abc',
-        const Color(0xFF000000),
-        const Color(0xFF000000),
-      );
-      expect(spans.length, 1);
-      expect(spans.first.text, 'abc');
+  group('tibetanHighlightMask', () {
+    test('empty range highlights nothing', () {
+      final mask = tibetanHighlightMask('བོད།', '');
+      expect(mask.every((v) => v == false), isTrue);
     });
 
-    test('splits Tibetan letters from non-letters', () {
-      const letter = Color(0xFF000000);
-      const other = Color(0xFFFF0000);
-      final spans = makeColorizedSpans('བོད།', letter, other);
-      expect(spans.length, greaterThan(1));
-      expect(spans.every((s) => s.color == letter || s.color == other), isTrue);
+    test('empty text yields empty mask', () {
+      expect(tibetanHighlightMask('', '1-2'), isEmpty);
     });
 
-    test('consecutive same-color chars merge into one span', () {
-      final spans = makeColorizedSpans(
-        'aaa',
-        const Color(0xFF000000),
-        const Color(0xFF000000),
-      );
-      expect(spans.length, 1);
+    test('mask length matches text code units', () {
+      const text = 'བོད་ཡིག';
+      expect(tibetanHighlightMask(text, '1-1').length, text.length);
     });
 
-    test('empty text returns no spans', () {
-      final spans = makeColorizedSpans(
-        '',
-        const Color(0xFF000000),
-        const Color(0xFFFF0000),
-      );
-      expect(spans, isEmpty);
+    test('marks letters of the highlighted syllable only', () {
+      // བོད་ཡིག = syllable 1 "བོད་", syllable 2 "ཡིག".
+      const text = 'བོད་ཡིག';
+      final mask = tibetanHighlightMask(text, '1-1');
+      // བ (U+0F56) is a letter, ོ (U+0F7C) is a vowel sign, ད a letter,
+      // ་ is tsheg (treated as a letter by the preview).
+      expect(mask[0], isTrue, reason: 'first consonant');
+      expect(mask[1], isFalse, reason: 'vowel sign is not a letter');
+      expect(mask[2], isTrue, reason: 'second consonant');
+      expect(mask[3], isTrue, reason: 'tsheg counts as a letter');
+      expect(mask[4], isFalse, reason: 'second syllable is not highlighted');
+    });
+
+    test('highlight covers later syllables', () {
+      const text = 'བོད་ཡིག';
+      final mask = tibetanHighlightMask(text, '2-2');
+      expect(mask[0], isFalse);
+      expect(mask[4], isTrue, reason: 'first char of syllable 2');
+    });
+
+    test('multiple ranges are unioned', () {
+      const text = 'ཀ་ཁ་ག་ང་';
+      final mask = tibetanHighlightMask(text, '1-1,3-3');
+      // positions of each letter: 0=ཀ 1=་ 2=ཁ 3=་ 4=ག 5=་ 6=ང 7=་
+      expect(mask[0], isTrue);
+      expect(mask[2], isFalse);
+      expect(mask[4], isTrue);
+      expect(mask[6], isFalse);
     });
   });
 

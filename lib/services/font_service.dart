@@ -6,6 +6,8 @@ import 'package:pdf/widgets.dart' as pw;
 
 import '../models/font_config.dart';
 import '../utils/font_utils.dart' as font_utils;
+import '../utils/shaped_text_core.dart';
+import '../utils/shaped_text_pdf.dart';
 import 'font_service_core.dart';
 
 export 'font_service_core.dart';
@@ -18,6 +20,8 @@ class FontService {
   List<SystemFontInfo>? _cachedFonts;
   final _loadedPreviewFamilies = <String>{};
   final _pdfFontCache = <String, pw.Font>{};
+  final _pdfFontDataCache = <String, ByteData>{};
+  final _shapingFontCache = <String, ShapedTextFont>{};
 
   static const _channel = MethodChannel('tibetan_typesetting/system_fonts');
 
@@ -73,7 +77,12 @@ class FontService {
     return _cachedFonts!;
   }
 
-  void invalidateCache() => _cachedFonts = null;
+  void invalidateCache() {
+    _cachedFonts = null;
+    // A re-scan can return different files, so opened shaping fonts must be
+    // reopened too; their native resources are freed here.
+    disposeShapingFonts();
+  }
 
   Future<List<pw.Font>> loadCjkFallbackFonts({int maxFonts = 3}) async {
     final systemFonts = await scanSystemFonts();
@@ -124,8 +133,12 @@ class FontService {
     }
   }
 
-  Future<pw.Font> loadFontForPdf(FontConfig config) async {
-    final cached = _pdfFontCache[config.fontPath];
+  /// Reads [config]'s file and returns font data that the `pdf` package can
+  /// embed for Unicode text (TrueType outlines, all required tables).
+  ///
+  /// Throws [UnsupportedFontError] when the font cannot be embedded.
+  Future<ByteData> loadFontDataForPdf(FontConfig config) async {
+    final cached = _pdfFontDataCache[config.fontPath];
     if (cached != null) return cached;
 
     final file = File(config.fontPath);
@@ -147,7 +160,7 @@ class FontService {
         throw UnsupportedFontError(
           'Font "${config.fontFamily}" (${config.fontPath}) uses OpenType/CFF '
           'outlines which are not supported by the PDF engine for CJK text. '
-          'Please choose a TrueType-flavored font (.ttf).',
+          'Please choose a different font.',
         );
       }
       final missing = font_utils.missingPdfEmbeddingTables(fontData);
@@ -160,8 +173,109 @@ class FontService {
       }
     }
 
-    final font = pw.Font.ttf(fontData);
+    _pdfFontDataCache[config.fontPath] = fontData;
+    return fontData;
+  }
+
+  Future<pw.Font> loadFontForPdf(FontConfig config) async {
+    final cached = _pdfFontCache[config.fontPath];
+    if (cached != null) return cached;
+
+    final font = pw.Font.ttf(await loadFontDataForPdf(config));
     _pdfFontCache[config.fontPath] = font;
+    return font;
+  }
+
+  /// Bytes suitable for OpenType shaping, plus a PDF font when the same data
+  /// can be embedded for the invisible Unicode text layer.
+  ///
+  /// Unlike [loadFontDataForPdf] this accepts CFF-flavoured OpenType fonts,
+  /// because HarfBuzz can shape and outline them even though the `pdf`
+  /// package cannot embed them; such fonts come back with a null [pdfFont].
+  Future<({Uint8List bytes, pw.Font? pdfFont})?> loadShapingFont(
+    FontConfig config,
+  ) async {
+    if (config.fontPath.isEmpty) return null;
+    final file = File(config.fontPath);
+    if (!await file.exists()) return null;
+
+    ByteData? pdfData;
+    try {
+      pdfData = await loadFontDataForPdf(config);
+    } on UnsupportedFontError {
+      pdfData = null;
+    }
+
+    if (pdfData != null) {
+      return (
+        bytes: pdfData.buffer.asUint8List(
+          pdfData.offsetInBytes,
+          pdfData.lengthInBytes,
+        ),
+        pdfFont: await loadFontForPdf(config),
+      );
+    }
+
+    final raw = await file.readAsBytes();
+    final data = ByteData.sublistView(raw);
+    final shapeable = isTtc(raw)
+        ? font_utils.extractTtfFromTtc(data, fontIndex: 0)
+        : data;
+    if (shapeable == null) return null;
+    return (
+      bytes: shapeable.buffer.asUint8List(
+        shapeable.offsetInBytes,
+        shapeable.lengthInBytes,
+      ),
+      pdfFont: null,
+    );
+  }
+
+  static String _normalizeFamily(String name) =>
+      name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+
+  /// Releases native shaping resources created for a PDF run.
+  void disposeShapingFonts() {
+    for (final font in _shapingFontCache.values) {
+      font.dispose();
+    }
+    _shapingFontCache.clear();
+  }
+
+  /// Opens [config]'s font for shaping, reusing an already-opened instance.
+  ///
+  /// When [config] has no file path (e.g. the built-in fallback configuration),
+  /// the first installed system font with that family name is used instead, so
+  /// Tibetan still renders for users who never picked a font file.
+  Future<ShapedTextFont?> shapingFont(FontConfig config) async {
+    final cached = _shapingFontCache[config.fontPath];
+    if (cached != null) return cached;
+
+    var resolved = config;
+    if (config.fontPath.isEmpty) {
+      final systemFonts = await scanSystemFonts();
+      // Family names vary in spacing and punctuation ("BabelStone Tibetan" vs
+      // the built-in "BabelStoneTibetan"), so compare a normalised form.
+      final wanted = _normalizeFamily(config.fontFamily);
+      SystemFontInfo? match;
+      for (final info in systemFonts) {
+        final family = _normalizeFamily(info.familyName);
+        if (family == wanted || family.contains(wanted)) {
+          match = info;
+          break;
+        }
+      }
+      if (match == null || match.filePath.isEmpty) return null;
+      resolved = config.copyWith(fontPath: match.filePath);
+    }
+
+    final loaded = await loadShapingFont(resolved);
+    if (loaded == null) return null;
+    final font = ShapedTextFont(
+      data: ShapedFontData.fromBytes(loaded.bytes, name: resolved.fontFamily),
+      pdfFont: loaded.pdfFont,
+    );
+    _shapingFontCache[config.fontPath] = font;
     return font;
   }
 

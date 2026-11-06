@@ -1,28 +1,29 @@
 import 'dart:ui' show Color, TextAlign;
 
-import '../utils/text_renderer.dart' show TextSpanDef;
-import '../utils/tibetan_segmenter.dart' show isTibetanNonLetter;
+import '../utils/tibetan_segmenter.dart'
+    show isTibetanNonLetter, parseRedHighlightRanges;
 
-List<TextSpanDef> makeColorizedSpans(
-  String text,
-  Color letterColor,
-  Color otherColor,
-) {
-  if (text.isEmpty) return const [];
-  return text.split('').fold<List<TextSpanDef>>(
-    const [],
-    (acc, c) {
-      final color =
-          isTibetanNonLetter(c.codeUnitAt(0)) ? otherColor : letterColor;
-      if (acc.isNotEmpty && acc.last.color == color) {
-        return [
-          ...acc.sublist(0, acc.length - 1),
-          TextSpanDef(acc.last.text + c, color),
-        ];
-      }
-      return [...acc, TextSpanDef(c, color)];
-    },
-  );
+/// Per-code-unit flag: true where the red highlight applies (Tibetan letters,
+/// including tsheg), false elsewhere (vowel signs, shad, punctuation and any
+/// syllable outside the highlight range).
+///
+/// Syllables are counted the same way [parseRedHighlightRanges] expects: a new
+/// word starts after each tsheg, and the tsheg itself belongs to the word it
+/// terminates. This mirrors the preview, which colours highlighted syllables
+/// with rose letters and black marks.
+List<bool> tibetanHighlightMask(String text, String ranges) {
+  final mask = List<bool>.filled(text.length, false);
+  final parsed = parseRedHighlightRanges(ranges);
+  if (parsed.isEmpty || text.isEmpty) return mask;
+
+  var word = 1;
+  for (var i = 0; i < text.length; i++) {
+    final codeUnit = text.codeUnitAt(i);
+    final highlighted = parsed.any((r) => word >= r.start && word <= r.end);
+    mask[i] = highlighted && !isTibetanNonLetter(codeUnit);
+    if (codeUnit == 0x0F0B || codeUnit == 0x0F0C) word++;
+  }
+  return mask;
 }
 
 String renderCacheKey({

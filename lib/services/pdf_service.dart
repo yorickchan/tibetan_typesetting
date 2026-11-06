@@ -14,7 +14,7 @@ import '../utils/content_page_template_layout.dart';
 import '../utils/font_constants.dart';
 import '../utils/font_utils.dart' as font_utils;
 import '../utils/sample_layout.dart';
-import '../utils/tibetan_segmenter.dart';
+import '../utils/shaped_text_pdf.dart';
 import '../utils/text_renderer.dart';
 import '../utils/title_page_layout.dart';
 import 'font_service.dart';
@@ -33,7 +33,6 @@ class PdfGenerationResult {
 const _rose = PdfColor.fromInt(0xFFe11d48);
 const _rowLine = PdfColor.fromInt(0xFFFFD700);
 
-const _roseUi = Color(0xFFe11d48);
 const _blackUi = Color(0xFF000000);
 
 /// Pre-rendered text image stored for synchronous PDF page construction.
@@ -74,10 +73,9 @@ class PdfService {
   }
 
   // ---------------------------------------------------------------------------
-  // Pre-render a piece of text through Flutter's HarfBuzz engine and store
-  // the resulting image. Tibetan script requires OpenType GSUB/GPOS features
-  // (abvs, blws, ccmp, etc.) that the pdf package does not implement, so we
-  // rasterise through Flutter's Skia/Impeller pipeline instead.
+  // Pre-render non-Tibetan text (Chinese labels, side panels) through Flutter
+  // and store the resulting image. Tibetan no longer uses this path: it is
+  // drawn as shaped vector outlines by [ShapedText].
   // ---------------------------------------------------------------------------
   Future<_Img?> _render(
     String text,
@@ -127,53 +125,6 @@ class PdfService {
     return img;
   }
 
-  // ---------------------------------------------------------------------------
-
-  Future<_Img?> _renderRich(
-    List<TextSpanDef> spans,
-    double fontSize,
-    double maxWidth, {
-    required String fontFamily,
-    List<String>? fontFamilyFallback,
-    double? lineHeight,
-    double topPadding = 0,
-    double bottomPadding = 0,
-    TextAlign textAlign = TextAlign.left,
-  }) async {
-    if (spans.isEmpty) return null;
-
-    final key =
-        'rich_${spans.map((s) => '${s.text}_${s.color.toARGB32()}').join('|')}_|_${fontFamily}_|_${fontFamilyFallback?.join(',') ?? ''}_|_${fontSize}_|_${maxWidth}_|_${lineHeight}_|_${topPadding}_|_${bottomPadding}_|_$textAlign';
-    if (_renderCache.containsKey(key)) {
-      return _renderCache[key];
-    }
-
-    final r = await renderRichTextToPng(
-      spans,
-      fontFamily: fontFamily,
-      fontFamilyFallback: fontFamilyFallback,
-      fontSize: fontSize,
-      maxWidth: maxWidth,
-      lineHeight: lineHeight,
-      topPadding: topPadding,
-      bottomPadding: bottomPadding,
-      textAlign: textAlign,
-    );
-    if (r == null) return null;
-
-    final img = _Img(pw.MemoryImage(r.pngBytes), r.width, r.height);
-    _renderCache[key] = img;
-    return img;
-  }
-
-  /// Break [text] into spans where Tibetan non-letters (vowels, tsheg, shad)
-  /// use [otherColor] and everything else uses [letterColor].
-  List<TextSpanDef> _makeColorizedSpans(
-    String text,
-    Color letterColor,
-    Color otherColor,
-  ) =>
-      makeColorizedSpans(text, letterColor, otherColor);
   // Public API
   // ---------------------------------------------------------------------------
 
@@ -193,6 +144,7 @@ class PdfService {
     AppSettings? appSettings,
   }) async {
     _renderCache.clear();
+    clearShapedGlyphCache();
     await _loadSvg();
 
     final warnings = <String>[];
@@ -249,9 +201,24 @@ class PdfService {
       titleChiConfig,
       'title Chinese',
     );
+
+    // Tibetan is drawn as shaped vector outlines through HarfBuzz; the same
+    // bytes also feed the invisible Unicode text layer.
+    final tibShaping = await _fontService.shapingFont(tibConfig);
+    final titleTibShaping =
+        titleTibConfig.fontPath == tibConfig.fontPath
+            ? tibShaping
+            : await _fontService.shapingFont(titleTibConfig);
+    if (tibShaping == null) {
+      warnings.add(
+        'tibetan: no usable font file is configured, Tibetan text is omitted '
+        'from the PDF.',
+      );
+    }
     final titleChiFont = titleChiPdfFont ?? tranFont;
 
-    // Font families for pre-rendered text (Tibetan through HarfBuzz)
+    // Font families for text still rasterised through Flutter (Chinese labels
+    // and the side panel, which may mix Chinese and Tibetan).
     final tibFamily = tibConfig.fontFamily;
     final transFamily = transConfig.fontFamily;
 
@@ -318,27 +285,6 @@ class PdfService {
       if (img != null) imgs[key] = img;
     }
 
-    // Title page Tibetan (PNG rasterization)
-    if (ps.showTitlePage && ps.titleTibetan.trim().isNotEmpty) {
-      tasks.add(
-        put(
-          'title_tib',
-          _render(
-            ps.titleTibetan,
-            titleTibConfig.fontSize,
-            _blackUi,
-            hasTemplate
-                ? titlePageTemplateTitleBoxBounds(ps).widthMm *
-                      PdfPageFormat.mm
-                : outerW,
-            fontFamily: titleTibConfig.fontFamily,
-            lineHeight: 1.4,
-            topPadding: 5,
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
-    }
 
     // Left side panel
     if (ps.leftVerticalTitle.trim().isNotEmpty) {
@@ -404,85 +350,7 @@ class PdfService {
           }
 
           final key = '${pi}_${ri}_$cellIndex';
-          final tibLines = splitLines(block.tibetan);
-          final heading = tibLines.isNotEmpty ? tibLines[0] : '';
-          final body = tibLines.length > 1
-              ? tibLines.sublist(1).join('\n')
-              : '';
-
           final small = block.smallText;
-          final tibContentSize = contentTibetanFontSize(
-            tibFontSize,
-            smallText: small,
-            smallBlockFontSize: small ? smallBlockFontSize : null,
-          );
-          if (heading.isNotEmpty) {
-            final segs = splitByRedHighlightRanges(
-              heading,
-              block.redHighlightRange,
-            );
-            if (segs.isEmpty) {
-              tasks.add(
-                put(
-                  '${key}_h',
-                  _render(
-                    heading,
-                    tibContentSize,
-                    _blackUi,
-                    blockWidth,
-                    fontFamily: tibConfig.fontFamily,
-                    lineHeight: contentTibetanLineHeight(smallText: small),
-                    topPadding: contentTibetanPngTopPadding,
-                    bottomPadding: contentTibetanPngBottomPadding,
-                  ),
-                ),
-              );
-            } else {
-              final spans = <TextSpanDef>[];
-              for (final s in segs) {
-                if (s.highlight) {
-                  spans.addAll(_makeColorizedSpans(s.text, _roseUi, _blackUi));
-                } else {
-                  spans.add(TextSpanDef(s.text, _blackUi));
-                }
-              }
-              if (spans.isNotEmpty) {
-                tasks.add(
-                  put(
-                    '${key}_h',
-                    _renderRich(
-                      spans,
-                      tibContentSize,
-                      blockWidth,
-                      fontFamily: tibConfig.fontFamily,
-                      lineHeight: contentTibetanLineHeight(smallText: small),
-                      topPadding: contentTibetanPngTopPadding,
-                      bottomPadding: contentTibetanPngBottomPadding,
-                    ),
-                  ),
-                );
-              }
-            }
-          }
-          // Tibetan body (PNG rasterization)
-          if (body.isNotEmpty) {
-            tasks.add(
-              put(
-                '${key}_b',
-                _render(
-                  body,
-                  tibContentSize,
-                  _blackUi,
-                  blockWidth,
-                  fontFamily: tibConfig.fontFamily,
-                  lineHeight: contentTibetanLineHeight(smallText: small),
-                  topPadding: contentTibetanPngTopPadding,
-                  bottomPadding: contentTibetanPngBottomPadding,
-                ),
-              ),
-            );
-          }
-
           final smallScale = smallBlockFontSize != null
               ? smallBlockFontSize / tibFontSize
               : 0.75;
@@ -572,7 +440,8 @@ class PdfService {
             outerH: hasTemplate ? pageH : outerH,
             sideW: sideW,
             inset: inset,
-            imgs: imgs,
+            titleTibShaping: titleTibShaping,
+            titleTibFontSize: titleTibConfig.fontSize,
             titlePageSvg: titlePageSvg,
           ),
         ),
@@ -638,6 +507,7 @@ class PdfService {
             sideW: sideW,
             inset: inset,
             pageNumber: pageNumber,
+            tibShaping: tibShaping,
             imgs: imgs,
             templateSvg: pageTemplateSvg,
             templateLayout: templateLayout,
@@ -651,8 +521,86 @@ class PdfService {
   }
 
   // ---------------------------------------------------------------------------
-  // Title page
+  // Tibetan text (shaped vector outlines + invisible Unicode text layer)
   // ---------------------------------------------------------------------------
+
+  /// Title-page Tibetan, or null when no shapable Tibetan font is configured.
+  pw.Widget? _titleTibetan(
+    PageSetup ps, {
+    required ShapedTextFont? shaping,
+    required double fontSize,
+    required double maxWidth,
+  }) {
+    final text = ps.titleTibetan;
+    if (shaping == null || text.trim().isEmpty) return null;
+    return ShapedText(
+      text,
+      fonts: [shaping],
+      fontSize: fontSize,
+      color: PdfColors.black,
+      maxWidth: maxWidth,
+      lineHeight: 1.4,
+      topPadding: 5,
+      textAlign: pw.TextAlign.center,
+
+    );
+  }
+
+  /// Content Tibetan for [block]: the first line is the heading, the rest is
+  /// the body. Red highlighting applies to heading syllables only, matching
+  /// the editor preview.
+  pw.Widget? _contentTibetan(
+    TextBlock block, {
+    required ShapedTextFont? shaping,
+    required double maxW,
+    required double fontSize,
+  }) {
+    final lines = splitLines(block.tibetan);
+    if (shaping == null || lines.isEmpty) return null;
+
+    final heading = lines.first;
+    final body = lines.length > 1 ? lines.sublist(1).join('\n') : '';
+    final small = block.smallText;
+    final lineHeight = contentTibetanLineHeight(smallText: small);
+
+    return pw.Column(
+      mainAxisSize: pw.MainAxisSize.min,
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        ShapedText(
+          heading,
+          fonts: [shaping],
+          fontSize: fontSize,
+          color: PdfColors.black,
+          maxWidth: maxW,
+          lineHeight: lineHeight,
+          topPadding: contentTibetanPngTopPadding,
+          bottomPadding: contentTibetanPngBottomPadding,
+          colorForRune: _tibetanColorFor(heading, block.redHighlightRange),
+        ),
+        if (body.isNotEmpty)
+          ShapedText(
+            body,
+            fonts: [shaping],
+            fontSize: fontSize,
+            color: PdfColors.black,
+            maxWidth: maxW,
+            lineHeight: lineHeight,
+            topPadding: contentTibetanPngTopPadding,
+            bottomPadding: contentTibetanPngBottomPadding,
+          ),
+      ],
+    );
+  }
+
+  /// Colours syllables covered by [highlightRange] rose, matching the preview
+  /// (highlighted letters rose, their vowel signs and punctuation black).
+  ShapedTextColorizer? _tibetanColorFor(String text, String highlightRange) {
+    final mask = tibetanHighlightMask(text, highlightRange);
+    if (!mask.contains(true)) return null;
+    return (index, rune) =>
+        index < mask.length && mask[index] ? _rose : PdfColors.black;
+  }
 
   pw.Widget _buildTitlePage({
     required PageSetup ps,
@@ -664,7 +612,8 @@ class PdfService {
     required double outerH,
     required double sideW,
     required double inset,
-    required Map<String, _Img> imgs,
+    required ShapedTextFont? titleTibShaping,
+    required double titleTibFontSize,
     String? titlePageSvg,
   }) {
     final titleChinese =
@@ -680,7 +629,12 @@ class PdfService {
       final titleTop = titleBoxBounds.topMm * PdfPageFormat.mm;
       final titleW = titleBoxBounds.widthMm * PdfPageFormat.mm;
       final titleH = titleBoxBounds.heightMm * PdfPageFormat.mm;
-      final tibImg = imgs['title_tib'];
+      final title = _titleTibetan(
+        ps,
+        shaping: titleTibShaping,
+        fontSize: titleTibFontSize,
+        maxWidth: titleW,
+      );
       return pw.Stack(
         children: [
           pw.Positioned(
@@ -704,18 +658,14 @@ class PdfService {
                   mainAxisSize: pw.MainAxisSize.min,
                   crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    if (tibImg != null) ...[
-                      pw.Image(
-                        tibImg.provider,
-                        width: tibImg.w,
-                        height: tibImg.h,
-                      ),
+                    if (title != null) ...[
+                      title,
                       pw.SizedBox(height: titleGapPt > 0 ? titleGapPt : 0),
                     ],
                     pw.Transform.translate(
                       offset: PdfPoint(
                         0,
-                        tibImg != null && titleGapPt < 0 ? -titleGapPt : 0,
+                        title != null && titleGapPt < 0 ? -titleGapPt : 0,
                       ),
                       child: pw.Text(
                         titleChinese.isEmpty ? ' ' : titleChinese,
@@ -765,11 +715,15 @@ class PdfService {
       );
     }
 
-    final tibImg = imgs['title_tib'];
-
     pw.Widget titleBox() {
       final titleBoxW =
           outerW - 2 * (inset + framePad) - 2 * panelW - 2 * titleGap;
+      final title = _titleTibetan(
+        ps,
+        shaping: titleTibShaping,
+        fontSize: titleTibFontSize,
+        maxWidth: titleBoxW - 24,
+      );
 
       return pw.Container(
         width: titleBoxW,
@@ -786,9 +740,8 @@ class PdfService {
             mainAxisSize: pw.MainAxisSize.min,
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
-              if (tibImg != null)
-                pw.Image(tibImg.provider, width: tibImg.w, height: tibImg.h),
-              if (tibImg == null)
+              ?title,
+              if (title == null)
                 pw.Text(
                   ' ',
                   style: pw.TextStyle(
@@ -879,6 +832,7 @@ class PdfService {
     required double sideW,
     required double inset,
     required String pageNumber,
+    required ShapedTextFont? tibShaping,
     required Map<String, _Img> imgs,
     String? templateSvg,
     ContentPageTemplateLayout? templateLayout,
@@ -973,25 +927,31 @@ class PdfService {
             : splitLines(block.chineseTranslation).join('\n');
         final freeTextContent = splitLines(block.tibetan).join('\n');
 
-        final hImg = imgs['${key}_h'];
-        final bImg = imgs['${key}_b'];
+        // Free-text blocks hold Chinese/English content, not Tibetan, so they
+        // keep the raster path below.
+        final tibText = freeText
+            ? null
+            : _contentTibetan(
+                block,
+                shaping: tibShaping,
+                maxW: maxW,
+                fontSize: contentTibetanFontSize(
+                  tibFontSize,
+                  smallText: small,
+                  smallBlockFontSize: small ? smallBlockFontSize : null,
+                ),
+              );
         final pImg = imgs['${key}_p'];
         final tImg = imgs['${key}_t'];
         final fImg = imgs['${key}_f'];
 
-        // The Tibetan raster carries transparent bottom padding for
-        // descenders; subtract it so the visible gap matches the setting.
-        final tibetanBottomPad =
-            (!freeText && (hImg != null || bImg != null))
-            ? contentTibetanPngBottomPadding
-            : 0.0;
-        final effectiveGapPt = contentGapPt - tibetanBottomPad;
+        // The Tibetan widget reserves the same transparent bottom padding the
+        // raster used for descenders, so subtract it to keep the visible gap
+        // equal to the configured setting.
+        final effectiveGapPt =
+            contentGapPt - (tibText != null ? contentTibetanPngBottomPadding : 0);
 
-        if (block.isOpeningMark) {
-          return hImg != null
-              ? pw.Image(hImg.provider, width: hImg.w, height: hImg.h)
-              : pw.SizedBox();
-        }
+        if (block.isOpeningMark) return tibText ?? pw.SizedBox();
 
         return pw.Column(
           mainAxisSize: pw.MainAxisSize.min,
@@ -1010,30 +970,7 @@ class PdfService {
                   lineSpacing: transSize * 0.4,
                 ),
               ),
-            if (!freeText) ...[
-              if (hImg != null && block.isImageBlock) ...[
-                pw.Image(
-                  hImg.provider,
-                  width: block.imageWidthMm != null
-                      ? (block.imageWidthMm! * PdfPageFormat.mm).clamp(
-                          10.0,
-                          maxW,
-                        )
-                      : hImg.w * (maxW / hImg.w).clamp(0.1, 1.0),
-                  height: block.imageWidthMm != null
-                      ? (hImg.h *
-                            ((block.imageWidthMm! * PdfPageFormat.mm).clamp(
-                                  10.0,
-                                  maxW,
-                                ) /
-                                hImg.w))
-                      : hImg.h * (maxW / hImg.w).clamp(0.1, 1.0),
-                ),
-              ] else if (hImg != null)
-                pw.Image(hImg.provider, width: hImg.w, height: hImg.h),
-              if (bImg != null)
-                pw.Image(bImg.provider, width: bImg.w, height: bImg.h),
-            ],
+            if (!freeText && tibText != null) tibText,
             if (pron.isNotEmpty || trans.isNotEmpty)
               pw.Transform.translate(
                 offset: PdfPoint(

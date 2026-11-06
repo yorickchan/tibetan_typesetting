@@ -88,12 +88,12 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 ## Technical Highlights
 
 ### Tibetan Script Rendering
-The application pre-renders Tibetan text to high-resolution PNG images (460 DPI) before embedding in the PDF. This approach is used because:
-- Tibetan script requires OpenType GSUB/GPOS shaping for correct rendering (stacked glyphs, vowel positioning)
-- The `pdf` package cannot perform OpenType shaping
-- PNG rasterization via Flutter's text engine produces correct Tibetan rendering at the cost of larger file size and minor pixelation at extreme zoom levels (>400%)
-- Rasters include top and bottom padding so ascenders and descenders (e.g. the ུ in ཧཱུྃ) are not clipped
-- SHA-256 based image caching for efficient re-rendering
+Tibetan text is embedded in the PDF as **vector glyph outlines**, not images:
+- Tibetan needs OpenType GSUB/GPOS shaping (stacked consonants, vowel-sign positioning), which the `pdf` package does not implement, so text is shaped with HarfBuzz (`harfbuzz_ffi`) via Dart FFI
+- Each shaped glyph is drawn as a PDF path and stored once as a reusable form XObject, so repeated syllables do not inflate the file (a 40-block document is ~140 KB instead of ~4 MB with inline paths)
+- An invisible Unicode text layer is emitted alongside the outlines, so exported PDFs stay searchable, copyable and accessible
+- Line breaking and line metrics match Flutter's `TextPainter`, keeping the export aligned with the on-screen preview
+- Chinese and free-text blocks still use native PDF text with CJK fallback fonts
 
 ### DPI-Aware Preview
 - `ScreenDpiService` queries the actual physical screen DPI via a native platform channel
@@ -308,13 +308,16 @@ The `sample_layout.dart` utility implements a two-pass pagination system:
 
 ### Text Rendering Pipeline
 
-1. Text input → `TextPainter` (Flutter's text engine)
-2. Check image cache (SHA-256 key from text + font + size)
-3. Render to `Picture` at ~6.4× scale (460 DPI in 72-DPI PDF coordinate space)
-4. Convert to PNG bytes and cache
-5. Embed in PDF as image
+**Tibetan** (`lib/utils/shaped_text_pdf.dart`):
+1. HarfBuzz shapes each font-coverage run, applying GSUB/GPOS
+2. Greedy line filling breaks only after whitespace, tsheg/shad, or between CJK characters — never inside a syllable
+3. Every glyph outline is cached as a form XObject in font units
+4. Glyphs are drawn with `drawXObject` at the target size, plus an invisible Unicode text layer for search/copy
 
-This approach ensures perfect Tibetan script rendering with proper OpenType feature support (GSUB/GPOS).
+**Chinese and side panels** still go through Flutter's `TextPainter`:
+1. Render to `Picture` at ~6.4× scale (460 DPI in a 72-DPI PDF coordinate space)
+2. Convert to PNG bytes and cache by SHA-256 key
+3. Embed in the PDF as an image
 
 ## License
 

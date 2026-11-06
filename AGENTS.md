@@ -4,7 +4,7 @@
 
 A Flutter desktop application (macOS primary; Linux, Windows) for composing Tibetan text documents with Chinese pronunciation and translation annotations, exported as PDF with traditional column layout. Version `1.1.13+16`, Dart SDK `^3.11.0`.
 
-**Golden rule — Tibetan rendering:** the `pdf` package cannot shape Tibetan script (it needs OpenType GSUB/GPOS), so Tibetan text is pre-rendered to high-resolution PNGs via Flutter's HarfBuzz-powered `TextPainter` at 460 DPI (`scale = 460/72 ≈ 6.389` in a 72-DPI PDF coordinate space) and embedded as images. Chinese renders natively via `pw.Text`; SVG templates via `pw.SvgImage` with explicit mm dimensions. Do not change this pipeline without understanding it.
+**Golden rule — Tibetan rendering:** the `pdf` package cannot shape Tibetan script (it needs OpenType GSUB/GPOS), so Tibetan text is shaped with HarfBuzz (`harfbuzz_ffi`, native asset) and embedded as **vector glyph outlines**, each glyph stored once as a reusable form XObject, with an invisible Unicode text layer so the PDF stays searchable/copyable. Chinese renders natively via `pw.Text`; SVG templates via `pw.SvgImage` with explicit mm dimensions. Do not change this pipeline without understanding it.
 
 ## Architecture & Data Flow
 
@@ -18,7 +18,7 @@ A Flutter desktop application (macOS primary; Linux, Windows) for composing Tibe
 **Three data paths:**
 - **Edit** — `EditorPage` mutation helpers each do `_undoService.pushState(_project!)` → `setState` with `copyWith` → `_bumpSave()` (800 ms debounced `Timer`) → `SaveStateMixin.performSave(() => _db.updateProject(_project!))`.
 - **Preview** — `_pagesWithBlocks` maps `paginateBlocks(blocks, 0, 4, pageSetup.flowGap, contentWidthMm)` to `_PageWithBlocks`, rendered per page inside `ScaledPreview` → `SamplePageWidget` (mm-accurate via `kMmToPx`). See the caching caveat below.
-- **Export** — `PdfService().generatePdfWithWarnings(project, appSettings:)` rasterizes all text up front (`_render`/`_renderRich` → `renderTextToPng`) and embeds `pw.Image`; Chinese uses `pw.Text(font:, fontFallback:)`; templates use `pw.SvgImage`. Non-fatal font problems surface as `PdfGenerationResult.warnings`. `HtmlExportService.generateHtml` is the static alternative path.
+- **Export** — `PdfService().generatePdfWithWarnings(project, appSettings:)` pre-renders non-Tibetan text to PNGs (`_render` → `renderTextToPng`) for side panels and free-text blocks, while Tibetan is handed to `ShapedText` (`lib/utils/shaped_text_pdf.dart`), which shapes with HarfBuzz and paints vector outlines plus an invisible text layer. Chinese uses `pw.Text(font:, fontFallback:)`; templates use `pw.SvgImage`. Non-fatal font problems surface as `PdfGenerationResult.warnings`. `HtmlExportService.generateHtml` is the static alternative path.
 
 **Undo/redo:** snapshot-based `UndoService` — full `Project` copies, max 50, redo cleared on push.
 
@@ -99,7 +99,8 @@ Never hardcode 96 DPI. Use the global `kMmToPx` (mm→preview px) and `font_util
 - `resolveContentRowHeights` gives compact rows their minimum height and redistributes the freed space evenly across normal rows.
 
 ### Rendering
-- `renderTextToPng(...)` default `scale = 460/72 ≈ 6.389` → 460 DPI; `renderRichTextToPng` is the multi-colour variant. Both dispose image/picture/painter.
+- `renderTextToPng(...)` default `scale = 460/72 ≈ 6.389` → 460 DPI; it disposes image/picture/painter. Multi-colour Tibetan is no longer rasterised: `ShapedText` colours per glyph.
+- Shaped-text internals: `shaped_text_core.dart` (FFI/HarfBuzz, outlines, break rules — pure and unit-tested) and `shaped_text_pdf.dart` (layout + painting via `pw.Widget`). It imports `package:pdf/src/pdf/obj/formxobject.dart` because form XObjects are not exported; `PdfXObject.name` lacks the leading `/`, so `_GlyphFormXObject` overrides it.
 - **`fontFamilyFallback` is NOT part of `renderCacheKey`** (`lib/services/pdf_service_core.dart`) nor of the rich-text inline key — if you change CJK fallback handling, extend the cache key or you will serve stale rasters.
 - `_renderCache` is cleared at the start of every `generatePdfWithWarnings`.
 
@@ -111,12 +112,14 @@ Three-tier resolution: `font_utils.effectiveFont(projectOverride, appDefault, fa
 | File | Role |
 |---|---|
 | `lib/main.dart` | Entry: DPI init + globals, `_DatabaseStartupGate`, app shell, `PlatformMenuBar`, theming |
-| `lib/services/pdf_service.dart` | PDF generation (1253 L): 460 DPI raster embedding, native Chinese/SVG, warnings |
+| `lib/services/pdf_service.dart` | PDF generation: shaped Tibetan vectors, raster Chinese/side panels, native SVG, warnings |
 | `lib/pages/editor_page.dart` | Main editor: block strip/editor, setup panels, undo/redo shortcuts, pagination, debounced save |
 | `lib/widgets/sample_page.dart` | mm-accurate page preview; owns global `kMmToPx` |
 | `lib/models/project.dart` | Core domain: `PageSetup`/`TextBlock`/`Project` + enums + copyWith/clearXxx |
 | `lib/utils/sample_layout.dart` | Layout engine: `paginateBlocks`/`_buildRows`/`BlockWidthEstimate` |
-| `lib/utils/text_renderer.dart` | `TextPainter` → high-res PNG (460 DPI) |
+| `lib/utils/text_renderer.dart` | `TextPainter` → high-res PNG (460 DPI) for non-Tibetan text |
+| `lib/utils/shaped_text_core.dart` | HarfBuzz shaping, glyph outlines, line-break rules (pure, unit-tested) |
+| `lib/utils/shaped_text_pdf.dart` | `ShapedText` widget: layout mirroring `TextPainter`, vector painting, invisible text layer |
 | `lib/services/database_service.dart` | SQLite facade + `withDependencies` DI (schema v5) |
 | `lib/services/font_service.dart` | System font scan, preview/PDF loading, TTC/CFF handling, CJK fallback |
 | `lib/services/database_location_service.dart` | Custom DB path + macOS security-scoped bookmarks |
