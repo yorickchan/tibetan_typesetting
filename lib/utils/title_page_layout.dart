@@ -2,6 +2,13 @@ import '../models/project.dart';
 
 const double pdfPointsPerMm = 72 / 25.4;
 
+/// Flutter logical pixels assume 96 DPI; PDF points are 72 per inch.
+const double pxToPdfPoints = 72 / 96;
+
+/// Vertical gap between the Tibetan and Chinese title lines, in PDF points.
+double titleTextGapPoints(PageSetup setup) =>
+    setup.titleTextGapPx * pxToPdfPoints;
+
 class TitlePageTemplateBounds {
   final double leftMm;
   final double topMm;

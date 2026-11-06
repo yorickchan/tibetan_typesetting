@@ -222,6 +222,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get titleChineseLabel => 'Title (Chinese)';
 
   @override
+  String get titleTextGap => 'Tibetan-Chinese spacing (px)';
+
+  @override
+  String get contentTextGap => 'Tibetan-Chinese spacing (px)';
+
+  @override
   String get projectFonts => 'Project fonts';
 
   @override

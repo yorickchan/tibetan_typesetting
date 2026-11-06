@@ -93,6 +93,8 @@
   "showTitlePage": "Show title page",
   "titleTibetanLabel": "Title (Tibetan)",
   "titleChineseLabel": "Title (Chinese)",
+  "titleTextGap": "Tibetan-Chinese spacing (px)",
+  "contentTextGap": "Tibetan-Chinese spacing (px)",
   "projectFonts": "Project fonts",
   "resetToDefault": "Reset to default",
   "tibetanLabel": "Tibetan",

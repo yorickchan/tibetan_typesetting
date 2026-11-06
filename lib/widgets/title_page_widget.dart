@@ -125,6 +125,7 @@ class TitlePageWidget extends StatelessWidget {
                                     chineseFontSize: font_utils.previewFontSize(
                                       transFont.fontSize,
                                     ),
+                                    titleTextGap: setup.titleTextGapPx,
                                     showFrame: true,
                                   ),
                                 ),
@@ -156,6 +157,7 @@ class TitlePageWidget extends StatelessWidget {
                     chineseFontSize: font_utils.previewFontSize(
                       transFont.fontSize,
                     ),
+                    titleTextGap: setup.titleTextGapPx,
                   ),
                 ),
               ),
@@ -219,6 +221,7 @@ class _TitleBox extends StatelessWidget {
   final String chineseFontFamily;
   final double tibetanFontSize;
   final double chineseFontSize;
+  final double titleTextGap;
   final bool showFrame;
 
   const _TitleBox({
@@ -228,11 +231,14 @@ class _TitleBox extends StatelessWidget {
     required this.chineseFontFamily,
     required this.tibetanFontSize,
     required this.chineseFontSize,
+    required this.titleTextGap,
     this.showFrame = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final gap = titleTextGap;
+    final overlap = gap < 0 ? gap : 0.0;
     final child = Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -247,16 +253,19 @@ class _TitleBox extends StatelessWidget {
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 6),
-        Text(
-          titleChinese.isEmpty ? ' ' : titleChinese,
-          style: TextStyle(
-            fontFamily: chineseFontFamily,
-            fontSize: chineseFontSize,
-            color: Colors.black87,
-            height: 1.5,
+        SizedBox(height: gap > 0 ? gap : 0),
+        Transform.translate(
+          offset: Offset(0, overlap),
+          child: Text(
+            titleChinese.isEmpty ? ' ' : titleChinese,
+            style: TextStyle(
+              fontFamily: chineseFontFamily,
+              fontSize: chineseFontSize,
+              color: Colors.black87,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
         ),
       ],
     );

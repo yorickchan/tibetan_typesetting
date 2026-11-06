@@ -104,6 +104,9 @@ class PageSetup {
   final bool showTitlePage;
   final String titleTibetan;
   final String titleChinese;
+  /// Vertical gap between the Tibetan and Chinese title lines, in logical
+  /// pixels. Negative values overlap the two lines.
+  final double titleTextGapPx;
   final FontConfig? tibetanFont;
   final FontConfig? pronunciationFont;
   final FontConfig? translationFont;
@@ -122,6 +125,9 @@ class PageSetup {
   final double footerFontSize;
   final String defaultOpeningMark;
   final double? smallBlockFontSize;
+  /// Vertical gap between Tibetan content and the first Chinese line, in
+  /// logical pixels. Negative values overlap.
+  final double contentTextGapPx;
   final String? titlePageTemplateId;
   final String? contentFirstPageTemplateId;
   final TemplateInset contentFirstPageTemplateInset;
@@ -145,6 +151,7 @@ class PageSetup {
     this.showTitlePage = true,
     this.titleTibetan = '',
     this.titleChinese = '',
+    this.titleTextGapPx = 6.0,
     this.tibetanFont,
     this.pronunciationFont,
     this.translationFont,
@@ -162,6 +169,7 @@ class PageSetup {
     this.headerFontSize = 9,
     this.footerFontSize = 9,
     this.smallBlockFontSize,
+    this.contentTextGapPx = 2.0,
     this.titlePageTemplateId,
     this.defaultOpeningMark = kDefaultOpeningMark,
     this.contentFirstPageTemplateId,
@@ -197,6 +205,7 @@ class PageSetup {
     bool? showTitlePage,
     String? titleTibetan,
     String? titleChinese,
+    double? titleTextGapPx,
     FontConfig? tibetanFont,
     FontConfig? pronunciationFont,
     FontConfig? translationFont,
@@ -216,6 +225,7 @@ class PageSetup {
     String? defaultOpeningMark,
     String? titlePageTemplateId,
     double? smallBlockFontSize,
+    double? contentTextGapPx,
     String? contentFirstPageTemplateId,
     TemplateInset? contentFirstPageTemplateInset,
     MarginMm? contentFirstPageMargin,
@@ -247,6 +257,7 @@ class PageSetup {
       showTitlePage: showTitlePage ?? this.showTitlePage,
       titleTibetan: titleTibetan ?? this.titleTibetan,
       titleChinese: titleChinese ?? this.titleChinese,
+      titleTextGapPx: titleTextGapPx ?? this.titleTextGapPx,
       tibetanFont: clearTibetanFont ? null : (tibetanFont ?? this.tibetanFont),
       pronunciationFont: clearPronunciationFont
           ? null
@@ -278,6 +289,7 @@ class PageSetup {
       smallBlockFontSize: clearSmallBlockFontSize
           ? null
           : (smallBlockFontSize ?? this.smallBlockFontSize),
+      contentTextGapPx: contentTextGapPx ?? this.contentTextGapPx,
       contentFirstPageTemplateId: clearContentFirstPageTemplateId
           ? null
           : (contentFirstPageTemplateId ?? this.contentFirstPageTemplateId),
@@ -312,6 +324,7 @@ class PageSetup {
     'templateInset': templateInset.toJson(),
     'titleTextInset': titleTextInset.toJson(),
     'titleChinese': titleChinese,
+    'titleTextGapPx': titleTextGapPx,
     'translationLang': translationLang.name,
     'headerLeft': headerLeft.name,
     'headerCenter': headerCenter.name,
@@ -334,6 +347,7 @@ class PageSetup {
       'titleChineseFont': titleChineseFont!.toJson(),
     if (titlePageTemplateId != null) 'titlePageTemplateId': titlePageTemplateId,
     if (smallBlockFontSize != null) 'smallBlockFontSize': smallBlockFontSize,
+    'contentTextGapPx': contentTextGapPx,
     if (contentFirstPageTemplateId != null)
       'contentFirstPageTemplateId': contentFirstPageTemplateId,
     'contentFirstPageTemplateInset': contentFirstPageTemplateInset.toJson(),
@@ -366,6 +380,7 @@ class PageSetup {
     showTitlePage: json['showTitlePage'] as bool? ?? true,
     titleTibetan: json['titleTibetan'] as String? ?? '',
     titleChinese: json['titleChinese'] as String? ?? '',
+    titleTextGapPx: (json['titleTextGapPx'] as num?)?.toDouble() ?? 6.0,
     tibetanFont: json['tibetanFont'] != null
         ? FontConfig.fromJson(json['tibetanFont'] as Map<String, dynamic>)
         : null,
@@ -398,6 +413,7 @@ class PageSetup {
         json['defaultOpeningMark'] as String? ?? kDefaultOpeningMark,
     titlePageTemplateId: json['titlePageTemplateId'] as String?,
     smallBlockFontSize: (json['smallBlockFontSize'] as num?)?.toDouble(),
+    contentTextGapPx: (json['contentTextGapPx'] as num?)?.toDouble() ?? 2.0,
     contentFirstPageTemplateId:
         json['contentFirstPageTemplateId'] as String?,
     contentFirstPageTemplateInset:

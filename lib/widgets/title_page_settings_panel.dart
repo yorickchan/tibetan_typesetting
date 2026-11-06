@@ -404,6 +404,27 @@ class TitlePageSettingsPanel extends StatelessWidget {
                     onChanged: (v) =>
                         onUpdateSetup((s) => s.copyWith(titleChinese: v)),
                   ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    initialValue: pageSetup.titleTextGapPx.toStringAsFixed(0),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      signed: true,
+                      decimal: true,
+                    ),
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 13,
+                    ),
+                    decoration: numberDecor(l10n.titleTextGap),
+                    onChanged: (v) {
+                      final n = double.tryParse(v);
+                      if (n != null) {
+                        onUpdateSetup(
+                          (s) => s.copyWith(titleTextGapPx: n),
+                        );
+                      }
+                    },
+                  ),
                   const SizedBox(height: 12),
                   Container(height: 1, color: AppColors.divider),
                   const SizedBox(height: 12),

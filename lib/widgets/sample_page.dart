@@ -167,6 +167,7 @@ class SamplePageWidget extends StatelessWidget {
             onInlineImageResize: onInlineImageResize,
             onSelectBlock: onSelectBlock,
             smallBlockFontSize: smallSz,
+            contentTextGap: setup.contentTextGapPx,
           ),
         ),
         if (!hasTemplate)
@@ -334,6 +335,7 @@ class _ContentGrid extends StatelessWidget {
   final FontConfig pronunciationFont;
   final FontConfig translationFont;
   final double? smallBlockFontSize;
+  final double contentTextGap;
 
   final List<TextBlock> floatingImages;
   final void Function(String id, double dxMm, double dyMm)? onFloatImageMove;
@@ -350,6 +352,7 @@ class _ContentGrid extends StatelessWidget {
     required this.pronunciationFont,
     required this.translationFont,
     this.smallBlockFontSize,
+    this.contentTextGap = 2,
     this.floatingImages = const [],
     this.onFloatImageMove,
     this.onFloatImageResize,
@@ -390,6 +393,7 @@ class _ContentGrid extends StatelessWidget {
               tibetanFontSize: smallTibetanSize,
               chineseFontSize: smallChineseSize,
               topPadding: kPreviewTextTopPadding,
+              chineseTopGap: contentTextGap,
             ),
           );
         }
@@ -808,35 +812,59 @@ class _ContentGrid extends StatelessWidget {
                               overflow: isSmall ? null : TextOverflow.ellipsis,
                             ),
                           ),
-                        if (!isFreeText && pron.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 2),
-                            child: Text(
-                              pron,
-                              style: TextStyle(
-                                fontFamily: pronFamily,
-                                fontSize: chineseSize,
-                                color: Colors.black87,
-                                height: 1.4,
-                              ),
-                              maxLines: isSmall ? null : 2,
-                              overflow: isSmall ? null : TextOverflow.ellipsis,
-                            ),
-                          ),
-                        if (!isFreeText && trans.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 1),
-                            child: Text(
-                              trans,
-                              style: TextStyle(
-                                fontFamily: transFamily,
-                                fontSize: chineseSize,
-                                color: Colors.black87,
-                                height: 1.4,
-                              ),
-                              maxLines: isSmall ? null : 2,
-                              overflow: isSmall ? null : TextOverflow.ellipsis,
-                            ),
+                        if (!isFreeText && (pron.isNotEmpty || trans.isNotEmpty))
+                          Builder(
+                            builder: (_) {
+                              final gap = contentTextGap;
+                              final positive = gap > 0 ? gap : 0.0;
+                              return Transform.translate(
+                                offset: Offset(0, gap < 0 ? gap : 0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (pron.isNotEmpty)
+                                      Padding(
+                                        padding: EdgeInsets.only(top: positive),
+                                        child: Text(
+                                          pron,
+                                          style: TextStyle(
+                                            fontFamily: pronFamily,
+                                            fontSize: chineseSize,
+                                            color: Colors.black87,
+                                            height: 1.4,
+                                          ),
+                                          maxLines: isSmall ? null : 2,
+                                          overflow: isSmall
+                                              ? null
+                                              : TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    if (trans.isNotEmpty)
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                          top: pron.isNotEmpty
+                                              ? 1
+                                              : positive + 1,
+                                        ),
+                                        child: Text(
+                                          trans,
+                                          style: TextStyle(
+                                            fontFamily: transFamily,
+                                            fontSize: chineseSize,
+                                            color: Colors.black87,
+                                            height: 1.4,
+                                          ),
+                                          maxLines: isSmall ? null : 2,
+                                          overflow: isSmall
+                                              ? null
+                                              : TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                       ],
                     ),

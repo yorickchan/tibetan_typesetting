@@ -513,6 +513,18 @@ abstract class AppLocalizations {
   /// **'Title (Chinese)'**
   String get titleChineseLabel;
 
+  /// No description provided for @titleTextGap.
+  ///
+  /// In en, this message translates to:
+  /// **'Tibetan-Chinese spacing (px)'**
+  String get titleTextGap;
+
+  /// No description provided for @contentTextGap.
+  ///
+  /// In en, this message translates to:
+  /// **'Tibetan-Chinese spacing (px)'**
+  String get contentTextGap;
+
   /// No description provided for @projectFonts.
   ///
   /// In en, this message translates to:

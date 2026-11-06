@@ -6,6 +6,7 @@ import '../models/font_config.dart';
 import '../models/project.dart';
 import '../services/font_service.dart';
 import '../utils/colors.dart';
+import '../utils/decorations.dart';
 import 'font_picker.dart';
 
 class FontSettingsPanel extends StatelessWidget {
@@ -315,6 +316,27 @@ class FontSettingsPanel extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    initialValue: pageSetup.contentTextGapPx.toStringAsFixed(0),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      signed: true,
+                      decimal: true,
+                    ),
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 13,
+                    ),
+                    decoration: numberDecor(l10n.contentTextGap),
+                    onChanged: (v) {
+                      final n = double.tryParse(v);
+                      if (n != null) {
+                        onUpdateSetup(
+                          (s) => s.copyWith(contentTextGapPx: n),
+                        );
+                      }
+                    },
                   ),
                 ],
               ),

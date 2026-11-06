@@ -346,6 +346,9 @@ double contentTibetanBottomBleed(double fontSize) {
 }
 
 const double contentTibetanPngTopPadding = 5 * 72 / 96;
+/// Extra room below Tibetan rasters so descenders (e.g. the ུ in ཧཱུྃ) are
+/// not clipped by the image canvas.
+const double contentTibetanPngBottomPadding = 2;
 const double contentChineseLineHeight = 1.4;
 
 bool shouldUseShortRow(
@@ -377,6 +380,7 @@ double estimateCompactSmallRowHeight(
   double topPadding = 0,
   double tibetanLineHeight = 1.2,
   double chineseLineHeight = contentChineseLineHeight,
+  double chineseTopGap = 2,
 }) {
   return row.fold<double>(
     0,
@@ -393,7 +397,9 @@ double estimateCompactSmallRowHeight(
         height += tibetanFontSize * tibetanLineHeight;
       }
       if (splitLines(block.chinesePronunciation).isNotEmpty) {
-        height += 2 + chineseFontSize * chineseLineHeight;
+        height +=
+            (chineseTopGap > 0 ? chineseTopGap : 0) +
+            chineseFontSize * chineseLineHeight;
       }
       return height > maxHeight ? height : maxHeight;
     },

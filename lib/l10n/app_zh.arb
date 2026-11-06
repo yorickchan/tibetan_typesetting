@@ -69,6 +69,8 @@
   "showTitlePage": "显示封面",
   "titleTibetanLabel": "标题（藏文）",
   "titleChineseLabel": "标题（中文）",
+  "titleTextGap": "藏文与中文间距 (px)",
+  "contentTextGap": "藏文与中文间距 (px)",
   "projectFonts": "项目字体",
   "resetToDefault": "重置为默认",
   "tibetanLabel": "藏文",

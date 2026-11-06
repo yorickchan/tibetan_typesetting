@@ -222,6 +222,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get titleChineseLabel => '标题（中文）';
 
   @override
+  String get titleTextGap => '藏文与中文间距 (px)';
+
+  @override
+  String get contentTextGap => '藏文与中文间距 (px)';
+
+  @override
   String get projectFonts => '项目字体';
 
   @override
@@ -825,6 +831,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get titleChineseLabel => '標題（中文）';
+
+  @override
+  String get titleTextGap => '藏文與中文間距 (px)';
+
+  @override
+  String get contentTextGap => '藏文與中文間距 (px)';
 
   @override
   String get projectFonts => '專案字體';

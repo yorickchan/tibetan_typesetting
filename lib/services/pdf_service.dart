@@ -433,6 +433,7 @@ class PdfService {
                     fontFamily: tibConfig.fontFamily,
                     lineHeight: contentTibetanLineHeight(smallText: small),
                     topPadding: contentTibetanPngTopPadding,
+                    bottomPadding: contentTibetanPngBottomPadding,
                   ),
                 ),
               );
@@ -456,6 +457,7 @@ class PdfService {
                       fontFamily: tibConfig.fontFamily,
                       lineHeight: contentTibetanLineHeight(smallText: small),
                       topPadding: contentTibetanPngTopPadding,
+                      bottomPadding: contentTibetanPngBottomPadding,
                     ),
                   ),
                 );
@@ -475,6 +477,7 @@ class PdfService {
                   fontFamily: tibConfig.fontFamily,
                   lineHeight: contentTibetanLineHeight(smallText: small),
                   topPadding: contentTibetanPngTopPadding,
+                  bottomPadding: contentTibetanPngBottomPadding,
                 ),
               ),
             );
@@ -500,7 +503,7 @@ class PdfService {
                   blockWidth,
                   fontFamily: pronConfig.fontFamily,
                   lineHeight: contentChineseLineHeight,
-                  topPadding: 2 * 72 / 96,
+                  topPadding: 0,
                 ),
               ),
             );
@@ -516,7 +519,7 @@ class PdfService {
                   blockWidth,
                   fontFamily: transConfig.fontFamily,
                   lineHeight: contentChineseLineHeight,
-                  topPadding: 1 * 72 / 96,
+                  topPadding: 0,
                 ),
               ),
             );
@@ -666,6 +669,7 @@ class PdfService {
   }) {
     final titleChinese =
         (ps.titleChinese.isNotEmpty ? ps.titleChinese : projectName).trim();
+    final titleGapPt = titleTextGapPoints(ps);
 
     if (titlePageSvg != null && titlePageSvg.isNotEmpty) {
       final templateBounds = titlePageTemplateBounds(ps);
@@ -700,22 +704,29 @@ class PdfService {
                   mainAxisSize: pw.MainAxisSize.min,
                   crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
-                    if (tibImg != null)
+                    if (tibImg != null) ...[
                       pw.Image(
                         tibImg.provider,
                         width: tibImg.w,
                         height: tibImg.h,
                       ),
-                    pw.SizedBox(height: tibImg != null ? 6 : 0),
-                    pw.Text(
-                      titleChinese.isEmpty ? ' ' : titleChinese,
-                      style: pw.TextStyle(
-                        font: chiFont,
-                        fontFallback: fontFallback,
-                        fontSize: chiFontSize,
-                        color: PdfColors.black,
+                      pw.SizedBox(height: titleGapPt > 0 ? titleGapPt : 0),
+                    ],
+                    pw.Transform.translate(
+                      offset: PdfPoint(
+                        0,
+                        tibImg != null && titleGapPt < 0 ? -titleGapPt : 0,
                       ),
-                      textAlign: pw.TextAlign.center,
+                      child: pw.Text(
+                        titleChinese.isEmpty ? ' ' : titleChinese,
+                        style: pw.TextStyle(
+                          font: chiFont,
+                          fontFallback: fontFallback,
+                          fontSize: chiFontSize,
+                          color: PdfColors.black,
+                        ),
+                        textAlign: pw.TextAlign.center,
+                      ),
                     ),
                   ],
                 ),
@@ -786,16 +797,19 @@ class PdfService {
                     fontSize: chiFontSize,
                   ),
                 ),
-              pw.SizedBox(height: 6),
-              pw.Text(
-                titleChinese.isEmpty ? ' ' : titleChinese,
-                style: pw.TextStyle(
-                  font: chiFont,
-                  fontFallback: fontFallback,
-                  fontSize: chiFontSize,
-                  color: PdfColors.black,
+              pw.SizedBox(height: titleGapPt > 0 ? titleGapPt : 0),
+              pw.Transform.translate(
+                offset: PdfPoint(0, titleGapPt < 0 ? -titleGapPt : 0),
+                child: pw.Text(
+                  titleChinese.isEmpty ? ' ' : titleChinese,
+                  style: pw.TextStyle(
+                    font: chiFont,
+                    fontFallback: fontFallback,
+                    fontSize: chiFontSize,
+                    color: PdfColors.black,
+                  ),
+                  textAlign: pw.TextAlign.center,
                 ),
-                textAlign: pw.TextAlign.center,
               ),
             ],
           ),
@@ -920,6 +934,7 @@ class PdfService {
           ? smallBlockFontSize / tibFontSize
           : 0.75;
       final smallChineseSize = pronFontSize * smallScale;
+      final contentGapPt = ps.contentTextGapPx * pxToPdfPoints;
       final compactMinimumHeights = <double>[];
       for (var ri = 0; ri < rowCount; ri++) {
         compactMinimumHeights.add(
@@ -930,6 +945,7 @@ class PdfService {
             topPadding: contentTibetanPngTopPadding,
             tibetanLineHeight: contentTibetanLineHeight(smallText: true),
             chineseLineHeight: 1.4,
+            chineseTopGap: contentGapPt,
           ),
         );
       }
@@ -962,6 +978,14 @@ class PdfService {
         final pImg = imgs['${key}_p'];
         final tImg = imgs['${key}_t'];
         final fImg = imgs['${key}_f'];
+
+        // The Tibetan raster carries transparent bottom padding for
+        // descenders; subtract it so the visible gap matches the setting.
+        final tibetanBottomPad =
+            (!freeText && (hImg != null || bImg != null))
+            ? contentTibetanPngBottomPadding
+            : 0.0;
+        final effectiveGapPt = contentGapPt - tibetanBottomPad;
 
         if (block.isOpeningMark) {
           return hImg != null
@@ -1010,35 +1034,57 @@ class PdfService {
               if (bImg != null)
                 pw.Image(bImg.provider, width: bImg.w, height: bImg.h),
             ],
-            if (pron.isNotEmpty)
-              pImg != null
-                  ? pw.Image(pImg.provider, width: pImg.w, height: pImg.h)
-                  : pw.Text(
-                      pron,
-                      style: pw.TextStyle(
-                        font: pronFont,
-                        fontFallback: fontFallback,
-                        fontSize: pronSize,
-                        color: PdfColors.black,
-                        lineSpacing: pronSize * 0.4,
+            if (pron.isNotEmpty || trans.isNotEmpty)
+              pw.Transform.translate(
+                offset: PdfPoint(
+                  0,
+                  effectiveGapPt < 0 ? -effectiveGapPt : 0,
+                ),
+                child: pw.Column(
+                  mainAxisSize: pw.MainAxisSize.min,
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    if (pron.isNotEmpty) ...[
+                      pw.SizedBox(
+                        height: effectiveGapPt > 0 ? effectiveGapPt : 0,
                       ),
-                    ),
-            if (trans.isNotEmpty)
-              tImg != null
-                  ? pw.Image(tImg.provider, width: tImg.w, height: tImg.h)
-                  : pw.Padding(
-                      padding: const pw.EdgeInsets.only(top: 1),
-                      child: pw.Text(
-                        trans,
-                        style: pw.TextStyle(
-                          font: transFont,
-                          fontFallback: fontFallback,
-                          fontSize: transSize,
-                          color: PdfColors.black,
-                          lineSpacing: transSize * 0.4,
+                      if (pImg != null)
+                        pw.Image(pImg.provider, width: pImg.w, height: pImg.h)
+                      else
+                        pw.Text(
+                          pron,
+                          style: pw.TextStyle(
+                            font: pronFont,
+                            fontFallback: fontFallback,
+                            fontSize: pronSize,
+                            color: PdfColors.black,
+                            lineSpacing: pronSize * 0.4,
+                          ),
                         ),
-                      ),
-                    ),
+                    ],
+                    if (trans.isNotEmpty) ...[
+                      if (pron.isEmpty)
+                        pw.SizedBox(
+                          height: effectiveGapPt > 0 ? effectiveGapPt : 0,
+                        ),
+                      pw.SizedBox(height: 1),
+                      if (tImg != null)
+                        pw.Image(tImg.provider, width: tImg.w, height: tImg.h)
+                      else
+                        pw.Text(
+                          trans,
+                          style: pw.TextStyle(
+                            font: transFont,
+                            fontFallback: fontFallback,
+                            fontSize: transSize,
+                            color: PdfColors.black,
+                            lineSpacing: transSize * 0.4,
+                          ),
+                        ),
+                    ],
+                  ],
+                ),
+              ),
           ],
         );
       }
