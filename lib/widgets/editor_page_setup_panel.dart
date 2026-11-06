@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../models/project.dart';
 import '../utils/colors.dart';
-import '../utils/decorations.dart';
+import 'settings_controls.dart';
 
 class EditorPageSetupPanel extends StatelessWidget {
   final PageSetup pageSetup;
@@ -66,117 +66,80 @@ class EditorPageSetupPanel extends StatelessWidget {
             Container(height: 1, color: AppColors.divider),
             Padding(
               padding: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  Row(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final sizes = Row(
                     children: [
-                      Expanded(
-                        child: _NumberField(
-                          initialValue: pageSetup.pageWidthMm,
-                          label: l10n.pageWidth,
-                          onChanged: (value) {
-                            if (value >= 50) {
-                              onUpdateSetup(
-                                (setup) => setup.copyWith(pageWidthMm: value),
-                              );
-                            }
-                          },
-                        ),
+                      CompactNumberField(
+                        initialValue: pageSetup.pageWidthMm,
+                        label: l10n.pageWidth,
+                        width: 110,
+                        onChanged: (value) {
+                          if (value >= 50) {
+                            onUpdateSetup(
+                              (s) => s.copyWith(pageWidthMm: value),
+                            );
+                          }
+                        },
                       ),
                       const SizedBox(width: 12),
-                      Expanded(
-                        child: _NumberField(
-                          initialValue: pageSetup.pageHeightMm,
-                          label: l10n.pageHeight,
-                          onChanged: (value) {
-                            if (value >= 50) {
-                              onUpdateSetup(
-                                (setup) => setup.copyWith(pageHeightMm: value),
-                              );
-                            }
-                          },
-                        ),
+                      CompactNumberField(
+                        initialValue: pageSetup.pageHeightMm,
+                        label: l10n.pageHeight,
+                        width: 110,
+                        onChanged: (value) {
+                          if (value >= 50) {
+                            onUpdateSetup(
+                              (s) => s.copyWith(pageHeightMm: value),
+                            );
+                          }
+                        },
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
+                  );
+                  final checks = Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Checkbox(
-                          value: pageSetup.showFrame,
-                          onChanged: (value) => onUpdateSetup(
-                            (setup) => setup.copyWith(showFrame: value),
-                          ),
-                          activeColor: AppColors.sky500,
-                          side: BorderSide(color: AppColors.textMuted),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        l10n.showFrame,
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 13,
+                      PanelCheckbox(
+                        value: pageSetup.showFrame,
+                        label: l10n.showFrame,
+                        onChanged: (value) => onUpdateSetup(
+                          (s) => s.copyWith(showFrame: value),
                         ),
                       ),
                       const SizedBox(width: 16),
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Checkbox(
-                          value: pageSetup.showRowLines,
-                          onChanged: (value) => onUpdateSetup(
-                            (setup) => setup.copyWith(showRowLines: value),
-                          ),
-                          activeColor: AppColors.sky500,
-                          side: BorderSide(color: AppColors.textMuted),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        l10n.showRowLines,
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 13,
+                      PanelCheckbox(
+                        value: pageSetup.showRowLines,
+                        label: l10n.showRowLines,
+                        onChanged: (value) => onUpdateSetup(
+                          (s) => s.copyWith(showRowLines: value),
                         ),
                       ),
                     ],
-                  ),
-                ],
+                  );
+                  if (constraints.maxWidth >= 700) {
+                    return Row(
+                      children: [
+                        sizes,
+                        const Spacer(),
+                        checks,
+                      ],
+                    );
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      sizes,
+                      const SizedBox(height: 12),
+                      checks,
+                    ],
+                  );
+                },
               ),
             ),
           ],
         ],
       ),
-    );
-  }
-}
-
-class _NumberField extends StatelessWidget {
-  final double initialValue;
-  final String label;
-  final ValueChanged<double> onChanged;
-
-  const _NumberField({
-    required this.initialValue,
-    required this.label,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      initialValue: initialValue.toStringAsFixed(0),
-      keyboardType: TextInputType.number,
-      style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
-      decoration: numberDecor(label),
-      onChanged: (value) {
-        final number = double.tryParse(value);
-        if (number != null) onChanged(number);
-      },
     );
   }
 }

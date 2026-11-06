@@ -13,11 +13,15 @@ class FontPicker extends StatefulWidget {
   final ValueChanged<SystemFontInfo> onSelected;
   final String label;
 
+  /// Text shown when no font is selected.
+  final String placeholder;
+
   const FontPicker({
     super.key,
     this.selectedPath,
     required this.onSelected,
     this.label = 'Font',
+    this.placeholder = 'Select a font...',
   });
 
   @override
@@ -70,16 +74,18 @@ class _FontPickerState extends State<FontPicker> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          widget.label,
-          style: TextStyle(
-            color: AppColors.textCaption,
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1.0,
+        if (widget.label.isNotEmpty) ...[
+          Text(
+            widget.label,
+            style: TextStyle(
+              color: AppColors.textCaption,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.0,
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
+          const SizedBox(height: 4),
+        ],
         GestureDetector(
           onTap: _loading ? null : _showPicker,
           child: Container(
@@ -95,7 +101,7 @@ class _FontPickerState extends State<FontPicker> {
                   child: Text(
                     _loading
                         ? 'Loading fonts...'
-                        : (_selectedName ?? 'Select a font...'),
+                        : (_selectedName ?? widget.placeholder),
                     style: TextStyle(
                       color: _selectedName != null
                           ? AppColors.textPrimary

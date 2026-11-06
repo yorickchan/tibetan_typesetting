@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/app_settings.dart';
 import '../models/font_config.dart';
-import '../models/title_page_template.dart';
 import '../models/project.dart';
+import '../models/title_page_template.dart';
 import '../services/font_service.dart';
 import '../utils/colors.dart';
-import '../utils/decorations.dart';
 import '../utils/font_constants.dart';
 import '../utils/font_utils.dart' as font_utils;
-import 'font_picker.dart';
+import 'settings_controls.dart';
 
 class TitlePageSettingsPanel extends StatelessWidget {
   final PageSetup pageSetup;
@@ -61,8 +59,28 @@ class TitlePageSettingsPanel extends StatelessWidget {
     });
   }
 
+  TitlePageTemplate? _templateFor(String? id) {
+    if (id == null) return null;
+    for (final template in templates) {
+      if (template.id == id) return template;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final template = _templateFor(pageSetup.titlePageTemplateId);
+    final tibFont = font_utils.effectiveFont(
+      pageSetup.tibetanFont,
+      appSettings.tibetanFont,
+      fallbackTibetanFont,
+    );
+    final transFont = font_utils.effectiveFont(
+      pageSetup.translationFont,
+      appSettings.translationFont,
+      fallbackChineseFont,
+    );
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.cardBg,
@@ -130,261 +148,122 @@ class TitlePageSettingsPanel extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Checkbox(
-                          value: pageSetup.showTitlePage,
-                          onChanged: (v) => onUpdateSetup(
-                            (s) => s.copyWith(showTitlePage: v),
-                          ),
-                          activeColor: AppColors.sky500,
-                          side: BorderSide(color: AppColors.textMuted),
+                      PanelCheckbox(
+                        value: pageSetup.showTitlePage,
+                        label: l10n.showTitlePage,
+                        onChanged: (value) => onUpdateSetup(
+                          (s) => s.copyWith(showTitlePage: value),
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        l10n.showTitlePage,
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (templates.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String?>(
-                      initialValue: pageSetup.titlePageTemplateId != null &&
-                              templates.any((t) => t.id == pageSetup.titlePageTemplateId)
-                          ? pageSetup.titlePageTemplateId
-                          : null,
-                      decoration: InputDecoration(
-                        labelText: l10n.titlePageTemplate,
-                        labelStyle: TextStyle(
-                          color: AppColors.textCaption,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.0,
-                        ),
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 12,
-                        ),
-                        filled: true,
-                        fillColor: AppColors.inputFill,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: AppColors.border),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: AppColors.border),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: AppColors.sky500),
-                        ),
-                      ),
-                      dropdownColor: AppColors.surfaceContainer,
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 13,
-                      ),
-                      items: [
-                        DropdownMenuItem<String?>(
-                          value: null,
-                          child: Text(l10n.defaultLayout),
-                        ),
-                        ...templates.map(
-                          (t) => DropdownMenuItem<String?>(
-                            value: t.id,
-                            child: Text(t.name),
-                          ),
-                        ),
-                      ],
-                      onChanged: (v) {
-                        onUpdateSetup(
-                          (s) => s.copyWith(
-                            titlePageTemplateId: v,
-                            clearTitlePageTemplateId: v == null,
-                          ),
-                        );
-                      },
-                    ),
-                    if (pageSetup.titlePageTemplateId != null) ...[
-                      const SizedBox(height: 8),
-                      Builder(
-                        builder: (_) {
-                          final t = templates.firstWhere(
-                            (t) => t.id == pageSetup.titlePageTemplateId,
-                            orElse: () => templates.first,
-                          );
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: SvgPicture.string(
-                              t.svgContent,
-                              width: 200,
-                              fit: BoxFit.contain,
-                              placeholderBuilder: (_) => const SizedBox(
-                                height: 60,
-                                child: Center(
-                                  child: SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
+                      if (templates.isNotEmpty) ...[
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: DropdownButtonFormField<String?>(
+                            initialValue:
+                                pageSetup.titlePageTemplateId != null &&
+                                    templates.any(
+                                      (t) =>
+                                          t.id ==
+                                          pageSetup.titlePageTemplateId,
+                                    )
+                                ? pageSetup.titlePageTemplateId
+                                : null,
+                            decoration: compactNumberDecor(
+                              l10n.titlePageTemplate,
+                            ),
+                            dropdownColor: AppColors.surfaceContainer,
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 13,
+                            ),
+                            items: [
+                              DropdownMenuItem<String?>(
+                                value: null,
+                                child: Text(l10n.defaultLayout),
+                              ),
+                              ...templates.map(
+                                (t) => DropdownMenuItem<String?>(
+                                  value: t.id,
+                                  child: Text(t.name),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.templateInset,
-                        style: TextStyle(
-                          color: AppColors.textCaption,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.0,
+                            ],
+                            onChanged: (value) {
+                              onUpdateSetup(
+                                (s) => s.copyWith(
+                                  titlePageTemplateId: value,
+                                  clearTitlePageTemplateId: value == null,
+                                ),
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children:
-                            [
-                                  (
-                                    'top',
-                                    l10n.top,
-                                    pageSetup.templateInset.top,
-                                  ),
-                                  (
-                                    'bottom',
-                                    l10n.bottom,
-                                    pageSetup.templateInset.bottom,
-                                  ),
-                                  (
-                                    'left',
-                                    l10n.left,
-                                    pageSetup.templateInset.left,
-                                  ),
-                                  (
-                                    'right',
-                                    l10n.right,
-                                    pageSetup.templateInset.right,
-                                  ),
-                                ]
-                                .map(
-                                  (e) => Expanded(
-                                    child: Padding(
-                                      padding: EdgeInsets.only(
-                                        right: e.$1 != 'right' ? 8 : 0,
-                                      ),
-                                      child: TextFormField(
-                                        initialValue: e.$3.toStringAsFixed(0),
-                                        keyboardType: TextInputType.number,
-                                        style: TextStyle(
-                                          color: AppColors.textPrimary,
-                                          fontSize: 13,
-                                        ),
-                                        decoration: numberDecor(e.$2),
-                                        onChanged: (v) {
-                                          final n = double.tryParse(v);
-                                          if (n != null && n >= 0 && n <= 100) {
-                                            _updateInset(e.$1, n);
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.titleTextInset,
-                        style: TextStyle(
-                          color: AppColors.textCaption,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children:
-                            [
-                                  (
-                                    'top',
-                                    l10n.top,
-                                    pageSetup.titleTextInset.top,
-                                  ),
-                                  (
-                                    'bottom',
-                                    l10n.bottom,
-                                    pageSetup.titleTextInset.bottom,
-                                  ),
-                                  (
-                                    'left',
-                                    l10n.left,
-                                    pageSetup.titleTextInset.left,
-                                  ),
-                                  (
-                                    'right',
-                                    l10n.right,
-                                    pageSetup.titleTextInset.right,
-                                  ),
-                                ]
-                                .map(
-                                  (e) => Expanded(
-                                    child: Padding(
-                                      padding: EdgeInsets.only(
-                                        right: e.$1 != 'right' ? 8 : 0,
-                                      ),
-                                      child: TextFormField(
-                                        initialValue: e.$3.toStringAsFixed(0),
-                                        keyboardType: TextInputType.number,
-                                        style: TextStyle(
-                                          color: AppColors.textPrimary,
-                                          fontSize: 13,
-                                        ),
-                                        decoration: numberDecor(e.$2),
-                                        onChanged: (v) {
-                                          final n = double.tryParse(v);
-                                          if (n != null && n >= 0 && n <= 150) {
-                                            _updateTitleTextInset(e.$1, n);
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                      ),
+                        const SizedBox(width: 12),
+                        TemplateThumb(svgContent: template?.svgContent),
+                      ],
                     ],
-                    Container(height: 1, color: AppColors.divider),
-                    const SizedBox(height: 8),
-                  ],
-                  const SizedBox(height: 8),
+                  ),
+                  const SizedBox(height: 12),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final wide = constraints.maxWidth >= 820;
+                      final groups = [
+                        MarginRow(
+                          label: l10n.templateInset,
+                          top: pageSetup.templateInset.top,
+                          bottom: pageSetup.templateInset.bottom,
+                          left: pageSetup.templateInset.left,
+                          right: pageSetup.templateInset.right,
+                          l10n: l10n,
+                          onTop: (v) => _updateInset('top', v),
+                          onBottom: (v) => _updateInset('bottom', v),
+                          onLeft: (v) => _updateInset('left', v),
+                          onRight: (v) => _updateInset('right', v),
+                        ),
+                        MarginRow(
+                          label: l10n.titleTextInset,
+                          top: pageSetup.titleTextInset.top,
+                          bottom: pageSetup.titleTextInset.bottom,
+                          left: pageSetup.titleTextInset.left,
+                          right: pageSetup.titleTextInset.right,
+                          max: 150,
+                          l10n: l10n,
+                          onTop: (v) => _updateTitleTextInset('top', v),
+                          onBottom: (v) => _updateTitleTextInset('bottom', v),
+                          onLeft: (v) => _updateTitleTextInset('left', v),
+                          onRight: (v) => _updateTitleTextInset('right', v),
+                        ),
+                      ];
+                      if (wide) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: groups[0]),
+                            const SizedBox(width: 20),
+                            Expanded(child: groups[1]),
+                          ],
+                        );
+                      }
+                      return Column(
+                        children: [
+                          groups[0],
+                          const SizedBox(height: 10),
+                          groups[1],
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
                   _SettingsField(
                     label: l10n.tibetanLabel,
                     value: pageSetup.titleTibetan,
                     placeholder: l10n.titleTibetanLabel,
                     fontFamily:
-                        (pageSetup.titleTibetanFont ??
-                                font_utils.effectiveFont(
-                                  pageSetup.tibetanFont,
-                                  appSettings.tibetanFont,
-                                  fallbackTibetanFont,
-                                ))
-                            .fontFamily,
+                        (pageSetup.titleTibetanFont ?? tibFont).fontFamily,
                     onChanged: (v) =>
                         onUpdateSetup((s) => s.copyWith(titleTibetan: v)),
                   ),
@@ -394,48 +273,34 @@ class TitlePageSettingsPanel extends StatelessWidget {
                     value: pageSetup.titleChinese,
                     placeholder: l10n.titleChineseLabel,
                     fontFamily:
-                        (pageSetup.titleChineseFont ??
-                                font_utils.effectiveFont(
-                                  pageSetup.translationFont,
-                                  appSettings.translationFont,
-                                  fallbackChineseFont,
-                                ))
-                            .fontFamily,
+                        (pageSetup.titleChineseFont ?? transFont).fontFamily,
                     onChanged: (v) =>
                         onUpdateSetup((s) => s.copyWith(titleChinese: v)),
                   ),
                   const SizedBox(height: 8),
-                  TextFormField(
-                    initialValue: pageSetup.titleTextGapPx.toStringAsFixed(0),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      signed: true,
-                      decimal: true,
-                    ),
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 13,
-                    ),
-                    decoration: numberDecor(l10n.titleTextGap),
-                    onChanged: (v) {
-                      final n = double.tryParse(v);
-                      if (n != null) {
-                        onUpdateSetup(
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 190,
+                        child: SettingsSectionLabel(l10n.titleTextGap),
+                      ),
+                      CompactNumberField(
+                        initialValue: pageSetup.titleTextGapPx,
+                        width: 90,
+                        signed: true,
+                        onChanged: (n) => onUpdateSetup(
                           (s) => s.copyWith(titleTextGapPx: n),
-                        );
-                      }
-                    },
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   Container(height: 1, color: AppColors.divider),
                   const SizedBox(height: 12),
-                  _TitleFontRow(
+                  CompactFontRow(
                     label: 'TITLE TIBETAN FONT',
                     current: pageSetup.titleTibetanFont,
-                    fallback: font_utils.effectiveFont(
-                      pageSetup.tibetanFont,
-                      appSettings.tibetanFont,
-                      fallbackTibetanFont,
-                    ),
+                    defaultName: tibFont.fontFamily,
                     defaultSize: 10,
                     l10n: l10n,
                     onSelected: (info) {
@@ -460,11 +325,10 @@ class TitlePageSettingsPanel extends StatelessWidget {
                     onSizeChanged: (v) {
                       final n = double.tryParse(v);
                       if (n == null || n <= 0) return;
-                      final cur = pageSetup.titleTibetanFont;
-                      if (cur == null) return;
+                      final base = pageSetup.titleTibetanFont ?? tibFont;
                       onUpdateSetup(
                         (s) => s.copyWith(
-                          titleTibetanFont: cur.copyWith(fontSize: n),
+                          titleTibetanFont: base.copyWith(fontSize: n),
                         ),
                       );
                     },
@@ -472,15 +336,11 @@ class TitlePageSettingsPanel extends StatelessWidget {
                       (s) => s.copyWith(clearTitleTibetanFont: true),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  _TitleFontRow(
+                  const SizedBox(height: 8),
+                  CompactFontRow(
                     label: 'TITLE CHINESE FONT',
                     current: pageSetup.titleChineseFont,
-                    fallback: font_utils.effectiveFont(
-                      pageSetup.translationFont,
-                      appSettings.translationFont,
-                      fallbackChineseFont,
-                    ),
+                    defaultName: transFont.fontFamily,
                     defaultSize: 8,
                     l10n: l10n,
                     onSelected: (info) {
@@ -496,7 +356,8 @@ class TitlePageSettingsPanel extends StatelessWidget {
                           titleChineseFont: FontConfig(
                             fontFamily: info.familyName,
                             fontPath: info.filePath,
-                            fontSize: pageSetup.titleChineseFont?.fontSize ?? 8,
+                            fontSize:
+                                pageSetup.titleChineseFont?.fontSize ?? 8,
                           ),
                         ),
                       );
@@ -504,11 +365,10 @@ class TitlePageSettingsPanel extends StatelessWidget {
                     onSizeChanged: (v) {
                       final n = double.tryParse(v);
                       if (n == null || n <= 0) return;
-                      final cur = pageSetup.titleChineseFont;
-                      if (cur == null) return;
+                      final base = pageSetup.titleChineseFont ?? transFont;
                       onUpdateSetup(
                         (s) => s.copyWith(
-                          titleChineseFont: cur.copyWith(fontSize: n),
+                          titleChineseFont: base.copyWith(fontSize: n),
                         ),
                       );
                     },
@@ -522,121 +382,6 @@ class TitlePageSettingsPanel extends StatelessWidget {
           ],
         ],
       ),
-    );
-  }
-}
-
-class _TitleFontRow extends StatelessWidget {
-  final String label;
-  final FontConfig? current;
-  final FontConfig fallback;
-  final double defaultSize;
-  final AppLocalizations l10n;
-  final ValueChanged<SystemFontInfo> onSelected;
-  final ValueChanged<String> onSizeChanged;
-  final VoidCallback onReset;
-
-  const _TitleFontRow({
-    required this.label,
-    required this.current,
-    required this.fallback,
-    required this.defaultSize,
-    required this.l10n,
-    required this.onSelected,
-    required this.onSizeChanged,
-    required this.onReset,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final hasOverride = current != null;
-    final effectiveName = current?.fontFamily ?? fallback.fontFamily;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: AppColors.textMuted,
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.0,
-              ),
-            ),
-            const Spacer(),
-            if (!hasOverride)
-              Text(
-                'Default: $effectiveName',
-                style: TextStyle(color: AppColors.textFaint, fontSize: 10),
-              ),
-            if (hasOverride)
-              GestureDetector(
-                onTap: onReset,
-                child: Text(
-                  l10n.resetToDefault,
-                  style: const TextStyle(
-                    color: AppColors.sky500,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            Expanded(
-              flex: 3,
-              child: FontPicker(
-                label: '',
-                selectedPath: current?.fontPath,
-                onSelected: onSelected,
-              ),
-            ),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 70,
-              child: TextFormField(
-                initialValue: (current?.fontSize ?? defaultSize)
-                    .toStringAsFixed(1),
-                keyboardType: TextInputType.number,
-                onChanged: onSizeChanged,
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
-                decoration: InputDecoration(
-                  labelText: l10n.size,
-                  labelStyle: TextStyle(
-                    color: AppColors.textMuted,
-                    fontSize: 10,
-                  ),
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 8,
-                  ),
-                  filled: true,
-                  fillColor: AppColors.inputFill,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.sky500),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }

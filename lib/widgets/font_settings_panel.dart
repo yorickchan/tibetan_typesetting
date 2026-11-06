@@ -6,8 +6,7 @@ import '../models/font_config.dart';
 import '../models/project.dart';
 import '../services/font_service.dart';
 import '../utils/colors.dart';
-import '../utils/decorations.dart';
-import 'font_picker.dart';
+import 'settings_controls.dart';
 
 class FontSettingsPanel extends StatelessWidget {
   final PageSetup pageSetup;
@@ -99,10 +98,12 @@ class FontSettingsPanel extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               child: Column(
                 children: [
-                  _FontOverrideRow(
+                  CompactFontRow(
                     label: 'TIBETAN',
                     current: pageSetup.tibetanFont,
-                    appDefault: appSettings.tibetanFont,
+                    defaultName:
+                        appSettings.tibetanFont?.fontFamily ?? '(not set)',
+                    defaultSize: appSettings.tibetanFont?.fontSize ?? 10,
                     l10n: l10n,
                     onSelected: (info) {
                       final existing = pageSetup.tibetanFont;
@@ -129,22 +130,27 @@ class FontSettingsPanel extends StatelessWidget {
                     onSizeChanged: (v) {
                       final n = double.tryParse(v);
                       if (n == null || n <= 0) return;
-                      final cur = pageSetup.tibetanFont;
-                      if (cur == null) return;
+                      final base =
+                          pageSetup.tibetanFont ?? appSettings.tibetanFont;
+                      if (base == null) return;
                       onUpdateSetup(
-                        (s) =>
-                            s.copyWith(tibetanFont: cur.copyWith(fontSize: n)),
+                        (s) => s.copyWith(
+                          tibetanFont: base.copyWith(fontSize: n),
+                        ),
                       );
                     },
                     onReset: () => onUpdateSetup(
                       (s) => s.copyWith(clearTibetanFont: true),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  _FontOverrideRow(
+                  const SizedBox(height: 8),
+                  CompactFontRow(
                     label: 'PRONUNCIATION',
                     current: pageSetup.pronunciationFont,
-                    appDefault: appSettings.pronunciationFont,
+                    defaultName:
+                        appSettings.pronunciationFont?.fontFamily ??
+                        '(not set)',
+                    defaultSize: appSettings.pronunciationFont?.fontSize ?? 8,
                     l10n: l10n,
                     onSelected: (info) {
                       final existing = pageSetup.pronunciationFont;
@@ -171,11 +177,13 @@ class FontSettingsPanel extends StatelessWidget {
                     onSizeChanged: (v) {
                       final n = double.tryParse(v);
                       if (n == null || n <= 0) return;
-                      final cur = pageSetup.pronunciationFont;
-                      if (cur == null) return;
+                      final base =
+                          pageSetup.pronunciationFont ??
+                          appSettings.pronunciationFont;
+                      if (base == null) return;
                       onUpdateSetup(
                         (s) => s.copyWith(
-                          pronunciationFont: cur.copyWith(fontSize: n),
+                          pronunciationFont: base.copyWith(fontSize: n),
                         ),
                       );
                     },
@@ -183,11 +191,13 @@ class FontSettingsPanel extends StatelessWidget {
                       (s) => s.copyWith(clearPronunciationFont: true),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  _FontOverrideRow(
+                  const SizedBox(height: 8),
+                  CompactFontRow(
                     label: 'TRANSLATION',
                     current: pageSetup.translationFont,
-                    appDefault: appSettings.translationFont,
+                    defaultName:
+                        appSettings.translationFont?.fontFamily ?? '(not set)',
+                    defaultSize: appSettings.translationFont?.fontSize ?? 8,
                     l10n: l10n,
                     onSelected: (info) {
                       final existing = pageSetup.translationFont;
@@ -214,11 +224,13 @@ class FontSettingsPanel extends StatelessWidget {
                     onSizeChanged: (v) {
                       final n = double.tryParse(v);
                       if (n == null || n <= 0) return;
-                      final cur = pageSetup.translationFont;
-                      if (cur == null) return;
+                      final base =
+                          pageSetup.translationFont ??
+                          appSettings.translationFont;
+                      if (base == null) return;
                       onUpdateSetup(
                         (s) => s.copyWith(
-                          translationFont: cur.copyWith(fontSize: n),
+                          translationFont: base.copyWith(fontSize: n),
                         ),
                       );
                     },
@@ -226,116 +238,111 @@ class FontSettingsPanel extends StatelessWidget {
                       (s) => s.copyWith(clearTranslationFont: true),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Text(
-                        l10n.smallBlockFontSize,
-                        style: TextStyle(
-                          color: AppColors.textMuted,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                      const Spacer(),
-                      if (pageSetup.smallBlockFontSize != null)
-                        GestureDetector(
-                          onTap: () => onUpdateSetup(
-                            (s) => s.copyWith(clearSmallBlockFontSize: true),
-                          ),
-                          child: Text(
-                            l10n.resetToDefault,
-                            style: const TextStyle(
-                              color: AppColors.sky500,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
+                  const SizedBox(height: 12),
+                  Container(height: 1, color: AppColors.divider),
+                  const SizedBox(height: 12),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final smallBlock = Row(
+                        children: [
+                          SizedBox(
+                            width: 190,
+                            child: SettingsSectionLabel(
+                              l10n.smallBlockFontSize,
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          width: 70,
-                          child: TextFormField(
-                            initialValue: pageSetup.smallBlockFontSize
-                                ?.toStringAsFixed(1) ?? '',
-                            keyboardType: TextInputType.number,
-                            onChanged: (v) {
-                              if (v.isEmpty) {
+                          SizedBox(
+                            width: 150,
+                            child: TextFormField(
+                              initialValue: pageSetup.smallBlockFontSize
+                                  ?.toStringAsFixed(1) ??
+                                  '',
+                              keyboardType: TextInputType.number,
+                              onChanged: (v) {
+                                if (v.isEmpty) {
+                                  onUpdateSetup(
+                                    (s) => s.copyWith(
+                                      clearSmallBlockFontSize: true,
+                                    ),
+                                  );
+                                  return;
+                                }
+                                final n = double.tryParse(v);
+                                if (n == null || n <= 0) return;
                                 onUpdateSetup(
-                                  (s) => s.copyWith(
-                                    clearSmallBlockFontSize: true,
-                                  ),
+                                  (s) => s.copyWith(smallBlockFontSize: n),
                                 );
-                                return;
-                              }
-                              final n = double.tryParse(v);
-                              if (n == null || n <= 0) return;
-                              onUpdateSetup(
-                                (s) => s.copyWith(smallBlockFontSize: n),
-                              );
-                            },
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 13,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: l10n.smallBlockFontSizeHint,
-                              hintStyle: TextStyle(
-                                color: AppColors.textFaint,
-                                fontSize: 10,
+                              },
+                              style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 13,
                               ),
-                              isDense: true,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 8,
-                              ),
-                              filled: true,
-                              fillColor: AppColors.inputFill,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: AppColors.border),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: AppColors.border),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(
-                                  color: AppColors.sky500,
+                              decoration: compactNumberDecor(null).copyWith(
+                                hintText: l10n.smallBlockFontSizeHint,
+                                hintStyle: TextStyle(
+                                  color: AppColors.textFaint,
+                                  fontSize: 10,
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    initialValue: pageSetup.contentTextGapPx.toStringAsFixed(0),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      signed: true,
-                      decimal: true,
-                    ),
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 13,
-                    ),
-                    decoration: numberDecor(l10n.contentTextGap),
-                    onChanged: (v) {
-                      final n = double.tryParse(v);
-                      if (n != null) {
-                        onUpdateSetup(
-                          (s) => s.copyWith(contentTextGapPx: n),
+                          const SizedBox(width: 4),
+                          SizedBox(
+                            width: 28,
+                            child: pageSetup.smallBlockFontSize != null
+                                ? IconButton(
+                                    icon: const Icon(
+                                      Icons.restart_alt,
+                                      size: 16,
+                                    ),
+                                    tooltip: l10n.resetToDefault,
+                                    onPressed: () => onUpdateSetup(
+                                      (s) => s.copyWith(
+                                        clearSmallBlockFontSize: true,
+                                      ),
+                                    ),
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(
+                                      minWidth: 28,
+                                      minHeight: 28,
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                        ],
+                      );
+                      final gap = Row(
+                        children: [
+                          SizedBox(
+                            width: 190,
+                            child: SettingsSectionLabel(l10n.contentTextGap),
+                          ),
+                          CompactNumberField(
+                            initialValue: pageSetup.contentTextGapPx,
+                            width: 90,
+                            signed: true,
+                            onChanged: (n) => onUpdateSetup(
+                              (s) => s.copyWith(contentTextGapPx: n),
+                            ),
+                          ),
+                        ],
+                      );
+                      if (constraints.maxWidth >= 700) {
+                        return Row(
+                          children: [
+                            Expanded(child: smallBlock),
+                            const SizedBox(width: 20),
+                            Expanded(child: gap),
+                          ],
                         );
                       }
+                      return Column(
+                        children: [
+                          smallBlock,
+                          const SizedBox(height: 10),
+                          gap,
+                        ],
+                      );
                     },
                   ),
                 ],
@@ -344,120 +351,6 @@ class FontSettingsPanel extends StatelessWidget {
           ],
         ],
       ),
-    );
-  }
-}
-
-class _FontOverrideRow extends StatelessWidget {
-  final String label;
-  final FontConfig? current;
-  final FontConfig? appDefault;
-  final AppLocalizations l10n;
-  final ValueChanged<SystemFontInfo> onSelected;
-  final ValueChanged<String> onSizeChanged;
-  final VoidCallback onReset;
-
-  const _FontOverrideRow({
-    required this.label,
-    required this.current,
-    required this.appDefault,
-    required this.l10n,
-    required this.onSelected,
-    required this.onSizeChanged,
-    required this.onReset,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final hasOverride = current != null;
-    final effectiveName =
-        current?.fontFamily ?? appDefault?.fontFamily ?? '(not set)';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: AppColors.textMuted,
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.0,
-              ),
-            ),
-            const Spacer(),
-            if (!hasOverride)
-              Text(
-                'Default: $effectiveName',
-                style: TextStyle(color: AppColors.textFaint, fontSize: 10),
-              ),
-            if (hasOverride)
-              GestureDetector(
-                onTap: onReset,
-                child: Text(
-                  l10n.resetToDefault,
-                  style: const TextStyle(
-                    color: AppColors.sky500,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            Expanded(
-              flex: 3,
-              child: FontPicker(
-                label: '',
-                selectedPath: current?.fontPath,
-                onSelected: onSelected,
-              ),
-            ),
-            const SizedBox(width: 8),
-            SizedBox(
-              width: 70,
-              child: TextFormField(
-                initialValue: (current?.fontSize ?? appDefault?.fontSize ?? 10)
-                    .toStringAsFixed(1),
-                keyboardType: TextInputType.number,
-                onChanged: onSizeChanged,
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
-                decoration: InputDecoration(
-                  labelText: l10n.size,
-                  labelStyle: TextStyle(
-                    color: AppColors.textMuted,
-                    fontSize: 10,
-                  ),
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 8,
-                  ),
-                  filled: true,
-                  fillColor: AppColors.inputFill,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.sky500),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
