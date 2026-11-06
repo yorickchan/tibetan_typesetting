@@ -24,6 +24,11 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - Red character highlight — mark selected words in heading text with red ink using range notation (e.g. `1-4,6-8`) while vowel marks, tshegs, and punctuation remain black
 - **Chinese script switch** — convert all Chinese text in a project between Simplified and Traditional with one click; script is auto-detected from content when unset
 
+### 🧭 Workspace Navigation
+- Left sidebar with Projects, Dictionary, Templates, and Settings destinations
+- Recent-projects list opens the editor directly
+- Projects, dictionary, templates, and settings share one workspace shell
+
 ### 🖼️ Floating Images
 - Insert images into text blocks with precise positioning
 - Configurable image dimensions (width/height in mm)
@@ -50,6 +55,8 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 
 ![Edit Screen](screenshot/edit%20screen.png)
 
+![Editor Settings](screenshot/settings%20panels.png)
+
 ### 📄 Traditional Layout
 - Traditional Tibetan book layout (landscape orientation)
 - Configurable page dimensions and margins
@@ -58,11 +65,12 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - Page and column break controls
 - Flow gap adjustment between text sections
 - Custom title page with Dharma Wheel symbol and configurable title fonts
-- **Custom SVG title page templates** rendered as true vector graphics in PDF, with configurable insets for template and title text regions
+- **Custom SVG title page templates** managed from the Templates page and rendered as true vector graphics in PDF, with configurable insets for template and title text regions
 - **Content page templates** — apply an SVG background template to all content pages with configurable export margins
 - Opening mark blocks at the start of content
 - Optional row separator lines in editor preview and PDF export
 - Configurable small block font size — independently adjust font size for compact ("small text") blocks in app settings and per-project font settings
+- **Tibetan–Chinese spacing** — configurable gap between Tibetan and Chinese lines for both the title page and content, in px; negative values overlap the lines
 - Flexible text sizing options with per-project font settings
 - Header and footer with configurable fields (file name, page number, date, custom text)
 
@@ -84,6 +92,7 @@ The application pre-renders Tibetan text to high-resolution PNG images (460 DPI)
 - Tibetan script requires OpenType GSUB/GPOS shaping for correct rendering (stacked glyphs, vowel positioning)
 - The `pdf` package cannot perform OpenType shaping
 - PNG rasterization via Flutter's text engine produces correct Tibetan rendering at the cost of larger file size and minor pixelation at extreme zoom levels (>400%)
+- Rasters include top and bottom padding so ascenders and descenders (e.g. the ུ in ཧཱུྃ) are not clipped
 - SHA-256 based image caching for efficient re-rendering
 
 ### DPI-Aware Preview
@@ -134,19 +143,21 @@ Fonts can be configured per-project through the font settings panel. Make sure r
 
 ## Usage
 
-1. **Create a Project**: Start from the main screen by creating a new project (optionally selecting a custom title page template)
+1. **Create a Project**: Start from the workspace; the left sidebar switches between Projects, Dictionary, Templates, and Settings. Create a new project (optionally selecting a custom title page template)
 2. **Add Content**: Add text blocks with Tibetan text, pronunciation, and translation
 3. **Pronunciation Auto-fill**: The editor auto-fills pronunciation from the dictionary as you type; unknown syllables are highlighted and shown as `X`
 4. **Red Highlight**: Enter a range (e.g. `1-4,6`) in the block's highlight field to render selected heading words in red ink in both preview and PDF
 5. **Insert Images**: Add floating images to blocks with position and size control
 6. **Batch Import**: Import multiple text blocks at once from CSV/TSV files
 7. **Edit Layout**: Configure page setup, margins, column count, flow gap, row lines, and headers/footers
-8. **Title Page Templates**: Upload SVG templates in Settings, then assign them per project with configurable insets
+8. **Title Page Templates**: Open the Templates page from the sidebar, upload SVG templates, then assign them per project with configurable insets
 9. **Content Page Templates**: Assign an SVG background to all content pages with configurable export margins
 10. **Font Settings**: Customize fonts per-project for Tibetan, pronunciation, translation, title text, and small block size
 11. **Preview**: View live DPI-accurate preview with zoom controls of your document layout
 12. **Export**: Generate PDF, export HTML, or print directly from the app
-13. **Manage Dictionary**: Open the Pronunciation Dictionary page to view, search, edit, or delete saved syllable entries and export/import the dictionary as JSON
+13. **Manage Dictionary**: Open the Pronunciation Dictionary from the sidebar to view, search, edit, or delete saved syllable entries and export/import the dictionary as JSON
+
+![Templates](screenshot/templates.png)
 
 ![Pronunciation Dictionary](screenshot/pronunciation%20dictionary.png)
 
@@ -174,6 +185,7 @@ lib/
 │   ├── editor_page.dart            # Text editor
 │   ├── export_page.dart            # PDF/HTML export and preview
 │   ├── settings_page.dart          # Application settings
+│   ├── templates_page.dart         # Title page template management
 │   └── dictionary_page.dart        # Pronunciation dictionary management
 ├── services/                        # Business logic
 │   ├── chinese_conversion_service.dart  # Simplified ↔ Traditional Chinese conversion
@@ -227,8 +239,12 @@ lib/
     ├── sample_page.dart             # Page preview
     ├── sample_pages.dart            # Multi-page preview
     ├── scaled_preview.dart          # Scaled preview wrapper
+    ├── settings_controls.dart       # Shared compact settings controls
+    ├── text_field_dialog.dart       # Shared single-field dialog
     ├── title_page_settings_panel.dart # Title page configuration
-    └── title_page_widget.dart       # Title page preview
+    ├── title_page_widget.dart       # Title page preview
+    ├── workspace_shell.dart         # Workspace root (sidebar + page)
+    └── workspace_sidebar.dart       # Workspace navigation rail
 ```
 
 ## Development
@@ -280,6 +296,7 @@ flutter build linux
 - **ScreenDpiService**: Queries physical screen DPI via platform channel for accurate preview scaling
 - **TitlePageTemplateService**: CRUD singleton for custom SVG title page templates
 - **TibetanSegmenter**: Splits Tibetan text into syllables by tsheg (་); parses range notation for red highlight
+- **WorkspaceShell / WorkspaceSidebar**: Root workspace combining the navigation rail (Projects, Dictionary, Templates, Settings) with the selected page
 
 ### Page Layout Algorithm
 
