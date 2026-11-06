@@ -314,10 +314,10 @@ The `sample_layout.dart` utility implements a two-pass pagination system:
 3. Every glyph outline is cached as a form XObject in font units
 4. Glyphs are drawn with `drawXObject` at the target size, plus an invisible Unicode text layer for search/copy
 
-**Chinese and side panels** still go through Flutter's `TextPainter`:
-1. Render to `Picture` at ~6.4× scale (460 DPI in a 72-DPI PDF coordinate space)
-2. Convert to PNG bytes and cache by SHA-256 key
-3. Embed in the PDF as an image
+**Chinese, side panels and free text** are real PDF text:
+1. Embedded as a subset TrueType font, with CJK fallback fonts for glyph gaps
+2. `wordSpacing` is forced to `0` for CJK and `lineSpacing` is derived per font so the baseline advance equals `fontSize × lineHeight`, matching the preview and the layout engine
+3. No text is ever rasterised — only images the user inserts are embedded as images
 
 ## License
 

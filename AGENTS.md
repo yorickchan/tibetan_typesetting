@@ -4,7 +4,7 @@
 
 A Flutter desktop application (macOS primary; Linux, Windows) for composing Tibetan text documents with Chinese pronunciation and translation annotations, exported as PDF with traditional column layout. Version `1.1.13+16`, Dart SDK `^3.11.0`.
 
-**Golden rule — Tibetan rendering:** the `pdf` package cannot shape Tibetan script (it needs OpenType GSUB/GPOS), so Tibetan text is shaped with HarfBuzz (`harfbuzz_ffi`, native asset) and embedded as **vector glyph outlines**, each glyph stored once as a reusable form XObject, with an invisible Unicode text layer so the PDF stays searchable/copyable. Chinese renders natively via `pw.Text`; SVG templates via `pw.SvgImage` with explicit mm dimensions. Do not change this pipeline without understanding it.
+**Golden rule — Tibetan rendering:** the `pdf` package cannot shape Tibetan script (it needs OpenType GSUB/GPOS), so Tibetan text is shaped with HarfBuzz (`harfbuzz_ffi`, native asset) and embedded as **vector glyph outlines**, each glyph stored once as a reusable form XObject, with an invisible Unicode text layer so the PDF stays searchable/copyable. Chinese and other scripts render as **native PDF text**, never images; SVG templates via `pw.SvgImage` with explicit mm dimensions. Do not change this pipeline without understanding it.
 
 ## Architecture & Data Flow
 
@@ -18,7 +18,7 @@ A Flutter desktop application (macOS primary; Linux, Windows) for composing Tibe
 **Three data paths:**
 - **Edit** — `EditorPage` mutation helpers each do `_undoService.pushState(_project!)` → `setState` with `copyWith` → `_bumpSave()` (800 ms debounced `Timer`) → `SaveStateMixin.performSave(() => _db.updateProject(_project!))`.
 - **Preview** — `_pagesWithBlocks` maps `paginateBlocks(blocks, 0, 4, pageSetup.flowGap, contentWidthMm)` to `_PageWithBlocks`, rendered per page inside `ScaledPreview` → `SamplePageWidget` (mm-accurate via `kMmToPx`). See the caching caveat below.
-- **Export** — `PdfService().generatePdfWithWarnings(project, appSettings:)` pre-renders non-Tibetan text to PNGs (`_render` → `renderTextToPng`) for side panels and free-text blocks, while Tibetan is handed to `ShapedText` (`lib/utils/shaped_text_pdf.dart`), which shapes with HarfBuzz and paints vector outlines plus an invisible text layer. Chinese uses `pw.Text(font:, fontFallback:)`; templates use `pw.SvgImage`. Non-fatal font problems surface as `PdfGenerationResult.warnings`. `HtmlExportService.generateHtml` is the static alternative path.
+- **Export** — `PdfService().generatePdfWithWarnings(project, appSettings:)` renders **no text as images**. Tibetan (including the title, side panels and any mixed Tibetan) goes through `ShapedText` (`lib/utils/shaped_text_pdf.dart`), which shapes with HarfBuzz and paints vector outlines plus an invisible text layer. Chinese uses native `pw.Text`, via `_chineseText` which forces `wordSpacing: 0` and derives `lineSpacing` from `pdfLineSpacing` so the baseline advance equals `fontSize × lineHeight`. Templates use `pw.SvgImage`. Non-fatal font problems surface as `PdfGenerationResult.warnings`. `HtmlExportService.generateHtml` is the static alternative path.
 
 **Undo/redo:** snapshot-based `UndoService` — full `Project` copies, max 50, redo cleared on push.
 
@@ -99,7 +99,7 @@ Never hardcode 96 DPI. Use the global `kMmToPx` (mm→preview px) and `font_util
 - `resolveContentRowHeights` gives compact rows their minimum height and redistributes the freed space evenly across normal rows.
 
 ### Rendering
-- `renderTextToPng(...)` default `scale = 460/72 ≈ 6.389` → 460 DPI; it disposes image/picture/painter. Multi-colour Tibetan is no longer rasterised: `ShapedText` colours per glyph.
+- No text is rasterised. `lib/utils/text_renderer.dart` and `renderCacheKey` were removed with the old PNG pipeline; `_Img` in `pdf_service.dart` now only holds inline/floating images the user inserts.
 - Shaped-text internals: `shaped_text_core.dart` (FFI/HarfBuzz, outlines, break rules — pure and unit-tested) and `shaped_text_pdf.dart` (layout + painting via `pw.Widget`). It imports `package:pdf/src/pdf/obj/formxobject.dart` because form XObjects are not exported; `PdfXObject.name` lacks the leading `/`, so `_GlyphFormXObject` overrides it. Glyph forms MUST use a `[0 0 width height]` BBox with coordinates translated to the origin: `PdfGraphics.drawXObject` computes its scale from `BBox[2]`/`BBox[3]` alone, so a real-coordinate BBox squeezes any glyph whose outline starts at negative x (Kailasa's combining marks reach xMin -1348 with xMax 307). `test/shaped_text_bbox_test.dart` guards this.
 - **`fontFamilyFallback` is NOT part of `renderCacheKey`** (`lib/services/pdf_service_core.dart`) nor of the rich-text inline key — if you change CJK fallback handling, extend the cache key or you will serve stale rasters.
 - `_renderCache` is cleared at the start of every `generatePdfWithWarnings`.
@@ -117,7 +117,6 @@ Three-tier resolution: `font_utils.effectiveFont(projectOverride, appDefault, fa
 | `lib/widgets/sample_page.dart` | mm-accurate page preview; owns global `kMmToPx` |
 | `lib/models/project.dart` | Core domain: `PageSetup`/`TextBlock`/`Project` + enums + copyWith/clearXxx |
 | `lib/utils/sample_layout.dart` | Layout engine: `paginateBlocks`/`_buildRows`/`BlockWidthEstimate` |
-| `lib/utils/text_renderer.dart` | `TextPainter` → high-res PNG (460 DPI) for non-Tibetan text |
 | `lib/utils/shaped_text_core.dart` | HarfBuzz shaping, glyph outlines, line-break rules (pure, unit-tested) |
 | `lib/utils/shaped_text_pdf.dart` | `ShapedText` widget: layout mirroring `TextPainter`, vector painting, invisible text layer |
 | `lib/services/database_service.dart` | SQLite facade + `withDependencies` DI (schema v5) |
@@ -136,7 +135,7 @@ Three-tier resolution: `font_utils.effectiveFont(projectOverride, appDefault, fa
 - **Lints**: `flutter_lints` v6 + `prefer_final_fields`, `prefer_const_constructors`, `prefer_const_declarations`, `avoid_catches_without_on_clauses`, `unnecessary_lambdas`, `prefer_final_locals`, `prefer_final_in_for_each`. `analysis_options.yaml` excludes `build/**`, `macos/**`, `linux/**`, `windows/**` (native edits are not analyzed).
 - **VCS**: colocated Jujutsu (`jj`) + git; GitHub remote `yorickchan/tibetan_typesetting`, branch `master` (plus remote `origin/web-support`). Git tags run `v1.0.0`–`v1.1.13`. `rtk` is **not installed** — run `git`/`flutter` directly (some plans under `docs/superpowers/plans/` still spell commands with `rtk`; they are stale).
 - **Release/CI**: tag pushes (`v*`) and `workflow_dispatch` build all 3 platforms and create a GitHub Release (DMG with `if: failure()` ZIP fallback / ZIP / tar.gz); no caching, and **no test or analyze step**.
-- **Docs drift** (don't trust blindly): `RELEASE_NOTES.md` stops at 1.1.3 (ten releases behind pubspec); `PUBLISH.md` and `RELEASE_GUIDE.md` are pinned to `v1.0.0` and instruct `git push origin main` though the branch is `master`; `README.zh-TW.md` says the render scale is 4× (English README and the code say ~6.4×/460 DPI); `.metadata` and `graphify-out/` still list removed `android`/`ios`/`web` platforms. **Do not re-add android/ios/web.**
+- **Docs drift** (don't trust blindly): `RELEASE_NOTES.md` stops at 1.1.3 (ten releases behind pubspec); `PUBLISH.md` and `RELEASE_GUIDE.md` are pinned to `v1.0.0` and instruct `git push origin main` though the branch is `master`; `.metadata` and `graphify-out/` still list removed `android`/`ios`/`web` platforms. **Do not re-add android/ios/web.**
 - **Planning artifacts**: `docs/superpowers/plans` (7 dated plans) + `docs/superpowers/specs` (5 design specs — the two `2026-06-03-*` plans have no spec) and `.sisyphus/plans/` (one plan; `drafts/` empty, referenced `evidence/` absent). There is no `gsd-core/`, `.planning/`, `agents/`, `tool/`, `scripts/` or `bin/`.
 
 ## Testing & QA

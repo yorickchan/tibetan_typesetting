@@ -314,10 +314,10 @@ flutter build linux
 3. 每個字形輪廓以字型單位快取為 form XObject
 4. 以 `drawXObject` 縮放繪製，並疊加隱形 Unicode 文字層供搜尋／複製
 
-**中文與側邊欄**仍使用 Flutter 的 `TextPainter`：
-1. 以約 6.4 倍比例渲染為 `Picture`（72-DPI PDF 座標空間中的 460 DPI）
-2. 轉換為 PNG 位元組，並以 SHA-256 金鑰快取
-3. 以圖片形式嵌入 PDF
+**中文、側邊欄與自由文字**都是 PDF 原生文字：
+1. 以子集化的 TrueType 字型嵌入，缺字時使用 CJK 備援字型
+2. CJK 的 `wordSpacing` 強制為 `0`，並依字型推算 `lineSpacing`，使基線間距等於 `fontSize × lineHeight`，與預覽及排版引擎一致
+3. 文字一律不轉為圖片——只有使用者插入的圖片才以圖片嵌入
 
 ## 授權條款
 

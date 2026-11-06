@@ -143,6 +143,24 @@ class ShapedText extends pw.Widget {
     if (layout == null || bounds == null || layout.lines.isEmpty) return;
 
     final canvas = context.canvas;
+    // The invisible text layer sets the text rendering mode to 3 (invisible).
+    // Text state is part of the graphics state, so without isolating the paint
+    // every later drawString on the same page would also be invisible — the
+    // title page's Chinese line disappeared exactly this way.
+    canvas.saveContext();
+    try {
+      _paintLines(canvas, context, layout, bounds);
+    } finally {
+      canvas.restoreContext();
+    }
+  }
+
+  void _paintLines(
+    PdfGraphics canvas,
+    pw.Context context,
+    _TextLayout layout,
+    PdfRect bounds,
+  ) {
     final originX = bounds.left;
     final originY = bounds.top;
     final baseline = _baselineFor(fonts.first.data);

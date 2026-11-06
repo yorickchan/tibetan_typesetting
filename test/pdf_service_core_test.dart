@@ -1,9 +1,65 @@
-import 'dart:ui' show Color, TextAlign;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tibetan_typesetting/services/pdf_service_core.dart';
 
 void main() {
+  group('pdfLineSpacing', () {
+    test('adds nothing when the font already advances the wanted distance', () {
+      // Kaiti: ascent 1.06, descent -0.34 => natural 1.4 em.
+      expect(
+        pdfLineSpacing(
+          ascent: 1.06,
+          descent: -0.34,
+          fontSize: 8,
+          lineHeight: 1.4,
+        ),
+        closeTo(0, 1e-9),
+      );
+    });
+
+    test('adds the shortfall for fonts with a tighter natural line', () {
+      // MingLiU: ascent 0.80078, descent -0.19922 => natural 1.0 em,
+      // wanted 1.4 em, so 0.4 em of extra spacing.
+      expect(
+        pdfLineSpacing(
+          ascent: 0.80078125,
+          descent: -0.19921875,
+          fontSize: 8,
+          lineHeight: 1.4,
+        ),
+        closeTo(3.2, 1e-9),
+      );
+    });
+
+    test('never returns a negative spacing', () {
+      expect(
+        pdfLineSpacing(
+          ascent: 2,
+          descent: 0,
+          fontSize: 10,
+          lineHeight: 1.0,
+        ),
+        0,
+      );
+    });
+
+    test('scales with font size', () {
+      final small = pdfLineSpacing(
+        ascent: 0.8,
+        descent: -0.2,
+        fontSize: 8,
+        lineHeight: 1.4,
+      );
+      final large = pdfLineSpacing(
+        ascent: 0.8,
+        descent: -0.2,
+        fontSize: 16,
+        lineHeight: 1.4,
+      );
+      expect(large, closeTo(small * 2, 1e-9));
+    });
+  });
+
   group('tibetanHighlightMask', () {
     test('empty range highlights nothing', () {
       final mask = tibetanHighlightMask('བོད།', '');
@@ -47,90 +103,6 @@ void main() {
       expect(mask[2], isFalse);
       expect(mask[4], isTrue);
       expect(mask[6], isFalse);
-    });
-  });
-
-  group('renderCacheKey', () {
-    test('produces stable key for same inputs', () {
-      const args = (
-        text: 'x',
-        fontFamily: 'f',
-        fontSize: 12.0,
-        color: Color(0xFF000000),
-        maxWidth: 100.0,
-        lineHeight: null,
-        topPadding: 0.0,
-        bottomPadding: 0.0,
-        textAlign: TextAlign.left,
-      );
-      final k1 = renderCacheKey(
-        text: args.text,
-        fontFamily: args.fontFamily,
-        fontSize: args.fontSize,
-        color: args.color,
-        maxWidth: args.maxWidth,
-        lineHeight: args.lineHeight,
-        topPadding: args.topPadding,
-        bottomPadding: args.bottomPadding,
-        textAlign: args.textAlign,
-      );
-      final k2 = renderCacheKey(
-        text: args.text,
-        fontFamily: args.fontFamily,
-        fontSize: args.fontSize,
-        color: args.color,
-        maxWidth: args.maxWidth,
-        lineHeight: args.lineHeight,
-        topPadding: args.topPadding,
-        bottomPadding: args.bottomPadding,
-        textAlign: args.textAlign,
-      );
-      expect(k1, k2);
-    });
-
-    test('different text produces different key', () {
-      final k1 = renderCacheKey(
-        text: 'x',
-        fontFamily: 'f',
-        fontSize: 12,
-        color: const Color(0xFF000000),
-        maxWidth: 100,
-        lineHeight: null,
-        topPadding: 0,
-        bottomPadding: 0,
-        textAlign: TextAlign.left,
-      );
-      final k2 = renderCacheKey(
-        text: 'y',
-        fontFamily: 'f',
-        fontSize: 12,
-        color: const Color(0xFF000000),
-        maxWidth: 100,
-        lineHeight: null,
-        topPadding: 0,
-        bottomPadding: 0,
-        textAlign: TextAlign.left,
-      );
-      expect(k1, isNot(k2));
-    });
-
-    test('different font family fallback produces different key', () {
-      String keyWith(List<String>? fallback) => renderCacheKey(
-        text: 'x',
-        fontFamily: 'f',
-        fontFamilyFallback: fallback,
-        fontSize: 12,
-        color: const Color(0xFF000000),
-        maxWidth: 100,
-        lineHeight: null,
-        topPadding: 0,
-        bottomPadding: 0,
-        textAlign: TextAlign.left,
-      );
-
-      expect(keyWith(null), isNot(keyWith(['STHeiti'])));
-      expect(keyWith(['STHeiti']), isNot(keyWith(['PingFang SC'])));
-      expect(keyWith(['STHeiti']), keyWith(['STHeiti']));
     });
   });
 }

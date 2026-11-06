@@ -1,7 +1,27 @@
-import 'dart:ui' show Color, TextAlign;
 
 import '../utils/tibetan_segmenter.dart'
     show isTibetanNonLetter, parseRedHighlightRanges;
+
+/// Extra line spacing for `package:pdf` text so its advance equals
+/// `fontSize * lineHeight`.
+///
+/// Flutter's `TextStyle(height:)` (used by the preview) and the layout engine's
+/// row-height estimates both treat `fontSize * lineHeight` as the distance
+/// between baselines. `package:pdf` instead advances by the font's natural line
+/// height — `(ascent - descent) * fontSize` — and adds `lineSpacing` on top.
+/// Fonts whose ascent/descent ratio differs therefore need different values:
+/// Kaiti already advances 1.4 em at the default settings, while MingLiU only
+/// advances 1.0 em. A natural line taller than the target cannot be shrunk.
+double pdfLineSpacing({
+  required double ascent,
+  required double descent,
+  required double fontSize,
+  required double lineHeight,
+}) {
+  final natural = (ascent - descent) * fontSize;
+  final wanted = fontSize * lineHeight;
+  return wanted > natural ? wanted - natural : 0;
+}
 
 /// Per-code-unit flag: true where the red highlight applies (Tibetan letters,
 /// including tsheg), false elsewhere (vowel signs, shad, punctuation and any
@@ -25,17 +45,3 @@ List<bool> tibetanHighlightMask(String text, String ranges) {
   }
   return mask;
 }
-
-String renderCacheKey({
-  required String text,
-  required String fontFamily,
-  List<String>? fontFamilyFallback,
-  required double fontSize,
-  required Color color,
-  required double maxWidth,
-  double? lineHeight,
-  required double topPadding,
-  required double bottomPadding,
-  required TextAlign textAlign,
-}) =>
-    '${text}_|_${fontFamily}_|_${fontFamilyFallback?.join(',') ?? ''}_|_${fontSize}_|_${color.toARGB32()}_|_${maxWidth}_|_${lineHeight}_|_${topPadding}_|_${bottomPadding}_|_$textAlign';
