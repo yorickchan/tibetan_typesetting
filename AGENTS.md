@@ -100,7 +100,7 @@ Never hardcode 96 DPI. Use the global `kMmToPx` (mm→preview px) and `font_util
 
 ### Rendering
 - `renderTextToPng(...)` default `scale = 460/72 ≈ 6.389` → 460 DPI; it disposes image/picture/painter. Multi-colour Tibetan is no longer rasterised: `ShapedText` colours per glyph.
-- Shaped-text internals: `shaped_text_core.dart` (FFI/HarfBuzz, outlines, break rules — pure and unit-tested) and `shaped_text_pdf.dart` (layout + painting via `pw.Widget`). It imports `package:pdf/src/pdf/obj/formxobject.dart` because form XObjects are not exported; `PdfXObject.name` lacks the leading `/`, so `_GlyphFormXObject` overrides it.
+- Shaped-text internals: `shaped_text_core.dart` (FFI/HarfBuzz, outlines, break rules — pure and unit-tested) and `shaped_text_pdf.dart` (layout + painting via `pw.Widget`). It imports `package:pdf/src/pdf/obj/formxobject.dart` because form XObjects are not exported; `PdfXObject.name` lacks the leading `/`, so `_GlyphFormXObject` overrides it. Glyph forms MUST use a `[0 0 width height]` BBox with coordinates translated to the origin: `PdfGraphics.drawXObject` computes its scale from `BBox[2]`/`BBox[3]` alone, so a real-coordinate BBox squeezes any glyph whose outline starts at negative x (Kailasa's combining marks reach xMin -1348 with xMax 307). `test/shaped_text_bbox_test.dart` guards this.
 - **`fontFamilyFallback` is NOT part of `renderCacheKey`** (`lib/services/pdf_service_core.dart`) nor of the rich-text inline key — if you change CJK fallback handling, extend the cache key or you will serve stale rasters.
 - `_renderCache` is cleared at the start of every `generatePdfWithWarnings`.
 

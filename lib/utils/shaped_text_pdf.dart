@@ -229,12 +229,20 @@ class ShapedText extends pw.Widget {
 
     // The form's content stream is written directly: constructing a PdfPage to
     // get a PdfGraphics would register that throwaway page in the page tree.
+    //
+    // The outline is translated so it starts at the origin and the BBox is
+    // `[0 0 width height]`. That matters because `PdfGraphics.drawXObject`
+    // derives its scale from `BBox[2]`/`BBox[3]` alone, as if the box always
+    // started at the origin. With a real-coordinate BBox, glyphs whose outline
+    // starts at a negative x (combining marks in fonts like Kailasa, where
+    // xMin is -1348 while xMax is only 307) were scaled by width/xMax instead
+    // of width/(xMax-xMin) and came out squeezed.
     final form = _GlyphFormXObject(document);
     form.params['/BBox'] = PdfArray.fromNum(<double>[
-      outline.xMin,
-      outline.yMin,
-      outline.xMax,
-      outline.yMax,
+      0,
+      0,
+      outline.width,
+      outline.height,
     ]);
 
     final buf = form.buf;
@@ -242,14 +250,14 @@ class ShapedText extends pw.Widget {
     for (final command in outline.commands) {
       switch (command) {
         case GlyphMoveTo(:final x, :final y):
-          num(x);
+          num(x - outline.xMin);
           buf.putByte(0x20);
-          num(y);
+          num(y - outline.yMin);
           buf.putString(' m ');
         case GlyphLineTo(:final x, :final y):
-          num(x);
+          num(x - outline.xMin);
           buf.putByte(0x20);
-          num(y);
+          num(y - outline.yMin);
           buf.putString(' l ');
         case GlyphCubicTo(
           :final x1,
@@ -259,8 +267,14 @@ class ShapedText extends pw.Widget {
           :final x3,
           :final y3,
         ):
-          for (final v in [x1, y1, x2, y2, x3, y3]) {
-            num(v);
+          for (final v in <List<double>>[
+            [x1, y1],
+            [x2, y2],
+            [x3, y3],
+          ]) {
+            num(v[0] - outline.xMin);
+            buf.putByte(0x20);
+            num(v[1] - outline.yMin);
             buf.putByte(0x20);
           }
           buf.putString('c ');
