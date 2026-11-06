@@ -111,12 +111,12 @@ class _DatabaseStartupGateState extends State<_DatabaseStartupGate> {
 
   Future<void> _chooseAnotherDatabase() async {
     final l10n = AppLocalizations.of(context)!;
-    final result = await FilePicker.pickFiles(
+    final files = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['db'],
       dialogTitle: l10n.chooseAnotherDatabase,
     );
-    final path = result?.files.single.path;
+    final path = files.isEmpty ? null : files.first.path;
     if (path == null || !mounted || !await _confirmCloudUse()) return;
     String? bookmarkRootPath;
     if (Platform.isMacOS) {

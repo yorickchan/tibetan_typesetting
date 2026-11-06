@@ -212,14 +212,13 @@ class _ProjectsPageState extends State<ProjectsPage> {
         '  ',
       ).convert(project.toJson());
 
-      final path = await FilePicker.saveFile(
+      final saved = await FilePicker.saveFile(
         dialogTitle: 'Export Project JSON',
         fileName: '${project.name}.json',
-        type: FileType.custom,
-        allowedExtensions: ['json'],
+        mimeType: 'application/json',
+        bytes: utf8.encode(jsonStr),
       );
-      if (path == null) return;
-      await File(path).writeAsString(jsonStr);
+      if (saved == null) return;
       _showSnackMsg(_l10n.projectExported);
     } catch (e) {
       _showSnackMsg(_l10n.failedToExportProject, error: true);
@@ -228,13 +227,14 @@ class _ProjectsPageState extends State<ProjectsPage> {
 
   Future<void> _importJson() async {
     try {
-      final result = await FilePicker.pickFiles(
+      final files = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
       );
-      if (result == null || result.files.isEmpty) return;
-      final file = File(result.files.single.path!);
-      final text = await file.readAsString();
+      if (files.isEmpty) return;
+      final path = files.first.path;
+      if (path == null) return;
+      final text = await File(path).readAsString();
       final parsed = jsonDecode(text) as Map<String, dynamic>;
       final project = Project.fromJson(parsed);
       final imported = await _db.importProject(project);

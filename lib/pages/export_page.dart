@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -197,17 +197,16 @@ class _ExportPageState extends State<ExportPage>
         _project!,
         appSettings: _appSettings,
       );
-      final path = await FilePicker.saveFile(
+      final saved = await FilePicker.saveFile(
         dialogTitle: 'Save PDF',
         fileName: '${_project!.name}.pdf',
-        type: FileType.custom,
-        allowedExtensions: ['pdf'],
+        mimeType: 'application/pdf',
+        bytes: result.bytes,
       );
-      if (path == null) {
+      if (saved == null) {
         if (mounted) setState(() => _pdfBusy = false);
         return;
       }
-      await File(path).writeAsBytes(result.bytes);
       if (result.warnings.isNotEmpty) {
         _showSnack(
           '${_l10n.projectExported}\n${result.warnings.join('\n')}',
@@ -229,17 +228,16 @@ class _ExportPageState extends State<ExportPage>
     setState(() => _pdfBusy = true);
     try {
       final html = HtmlExportService.generateHtml(_project!);
-      final path = await FilePicker.saveFile(
+      final saved = await FilePicker.saveFile(
         dialogTitle: 'Save HTML',
         fileName: '${_project!.name}.html',
-        type: FileType.custom,
-        allowedExtensions: ['html', 'htm'],
+        mimeType: 'text/html',
+        bytes: utf8.encode(html),
       );
-      if (path == null) {
+      if (saved == null) {
         if (mounted) setState(() => _pdfBusy = false);
         return;
       }
-      await File(path).writeAsString(html);
       _showSnack(_l10n.projectExported);
     } catch (e, s) {
       debugPrint('HTML export failed: $e\n$s');

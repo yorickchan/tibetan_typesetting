@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -253,14 +254,13 @@ class _DictionaryPageState extends State<DictionaryPage> {
   Future<void> _exportJson() async {
     try {
       final json = await _pronunciationService.exportToJson();
-      final path = await FilePicker.saveFile(
+      final saved = await FilePicker.saveFile(
         dialogTitle: _l10n.exportDictionary,
         fileName: 'pronunciation_dictionary.json',
-        type: FileType.custom,
-        allowedExtensions: ['json'],
+        mimeType: 'application/json',
+        bytes: utf8.encode(json),
       );
-      if (path == null) return;
-      await File(path).writeAsString(json);
+      if (saved == null) return;
       _showSnack(_l10n.projectExported);
     } catch (e) {
       _showSnack(_l10n.failedToExportProject, error: true);
@@ -269,13 +269,14 @@ class _DictionaryPageState extends State<DictionaryPage> {
 
   Future<void> _importJson() async {
     try {
-      final result = await FilePicker.pickFiles(
+      final files = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
       );
-      if (result == null || result.files.isEmpty) return;
-      final file = File(result.files.single.path!);
-      final json = await file.readAsString();
+      if (files.isEmpty) return;
+      final path = files.first.path;
+      if (path == null) return;
+      final json = await File(path).readAsString();
       final count = await _pronunciationService.importFromJson(json);
       _showSnack(_l10n.importedCount(count));
       _loadEntries();

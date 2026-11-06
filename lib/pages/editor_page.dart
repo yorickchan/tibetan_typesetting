@@ -293,17 +293,16 @@ class _EditorPageState extends State<EditorPage>
 
   Future<void> _addImageBlock() async {
     if (_project == null) return;
-    final result = await FilePicker.pickFiles(type: FileType.image);
-    if (result == null || result.files.isEmpty) return;
-    if (result.files.single.path == null) return;
+    final files = await FilePicker.pickFiles(type: FileType.image);
+    if (files.isEmpty) return;
+    final path = files.first.path;
+    if (path == null) return;
 
     _undoService.pushState(_project!);
     final id = _uuid.v4().replaceAll('-', '');
     final String storedPath;
     try {
-      storedPath = await ImageStorageService().copyImageToAppSupport(
-        result.files.single.path!,
-      );
+      storedPath = await ImageStorageService().copyImageToAppSupport(path);
     } catch (e) {
       _showSnack('Failed to store image: $e', error: true);
       return;
@@ -323,13 +322,14 @@ class _EditorPageState extends State<EditorPage>
 
   Future<void> _importCsv() async {
     if (_project == null) return;
-    final result = await FilePicker.pickFiles(
+    final files = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['csv', 'tsv', 'txt'],
     );
-    if (result == null || result.files.isEmpty) return;
-    if (result.files.single.path == null) return;
-    final file = File(result.files.single.path!);
+    if (files.isEmpty) return;
+    final path = files.first.path;
+    if (path == null) return;
+    final file = File(path);
 
     final importResult = BatchImportService.parseFile(file);
     if (importResult.importedRows == 0) {

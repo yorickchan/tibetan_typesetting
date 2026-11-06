@@ -120,12 +120,12 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _openExistingDatabase() async {
-    final result = await FilePicker.pickFiles(
+    final files = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['db'],
       dialogTitle: _l10n.openExistingDatabase,
     );
-    final path = result?.files.single.path;
+    final path = files.isEmpty ? null : files.first.path;
     if (path == null || !mounted) return;
 
     final confirmed = await showDialog<bool>(
@@ -198,16 +198,17 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _addTemplate() async {
-    final result = await FilePicker.pickFiles(
+    final files = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['svg'],
     );
-    if (result == null || result.files.isEmpty) return;
+    if (files.isEmpty) return;
 
-    final file = result.files.first;
-    if (file.path == null) return;
+    final file = files.first;
+    final path = file.path;
+    if (path == null) return;
 
-    final content = await File(file.path!).readAsString();
+    final content = await File(path).readAsString();
     if (!content.contains('<svg')) {
       if (mounted) {
         _showSnackMsg(_l10n.invalidSvgFile, error: true);
