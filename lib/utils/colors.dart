@@ -53,6 +53,12 @@ class AppColors {
   static Color borderSubtle = slate800;
   static Color divider = slate800;
 
+  // Workspace sidebar navigation
+  static Color navSelectedBg = const Color(0xFF1B1830);
+  static Color navSelectedBorder = const Color(0xFF4B4570);
+  static Color navSelectedText = Colors.white;
+  static Color navText = slate400;
+
   // Contrasting muted button (light on dark, dark on light)
   static Color buttonMutedBg = slate100;
   static Color buttonMutedFg = slate900;
@@ -79,6 +85,11 @@ class AppColors {
 
       buttonMutedBg = slate200;
       buttonMutedFg = slate800;
+
+      navSelectedBg = const Color(0xFFEDE9FE);
+      navSelectedBorder = const Color(0xFFC4B5FD);
+      navSelectedText = slate900;
+      navText = slate600;
     } else {
       textPrimary = slate100;
       textSecondary = slate200;
@@ -99,6 +110,11 @@ class AppColors {
 
       buttonMutedBg = slate100;
       buttonMutedFg = slate900;
+
+      navSelectedBg = const Color(0xFF1B1830);
+      navSelectedBorder = const Color(0xFF4B4570);
+      navSelectedText = Colors.white;
+      navText = slate400;
     }
   }
 }

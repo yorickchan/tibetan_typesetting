@@ -602,4 +602,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get chineseConversionFailed =>
       'Failed to convert and save Chinese text.';
+
+  @override
+  String get workspaceTitle => 'Tibetan Text Workspace';
+
+  @override
+  String get workspaceSection => 'Workspace';
+
+  @override
+  String get dictionary => 'Dictionary';
+
+  @override
+  String get templates => 'Templates';
+
+  @override
+  String get recentProjects => 'Recent Projects';
 }

@@ -260,5 +260,10 @@
   },
   "convertChineseScriptWarning": "This rewrites all Chinese document text. Some characters may not convert back exactly.",
   "convertChineseScriptAction": "Convert",
-  "chineseConversionFailed": "Failed to convert and save Chinese text."
+  "chineseConversionFailed": "Failed to convert and save Chinese text.",
+  "workspaceTitle": "Tibetan Text Workspace",
+  "workspaceSection": "Workspace",
+  "dictionary": "Dictionary",
+  "templates": "Templates",
+  "recentProjects": "Recent Projects"
 }

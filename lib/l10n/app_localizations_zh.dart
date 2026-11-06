@@ -592,6 +592,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get chineseConversionFailed => '无法转换并保存中文文字。';
+
+  @override
+  String get workspaceTitle => '藏文排版工作区';
+
+  @override
+  String get workspaceSection => '工作区';
+
+  @override
+  String get dictionary => '字典';
+
+  @override
+  String get templates => '模板';
+
+  @override
+  String get recentProjects => '最近项目';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -1182,4 +1197,19 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get chineseConversionFailed => '無法轉換並儲存中文文字。';
+
+  @override
+  String get workspaceTitle => '藏文排版工作區';
+
+  @override
+  String get workspaceSection => '工作區';
+
+  @override
+  String get dictionary => '字典';
+
+  @override
+  String get templates => '範本';
+
+  @override
+  String get recentProjects => '最近專案';
 }

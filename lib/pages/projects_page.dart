@@ -18,7 +18,11 @@ import 'editor_page.dart';
 import 'export_page.dart';
 
 class ProjectsPage extends StatefulWidget {
-  const ProjectsPage({super.key});
+  /// Invoked after the project list is mutated so the workspace sidebar can
+  /// refresh its recent-projects list.
+  final VoidCallback? onProjectsChanged;
+
+  const ProjectsPage({super.key, this.onProjectsChanged});
 
   @override
   State<ProjectsPage> createState() => _ProjectsPageState();
@@ -117,6 +121,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
         ),
       );
       _showSnackMsg(_l10n.projectCreated);
+      widget.onProjectsChanged?.call();
       if (mounted) _openProject(project.id);
     } catch (e) {
       _showSnackMsg(_l10n.failedToCreateProject, error: true);
@@ -141,6 +146,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
       await _db.updateProject(updated);
       _showSnackMsg(_l10n.projectUpdated);
       _loadProjects();
+      widget.onProjectsChanged?.call();
     } catch (e) {
       _showSnackMsg(_l10n.failedToUpdateProject, error: true);
     }
@@ -189,6 +195,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
       await _db.deleteProject(item.id);
       _showSnackMsg(_l10n.projectDeleted);
       _loadProjects();
+      widget.onProjectsChanged?.call();
     } catch (e) {
       _showSnackMsg(_l10n.failedToDeleteProject, error: true);
     }
@@ -198,6 +205,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
     try {
       final copy = await _db.duplicateProject(projectId);
       _showSnackMsg(_l10n.projectDuplicated);
+      widget.onProjectsChanged?.call();
       if (mounted) _openProject(copy.id);
     } catch (e) {
       _showSnackMsg(_l10n.failedToDuplicateProject, error: true);
@@ -239,6 +247,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
       final project = Project.fromJson(parsed);
       final imported = await _db.importProject(project);
       _showSnackMsg(_l10n.projectImported);
+      widget.onProjectsChanged?.call();
       if (mounted) _openProject(imported.id);
     } catch (e) {
       _showSnackMsg(_l10n.failedToImportProject, error: true);

@@ -194,5 +194,10 @@
   },
   "convertChineseScriptWarning": "這會重寫文件中的所有中文文字。部分字元可能無法完全還原。",
   "convertChineseScriptAction": "轉換",
-  "chineseConversionFailed": "無法轉換並儲存中文文字。"
+  "chineseConversionFailed": "無法轉換並儲存中文文字。",
+  "workspaceTitle": "藏文排版工作區",
+  "workspaceSection": "工作區",
+  "dictionary": "字典",
+  "templates": "範本",
+  "recentProjects": "最近專案"
 }

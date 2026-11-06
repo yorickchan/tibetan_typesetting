@@ -1226,6 +1226,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to convert and save Chinese text.'**
   String get chineseConversionFailed;
+
+  /// No description provided for @workspaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tibetan Text Workspace'**
+  String get workspaceTitle;
+
+  /// No description provided for @workspaceSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get workspaceSection;
+
+  /// No description provided for @dictionary.
+  ///
+  /// In en, this message translates to:
+  /// **'Dictionary'**
+  String get dictionary;
+
+  /// No description provided for @templates.
+  ///
+  /// In en, this message translates to:
+  /// **'Templates'**
+  String get templates;
+
+  /// No description provided for @recentProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Projects'**
+  String get recentProjects;
 }
 
 class _AppLocalizationsDelegate

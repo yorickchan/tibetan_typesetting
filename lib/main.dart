@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'l10n/app_localizations.dart';
 import 'models/app_settings.dart';
 import 'pages/database_recovery_page.dart';
-import 'pages/projects_page.dart';
 import 'pages/settings_page.dart';
 import 'services/database_location_provider.dart';
 import 'services/database_location_service.dart';
@@ -19,6 +18,7 @@ import 'services/screen_dpi_service.dart';
 import 'utils/colors.dart';
 import 'utils/font_utils.dart' as font_utils;
 import 'widgets/sample_page.dart' show kMmToPx;
+import 'widgets/workspace_shell.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -442,6 +442,7 @@ class _TibetanTypesettingAppState extends State<TibetanTypesettingApp> {
         home: _HomeWrapper(
           needsSetup: !_settings.hasAnyFontConfigured,
           onOpenSettings: () => _openSettings(require: true),
+          onSettingsChanged: (settings) => setState(() => _settings = settings),
         ),
       ),
     );
@@ -453,8 +454,13 @@ class _TibetanTypesettingAppState extends State<TibetanTypesettingApp> {
 class _HomeWrapper extends StatefulWidget {
   final bool needsSetup;
   final VoidCallback onOpenSettings;
+  final ValueChanged<AppSettings> onSettingsChanged;
 
-  const _HomeWrapper({required this.needsSetup, required this.onOpenSettings});
+  const _HomeWrapper({
+    required this.needsSetup,
+    required this.onOpenSettings,
+    required this.onSettingsChanged,
+  });
 
   @override
   State<_HomeWrapper> createState() => _HomeWrapperState();
@@ -472,5 +478,6 @@ class _HomeWrapperState extends State<_HomeWrapper> {
   }
 
   @override
-  Widget build(BuildContext context) => const ProjectsPage();
+  Widget build(BuildContext context) =>
+      WorkspaceShell(onSettingsChanged: widget.onSettingsChanged);
 }
