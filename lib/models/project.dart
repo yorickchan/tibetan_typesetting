@@ -514,6 +514,7 @@ class TextBlock {
   final double? imageXMm;
   final double? imageYMm;
   final String redHighlightRange;
+  final bool openingMarkRed;
   const TextBlock({
     required this.id,
     this.tibetan = '',
@@ -531,6 +532,7 @@ class TextBlock {
     this.imageXMm,
     this.imageYMm,
     this.redHighlightRange = '',
+    this.openingMarkRed = false,
   });
 
   bool get isFreeText => format == TextBlockFormat.freeText;
@@ -554,6 +556,7 @@ class TextBlock {
     double? imageXMm,
     double? imageYMm,
     String? redHighlightRange,
+    bool? openingMarkRed,
     bool clearColumnSpan = false,
     bool clearImagePath = false,
     bool clearImageWidthMm = false,
@@ -582,6 +585,7 @@ class TextBlock {
       imageXMm: clearImageXMm ? null : (imageXMm ?? this.imageXMm),
       imageYMm: clearImageYMm ? null : (imageYMm ?? this.imageYMm),
       redHighlightRange: redHighlightRange ?? this.redHighlightRange,
+      openingMarkRed: openingMarkRed ?? this.openingMarkRed,
     );
   }
 
@@ -602,6 +606,7 @@ class TextBlock {
     if (imageXMm != null) 'imageXMm': imageXMm,
     if (imageYMm != null) 'imageYMm': imageYMm,
     if (redHighlightRange.isNotEmpty) 'redHighlightRange': redHighlightRange,
+    if (openingMarkRed) 'openingMarkRed': true,
   };
 
   factory TextBlock.fromJson(Map<String, dynamic> json) => TextBlock(
@@ -621,6 +626,7 @@ class TextBlock {
     imageXMm: (json['imageXMm'] as num?)?.toDouble(),
     imageYMm: (json['imageYMm'] as num?)?.toDouble(),
     redHighlightRange: _migrateRedHighlightRange(json),
+    openingMarkRed: json['openingMarkRed'] as bool? ?? false,
   );
 
   static String _migrateRedHighlightRange(Map<String, dynamic> json) {

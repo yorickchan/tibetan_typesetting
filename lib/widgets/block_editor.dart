@@ -649,7 +649,9 @@ class _EditorFieldsState extends State<_EditorFields> {
                 ),
                 const SizedBox(height: 6),
                 _tibetanField(),
-                _redHighlightSelector(),
+                const SizedBox(height: 8),
+                _redToggle(),
+                if (!widget.block.openingMarkRed) _redHighlightSelector(),
               ],
             );
           }
@@ -689,6 +691,38 @@ class _EditorFieldsState extends State<_EditorFields> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _redToggle() {
+    return InkWell(
+      onTap: () => widget.onUpdateBlock(
+        BlockUpdate(openingMarkRed: !widget.block.openingMarkRed),
+      ),
+      borderRadius: BorderRadius.circular(4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 20,
+            height: 20,
+            child: Checkbox(
+              value: widget.block.openingMarkRed,
+              onChanged: (v) =>
+                  widget.onUpdateBlock(BlockUpdate(openingMarkRed: v ?? false)),
+              activeColor: AppColors.rose600,
+              side: BorderSide(color: AppColors.textMuted),
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            widget.l10n.openingMarkRed,
+            style: const TextStyle(color: AppColors.rose600, fontSize: 12),
+          ),
+        ],
       ),
     );
   }

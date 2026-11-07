@@ -139,6 +139,25 @@ void main() {
       });
       expect(old.redHighlightRange, '3-4');
     });
+
+    test('openingMarkRed round-trip', () {
+      const block = TextBlock(
+        id: 'om',
+        tibetan: '༄༅།།',
+        format: TextBlockFormat.openingMark,
+        openingMarkRed: true,
+      );
+      final json = block.toJson();
+      expect(json['openingMarkRed'], true);
+      final restored = TextBlock.fromJson(json);
+      expect(restored.openingMarkRed, true);
+      expect(restored.isOpeningMark, true);
+
+      const plain = TextBlock(id: 'plain');
+      expect(plain.openingMarkRed, false);
+      expect(plain.toJson().containsKey('openingMarkRed'), false);
+      expect(plain.copyWith(openingMarkRed: true).openingMarkRed, true);
+    });
   });
 
   group('PageSetup', () {

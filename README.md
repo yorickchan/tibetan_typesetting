@@ -22,6 +22,7 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - Auto-save functionality with save-state indicator
 - Undo/Redo support (up to 50 states)
 - Red character highlight — mark selected words in heading text with red ink using range notation (e.g. `1-4,6-8`) while vowel marks, tshegs, and punctuation remain black
+- Red opening mark — render an opening-mark block entirely in red ink (including shad punctuation) with a checkbox in the block editor
 - **Chinese script switch** — convert all Chinese text in a project between Simplified and Traditional with one click; script is auto-detected from content when unset
 
 ### 🧭 Workspace Navigation

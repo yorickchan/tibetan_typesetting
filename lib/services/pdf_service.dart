@@ -450,6 +450,7 @@ class PdfService {
     required List<ShapedTextFont> fonts,
     required double maxW,
     required double fontSize,
+    bool forceRed = false,
   }) {
     final lines = splitLines(block.tibetan);
     if (fonts.isEmpty || lines.isEmpty) return null;
@@ -467,19 +468,21 @@ class PdfService {
           heading,
           fonts: fonts,
           fontSize: fontSize,
-          color: PdfColors.black,
+          color: forceRed ? _rose : PdfColors.black,
           maxWidth: maxW,
           lineHeight: lineHeight,
           topPadding: contentTibetanPngTopPadding,
           bottomPadding: contentTibetanPngBottomPadding,
-          colorForRune: _tibetanColorFor(heading, block.redHighlightRange),
+          colorForRune: forceRed
+              ? null
+              : _tibetanColorFor(heading, block.redHighlightRange),
         ),
         if (body.isNotEmpty)
           ShapedText(
             body,
             fonts: fonts,
             fontSize: fontSize,
-            color: PdfColors.black,
+            color: forceRed ? _rose : PdfColors.black,
             maxWidth: maxW,
             lineHeight: lineHeight,
             topPadding: contentTibetanPngTopPadding,
@@ -842,6 +845,7 @@ class PdfService {
                   smallText: small,
                   smallBlockFontSize: small ? smallBlockFontSize : null,
                 ),
+                forceRed: block.isOpeningMark && block.openingMarkRed,
               );
         // The Tibetan widget reserves the same transparent bottom padding the
         // raster used for descenders, so subtract it to keep the visible gap

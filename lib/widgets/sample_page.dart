@@ -629,6 +629,13 @@ class _ContentGrid extends StatelessWidget {
                           ),
                           height: contentTibetanLineHeight(smallText: isSmall),
                         );
+                        if (block.openingMarkRed) {
+                          return Text(
+                            markText,
+                            style: style.copyWith(color: AppColors.rose600),
+                            maxLines: null,
+                          );
+                        }
                         final segs = splitByRedHighlightRanges(
                           markText,
                           block.redHighlightRange,

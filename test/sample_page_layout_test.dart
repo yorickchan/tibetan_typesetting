@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:tibetan_typesetting/models/project.dart';
+import 'package:tibetan_typesetting/utils/colors.dart';
 import 'package:tibetan_typesetting/widgets/sample_page.dart';
 
 void main() {
@@ -103,5 +104,31 @@ void main() {
     );
 
     expect(find.byType(OverflowBox), findsWidgets);
+  });
+
+  testWidgets('opening mark red renders the whole mark in rose', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SamplePageWidget(
+          project: Project(
+            id: 'project',
+            name: 'Project',
+            blocks: [
+              const TextBlock(
+                id: 'block',
+                tibetan: '༄༅།།',
+                format: TextBlockFormat.openingMark,
+                openingMarkRed: true,
+              ),
+            ],
+            updatedAt: '',
+            createdAt: '',
+          ),
+        ),
+      ),
+    );
+
+    final text = tester.widget<Text>(find.text('༄༅།།'));
+    expect(text.style!.color, AppColors.rose600);
   });
 }

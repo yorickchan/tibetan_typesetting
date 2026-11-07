@@ -145,6 +145,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get openingMark => '开篇标记';
 
   @override
+  String get openingMarkRed => '红色开篇标记';
+
+  @override
   String get tibetanText => '藏文';
 
   @override
@@ -754,6 +757,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get openingMark => '卷首標記';
+
+  @override
+  String get openingMarkRed => '紅色卷首標記';
 
   @override
   String get tibetanText => '藏文';

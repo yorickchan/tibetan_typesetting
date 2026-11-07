@@ -229,6 +229,7 @@ class _EditorPageState extends State<EditorPage>
           imageXMm: update.imageXMm,
           imageYMm: update.imageYMm,
           redHighlightRange: update.redHighlightRange,
+          openingMarkRed: update.openingMarkRed,
           clearImageWidthMm: update.clearImageWidthMm,
           clearImageHeightMm: update.clearImageHeightMm,
           clearImageXMm: update.clearImageXMm,

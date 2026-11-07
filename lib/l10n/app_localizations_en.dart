@@ -145,6 +145,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get openingMark => 'Opening mark';
 
   @override
+  String get openingMarkRed => 'Red opening mark';
+
+  @override
   String get tibetanText => 'Tibetan text';
 
   @override

@@ -363,6 +363,12 @@ abstract class AppLocalizations {
   /// **'Opening mark'**
   String get openingMark;
 
+  /// No description provided for @openingMarkRed.
+  ///
+  /// In en, this message translates to:
+  /// **'Red opening mark'**
+  String get openingMarkRed;
+
   /// No description provided for @tibetanText.
   ///
   /// In en, this message translates to:
