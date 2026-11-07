@@ -1,5 +1,18 @@
 # Release Notes
 
+## [1.1.15] - 2026-11-08
+
+### ✨ New Features
+- **Red opening mark** — opening-mark blocks now have a **Red opening mark** checkbox that renders the whole mark (including shad punctuation) in red in both preview and PDF; the range-based highlight remains available for partial red
+
+### 🐛 Fixes
+- PDF red highlight now colors only the main syllable structure: base consonants and tshegs are red, while vowel signs, shad, and punctuation stay black, matching the preview
+
+### 🔧 Maintenance
+- Bumped `harfbuzz_ffi` to 0.5.1 (native HarfBuzz build)
+
+---
+
 ## [1.1.14] - 2026-11-08
 
 ### ✨ New Features

@@ -1,6 +1,6 @@
 # Tibetan Typesetting
 
-[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.14**
+[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.15**
 
 <p align="center">
   <img src="assets/images/icon.png" width="128" alt="App Icon"/>
