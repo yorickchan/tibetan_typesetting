@@ -58,4 +58,19 @@ void main() {
       expect(lineBreakOpportunities(text), {text.length});
     });
   });
+
+  group('glyphSourceOffsets', () {
+    test('maps cluster glyphs to their source characters', () {
+      // A base consonant and its vowel sign share one HarfBuzz cluster.
+      expect(glyphSourceOffsets(1, 3, 2), [1, 2]);
+    });
+
+    test('clamps extra glyphs to the last source character', () {
+      expect(glyphSourceOffsets(1, 3, 4), [1, 2, 2, 2]);
+    });
+
+    test('falls back to the cluster start for an empty range', () {
+      expect(glyphSourceOffsets(2, 2, 1), [2]);
+    });
+  });
 }

@@ -82,5 +82,46 @@ void main() {
         );
       });
     }, timeout: const Timeout(Duration(minutes: 5)));
+
+    testWidgets('$name keeps vowel signs black in red-highlighted text', (
+      tester,
+    ) async {
+      if (!file.existsSync()) {
+        markTestSkipped('$name is not installed');
+        return;
+      }
+
+      await tester.runAsync(() async {
+        final shaping = await FontService().shapingFont(
+          FontConfig(fontFamily: name, fontPath: path, fontSize: 12),
+        );
+        expect(shaping, isNotNull, reason: 'font should open for shaping');
+
+        const text = 'དཀོན';
+        const rose = PdfColor.fromInt(0xFFe11d48);
+        final widget = ShapedText(
+          text,
+          fonts: [shaping!],
+          fontSize: 12,
+          color: PdfColors.black,
+          maxWidth: 280,
+          colorForRune: (i, _) =>
+              text.codeUnitAt(i) == 0x0F7C ? PdfColors.black : rose,
+        );
+
+        final run = shaping.data.shape(text);
+        final clusterStart = run.glyphs.indexWhere((g) => g.cluster == 1);
+        expect(clusterStart, isNot(-1), reason: 'expected the ཀོ cluster');
+        expect(
+          run.glyphs[clusterStart + 1].cluster,
+          1,
+          reason: 'expected the vowel sign in the same cluster',
+        );
+
+        final colors = widget.glyphColors;
+        expect(colors[clusterStart], rose);
+        expect(colors[clusterStart + 1], PdfColors.black);
+      });
+    }, timeout: const Timeout(Duration(minutes: 5)));
   }
 }

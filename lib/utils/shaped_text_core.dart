@@ -38,6 +38,21 @@ class ShapedRun {
   bool get isEmpty => glyphs.isEmpty;
 }
 
+/// Maps each glyph of a shaped cluster to its source character offset.
+///
+/// Tibetan shaping groups a base consonant and its vowel signs into one
+/// cluster, so every glyph shares the consonant's [ShapedGlyph.cluster] index.
+/// HarfBuzz emits the cluster's glyphs in source order, so the nth glyph maps
+/// to the nth character; extra glyphs clamp to the last character.
+List<int> glyphSourceOffsets(int cluster, int clusterEnd, int glyphCount) {
+  final length = clusterEnd - cluster;
+  if (length <= 0) return List<int>.filled(glyphCount, cluster);
+  return [
+    for (var k = 0; k < glyphCount; k++)
+      cluster + (k < length ? k : length - 1),
+  ];
+}
+
 /// Whether a line may break after [rune].
 ///
 /// Breaks are allowed after whitespace, after Tibetan tsheg/shad and

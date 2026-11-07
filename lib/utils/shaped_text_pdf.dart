@@ -107,6 +107,16 @@ class ShapedText extends pw.Widget {
     return [for (final line in lines) line.width];
   }
 
+  /// Per-glyph fill colours after layout. Visible for tests.
+  List<PdfColor> get glyphColors {
+    final layout = _layout ??= _buildLayout();
+    return [
+      for (final line in layout.lines)
+        for (final run in line.runs)
+          for (final glyph in run.glyphs) run.colors[glyph]!,
+    ];
+  }
+
   /// Baseline distance from the top of a line box.
   ///
   /// Flutter first computes the font's natural line box, then scales that box
@@ -575,9 +585,14 @@ class _Piece {
       }
       final clusterEnd = end < glyphs.length ? glyphs[end].cluster : text.length;
       if (clusterEnd > from && cluster < to) {
+        final sourceOffsets = glyphSourceOffsets(
+          cluster,
+          clusterEnd,
+          end - i,
+        );
         for (var k = i; k < end; k++) {
           kept.add(glyphs[k]);
-          colors[glyphs[k]] = this.colors[baseOffset + cluster];
+          colors[glyphs[k]] = this.colors[baseOffset + sourceOffsets[k - i]];
           advance += glyphs[k].xAdvance;
         }
       }
