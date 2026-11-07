@@ -1,5 +1,31 @@
 # Release Notes
 
+## [1.1.14] - 2026-11-08
+
+### ✨ New Features
+- **Workspace sidebar** — Projects, Dictionary, Templates, and Settings destinations plus a recent-projects list, all in one workspace shell
+- **Templates page** — title-page templates now have their own page instead of living inside Settings
+- **Tibetan–Chinese spacing** — configurable gap for the title page and content text, in px; negative values overlap the lines
+
+### 🖨️ PDF
+- Tibetan is now embedded as **shaped vector glyph outlines** (HarfBuzz) with an invisible Unicode text layer, replacing the previous 460 DPI raster pipeline
+- Glyph form XObjects use a `[0 0 width height]` BBox so outlines with negative coordinates (e.g. Kailasa combining marks) are not squeezed
+- All text renders natively; invisible text state is isolated per run
+- Exported content pages match the preview's content-box height
+- Tibetan rasters keep bottom padding so descenders (e.g. the ུ in ཧཱུྃ) are not clipped
+
+### 🎛️ UI
+- Editor settings panels are denser: margins side-by-side, template thumbnails, single-line font rows, two-column content sections
+- Font size fields now create an override from the effective default when edited
+- `FontPicker` accepts a placeholder and skips the empty label line
+
+### 🔧 Maintenance
+- Migrated `file_picker` call sites to the v13 API
+- Refreshed READMEs (English and Traditional Chinese) with new screenshots
+- Added `.agents/` to `.gitignore`
+
+---
+
 ## [1.1.3] - 2026-02-22
 
 ### 🎨 Assets

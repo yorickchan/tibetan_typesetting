@@ -1,4 +1,4 @@
-# 藏文排版 &nbsp;·&nbsp; v1.1.13
+# 藏文排版 &nbsp;·&nbsp; v1.1.14
 
 [English](README.md) | 繁體中文
 
