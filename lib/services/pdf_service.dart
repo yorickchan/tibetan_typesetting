@@ -361,6 +361,7 @@ class PdfService {
             sideW: sideW,
             inset: inset,
             pageNumber: pageNumber,
+            pageMargin: pageMargin,
             tibFonts: tibFonts,
             imgs: imgs,
             templateSvg: pageTemplateSvg,
@@ -722,6 +723,7 @@ class PdfService {
     required double transFontSize,
     required double tibFontSize,
     required double? smallBlockFontSize,
+    required MarginMm pageMargin,
     required double outerW,
     required double outerH,
     required double sideW,
@@ -1009,10 +1011,23 @@ class PdfService {
     final sidePW = hasPageTemplate ? 0.0 : sideW - 2 * inset;
     final cW = hasPageTemplate
         ? templateContent!.widthMm * PdfPageFormat.mm
-        : outerW - 2 * inset - 2 * sidePW;
+        : contentBoxWidthMm(
+            pageWidthMm: ps.pageWidthMm,
+            marginLeftMm: pageMargin.left,
+            marginRightMm: pageMargin.right,
+            insetMm: inset / PdfPageFormat.mm,
+            sidePanelWidthMm: sidePW / PdfPageFormat.mm,
+          ) *
+          PdfPageFormat.mm;
     final cH = hasPageTemplate
         ? templateContent!.heightMm * PdfPageFormat.mm
-        : outerH - 4 * inset;
+        : contentBoxHeightMm(
+            pageHeightMm: ps.pageHeightMm,
+            marginTopMm: pageMargin.top,
+            marginBottomMm: pageMargin.bottom,
+            insetMm: inset / PdfPageFormat.mm,
+          ) *
+          PdfPageFormat.mm;
     pw.Widget buildInner() {
       return pw.Row(
         children: [

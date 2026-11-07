@@ -2,6 +2,38 @@
 import '../utils/tibetan_segmenter.dart'
     show isTibetanNonLetter, parseRedHighlightRanges;
 
+/// Height of the content box on a page without a content template, in mm.
+///
+/// The page loses its top and bottom margins, then one frame `inset` above and
+/// one below. The preview (`SamplePageWidget`) applies the same inset through
+/// `Padding(EdgeInsets.all(inset))`, so both must subtract `2 * inset` per axis.
+/// Subtracting it twice made the exported box shorter than the preview's and
+/// squeezed every row, which made the PDF's Tibetan look smaller on paper than
+/// on screen.
+double contentBoxHeightMm({
+  required double pageHeightMm,
+  required double marginTopMm,
+  required double marginBottomMm,
+  required double insetMm,
+}) => pageHeightMm - marginTopMm - marginBottomMm - 2 * insetMm;
+
+/// Width of the content box on a page without a content template, in mm.
+///
+/// Mirrors the preview: the page loses its side margins, one frame inset per
+/// side, and one side panel per side.
+double contentBoxWidthMm({
+  required double pageWidthMm,
+  required double marginLeftMm,
+  required double marginRightMm,
+  required double insetMm,
+  required double sidePanelWidthMm,
+}) =>
+    pageWidthMm -
+    marginLeftMm -
+    marginRightMm -
+    2 * insetMm -
+    2 * sidePanelWidthMm;
+
 /// Extra line spacing for `package:pdf` text so its advance equals
 /// `fontSize * lineHeight`.
 ///
