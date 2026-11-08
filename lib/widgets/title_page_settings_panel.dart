@@ -247,7 +247,7 @@ class TitlePageSettingsPanel extends StatelessWidget {
                   const SizedBox(height: 12),
                   LayoutBuilder(
                     builder: (context, constraints) {
-                      final wide = constraints.maxWidth >= 820;
+                      final wide = constraints.maxWidth >= 1180;
                       final groups = [
                         MarginRow(
                           label: l10n.templateInset,
@@ -294,88 +294,107 @@ class TitlePageSettingsPanel extends StatelessWidget {
                       );
                     },
                   ),
-                  const SizedBox(height: 12),
-                  const SizedBox(height: 12),
                   Container(height: 1, color: AppColors.divider),
                   const SizedBox(height: 12),
-                  CompactFontRow(
-                    label: 'TITLE TIBETAN FONT',
-                    current: pageSetup.titleTibetanFont,
-                    defaultName: tibFont.fontFamily,
-                    defaultSize: 10,
-                    l10n: l10n,
-                    onSelected: (info) {
-                      FontService().loadFontForPreview(
-                        FontConfig(
-                          fontFamily: info.familyName,
-                          fontPath: info.filePath,
-                          fontSize: 10,
-                        ),
-                      );
-                      onUpdateSetup(
-                        (s) => s.copyWith(
-                          titleTibetanFont: FontConfig(
-                            fontFamily: info.familyName,
-                            fontPath: info.filePath,
-                            fontSize:
-                                pageSetup.titleTibetanFont?.fontSize ?? 10,
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final wide = constraints.maxWidth >= 1180;
+                      final tibetanRow = CompactFontRow(
+                          label: 'TITLE TIBETAN FONT',
+                          current: pageSetup.titleTibetanFont,
+                          defaultName: tibFont.fontFamily,
+                          defaultSize: 10,
+                          l10n: l10n,
+                          onSelected: (info) {
+                            FontService().loadFontForPreview(
+                              FontConfig(
+                                fontFamily: info.familyName,
+                                fontPath: info.filePath,
+                                fontSize: 10,
+                              ),
+                            );
+                            onUpdateSetup(
+                              (s) => s.copyWith(
+                                titleTibetanFont: FontConfig(
+                                  fontFamily: info.familyName,
+                                  fontPath: info.filePath,
+                                  fontSize:
+                                      pageSetup.titleTibetanFont?.fontSize ?? 10,
+                                ),
+                              ),
+                            );
+                          },
+                          onSizeChanged: (v) {
+                            final n = double.tryParse(v);
+                            if (n == null || n <= 0) return;
+                            final base = pageSetup.titleTibetanFont ?? tibFont;
+                            onUpdateSetup(
+                              (s) => s.copyWith(
+                                titleTibetanFont: base.copyWith(fontSize: n),
+                              ),
+                            );
+                          },
+                          onReset: () => onUpdateSetup(
+                            (s) => s.copyWith(clearTitleTibetanFont: true),
                           ),
-                        ),
-                      );
-                    },
-                    onSizeChanged: (v) {
-                      final n = double.tryParse(v);
-                      if (n == null || n <= 0) return;
-                      final base = pageSetup.titleTibetanFont ?? tibFont;
-                      onUpdateSetup(
-                        (s) => s.copyWith(
-                          titleTibetanFont: base.copyWith(fontSize: n),
-                        ),
-                      );
-                    },
-                    onReset: () => onUpdateSetup(
-                      (s) => s.copyWith(clearTitleTibetanFont: true),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  CompactFontRow(
-                    label: 'TITLE CHINESE FONT',
-                    current: pageSetup.titleChineseFont,
-                    defaultName: transFont.fontFamily,
-                    defaultSize: 8,
-                    l10n: l10n,
-                    onSelected: (info) {
-                      FontService().loadFontForPreview(
-                        FontConfig(
-                          fontFamily: info.familyName,
-                          fontPath: info.filePath,
-                          fontSize: 8,
-                        ),
-                      );
-                      onUpdateSetup(
-                        (s) => s.copyWith(
-                          titleChineseFont: FontConfig(
-                            fontFamily: info.familyName,
-                            fontPath: info.filePath,
-                            fontSize:
-                                pageSetup.titleChineseFont?.fontSize ?? 8,
+                        );
+                      final chineseRow = CompactFontRow(
+                          label: 'TITLE CHINESE FONT',
+                          current: pageSetup.titleChineseFont,
+                          defaultName: transFont.fontFamily,
+                          defaultSize: 8,
+                          l10n: l10n,
+                          onSelected: (info) {
+                            FontService().loadFontForPreview(
+                              FontConfig(
+                                fontFamily: info.familyName,
+                                fontPath: info.filePath,
+                                fontSize: 8,
+                              ),
+                            );
+                            onUpdateSetup(
+                              (s) => s.copyWith(
+                                titleChineseFont: FontConfig(
+                                  fontFamily: info.familyName,
+                                  fontPath: info.filePath,
+                                  fontSize:
+                                      pageSetup.titleChineseFont?.fontSize ?? 8,
+                                ),
+                              ),
+                            );
+                          },
+                          onSizeChanged: (v) {
+                            final n = double.tryParse(v);
+                            if (n == null || n <= 0) return;
+                            final base = pageSetup.titleChineseFont ?? transFont;
+                            onUpdateSetup(
+                              (s) => s.copyWith(
+                                titleChineseFont: base.copyWith(fontSize: n),
+                              ),
+                            );
+                          },
+                          onReset: () => onUpdateSetup(
+                            (s) => s.copyWith(clearTitleChineseFont: true),
                           ),
-                        ),
+                        );
+                      if (wide) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: tibetanRow),
+                            const SizedBox(width: 16),
+                            Expanded(child: chineseRow),
+                          ],
+                        );
+                      }
+                      return Column(
+                        children: [
+                          tibetanRow,
+                          const SizedBox(height: 8),
+                          chineseRow,
+                        ],
                       );
                     },
-                    onSizeChanged: (v) {
-                      final n = double.tryParse(v);
-                      if (n == null || n <= 0) return;
-                      final base = pageSetup.titleChineseFont ?? transFont;
-                      onUpdateSetup(
-                        (s) => s.copyWith(
-                          titleChineseFont: base.copyWith(fontSize: n),
-                        ),
-                      );
-                    },
-                    onReset: () => onUpdateSetup(
-                      (s) => s.copyWith(clearTitleChineseFont: true),
-                    ),
                   ),
                 ],
               ),
