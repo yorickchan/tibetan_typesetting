@@ -354,7 +354,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Expanded(
             child: _loading
                 ? const Center(
@@ -373,7 +373,15 @@ class _DictionaryPageState extends State<DictionaryPage> {
                       textAlign: TextAlign.center,
                     ),
                   )
-                : ListView.builder(
+                : GridView.builder(
+                    padding: EdgeInsets.zero,
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 520,
+                          mainAxisExtent: 52,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                        ),
                     itemCount: _filtered.length,
                     itemBuilder: (context, index) => _EntryCard(
                       entry: _filtered[index],
@@ -404,8 +412,7 @@ class _EntryCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(8),
@@ -413,71 +420,72 @@ class _EntryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      entry.tibetanSyllable,
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (entry.wordCount > 1) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 1,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.sky500.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(
-                            color: AppColors.sky500.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Text(
-                          '×${entry.wordCount}',
-                          style: const TextStyle(
-                            color: AppColors.sky500,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  entry.chinesePronunciation,
-                  style: TextStyle(color: AppColors.textBody, fontSize: 13),
-                ),
-              ],
+          SizedBox(
+            width: 120,
+            child: Text(
+              entry.tibetanSyllable,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              entry.chinesePronunciation,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: AppColors.textBody, fontSize: 13),
+            ),
+          ),
+          if (entry.wordCount > 1) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              decoration: BoxDecoration(
+                color: AppColors.sky500.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: AppColors.sky500.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Text(
+                '×${entry.wordCount}',
+                style: const TextStyle(
+                  color: AppColors.sky500,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
           IconButton(
             icon: Icon(
               Icons.edit_outlined,
-              size: 18,
+              size: 16,
               color: AppColors.textCaption,
             ),
             onPressed: onEdit,
             tooltip: l10n.edit,
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
           ),
           IconButton(
             icon: const Icon(
               Icons.delete_outline,
-              size: 18,
+              size: 16,
               color: AppColors.rose400,
             ),
             onPressed: onDelete,
             tooltip: l10n.delete,
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
           ),
         ],
       ),
