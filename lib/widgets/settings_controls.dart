@@ -273,15 +273,17 @@ class CompactFontRow extends StatelessWidget {
     return Row(
       children: [
         SizedBox(width: 120, child: SettingsSectionLabel(label)),
-        SizedBox(
-          width: 360,
-          child: FontPicker(
-            label: '',
-            placeholder: hasOverride
-                ? (current?.fontFamily ?? defaultName)
-                : 'Default: $defaultName',
-            selectedPath: current?.fontPath,
-            onSelected: onSelected,
+        Flexible(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 360),
+            child: FontPicker(
+              label: '',
+              placeholder: hasOverride
+                  ? (current?.fontFamily ?? defaultName)
+                  : 'Default: $defaultName',
+              selectedPath: current?.fontPath,
+              onSelected: onSelected,
+            ),
           ),
         ),
         const SizedBox(width: 6),
