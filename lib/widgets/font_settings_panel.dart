@@ -95,7 +95,7 @@ class FontSettingsPanel extends StatelessWidget {
           if (isOpen) ...[
             Container(height: 1, color: AppColors.divider),
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
               child: Column(
                 children: [
                   CompactFontRow(
@@ -143,7 +143,7 @@ class FontSettingsPanel extends StatelessWidget {
                       (s) => s.copyWith(clearTibetanFont: true),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   CompactFontRow(
                     label: 'PRONUNCIATION',
                     current: pageSetup.pronunciationFont,
@@ -191,7 +191,7 @@ class FontSettingsPanel extends StatelessWidget {
                       (s) => s.copyWith(clearPronunciationFont: true),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   CompactFontRow(
                     label: 'TRANSLATION',
                     current: pageSetup.translationFont,
