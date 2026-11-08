@@ -98,145 +98,169 @@ class FontSettingsPanel extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
               child: Column(
                 children: [
-                  CompactFontRow(
-                    label: 'TIBETAN',
-                    current: pageSetup.tibetanFont,
-                    defaultName:
-                        appSettings.tibetanFont?.fontFamily ?? '(not set)',
-                    defaultSize: appSettings.tibetanFont?.fontSize ?? 10,
-                    l10n: l10n,
-                    onSelected: (info) {
-                      final existing = pageSetup.tibetanFont;
-                      onUpdateSetup(
-                        (s) => s.copyWith(
-                          tibetanFont: FontConfig(
-                            fontFamily: info.familyName,
-                            fontPath: info.filePath,
-                            fontSize:
-                                existing?.fontSize ??
-                                appSettings.tibetanFont?.fontSize ??
-                                10,
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final wide = constraints.maxWidth >= 1280;
+                      final colWidth = wide
+                          ? (constraints.maxWidth - 24) / 3
+                          : constraints.maxWidth;
+                      return Wrap(
+                        spacing: 12,
+                        runSpacing: 6,
+                        children: [
+                          SizedBox(
+                            width: colWidth,
+                            child:
+                              CompactFontRow(
+                                label: 'TIBETAN',
+                                current: pageSetup.tibetanFont,
+                                defaultName:
+                                    appSettings.tibetanFont?.fontFamily ?? '(not set)',
+                                defaultSize: appSettings.tibetanFont?.fontSize ?? 10,
+                                l10n: l10n,
+                                onSelected: (info) {
+                                  final existing = pageSetup.tibetanFont;
+                                  onUpdateSetup(
+                                    (s) => s.copyWith(
+                                      tibetanFont: FontConfig(
+                                        fontFamily: info.familyName,
+                                        fontPath: info.filePath,
+                                        fontSize:
+                                            existing?.fontSize ??
+                                            appSettings.tibetanFont?.fontSize ??
+                                            10,
+                                      ),
+                                    ),
+                                  );
+                                  FontService().loadFontForPreview(
+                                    FontConfig(
+                                      fontFamily: info.familyName,
+                                      fontPath: info.filePath,
+                                      fontSize: 10,
+                                    ),
+                                  );
+                                },
+                                onSizeChanged: (v) {
+                                  final n = double.tryParse(v);
+                                  if (n == null || n <= 0) return;
+                                  final base =
+                                      pageSetup.tibetanFont ?? appSettings.tibetanFont;
+                                  if (base == null) return;
+                                  onUpdateSetup(
+                                    (s) => s.copyWith(
+                                      tibetanFont: base.copyWith(fontSize: n),
+                                    ),
+                                  );
+                                },
+                                onReset: () => onUpdateSetup(
+                                  (s) => s.copyWith(clearTibetanFont: true),
+                                ),
+                              ),
                           ),
-                        ),
-                      );
-                      FontService().loadFontForPreview(
-                        FontConfig(
-                          fontFamily: info.familyName,
-                          fontPath: info.filePath,
-                          fontSize: 10,
-                        ),
-                      );
-                    },
-                    onSizeChanged: (v) {
-                      final n = double.tryParse(v);
-                      if (n == null || n <= 0) return;
-                      final base =
-                          pageSetup.tibetanFont ?? appSettings.tibetanFont;
-                      if (base == null) return;
-                      onUpdateSetup(
-                        (s) => s.copyWith(
-                          tibetanFont: base.copyWith(fontSize: n),
-                        ),
-                      );
-                    },
-                    onReset: () => onUpdateSetup(
-                      (s) => s.copyWith(clearTibetanFont: true),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  CompactFontRow(
-                    label: 'PRONUNCIATION',
-                    current: pageSetup.pronunciationFont,
-                    defaultName:
-                        appSettings.pronunciationFont?.fontFamily ??
-                        '(not set)',
-                    defaultSize: appSettings.pronunciationFont?.fontSize ?? 8,
-                    l10n: l10n,
-                    onSelected: (info) {
-                      final existing = pageSetup.pronunciationFont;
-                      onUpdateSetup(
-                        (s) => s.copyWith(
-                          pronunciationFont: FontConfig(
-                            fontFamily: info.familyName,
-                            fontPath: info.filePath,
-                            fontSize:
-                                existing?.fontSize ??
-                                appSettings.pronunciationFont?.fontSize ??
-                                8,
+                          SizedBox(
+                            width: colWidth,
+                            child:
+                              CompactFontRow(
+                                label: 'PRONUNCIATION',
+                                current: pageSetup.pronunciationFont,
+                                defaultName:
+                                    appSettings.pronunciationFont?.fontFamily ??
+                                    '(not set)',
+                                defaultSize: appSettings.pronunciationFont?.fontSize ?? 8,
+                                l10n: l10n,
+                                onSelected: (info) {
+                                  final existing = pageSetup.pronunciationFont;
+                                  onUpdateSetup(
+                                    (s) => s.copyWith(
+                                      pronunciationFont: FontConfig(
+                                        fontFamily: info.familyName,
+                                        fontPath: info.filePath,
+                                        fontSize:
+                                            existing?.fontSize ??
+                                            appSettings.pronunciationFont?.fontSize ??
+                                            8,
+                                      ),
+                                    ),
+                                  );
+                                  FontService().loadFontForPreview(
+                                    FontConfig(
+                                      fontFamily: info.familyName,
+                                      fontPath: info.filePath,
+                                      fontSize: 8,
+                                    ),
+                                  );
+                                },
+                                onSizeChanged: (v) {
+                                  final n = double.tryParse(v);
+                                  if (n == null || n <= 0) return;
+                                  final base =
+                                      pageSetup.pronunciationFont ??
+                                      appSettings.pronunciationFont;
+                                  if (base == null) return;
+                                  onUpdateSetup(
+                                    (s) => s.copyWith(
+                                      pronunciationFont: base.copyWith(fontSize: n),
+                                    ),
+                                  );
+                                },
+                                onReset: () => onUpdateSetup(
+                                  (s) => s.copyWith(clearPronunciationFont: true),
+                                ),
+                              ),
                           ),
-                        ),
-                      );
-                      FontService().loadFontForPreview(
-                        FontConfig(
-                          fontFamily: info.familyName,
-                          fontPath: info.filePath,
-                          fontSize: 8,
-                        ),
-                      );
-                    },
-                    onSizeChanged: (v) {
-                      final n = double.tryParse(v);
-                      if (n == null || n <= 0) return;
-                      final base =
-                          pageSetup.pronunciationFont ??
-                          appSettings.pronunciationFont;
-                      if (base == null) return;
-                      onUpdateSetup(
-                        (s) => s.copyWith(
-                          pronunciationFont: base.copyWith(fontSize: n),
-                        ),
-                      );
-                    },
-                    onReset: () => onUpdateSetup(
-                      (s) => s.copyWith(clearPronunciationFont: true),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  CompactFontRow(
-                    label: 'TRANSLATION',
-                    current: pageSetup.translationFont,
-                    defaultName:
-                        appSettings.translationFont?.fontFamily ?? '(not set)',
-                    defaultSize: appSettings.translationFont?.fontSize ?? 8,
-                    l10n: l10n,
-                    onSelected: (info) {
-                      final existing = pageSetup.translationFont;
-                      onUpdateSetup(
-                        (s) => s.copyWith(
-                          translationFont: FontConfig(
-                            fontFamily: info.familyName,
-                            fontPath: info.filePath,
-                            fontSize:
-                                existing?.fontSize ??
-                                appSettings.translationFont?.fontSize ??
-                                8,
+                          SizedBox(
+                            width: colWidth,
+                            child:
+                              CompactFontRow(
+                                label: 'TRANSLATION',
+                                current: pageSetup.translationFont,
+                                defaultName:
+                                    appSettings.translationFont?.fontFamily ?? '(not set)',
+                                defaultSize: appSettings.translationFont?.fontSize ?? 8,
+                                l10n: l10n,
+                                onSelected: (info) {
+                                  final existing = pageSetup.translationFont;
+                                  onUpdateSetup(
+                                    (s) => s.copyWith(
+                                      translationFont: FontConfig(
+                                        fontFamily: info.familyName,
+                                        fontPath: info.filePath,
+                                        fontSize:
+                                            existing?.fontSize ??
+                                            appSettings.translationFont?.fontSize ??
+                                            8,
+                                      ),
+                                    ),
+                                  );
+                                  FontService().loadFontForPreview(
+                                    FontConfig(
+                                      fontFamily: info.familyName,
+                                      fontPath: info.filePath,
+                                      fontSize: 8,
+                                    ),
+                                  );
+                                },
+                                onSizeChanged: (v) {
+                                  final n = double.tryParse(v);
+                                  if (n == null || n <= 0) return;
+                                  final base =
+                                      pageSetup.translationFont ??
+                                      appSettings.translationFont;
+                                  if (base == null) return;
+                                  onUpdateSetup(
+                                    (s) => s.copyWith(
+                                      translationFont: base.copyWith(fontSize: n),
+                                    ),
+                                  );
+                                },
+                                onReset: () => onUpdateSetup(
+                                  (s) => s.copyWith(clearTranslationFont: true),
+                                ),
+                              ),
                           ),
-                        ),
-                      );
-                      FontService().loadFontForPreview(
-                        FontConfig(
-                          fontFamily: info.familyName,
-                          fontPath: info.filePath,
-                          fontSize: 8,
-                        ),
+                        ],
                       );
                     },
-                    onSizeChanged: (v) {
-                      final n = double.tryParse(v);
-                      if (n == null || n <= 0) return;
-                      final base =
-                          pageSetup.translationFont ??
-                          appSettings.translationFont;
-                      if (base == null) return;
-                      onUpdateSetup(
-                        (s) => s.copyWith(
-                          translationFont: base.copyWith(fontSize: n),
-                        ),
-                      );
-                    },
-                    onReset: () => onUpdateSetup(
-                      (s) => s.copyWith(clearTranslationFont: true),
-                    ),
                   ),
                   const SizedBox(height: 12),
                   Container(height: 1, color: AppColors.divider),
