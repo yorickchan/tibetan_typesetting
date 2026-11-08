@@ -17,6 +17,7 @@ import 'services/settings_service.dart';
 import 'services/screen_dpi_service.dart';
 import 'services/window_appearance_service.dart';
 import 'utils/colors.dart';
+import 'utils/font_fallbacks.dart';
 import 'utils/font_utils.dart' as font_utils;
 import 'widgets/sample_page.dart' show kMmToPx;
 import 'widgets/workspace_shell.dart';
@@ -246,6 +247,7 @@ class _TibetanTypesettingAppState extends State<TibetanTypesettingApp> {
 
     return ThemeData(
       brightness: _brightness,
+      fontFamilyFallback: kPreviewFontFallbacks,
       scaffoldBackgroundColor: bgColor,
       colorScheme: isDark
           ? ColorScheme.dark(
