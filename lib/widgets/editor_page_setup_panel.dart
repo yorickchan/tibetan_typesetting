@@ -97,8 +97,10 @@ class EditorPageSetupPanel extends StatelessWidget {
                       ),
                     ],
                   );
-                  final checks = Row(
-                    mainAxisSize: MainAxisSize.min,
+                  final checks = Wrap(
+                    spacing: 16,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       PanelCheckbox(
                         value: pageSetup.showFrame,
@@ -107,7 +109,6 @@ class EditorPageSetupPanel extends StatelessWidget {
                           (s) => s.copyWith(showFrame: value),
                         ),
                       ),
-                      const SizedBox(width: 16),
                       PanelCheckbox(
                         value: pageSetup.showRowLines,
                         label: l10n.showRowLines,
@@ -115,6 +116,19 @@ class EditorPageSetupPanel extends StatelessWidget {
                           (s) => s.copyWith(showRowLines: value),
                         ),
                       ),
+                      if (pageSetup.showRowLines)
+                        SizedBox(
+                          width: 150,
+                          child: CompactNumberField(
+                            initialValue: pageSetup.rowLineYOffset,
+                            label: l10n.rowLineYOffset,
+                            width: 150,
+                            signed: true,
+                            onChanged: (value) => onUpdateSetup(
+                              (s) => s.copyWith(rowLineYOffset: value),
+                            ),
+                          ),
+                        ),
                     ],
                   );
                   if (constraints.maxWidth >= 700) {

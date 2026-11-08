@@ -96,6 +96,9 @@ class PageSetup {
   final int columnCount;
   final bool showFrame;
   final bool showRowLines;
+  /// Vertical offset of the yellow row line from the row top, in preview
+  /// logical pixels. The PDF export converts it with the same mm ratio.
+  final double rowLineYOffset;
   final String leftVerticalTitle;
   final String pageNumber;
   final double flowGap;
@@ -143,6 +146,7 @@ class PageSetup {
     this.columnCount = 5,
     this.showFrame = true,
     this.showRowLines = true,
+    this.rowLineYOffset = 7,
     this.leftVerticalTitle = '',
     this.pageNumber = '',
     this.flowGap = 0.01,
@@ -197,6 +201,7 @@ class PageSetup {
     int? columnCount,
     bool? showFrame,
     bool? showRowLines,
+    double? rowLineYOffset,
     String? leftVerticalTitle,
     String? pageNumber,
     double? flowGap,
@@ -249,6 +254,7 @@ class PageSetup {
       columnCount: columnCount ?? this.columnCount,
       showFrame: showFrame ?? this.showFrame,
       showRowLines: showRowLines ?? this.showRowLines,
+      rowLineYOffset: rowLineYOffset ?? this.rowLineYOffset,
       leftVerticalTitle: leftVerticalTitle ?? this.leftVerticalTitle,
       pageNumber: pageNumber ?? this.pageNumber,
       flowGap: flowGap ?? this.flowGap,
@@ -316,6 +322,7 @@ class PageSetup {
     'columnCount': columnCount,
     'showFrame': showFrame,
     'showRowLines': showRowLines,
+    'rowLineYOffset': rowLineYOffset,
     'leftVerticalTitle': leftVerticalTitle,
     'pageNumber': pageNumber,
     'flowGap': flowGap,
@@ -368,6 +375,7 @@ class PageSetup {
     columnCount: (json['columnCount'] as num?)?.toInt() ?? 5,
     showFrame: json['showFrame'] as bool? ?? true,
     showRowLines: json['showRowLines'] as bool? ?? true,
+    rowLineYOffset: (json['rowLineYOffset'] as num?)?.toDouble() ?? 7,
     leftVerticalTitle: json['leftVerticalTitle'] as String? ?? '',
     pageNumber: json['pageNumber'] as String? ?? '',
     flowGap: (json['flowGap'] as num?)?.toDouble() ?? 0.01,

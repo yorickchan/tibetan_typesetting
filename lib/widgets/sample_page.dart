@@ -14,7 +14,6 @@ import '../utils/tibetan_segmenter.dart';
 
 double kMmToPx = 3.78;
 const double kPreviewTextTopPadding = 5;
-const double kPreviewRowLineOffset = 7;
 
 List<TextSpan> _colorizedChildren(
   String text,
@@ -157,6 +156,7 @@ class SamplePageWidget extends StatelessWidget {
             rows: effectiveFlowRows,
             colCount: effectiveColCount,
             showRowLines: setup.showRowLines,
+            rowLineYOffset: setup.rowLineYOffset,
             highlightBlockId: highlightBlockId,
             tibetanFont: tibFont,
             pronunciationFont: pronFont,
@@ -330,6 +330,7 @@ class _ContentGrid extends StatelessWidget {
   final List<List<LayoutCell>> rows;
   final int colCount;
   final bool showRowLines;
+  final double rowLineYOffset;
   final String? highlightBlockId;
   final FontConfig tibetanFont;
   final FontConfig pronunciationFont;
@@ -347,6 +348,7 @@ class _ContentGrid extends StatelessWidget {
     required this.rows,
     required this.colCount,
     required this.showRowLines,
+    required this.rowLineYOffset,
     this.highlightBlockId,
     required this.tibetanFont,
     required this.pronunciationFont,
@@ -413,7 +415,7 @@ class _ContentGrid extends StatelessWidget {
         if (showRowLines) {
           const rowLineColor = Color(0xFFFFD700);
           const rowLineHeight = 1.0;
-          const rowLineOffset = kPreviewRowLineOffset;
+          final rowLineOffset = rowLineYOffset;
           for (var ri = 0; ri < rowCount; ri++) {
             final hasNormalBlock = rows[ri].any(
               (cell) =>

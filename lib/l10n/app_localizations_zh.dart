@@ -204,6 +204,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get showRowLines => '显示行线';
 
   @override
+  String get rowLineYOffset => '行线 Y 偏移 (px)';
+
+  @override
   String get leftVerticalTitle => '左侧竖排标题';
 
   @override
@@ -834,6 +837,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get showRowLines => '顯示行線';
+
+  @override
+  String get rowLineYOffset => '行線 Y 位移 (px)';
 
   @override
   String get leftVerticalTitle => '左側豎排標題';

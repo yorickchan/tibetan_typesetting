@@ -915,7 +915,8 @@ class PdfService {
       }
 
       final positioned = <pw.Widget>[];
-      const rowLineYOffset = 7 * PdfPageFormat.mm / 3.78;
+      final rowLineYOffset =
+          ps.rowLineYOffset * PdfPageFormat.mm / 3.78;
       if (ps.showRowLines) {
         const rowLineH = 0.6;
         for (var ri = 0; ri < rows.length; ri++) {

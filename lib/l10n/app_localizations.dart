@@ -477,6 +477,12 @@ abstract class AppLocalizations {
   /// **'Show row lines'**
   String get showRowLines;
 
+  /// No description provided for @rowLineYOffset.
+  ///
+  /// In en, this message translates to:
+  /// **'Row line Y offset (px)'**
+  String get rowLineYOffset;
+
   /// No description provided for @leftVerticalTitle.
   ///
   /// In en, this message translates to:

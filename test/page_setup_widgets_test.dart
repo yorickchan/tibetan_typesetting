@@ -64,6 +64,50 @@ void main() {
       expect(updated.pageWidthMm, 232);
     });
 
+    testWidgets('shows row line offset only while row lines are enabled', (
+      tester,
+    ) async {
+      PageSetup updated = PageSetup(showRowLines: false);
+      await tester.pumpWidget(
+        buildPanel(
+          pageSetup: updated,
+          onUpdateSetup: (updater) => updated = updater(updated),
+        ),
+      );
+
+      expect(find.text(l10n.rowLineYOffset), findsNothing);
+
+      await tester.tap(find.text(l10n.showRowLines));
+      await tester.pump();
+      expect(updated.showRowLines, isTrue);
+
+      await tester.pumpWidget(
+        buildPanel(
+          pageSetup: updated,
+          onUpdateSetup: (updater) => updated = updater(updated),
+        ),
+      );
+
+      expect(find.text(l10n.rowLineYOffset), findsOneWidget);
+    });
+
+    testWidgets('updates the row line Y offset', (tester) async {
+      PageSetup updated = PageSetup(showRowLines: true);
+      await tester.pumpWidget(
+        buildPanel(
+          pageSetup: updated,
+          onUpdateSetup: (updater) => updated = updater(updated),
+        ),
+      );
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, l10n.rowLineYOffset),
+        '12',
+      );
+
+      expect(updated.rowLineYOffset, 12);
+    });
+
     testWidgets('updates show frame from the checkbox', (tester) async {
       PageSetup updated = PageSetup(showFrame: true);
       await tester.pumpWidget(

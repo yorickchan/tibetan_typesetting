@@ -87,6 +87,7 @@
   "sentenceSpacing": "Sentence spacing",
   "showFrame": "Show frame",
   "showRowLines": "Show row lines",
+  "rowLineYOffset": "Row line Y offset (px)",
   "leftVerticalTitle": "Left vertical title",
   "pageNumberLabel": "Page number",
   "exportPdfHint": "Use Export PDF to output. Zoom: Cmd +/−/0",

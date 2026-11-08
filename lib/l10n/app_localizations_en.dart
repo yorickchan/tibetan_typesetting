@@ -204,6 +204,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get showRowLines => 'Show row lines';
 
   @override
+  String get rowLineYOffset => 'Row line Y offset (px)';
+
+  @override
   String get leftVerticalTitle => 'Left vertical title';
 
   @override
