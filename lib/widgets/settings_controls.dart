@@ -272,7 +272,7 @@ class CompactFontRow extends StatelessWidget {
 
     return Row(
       children: [
-        SizedBox(width: 190, child: SettingsSectionLabel(label)),
+        SizedBox(width: 120, child: SettingsSectionLabel(label)),
         Expanded(
           child: FontPicker(
             label: '',
@@ -283,9 +283,9 @@ class CompactFontRow extends StatelessWidget {
             onSelected: onSelected,
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 6),
         SizedBox(
-          width: 76,
+          width: 70,
           child: TextFormField(
             initialValue: effectiveSize.toStringAsFixed(1),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -294,18 +294,17 @@ class CompactFontRow extends StatelessWidget {
             decoration: compactNumberDecor(l10n.size),
           ),
         ),
-        const SizedBox(width: 4),
         SizedBox(
-          width: 28,
+          width: 24,
           child: hasOverride
               ? IconButton(
-                  icon: const Icon(Icons.restart_alt, size: 16),
+                  icon: const Icon(Icons.restart_alt, size: 15),
                   tooltip: l10n.resetToDefault,
                   onPressed: onReset,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
-                    minWidth: 28,
-                    minHeight: 28,
+                    minWidth: 24,
+                    minHeight: 24,
                   ),
                 )
               : const SizedBox.shrink(),
