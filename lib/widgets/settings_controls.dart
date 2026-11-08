@@ -273,7 +273,8 @@ class CompactFontRow extends StatelessWidget {
     return Row(
       children: [
         SizedBox(width: 120, child: SettingsSectionLabel(label)),
-        Expanded(
+        SizedBox(
+          width: 360,
           child: FontPicker(
             label: '',
             placeholder: hasOverride
