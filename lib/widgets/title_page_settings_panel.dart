@@ -207,6 +207,43 @@ class TitlePageSettingsPanel extends StatelessWidget {
                       ],
                     ],
                   ),
+                  const SizedBox(height: 8),
+                  _SettingsField(
+                    label: l10n.tibetanLabel,
+                    value: pageSetup.titleTibetan,
+                    placeholder: l10n.titleTibetanLabel,
+                    fontFamily:
+                        (pageSetup.titleTibetanFont ?? tibFont).fontFamily,
+                    onChanged: (v) =>
+                        onUpdateSetup((s) => s.copyWith(titleTibetan: v)),
+                  ),
+                  const SizedBox(height: 8),
+                  _SettingsField(
+                    label: l10n.chineseLabel,
+                    value: pageSetup.titleChinese,
+                    placeholder: l10n.titleChineseLabel,
+                    fontFamily:
+                        (pageSetup.titleChineseFont ?? transFont).fontFamily,
+                    onChanged: (v) =>
+                        onUpdateSetup((s) => s.copyWith(titleChinese: v)),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 190,
+                        child: SettingsSectionLabel(l10n.titleTextGap),
+                      ),
+                      CompactNumberField(
+                        initialValue: pageSetup.titleTextGapPx,
+                        width: 90,
+                        signed: true,
+                        onChanged: (n) => onUpdateSetup(
+                          (s) => s.copyWith(titleTextGapPx: n),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 12),
                   LayoutBuilder(
                     builder: (context, constraints) {
@@ -258,42 +295,6 @@ class TitlePageSettingsPanel extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 12),
-                  _SettingsField(
-                    label: l10n.tibetanLabel,
-                    value: pageSetup.titleTibetan,
-                    placeholder: l10n.titleTibetanLabel,
-                    fontFamily:
-                        (pageSetup.titleTibetanFont ?? tibFont).fontFamily,
-                    onChanged: (v) =>
-                        onUpdateSetup((s) => s.copyWith(titleTibetan: v)),
-                  ),
-                  const SizedBox(height: 8),
-                  _SettingsField(
-                    label: l10n.chineseLabel,
-                    value: pageSetup.titleChinese,
-                    placeholder: l10n.titleChineseLabel,
-                    fontFamily:
-                        (pageSetup.titleChineseFont ?? transFont).fontFamily,
-                    onChanged: (v) =>
-                        onUpdateSetup((s) => s.copyWith(titleChinese: v)),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 190,
-                        child: SettingsSectionLabel(l10n.titleTextGap),
-                      ),
-                      CompactNumberField(
-                        initialValue: pageSetup.titleTextGapPx,
-                        width: 90,
-                        signed: true,
-                        onChanged: (n) => onUpdateSetup(
-                          (s) => s.copyWith(titleTextGapPx: n),
-                        ),
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 12),
                   Container(height: 1, color: AppColors.divider),
                   const SizedBox(height: 12),
