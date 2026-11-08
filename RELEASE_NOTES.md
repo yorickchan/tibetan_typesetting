@@ -1,5 +1,29 @@
 # Release Notes
 
+## [1.1.16] - 2026-11-09
+
+### ✨ New Features
+- **Template previews** — the Templates page now shows a responsive card grid with live SVG previews, names, rename-on-tap, and delete actions
+- **Row-line Y offset** — Page Setup exposes a signed offset field next to “Show row lines”; preview and PDF place the yellow line at the configured position and hide the field when row lines are off
+- **Font preview** — the font picker previews the hovered/focused font with a Tibetan and CJK/Latin sample
+- **Compact settings** — the settings form uses a 760 px column with a sticky save bar and status, compact font rows, inline page-size labels, and a two-column Language & theme section
+- **Compact dictionary** — pronunciation entries appear in a responsive three-column, one-line grid
+- **Title-page text first** — the Tibetan/Chinese title text and spacing fields now sit directly below the template picker
+- **Side-by-side font rows** — the title font rows share a line above 1180 px; project font rows share a line above 1280 px, otherwise stack
+- **Theme-aware window chrome** — the macOS title bar follows the app’s Light/Dark/System theme
+- **Sky sidebar selection** — navigation uses Material icons and the sky accent
+
+### 🐛 Fixes
+- PDF red highlights now keep vowel signs, shad, and punctuation black while consonants and tshegs stay red, matching the preview
+- Preview text falls back through system fonts for missing glyphs, and PDF export renders rare runes (e.g. U+27593) through HarfBuzz shaping when no embeddable font covers them
+- The exported content pages match the preview’s content-box height
+
+### 🔧 Maintenance
+- Added widget tests for the row-line offset control and font-fallback chain
+- `harfbuzz_ffi` 0.5.1
+
+---
+
 ## [1.1.15] - 2026-11-08
 
 ### ✨ New Features

@@ -1,6 +1,6 @@
 # Tibetan Typesetting
 
-[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.15**
+[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.16**
 
 <p align="center">
   <img src="assets/images/icon.png" width="128" alt="App Icon"/>
@@ -69,14 +69,16 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - **Custom SVG title page templates** managed from the Templates page and rendered as true vector graphics in PDF, with configurable insets for template and title text regions
 - **Content page templates** — apply an SVG background template to all content pages with configurable export margins
 - Opening mark blocks at the start of content
-- Optional row separator lines in editor preview and PDF export
+- Optional row separator lines in editor preview and PDF export, with a configurable Y offset
 - Configurable small block font size — independently adjust font size for compact ("small text") blocks in app settings and per-project font settings
 - **Tibetan–Chinese spacing** — configurable gap between Tibetan and Chinese lines for both the title page and content, in px; negative values overlap the lines
 - Flexible text sizing options with per-project font settings
+- Template cards show live SVG previews on the Templates page for faster management
 - Header and footer with configurable fields (file name, page number, date, custom text)
 
 ### 🖨️ PDF & HTML Export
 - High-quality PDF generation with proper Tibetan script rendering and vector SVG title page templates
+- Missing-glyph fallback in preview and PDF — rare characters render through system/shaper fallbacks instead of disappearing
 - HTML export for web viewing
 - Live preview with zoom controls before export
 - Print directly from the app
