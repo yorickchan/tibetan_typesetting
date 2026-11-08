@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/font_config.dart';
 import '../services/font_service.dart';
 import '../utils/colors.dart';
 
@@ -142,12 +143,118 @@ class _FontPickerDialog extends StatefulWidget {
 class _FontPickerDialogState extends State<_FontPickerDialog> {
   late TextEditingController _searchCtrl;
   List<SystemFontInfo> _filtered = [];
+  SystemFontInfo? _previewFont;
+  bool _previewLoading = false;
+  int _previewToken = 0;
+  final _loadedPreviews = <String>{};
 
   @override
   void initState() {
     super.initState();
     _searchCtrl = TextEditingController();
     _filtered = widget.fonts;
+
+    final selected = widget.fonts.where(
+      (f) => f.filePath == widget.selectedPath,
+    );
+    final initial = selected.isNotEmpty
+        ? selected.first
+        : (widget.fonts.isNotEmpty ? widget.fonts.first : null);
+    if (initial != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _preview(initial);
+      });
+    }
+  }
+
+  void _preview(SystemFontInfo font) {
+    final token = ++_previewToken;
+    final already = _loadedPreviews.contains(font.filePath);
+    setState(() {
+      _previewFont = font;
+      _previewLoading = !already;
+    });
+    if (already) return;
+
+    FontService()
+        .loadFontForPreview(
+          FontConfig(
+            fontFamily: font.familyName,
+            fontPath: font.filePath,
+            fontSize: 14,
+          ),
+        )
+        .then((_) {
+          if (!mounted || token != _previewToken) return;
+          setState(() {
+            _loadedPreviews.add(font.filePath);
+            _previewLoading = false;
+          });
+        });
+  }
+
+  Widget _previewPane() {
+    final font = _previewFont;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppColors.inputFill,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  font == null ? 'Hover a font to preview' : font.familyName,
+                  style: TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 10,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (_previewLoading)
+                const SizedBox(
+                  width: 10,
+                  height: 10,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    color: AppColors.sky500,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'ཨོཾ་མ་ཎི་པདྨེ་ཧཱུྃ',
+            style: TextStyle(
+              fontFamily: font?.familyName,
+              fontSize: 18,
+              color: AppColors.textPrimary,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            '嗡嘛呢叭咪吽 · Aa Bb Cc 123',
+            style: TextStyle(
+              fontFamily: font?.familyName,
+              fontSize: 12,
+              color: AppColors.textBody,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -230,6 +337,7 @@ class _FontPickerDialogState extends State<_FontPickerDialog> {
               ),
             ),
             const SizedBox(height: 4),
+            _previewPane(),
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -238,28 +346,42 @@ class _FontPickerDialogState extends State<_FontPickerDialog> {
                 itemBuilder: (context, index) {
                   final font = _filtered[index];
                   final selected = font.filePath == widget.selectedPath;
-                  return ListTile(
-                    dense: true,
-                    selected: selected,
-                    selectedTileColor: AppColors.sky500.withValues(alpha: 0.15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    title: Text(
-                      font.familyName,
-                      style: TextStyle(
-                        color: selected
-                            ? AppColors.sky400
-                            : AppColors.textSecondary,
-                        fontSize: 13,
+                  return MouseRegion(
+                    onEnter: (_) => _preview(font),
+                    cursor: SystemMouseCursors.click,
+                    child: Focus(
+                      onFocusChange: (hasFocus) {
+                        if (hasFocus) _preview(font);
+                      },
+                      child: ListTile(
+                        dense: true,
+                        selected: selected,
+                        selectedTileColor: AppColors.sky500.withValues(
+                          alpha: 0.15,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        title: Text(
+                          font.familyName,
+                          style: TextStyle(
+                            color: selected
+                                ? AppColors.sky400
+                                : AppColors.textSecondary,
+                            fontSize: 13,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: Text(
+                          font.fileType.toUpperCase(),
+                          style: TextStyle(
+                            color: AppColors.textFaint,
+                            fontSize: 9,
+                          ),
+                        ),
+                        onTap: () => widget.onSelected(font),
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    trailing: Text(
-                      font.fileType.toUpperCase(),
-                      style: TextStyle(color: AppColors.textFaint, fontSize: 9),
-                    ),
-                    onTap: () => widget.onSelected(font),
                   );
                 },
               ),
