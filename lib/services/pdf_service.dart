@@ -46,6 +46,8 @@ class PdfService {
   factory PdfService() => _instance;
 
   final _fontService = FontService();
+  List<ShapedTextFont> _chineseShapingFonts = const [];
+  ShapedTextFont? _rareGlyphShapingFont;
   String? _dharmaWheelSvg;
   final Map<String, String?> _templateSvgCache = {};
 
@@ -144,6 +146,28 @@ class PdfService {
       titleChiConfig,
       'title Chinese',
     );
+
+    // Shaping equivalents for the Chinese text paths, plus the macOS
+    // .LastResort font. The pdf package cannot embed .LastResort (CFF), but
+    // HarfBuzz can shape its outlines for rare glyphs that no native font
+    // covers (e.g. U+27593).
+    final chineseShaping = <ShapedTextFont>[];
+    for (final config in [pronConfig, transConfig, titleChiConfig]) {
+      final shaped = await _fontService.shapingFont(config);
+      if (shaped != null && !chineseShaping.any((f) => identical(f, shaped))) {
+        chineseShaping.add(shaped);
+      }
+    }
+    _chineseShapingFonts = chineseShaping;
+    _rareGlyphShapingFont = Platform.isMacOS
+        ? await _fontService.shapingFont(
+            const FontConfig(
+              fontFamily: '.LastResort',
+              fontPath: '/System/Library/Fonts/LastResort.otf',
+              fontSize: 10,
+            ),
+          )
+        : null;
 
     // Tibetan is drawn as shaped vector outlines through HarfBuzz; the same
     // bytes also feed the invisible Unicode text layer.
@@ -393,9 +417,31 @@ class PdfService {
     required List<pw.Font> fontFallback,
     required double fontSize,
     required double lineHeight,
+    required double maxWidth,
     pw.TextAlign textAlign = pw.TextAlign.left,
   }) {
     final built = font.getFont(context);
+    if (_rareGlyphShapingFont != null &&
+        _chineseShapingFonts.isNotEmpty &&
+        _needsShapedFallback(text, context, font, fontFallback)) {
+      final primary = _chineseShapingFonts.firstWhere(
+        (f) => identical(f.pdfFont, font),
+        orElse: () => _chineseShapingFonts.first,
+      );
+      return ShapedText(
+        text,
+        fonts: <ShapedTextFont>[
+          primary,
+          ..._chineseShapingFonts.where((f) => !identical(f, primary)),
+          _rareGlyphShapingFont!,
+        ],
+        fontSize: fontSize,
+        color: PdfColors.black,
+        maxWidth: maxWidth,
+        lineHeight: lineHeight,
+        textAlign: textAlign,
+      );
+    }
     return pw.Text(
       text,
       style: pw.TextStyle(
@@ -418,6 +464,29 @@ class PdfService {
       // it; splitting per character allows wrapping anywhere.
       lineSplitter: (line) => line.split(''),
     );
+  }
+
+  /// Whether [text] contains a rune that the native PDF fonts cannot draw but
+  /// a shaping font can. Those runs are rendered as HarfBuzz outlines.
+  bool _needsShapedFallback(
+    String text,
+    pw.Context context,
+    pw.Font font,
+    List<pw.Font> fontFallback,
+  ) {
+    final primary = font.getFont(context);
+    final fallbacks = [for (final f in fontFallback) f.getFont(context)];
+    final shaping = <ShapedTextFont>[
+      ..._chineseShapingFonts,
+      if (_rareGlyphShapingFont != null) _rareGlyphShapingFont!,
+    ];
+    for (final rune in text.runes) {
+      final native = primary.isRuneSupported(rune) ||
+          fallbacks.any((f) => f.isRuneSupported(rune));
+      if (native) continue;
+      if (shaping.any((f) => f.data.supportsRune(rune))) return true;
+    }
+    return false;
   }
 
   /// Title-page Tibetan, or null when no shapable Tibetan font is configured.
@@ -574,6 +643,7 @@ class PdfService {
                         fontFallback: fontFallback,
                         fontSize: chiFontSize,
                         lineHeight: 1.2,
+                        maxWidth: titleW,
                         textAlign: pw.TextAlign.center,
                       ),
                     ),
@@ -659,6 +729,7 @@ class PdfService {
                   fontFallback: fontFallback,
                   fontSize: chiFontSize,
                   lineHeight: 1.2,
+                  maxWidth: titleBoxW - 24,
                   textAlign: pw.TextAlign.center,
                 ),
               ),
@@ -763,6 +834,7 @@ class PdfService {
                   fontFallback: fontFallback,
                   fontSize: sideFontSize,
                   lineHeight: 1.2,
+                  maxWidth: outerH,
                   textAlign: pw.TextAlign.center,
                 ),
         );
@@ -867,6 +939,7 @@ class PdfService {
                 fontFallback: fontFallback,
                 fontSize: transSize,
                 lineHeight: 1.2,
+                maxWidth: maxW,
               ),
             if (!freeText && tibText != null) tibText,
             if (pron.isNotEmpty || trans.isNotEmpty)
@@ -890,6 +963,7 @@ class PdfService {
                         fontFallback: fontFallback,
                         fontSize: pronSize,
                         lineHeight: contentChineseLineHeight,
+                        maxWidth: maxW,
                       ),
                     ],
                     if (trans.isNotEmpty) ...[
@@ -905,6 +979,7 @@ class PdfService {
                         fontFallback: fontFallback,
                         fontSize: transSize,
                         lineHeight: contentChineseLineHeight,
+                        maxWidth: maxW,
                       ),
                     ],
                   ],
