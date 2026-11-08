@@ -289,6 +289,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
+  String get settingsSubtitle =>
+      'Manage defaults for new projects, data location, language, and appearance';
+
+  @override
   String get export => 'Export';
 
   @override
@@ -319,6 +323,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saved => 'Saved';
+
+  @override
+  String get unsavedChanges => 'Unsaved changes';
+
+  @override
+  String get allChangesSaved => 'All changes saved';
 
   @override
   String get saveError => 'Save failed';
@@ -530,6 +540,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currentDatabase => 'Current database';
 
   @override
+  String get copyPath => 'Copy path';
+
+  @override
+  String get copied => 'Copied';
+
+  @override
   String get openExistingDatabase => 'Open Existing Database…';
 
   @override
@@ -537,7 +553,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cloudDatabaseWarning =>
-      'Cloud folders are safe only when this database is open on one device at a time.';
+      'If this database is in a cloud-synced folder, open it on only one device at a time.';
 
   @override
   String get databaseRestartRequired =>

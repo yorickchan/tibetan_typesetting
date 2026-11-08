@@ -42,6 +42,31 @@ class MainFlutterWindow: NSWindow {
       }
     }
 
+    let appearanceChannel = FlutterMethodChannel(
+      name: "tibetan_typesetting/window_appearance",
+      binaryMessenger: flutterViewController.engine.binaryMessenger)
+    appearanceChannel.setMethodCallHandler { [weak self] call, result in
+      guard let self else {
+        result(FlutterError(code: "window_unavailable", message: nil, details: nil))
+        return
+      }
+      guard call.method == "set", let mode = call.arguments as? String else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      DispatchQueue.main.async {
+        switch mode {
+        case "light":
+          self.appearance = NSAppearance(named: .aqua)
+        case "dark":
+          self.appearance = NSAppearance(named: .darkAqua)
+        default:
+          self.appearance = nil
+        }
+      }
+      result(nil)
+    }
+
     super.awakeFromNib()
   }
 

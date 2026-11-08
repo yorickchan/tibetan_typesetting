@@ -45,6 +45,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final _fontService = FontService();
   final _databaseLocationService = createDatabaseLocationService();
   AppSettings? _settings;
+  AppSettings? _originalSettings;
   void _showSnackMsg(String msg, {bool error = false}) {
     if (!mounted) return;
     showAppSnackBar(context, msg, error: error);
@@ -96,6 +97,7 @@ class _SettingsPageState extends State<SettingsPage> {
     if (!mounted) return;
     setState(() {
       _settings = settings;
+      _originalSettings = settings;
       _usesDefaultDatabase = databasePreference.usesDefault;
       _databasePath = databasePath;
       _loading = false;
@@ -209,7 +211,10 @@ class _SettingsPageState extends State<SettingsPage> {
     }
 
     if (!mounted) return;
-    setState(() => _saving = false);
+    setState(() {
+      _saving = false;
+      _originalSettings = _settings;
+    });
     if (widget.asPage) {
       widget.onSaved?.call(_settings!);
       _showSnackMsg(_l10n.saved);
@@ -285,10 +290,10 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   bool get _canSave {
-    if (widget.requireFonts) {
-      return _settings?.hasAnyFontConfigured ?? false;
-    }
-    return true;
+    final settings = _settings;
+    if (settings == null) return false;
+    if (widget.requireFonts && !settings.hasAnyFontConfigured) return false;
+    return settings != _originalSettings;
   }
 
   void _updateSmallBlockSize(String v) {
@@ -310,11 +315,29 @@ class _SettingsPageState extends State<SettingsPage> {
     if (widget.asPage) {
       return AppShell(
         title: _l10n.settings,
-        child: _loading
-            ? const Center(
-                child: CircularProgressIndicator(color: AppColors.sky500),
-              )
-            : _buildContent(),
+        subtitle: _l10n.settingsSubtitle,
+        child: Column(
+          children: [
+            Expanded(
+              child: _loading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.sky500,
+                      ),
+                    )
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 760),
+                          child: _buildFormFields(includeSave: false),
+                        ),
+                      ),
+                    ),
+            ),
+            if (!_loading) _buildSaveBar(),
+          ],
+        ),
       );
     }
     return Dialog(
@@ -329,163 +352,161 @@ class _SettingsPageState extends State<SettingsPage> {
                   child: CircularProgressIndicator(color: AppColors.sky500),
                 ),
               )
-            : _buildContent(),
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: _buildFormFields(includeSave: true),
+              ),
       ),
     );
   }
 
-  Widget _buildContent() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (!widget.asPage)
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _l10n.applicationSettings,
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                if (!widget.requireFonts)
-                  IconButton(
-                    icon: Icon(
-                      Icons.close,
-                      size: 18,
-                      color: AppColors.textCaption,
-                    ),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-              ],
-            ),
-          if (widget.requireFonts) ...[
-            const SizedBox(height: 4),
-            Text(
-              _l10n.configureFonts,
-              style: TextStyle(color: AppColors.textCaption, fontSize: 12),
-            ),
-          ],
-          const SizedBox(height: 20),
-
-          _sectionLabel(_l10n.defaultFonts),
-          const SizedBox(height: 12),
-
-          _fontRow(
-            label: _l10n.tibetan.toUpperCase(),
-            selectedPath: _settings!.tibetanFont?.fontPath,
-            onSelected: _updateTibetanFont,
-            sizeCtrl: _tibSizeCtrl,
-            onSizeChanged: _updateTibetanSize,
-          ),
-          const SizedBox(height: 12),
-          _fontRow(
-            label: _l10n.pronunciation.toUpperCase(),
-            selectedPath: _settings!.pronunciationFont?.fontPath,
-            onSelected: _updatePronunciationFont,
-            sizeCtrl: _pronSizeCtrl,
-            onSizeChanged: _updatePronunciationSize,
-          ),
-          const SizedBox(height: 12),
-          _fontRow(
-            label: _l10n.translation.toUpperCase(),
-            selectedPath: _settings!.translationFont?.fontPath,
-            onSelected: _updateTranslationFont,
-            sizeCtrl: _transSizeCtrl,
-            onSizeChanged: _updateTranslationSize,
-          ),
-
-          if (_settings!.tibetanFont != null) ...[
-            const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: _numberField(
-                    controller: _smallBlockSizeCtrl,
-                    label: _l10n.smallBlockFontSizeLabel,
-                    onChanged: _updateSmallBlockSize,
-                  ),
-                ),
-              ],
-            ),
-          ],
-
-          const SizedBox(height: 24),
-
-          _sectionLabel(_l10n.defaultPageSize),
-          const SizedBox(height: 12),
+  Widget _buildFormFields({required bool includeSave}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (!widget.asPage)
           Row(
             children: [
               Expanded(
-                child: _numberField(
-                  controller: _widthCtrl,
-                  label: '${_l10n.width} (mm)',
-                  onChanged: (v) {
-                    final n = double.tryParse(v);
-                    if (n != null && n >= 50) {
-                      setState(
-                        () => _settings = _settings!.copyWith(
-                          defaultPageWidthMm: n,
-                        ),
-                      );
-                    }
-                  },
+                child: Text(
+                  _l10n.applicationSettings,
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _numberField(
-                  controller: _heightCtrl,
-                  label: '${_l10n.height} (mm)',
-                  onChanged: (v) {
-                    final n = double.tryParse(v);
-                    if (n != null && n >= 50) {
-                      setState(
-                        () => _settings = _settings!.copyWith(
-                          defaultPageHeightMm: n,
-                        ),
-                      );
-                    }
-                  },
+              if (!widget.requireFonts)
+                IconButton(
+                  icon: Icon(
+                    Icons.close,
+                    size: 18,
+                    color: AppColors.textSecondary,
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
-              ),
             ],
           ),
-
-          const SizedBox(height: 24),
-
-          _sectionLabel(_l10n.database.toUpperCase()),
-          const SizedBox(height: 12),
-          DatabaseLocationPanel(
-            path: _databasePath,
-            usesDefault: _usesDefaultDatabase,
-            restartRequired: _databaseRestartRequired,
-            busy: _databaseBusy,
-            onOpenExisting: _openExistingDatabase,
-            onUseDefault: _useDefaultDatabase,
+        if (widget.requireFonts) ...[
+          const SizedBox(height: 4),
+          Text(
+            _l10n.configureFonts,
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
           ),
+        ],
+        const SizedBox(height: 20),
 
-          const SizedBox(height: 24),
+        _sectionLabel(_l10n.defaultFonts),
+        const SizedBox(height: 12),
 
-          _sectionLabel(_l10n.language.toUpperCase()),
+        _fontRow(
+          label: _l10n.tibetan,
+          selectedPath: _settings!.tibetanFont?.fontPath,
+          onSelected: _updateTibetanFont,
+          sizeCtrl: _tibSizeCtrl,
+          onSizeChanged: _updateTibetanSize,
+        ),
+        const SizedBox(height: 12),
+        _fontRow(
+          label: _l10n.pronunciation,
+          selectedPath: _settings!.pronunciationFont?.fontPath,
+          onSelected: _updatePronunciationFont,
+          sizeCtrl: _pronSizeCtrl,
+          onSizeChanged: _updatePronunciationSize,
+        ),
+        const SizedBox(height: 12),
+        _fontRow(
+          label: _l10n.translation,
+          selectedPath: _settings!.translationFont?.fontPath,
+          onSelected: _updateTranslationFont,
+          sizeCtrl: _transSizeCtrl,
+          onSizeChanged: _updateTranslationSize,
+        ),
+
+        if (_settings!.tibetanFont != null) ...[
           const SizedBox(height: 12),
-          _buildLanguageSelector(),
+          SizedBox(
+            width: 140,
+            child: _numberField(
+              controller: _smallBlockSizeCtrl,
+              label: _l10n.smallBlockFontSizeLabel,
+              hintText: _l10n.smallBlockFontSizeHint,
+              onChanged: _updateSmallBlockSize,
+            ),
+          ),
+        ],
 
+        const SizedBox(height: 24),
+
+        _sectionLabel(_l10n.defaultPageSize),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _numberField(
+                controller: _widthCtrl,
+                label: '${_l10n.width} (mm)',
+                onChanged: (v) {
+                  final n = double.tryParse(v);
+                  if (n != null && n >= 50) {
+                    setState(
+                      () => _settings = _settings!.copyWith(
+                        defaultPageWidthMm: n,
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _numberField(
+                controller: _heightCtrl,
+                label: '${_l10n.height} (mm)',
+                onChanged: (v) {
+                  final n = double.tryParse(v);
+                  if (n != null && n >= 50) {
+                    setState(
+                      () => _settings = _settings!.copyWith(
+                        defaultPageHeightMm: n,
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+
+        _sectionLabel(_l10n.database.toUpperCase()),
+        const SizedBox(height: 12),
+        DatabaseLocationPanel(
+          path: _databasePath,
+          usesDefault: _usesDefaultDatabase,
+          restartRequired: _databaseRestartRequired,
+          busy: _databaseBusy,
+          onOpenExisting: _openExistingDatabase,
+          onUseDefault: _useDefaultDatabase,
+        ),
+
+        const SizedBox(height: 24),
+
+        _sectionLabel(_l10n.language.toUpperCase()),
+        const SizedBox(height: 12),
+        _buildLanguageSelector(),
+
+        const SizedBox(height: 24),
+
+        _sectionLabel(_l10n.theme.toUpperCase()),
+        const SizedBox(height: 12),
+        _buildThemeSelector(),
+
+        if (includeSave) ...[
           const SizedBox(height: 24),
-
-          _sectionLabel(_l10n.theme.toUpperCase()),
-          const SizedBox(height: 12),
-          _buildThemeSelector(),
-
-          const SizedBox(height: 24),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -494,35 +515,58 @@ class _SettingsPageState extends State<SettingsPage> {
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(
                     _l10n.cancel,
-                    style: TextStyle(color: AppColors.textCaption),
+                    style: TextStyle(color: AppColors.textSecondary),
                   ),
                 ),
               const SizedBox(width: 8),
-              TextButton(
-                onPressed: _canSave && !_saving ? _save : null,
-                style: TextButton.styleFrom(
-                  backgroundColor: _canSave
-                      ? AppColors.sky500
-                      : AppColors.border,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: Text(
-                  _saving ? _l10n.saving : _l10n.save,
-                  style: TextStyle(
-                    color: _canSave ? Colors.white : AppColors.textMuted,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
+              _saveButton(),
             ],
           ),
         ],
+      ],
+    );
+  }
+
+  Widget _buildSaveBar() {
+    final status = _saving
+        ? _l10n.saving
+        : (_canSave ? _l10n.unsavedChanges : _l10n.allChangesSaved);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.divider)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text(
+            status,
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+          ),
+          const SizedBox(width: 12),
+          _saveButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _saveButton() {
+    return TextButton(
+      onPressed: _canSave && !_saving ? _save : null,
+      style: TextButton.styleFrom(
+        backgroundColor: _canSave ? AppColors.sky500 : AppColors.border,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: Text(
+        _saving ? _l10n.saving : _l10n.save,
+        style: TextStyle(
+          color: _canSave ? Colors.white : AppColors.textMuted,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
@@ -531,8 +575,8 @@ class _SettingsPageState extends State<SettingsPage> {
     return Text(
       text,
       style: TextStyle(
-        color: AppColors.textMuted,
-        fontSize: 10,
+        color: AppColors.textSecondary,
+        fontSize: 11,
         fontWeight: FontWeight.w600,
         letterSpacing: 1.2,
       ),
@@ -573,6 +617,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _numberField({
     required TextEditingController controller,
     required String label,
+    String? hintText,
     required ValueChanged<String> onChanged,
   }) {
     return Column(
@@ -581,10 +626,9 @@ class _SettingsPageState extends State<SettingsPage> {
         Text(
           label,
           style: TextStyle(
-            color: AppColors.textCaption,
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1.0,
+            color: AppColors.textSecondary,
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
           ),
         ),
         const SizedBox(height: 4),
@@ -601,6 +645,11 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             filled: true,
             fillColor: AppColors.inputFill,
+            hintText: hintText,
+            hintStyle: TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 11,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(color: AppColors.border),

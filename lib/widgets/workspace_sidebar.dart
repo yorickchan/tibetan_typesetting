@@ -45,7 +45,7 @@ class WorkspaceSidebar extends StatelessWidget {
               Text(
                 l10n.workspaceTitle.toUpperCase(),
                 style: TextStyle(
-                  color: AppColors.textMuted,
+                  color: AppColors.textSecondary,
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 1.4,
@@ -55,25 +55,25 @@ class WorkspaceSidebar extends StatelessWidget {
               _sectionLabel(l10n.workspaceSection),
               const SizedBox(height: 8),
               _NavItem(
-                glyph: 'P',
+                icon: Icons.folder_outlined,
                 label: l10n.projects,
                 selected: selected == WorkspaceSection.projects,
                 onTap: () => onSelected(WorkspaceSection.projects),
               ),
               _NavItem(
-                glyph: '文',
+                icon: Icons.menu_book_outlined,
                 label: l10n.dictionary,
                 selected: selected == WorkspaceSection.dictionary,
                 onTap: () => onSelected(WorkspaceSection.dictionary),
               ),
               _NavItem(
-                glyph: 'T',
+                icon: Icons.dashboard_outlined,
                 label: l10n.templates,
                 selected: selected == WorkspaceSection.templates,
                 onTap: () => onSelected(WorkspaceSection.templates),
               ),
               _NavItem(
-                glyph: 'S',
+                icon: Icons.settings_outlined,
                 label: l10n.settings,
                 selected: selected == WorkspaceSection.settings,
                 onTap: () => onSelected(WorkspaceSection.settings),
@@ -92,13 +92,16 @@ class WorkspaceSidebar extends StatelessWidget {
                       horizontal: 4,
                       vertical: 7,
                     ),
-                    child: Text(
-                      project.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: AppColors.navText,
-                        fontSize: 13,
+                    child: Tooltip(
+                      message: project.name,
+                      child: Text(
+                        project.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: AppColors.navText,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ),
@@ -115,8 +118,8 @@ class WorkspaceSidebar extends StatelessWidget {
     return Text(
       text.toUpperCase(),
       style: TextStyle(
-        color: AppColors.textMuted,
-        fontSize: 10,
+        color: AppColors.textSecondary,
+        fontSize: 11,
         fontWeight: FontWeight.w600,
         letterSpacing: 1.2,
       ),
@@ -125,13 +128,13 @@ class WorkspaceSidebar extends StatelessWidget {
 }
 
 class _NavItem extends StatelessWidget {
-  final String glyph;
+  final IconData icon;
   final String label;
   final bool selected;
   final VoidCallback onTap;
 
   const _NavItem({
-    required this.glyph,
+    required this.icon,
     required this.label,
     required this.selected,
     required this.onTap,
@@ -162,16 +165,8 @@ class _NavItem extends StatelessWidget {
             child: Row(
               children: [
                 SizedBox(
-                  width: 16,
-                  child: Text(
-                    glyph,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: foreground,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  width: 20,
+                  child: Icon(icon, size: 18, color: foreground),
                 ),
                 const SizedBox(width: 10),
                 Expanded(

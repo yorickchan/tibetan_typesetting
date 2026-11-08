@@ -78,10 +78,9 @@ class _FontPickerState extends State<FontPicker> {
           Text(
             widget.label,
             style: TextStyle(
-              color: AppColors.textCaption,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.0,
+              color: AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 4),

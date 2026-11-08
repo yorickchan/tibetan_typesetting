@@ -4,6 +4,7 @@ import '../utils/colors.dart';
 
 class AppShell extends StatelessWidget {
   final String title;
+  final String? subtitle;
   final Widget? leading;
   final List<Widget>? actions;
   final Widget child;
@@ -11,6 +12,7 @@ class AppShell extends StatelessWidget {
   const AppShell({
     super.key,
     required this.title,
+    this.subtitle,
     this.leading,
     this.actions,
     required this.child,
@@ -32,14 +34,30 @@ class AppShell extends StatelessWidget {
                     onPressed: () => Navigator.pop(context),
                   )
                 : null),
-        title: Text(
-          title,
-          style: TextStyle(
-            color: AppColors.textCaption,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
-          ),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.3,
+              ),
+            ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 2),
+              Text(
+                subtitle!,
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ],
         ),
         actions: actions,
         bottom: PreferredSize(

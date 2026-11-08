@@ -289,6 +289,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings => '设置';
 
   @override
+  String get settingsSubtitle => '管理新项目的默认设置、数据位置、语言和外观';
+
+  @override
   String get export => '导出';
 
   @override
@@ -319,6 +322,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get saved => '已保存';
+
+  @override
+  String get unsavedChanges => '未保存的更改';
+
+  @override
+  String get allChangesSaved => '所有更改已保存';
 
   @override
   String get saveError => '保存失败';
@@ -528,13 +537,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get currentDatabase => '当前数据库';
 
   @override
+  String get copyPath => '复制路径';
+
+  @override
+  String get copied => '已复制';
+
+  @override
   String get openExistingDatabase => '打开现有数据库…';
 
   @override
   String get useDefaultDatabase => '使用默认数据库';
 
   @override
-  String get cloudDatabaseWarning => '云端文件夹仅适合一次由一台设备打开此数据库。';
+  String get cloudDatabaseWarning => '如果此数据库位于云端同步文件夹中，请仅在一台设备上打开。';
 
   @override
   String get databaseRestartRequired => '请重新启动应用程序以使用此数据库。';
@@ -903,6 +918,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings => '設定';
 
   @override
+  String get settingsSubtitle => '管理新專案的預設設定、資料位置、語言與外觀';
+
+  @override
   String get export => '匯出';
 
   @override
@@ -933,6 +951,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get saved => '已儲存';
+
+  @override
+  String get unsavedChanges => '未儲存的變更';
+
+  @override
+  String get allChangesSaved => '所有變更已儲存';
 
   @override
   String get saveError => '儲存失敗';
@@ -1142,13 +1166,19 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get currentDatabase => '目前資料庫';
 
   @override
+  String get copyPath => '複製路徑';
+
+  @override
+  String get copied => '已複製';
+
+  @override
   String get openExistingDatabase => '開啟現有資料庫…';
 
   @override
   String get useDefaultDatabase => '使用預設資料庫';
 
   @override
-  String get cloudDatabaseWarning => '雲端資料夾僅適合一次由一台裝置開啟此資料庫。';
+  String get cloudDatabaseWarning => '如果此資料庫位於雲端同步資料夾中，請僅在一部裝置上開啟。';
 
   @override
   String get databaseRestartRequired => '請重新啟動應用程式以使用此資料庫。';

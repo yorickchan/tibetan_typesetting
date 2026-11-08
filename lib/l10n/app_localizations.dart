@@ -639,6 +639,12 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
+  /// No description provided for @settingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage defaults for new projects, data location, language, and appearance'**
+  String get settingsSubtitle;
+
   /// No description provided for @export.
   ///
   /// In en, this message translates to:
@@ -698,6 +704,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved'**
   String get saved;
+
+  /// No description provided for @unsavedChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get unsavedChanges;
+
+  /// No description provided for @allChangesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'All changes saved'**
+  String get allChangesSaved;
 
   /// No description provided for @saveError.
   ///
@@ -1101,6 +1119,18 @@ abstract class AppLocalizations {
   /// **'Current database'**
   String get currentDatabase;
 
+  /// No description provided for @copyPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy path'**
+  String get copyPath;
+
+  /// No description provided for @copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get copied;
+
   /// No description provided for @openExistingDatabase.
   ///
   /// In en, this message translates to:
@@ -1116,7 +1146,7 @@ abstract class AppLocalizations {
   /// No description provided for @cloudDatabaseWarning.
   ///
   /// In en, this message translates to:
-  /// **'Cloud folders are safe only when this database is open on one device at a time.'**
+  /// **'If this database is in a cloud-synced folder, open it on only one device at a time.'**
   String get cloudDatabaseWarning;
 
   /// No description provided for @databaseRestartRequired.

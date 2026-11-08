@@ -15,6 +15,7 @@ import 'services/database_startup_controller.dart';
 import 'services/font_service.dart';
 import 'services/settings_service.dart';
 import 'services/screen_dpi_service.dart';
+import 'services/window_appearance_service.dart';
 import 'utils/colors.dart';
 import 'utils/font_utils.dart' as font_utils;
 import 'widgets/sample_page.dart' show kMmToPx;
@@ -195,11 +196,20 @@ class TibetanTypesettingApp extends StatefulWidget {
 
 class _TibetanTypesettingAppState extends State<TibetanTypesettingApp> {
   late AppSettings _settings;
+  AppTheme? _appliedWindowTheme;
 
   @override
   void initState() {
     super.initState();
     _settings = widget.initialSettings;
+    _applyWindowAppearance();
+  }
+
+  void _applyWindowAppearance() {
+    final theme = _settings.theme;
+    if (_appliedWindowTheme == theme) return;
+    _appliedWindowTheme = theme;
+    WindowAppearanceService.set(theme);
   }
 
   Locale? get _locale {
@@ -303,6 +313,7 @@ class _TibetanTypesettingAppState extends State<TibetanTypesettingApp> {
 
   @override
   Widget build(BuildContext context) {
+    _applyWindowAppearance();
     return PlatformMenuBar(
       menus: [
         PlatformMenu(

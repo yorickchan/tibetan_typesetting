@@ -18,8 +18,12 @@ class AppColors {
   static const lightSlate50 = Color(0xFFf8fafc);
 
   // Accent colors (unchanged across themes)
+  static const sky900 = Color(0xFF0c4a6e);
+  static const sky600 = Color(0xFF0284c7);
   static const sky500 = Color(0xFF0ea5e9);
   static const sky400 = Color(0xFF38bdf8);
+  static const sky300 = Color(0xFF7dd3fc);
+  static const sky100 = Color(0xFFe0f2fe);
 
   static const rose600 = Color(0xFFe11d48);
   static const rose500 = Color(0xFFf43f5e);
@@ -86,8 +90,8 @@ class AppColors {
       buttonMutedBg = slate200;
       buttonMutedFg = slate800;
 
-      navSelectedBg = const Color(0xFFEDE9FE);
-      navSelectedBorder = const Color(0xFFC4B5FD);
+      navSelectedBg = sky100;
+      navSelectedBorder = sky300;
       navSelectedText = slate900;
       navText = slate600;
     } else {
@@ -111,8 +115,8 @@ class AppColors {
       buttonMutedBg = slate100;
       buttonMutedFg = slate900;
 
-      navSelectedBg = const Color(0xFF1B1830);
-      navSelectedBorder = const Color(0xFF4B4570);
+      navSelectedBg = sky900;
+      navSelectedBorder = sky600;
       navSelectedText = Colors.white;
       navText = slate400;
     }
