@@ -113,6 +113,7 @@
   "about": "關於藏文排版",
   "language": "語言",
   "theme": "主題",
+  "languageTheme": "語言與主題",
   "themeSystem": "跟隨系統",
   "themeLight": "淺色",
   "themeDark": "深色",

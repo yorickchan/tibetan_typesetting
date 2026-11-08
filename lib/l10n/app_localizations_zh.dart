@@ -360,6 +360,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get theme => '主题';
 
   @override
+  String get languageTheme => '语言与主题';
+
+  @override
   String get themeSystem => '跟随系统';
 
   @override
@@ -987,6 +990,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get theme => '主題';
+
+  @override
+  String get languageTheme => '語言與主題';
 
   @override
   String get themeSystem => '跟隨系統';

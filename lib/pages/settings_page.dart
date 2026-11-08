@@ -396,10 +396,29 @@ class _SettingsPageState extends State<SettingsPage> {
             style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
           ),
         ],
-        const SizedBox(height: 20),
+        const SizedBox(height: 12),
 
         _sectionLabel(_l10n.defaultFonts),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
+
+        Row(
+          children: [
+            const SizedBox(width: 100),
+            const Expanded(child: SizedBox()),
+            SizedBox(
+              width: 80,
+              child: Text(
+                '${_l10n.size} (pt)',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
 
         _fontRow(
           label: _l10n.tibetan,
@@ -408,7 +427,7 @@ class _SettingsPageState extends State<SettingsPage> {
           sizeCtrl: _tibSizeCtrl,
           onSizeChanged: _updateTibetanSize,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         _fontRow(
           label: _l10n.pronunciation,
           selectedPath: _settings!.pronunciationFont?.fontPath,
@@ -416,7 +435,7 @@ class _SettingsPageState extends State<SettingsPage> {
           sizeCtrl: _pronSizeCtrl,
           onSizeChanged: _updatePronunciationSize,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         _fontRow(
           label: _l10n.translation,
           selectedPath: _settings!.translationFont?.fontPath,
@@ -426,64 +445,122 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
 
         if (_settings!.tibetanFont != null) ...[
-          const SizedBox(height: 12),
-          SizedBox(
-            width: 140,
-            child: _numberField(
-              controller: _smallBlockSizeCtrl,
-              label: _l10n.smallBlockFontSizeLabel,
-              hintText: _l10n.smallBlockFontSizeHint,
-              onChanged: _updateSmallBlockSize,
+          const SizedBox(height: 8),
+          Semantics(
+            label: _l10n.smallBlockFontSizeLabel,
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 140,
+                  child: Text(
+                    _l10n.smallBlockFontSizeLabel,
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 140,
+                  child: _numberField(
+                    controller: _smallBlockSizeCtrl,
+                    label: '',
+                    hintText: _l10n.smallBlockFontSizeHint,
+                    onChanged: _updateSmallBlockSize,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
 
         _sectionLabel(_l10n.defaultPageSize),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
-              child: _numberField(
-                controller: _widthCtrl,
+              child: Semantics(
                 label: '${_l10n.width} (mm)',
-                onChanged: (v) {
-                  final n = double.tryParse(v);
-                  if (n != null && n >= 50) {
-                    setState(
-                      () => _settings = _settings!.copyWith(
-                        defaultPageWidthMm: n,
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 100,
+                      child: Text(
+                        '${_l10n.width} (mm)',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    );
-                  }
-                },
+                    ),
+                    Expanded(
+                      child: _numberField(
+                        controller: _widthCtrl,
+                        label: '',
+                        onChanged: (v) {
+                          final n = double.tryParse(v);
+                          if (n != null && n >= 50) {
+                            setState(
+                              () => _settings = _settings!.copyWith(
+                                defaultPageWidthMm: n,
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Expanded(
-              child: _numberField(
-                controller: _heightCtrl,
+              child: Semantics(
                 label: '${_l10n.height} (mm)',
-                onChanged: (v) {
-                  final n = double.tryParse(v);
-                  if (n != null && n >= 50) {
-                    setState(
-                      () => _settings = _settings!.copyWith(
-                        defaultPageHeightMm: n,
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 100,
+                      child: Text(
+                        '${_l10n.height} (mm)',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    );
-                  }
-                },
+                    ),
+                    Expanded(
+                      child: _numberField(
+                        controller: _heightCtrl,
+                        label: '',
+                        onChanged: (v) {
+                          final n = double.tryParse(v);
+                          if (n != null && n >= 50) {
+                            setState(
+                              () => _settings = _settings!.copyWith(
+                                defaultPageHeightMm: n,
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
         ),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
 
         _sectionLabel(_l10n.database.toUpperCase()),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         DatabaseLocationPanel(
           path: _databasePath,
           usesDefault: _usesDefaultDatabase,
@@ -493,20 +570,53 @@ class _SettingsPageState extends State<SettingsPage> {
           onUseDefault: _useDefaultDatabase,
         ),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
 
-        _sectionLabel(_l10n.language.toUpperCase()),
-        const SizedBox(height: 12),
-        _buildLanguageSelector(),
-
-        const SizedBox(height: 24),
-
-        _sectionLabel(_l10n.theme.toUpperCase()),
-        const SizedBox(height: 12),
-        _buildThemeSelector(),
+        _sectionLabel(_l10n.languageTheme),
+        const SizedBox(height: 8),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _l10n.language,
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  _buildLanguageSelector(),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _l10n.theme,
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  _buildThemeSelector(),
+                ],
+              ),
+            ),
+          ],
+        ),
 
         if (includeSave) ...[
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -590,27 +700,40 @@ class _SettingsPageState extends State<SettingsPage> {
     required TextEditingController sizeCtrl,
     required ValueChanged<String> onSizeChanged,
   }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          flex: 3,
-          child: FontPicker(
-            label: label,
-            selectedPath: selectedPath,
-            onSelected: onSelected,
+    return Semantics(
+      label: label,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        SizedBox(
-          width: 80,
-          child: _numberField(
-            controller: sizeCtrl,
-            label: '${_l10n.size} (pt)',
-            onChanged: onSizeChanged,
+          Expanded(
+            child: FontPicker(
+              label: '',
+              selectedPath: selectedPath,
+              onSelected: onSelected,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 80,
+            child: _numberField(
+              controller: sizeCtrl,
+              label: '',
+              onChanged: onSizeChanged,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -623,15 +746,17 @@ class _SettingsPageState extends State<SettingsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
+        if (label.isNotEmpty) ...[
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
+          const SizedBox(height: 4),
+        ],
         TextField(
           controller: controller,
           onChanged: onChanged,

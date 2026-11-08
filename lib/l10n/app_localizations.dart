@@ -777,6 +777,12 @@ abstract class AppLocalizations {
   /// **'Theme'**
   String get theme;
 
+  /// No description provided for @languageTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Language & theme'**
+  String get languageTheme;
+
   /// No description provided for @themeSystem.
   ///
   /// In en, this message translates to:

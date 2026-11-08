@@ -158,6 +158,7 @@
   "about": "About Tibetan Typesetting",
   "language": "Language",
   "theme": "Theme",
+  "languageTheme": "Language & theme",
   "themeSystem": "System",
   "themeLight": "Light",
   "themeDark": "Dark",
