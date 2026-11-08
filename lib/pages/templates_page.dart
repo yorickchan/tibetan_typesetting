@@ -9,6 +9,7 @@ import '../services/title_page_template_service.dart';
 import '../utils/colors.dart';
 import '../utils/snackbar.dart';
 import '../widgets/app_shell.dart';
+import '../widgets/settings_controls.dart';
 import '../widgets/text_field_dialog.dart';
 
 /// Manages the SVG title-page templates used when composing a document.
@@ -171,53 +172,66 @@ class _TemplatesPageState extends State<TemplatesPage> {
                 textAlign: TextAlign.center,
               ),
             )
-          : ListView.separated(
+          : GridView.builder(
+              padding: EdgeInsets.zero,
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 320,
+                mainAxisExtent: 180,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+              ),
               itemCount: _templates.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final template = _templates[index];
                 return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: AppColors.cardBg,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: AppColors.border),
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.description_outlined,
-                        size: 16,
-                        color: AppColors.textCaption,
+                      GestureDetector(
+                        onTap: () => _renameTemplate(template),
+                        child: TemplateThumb(
+                          svgContent: template.svgContent,
+                          width: 260,
+                          height: 100,
+                        ),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => _renameTemplate(template),
-                          child: Text(
-                            template.name,
-                            style: TextStyle(
-                              color: AppColors.textBody,
-                              fontSize: 13,
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => _renameTemplate(template),
+                              child: Text(
+                                template.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: AppColors.textBody,
+                                  fontSize: 13,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.delete_outline,
-                          size: 16,
-                          color: AppColors.rose600,
-                        ),
-                        onPressed: () => _deleteTemplate(template),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                          minWidth: 28,
-                          minHeight: 28,
-                        ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              size: 16,
+                              color: AppColors.rose600,
+                            ),
+                            onPressed: () => _deleteTemplate(template),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                              minWidth: 28,
+                              minHeight: 28,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
