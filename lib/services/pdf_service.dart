@@ -824,6 +824,10 @@ class PdfService {
         final isTibetan = text.runes.any((r) => r >= 0x0F00 && r <= 0x0FFF);
         inner = pw.Transform.rotateBox(
           angle: 1.5708,
+          // The panel's width would otherwise clamp the text to the narrow
+          // side column; lay it out unconstrained so the explicit width below
+          // can span the page height and keep the title on one line.
+          unconstrained: true,
           child: isTibetan
               // Mixed Tibetan: needs HarfBuzz shaping, not raw codepoint mapping.
               ? ShapedText(
