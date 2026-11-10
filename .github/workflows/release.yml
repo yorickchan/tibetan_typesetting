@@ -9,27 +9,73 @@ on:
 jobs:
   build-macos:
     runs-on: macos-latest
+    env:
+      HAS_MACOS_SIGNING: ${{ secrets.MACOS_CERTIFICATE_P12 != '' }}
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          
+
       - name: Install dependencies
         run: flutter pub get
-        
+
       - name: Build macOS
         run: flutter build macos --release
-        
+
+      - name: Import Developer ID certificate
+        if: env.HAS_MACOS_SIGNING == 'true'
+        env:
+          MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          KEYCHAIN_PASSWORD="$(openssl rand -hex 16)"
+          echo "KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> "$GITHUB_ENV"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings -lut 21600 build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          echo "$MACOS_CERTIFICATE_P12" | base64 -D > certificate.p12
+          security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          EXISTING_KEYCHAINS=()
+          while IFS= read -r keychain; do
+            EXISTING_KEYCHAINS+=("$keychain")
+          done < <(security list-keychains -d user | tr -d '"')
+          security list-keychains -d user -s build.keychain "${EXISTING_KEYCHAINS[@]}"
+          security find-identity -v -p codesigning build.keychain
+          rm -f certificate.p12
+
+      - name: Sign macOS app
+        if: env.HAS_MACOS_SIGNING == 'true'
+        env:
+          MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+        run: |
+          set -euo pipefail
+          APP_PATH="$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' -print -quit)"
+          IDENTITY="${MACOS_SIGNING_IDENTITY:-$(security find-identity -v -p codesigning build.keychain | awk -F'"' '/Developer ID Application/ {print $2; exit}')}"
+          if [ -z "$IDENTITY" ]; then
+            echo "No Developer ID Application identity found. Set MACOS_SIGNING_IDENTITY."
+            exit 1
+          fi
+          echo "Signing $APP_PATH with $IDENTITY"
+          codesign --force --deep --options runtime --timestamp \
+            --sign "$IDENTITY" \
+            --entitlements macos/Runner/Release.entitlements \
+            "$APP_PATH"
+          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+
       - name: Create DMG
         run: |
+          set -euo pipefail
           brew install create-dmg
           APP_PATH="$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' -print -quit)"
           APP_NAME="$(basename "$APP_PATH")"
           echo "Found app bundle: $APP_NAME"
-          create-dmg \
+          rm -f tibetan-typesetting-macos.dmg
+          if ! create-dmg \
             --volname "Tibetan Typesetting" \
             --window-pos 200 120 \
             --window-size 600 400 \
@@ -37,9 +83,50 @@ jobs:
             --app-drop-link 450 185 \
             --hide-extension "$APP_NAME" \
             tibetan-typesetting-macos.dmg \
-            "$APP_PATH" \
-            || cp -r "$APP_PATH" "$APP_NAME"
-        
+            "$APP_PATH"; then
+            echo "create-dmg failed; falling back to hdiutil"
+            hdiutil create -volname "Tibetan Typesetting" -srcfolder "$APP_PATH" -ov -format UDZO tibetan-typesetting-macos.dmg
+          fi
+
+      - name: Sign and notarize DMG
+        if: env.HAS_MACOS_SIGNING == 'true'
+        env:
+          MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          IDENTITY="${MACOS_SIGNING_IDENTITY:-$(security find-identity -v -p codesigning build.keychain | awk -F'"' '/Developer ID Application/ {print $2; exit}')}"
+          if [ -z "$IDENTITY" ]; then
+            echo "No Developer ID Application identity found. Set MACOS_SIGNING_IDENTITY."
+            exit 1
+          fi
+          codesign --force --timestamp --sign "$IDENTITY" tibetan-typesetting-macos.dmg
+          codesign --verify --verbose=2 tibetan-typesetting-macos.dmg
+          if [ -n "$APPLE_ID" ] && [ -n "$APPLE_APP_SPECIFIC_PASSWORD" ] && [ -n "$APPLE_TEAM_ID" ]; then
+            echo "Submitting DMG for notarization..."
+            RESULT=$(xcrun notarytool submit tibetan-typesetting-macos.dmg \
+              --apple-id "$APPLE_ID" \
+              --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+              --team-id "$APPLE_TEAM_ID" \
+              --wait --output-format json)
+            echo "$RESULT"
+            STATUS=$(printf '%s' "$RESULT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["status"])')
+            if [ "$STATUS" != "Accepted" ]; then
+              echo "Notarization failed: $STATUS"
+              exit 1
+            fi
+            xcrun stapler staple tibetan-typesetting-macos.dmg
+            xcrun stapler validate tibetan-typesetting-macos.dmg
+          else
+            echo "Notarization secrets not set; skipping notarization."
+          fi
+
+      - name: Clean up signing keychain
+        if: always() && env.HAS_MACOS_SIGNING == 'true'
+        run: security delete-keychain build.keychain || true
+
       - name: Create ZIP (fallback)
         if: failure()
         run: |
@@ -47,8 +134,9 @@ jobs:
           APP_NAME="$(basename "$(find . -maxdepth 1 -name '*.app' -print -quit)")"
           echo "Zipping app bundle: $APP_NAME"
           zip -r ../../../../../tibetan-typesetting-macos.zip "$APP_NAME"
-          
+
       - name: Upload artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: macos-build
@@ -108,7 +196,7 @@ jobs:
       - name: Create tarball
         run: |
           cd build/linux/x64/release/bundle
-          tar -czf ../../../../../tibetan-typesetting-linux.tar.gz *
+          tar -czf ../../../../../tibetan-typesetting-linux.tar.gz ./*
           
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -128,7 +216,7 @@ jobs:
         uses: actions/download-artifact@v4
         
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             macos-build/*
