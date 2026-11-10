@@ -71,7 +71,6 @@ class ChineseConversionService {
     final setup = project.pageSetup;
     final convertedSetup = setup.copyWith(
       titleChinese: convertText(setup.titleChinese, target),
-      leftVerticalTitle: convertText(setup.leftVerticalTitle, target),
       headerCustomText: convertText(setup.headerCustomText, target),
       footerCustomText: convertText(setup.footerCustomText, target),
     );
@@ -103,7 +102,6 @@ class ChineseConversionService {
       yield block.chineseTranslation;
     }
     yield project.pageSetup.titleChinese;
-    yield project.pageSetup.leftVerticalTitle;
     yield project.pageSetup.headerCustomText;
     yield project.pageSetup.footerCustomText;
   }

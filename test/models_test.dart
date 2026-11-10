@@ -183,7 +183,7 @@ void main() {
         pageHeightMm: 120,
         columnCount: 5,
         showFrame: true,
-        leftVerticalTitle: 'Test',
+        titleChinese: 'Test',
         pageNumber: '1',
         flowGap: 0.02,
       );
@@ -195,9 +195,24 @@ void main() {
       expect(restored.pageHeightMm, original.pageHeightMm);
       expect(restored.columnCount, original.columnCount);
       expect(restored.showFrame, original.showFrame);
-      expect(restored.leftVerticalTitle, original.leftVerticalTitle);
+      expect(restored.titleChinese, original.titleChinese);
       expect(restored.pageNumber, original.pageNumber);
       expect(restored.flowGap, original.flowGap);
+    });
+
+    test('migrates legacy leftVerticalTitle into titleChinese', () {
+      final restored = PageSetup.fromJson({
+        'titleChinese': 'Current',
+        'leftVerticalTitle': 'Legacy',
+      });
+
+      expect(restored.titleChinese, 'Current');
+    });
+
+    test('uses leftVerticalTitle when titleChinese is empty', () {
+      final restored = PageSetup.fromJson({'leftVerticalTitle': 'Legacy'});
+
+      expect(restored.titleChinese, 'Legacy');
     });
 
     test('titlePageTemplateId round-trip (non-null)', () {

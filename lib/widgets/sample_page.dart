@@ -147,7 +147,7 @@ class SamplePageWidget extends StatelessWidget {
       children: [
         if (!hasTemplate)
           _SidePanel(
-            text: setup.leftVerticalTitle,
+            text: setup.titleChinese,
             showFrame: setup.showFrame,
             fontFamily: transFont.fontFamily,
           ),
@@ -234,7 +234,7 @@ class SamplePageWidget extends StatelessWidget {
                 child: SvgPicture.string(svgContent!, fit: BoxFit.fill),
               ),
             contentWidget,
-            if (hasTemplate && setup.leftVerticalTitle.isNotEmpty)
+            if (hasTemplate && setup.titleChinese.isNotEmpty)
               Positioned(
                 left: 0,
                 top: 0,
@@ -244,7 +244,7 @@ class SamplePageWidget extends StatelessWidget {
                   child: RotatedBox(
                     quarterTurns: 1,
                     child: Text(
-                      setup.leftVerticalTitle,
+                      setup.titleChinese,
                       style: TextStyle(
                         fontFamily: transFont.fontFamily,
                         fontSize: font_utils.previewFontSize(9),

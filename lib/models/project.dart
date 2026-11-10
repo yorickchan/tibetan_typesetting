@@ -99,7 +99,6 @@ class PageSetup {
   /// Vertical offset of the yellow row line from the row top, in preview
   /// logical pixels. The PDF export converts it with the same mm ratio.
   final double rowLineYOffset;
-  final String leftVerticalTitle;
   final String pageNumber;
   final double flowGap;
   final TemplateInset templateInset;
@@ -147,7 +146,6 @@ class PageSetup {
     this.showFrame = true,
     this.showRowLines = true,
     this.rowLineYOffset = 7,
-    this.leftVerticalTitle = '',
     this.pageNumber = '',
     this.flowGap = 0.01,
     TemplateInset? templateInset,
@@ -202,7 +200,6 @@ class PageSetup {
     bool? showFrame,
     bool? showRowLines,
     double? rowLineYOffset,
-    String? leftVerticalTitle,
     String? pageNumber,
     double? flowGap,
     TemplateInset? templateInset,
@@ -255,7 +252,6 @@ class PageSetup {
       showFrame: showFrame ?? this.showFrame,
       showRowLines: showRowLines ?? this.showRowLines,
       rowLineYOffset: rowLineYOffset ?? this.rowLineYOffset,
-      leftVerticalTitle: leftVerticalTitle ?? this.leftVerticalTitle,
       pageNumber: pageNumber ?? this.pageNumber,
       flowGap: flowGap ?? this.flowGap,
       templateInset: templateInset ?? this.templateInset,
@@ -323,7 +319,6 @@ class PageSetup {
     'showFrame': showFrame,
     'showRowLines': showRowLines,
     'rowLineYOffset': rowLineYOffset,
-    'leftVerticalTitle': leftVerticalTitle,
     'pageNumber': pageNumber,
     'flowGap': flowGap,
     'showTitlePage': showTitlePage,
@@ -376,7 +371,6 @@ class PageSetup {
     showFrame: json['showFrame'] as bool? ?? true,
     showRowLines: json['showRowLines'] as bool? ?? true,
     rowLineYOffset: (json['rowLineYOffset'] as num?)?.toDouble() ?? 7,
-    leftVerticalTitle: json['leftVerticalTitle'] as String? ?? '',
     pageNumber: json['pageNumber'] as String? ?? '',
     flowGap: (json['flowGap'] as num?)?.toDouble() ?? 0.01,
     templateInset: json['templateInset'] != null
@@ -387,7 +381,9 @@ class PageSetup {
         : const TemplateInset(top: 20, right: 56, bottom: 20, left: 56),
     showTitlePage: json['showTitlePage'] as bool? ?? true,
     titleTibetan: json['titleTibetan'] as String? ?? '',
-    titleChinese: json['titleChinese'] as String? ?? '',
+    titleChinese: (json['titleChinese'] as String?)?.isNotEmpty == true
+        ? json['titleChinese'] as String
+        : (json['leftVerticalTitle'] as String? ?? ''),
     titleTextGapPx: (json['titleTextGapPx'] as num?)?.toDouble() ?? 6.0,
     tibetanFont: json['tibetanFont'] != null
         ? FontConfig.fromJson(json['tibetanFont'] as Map<String, dynamic>)

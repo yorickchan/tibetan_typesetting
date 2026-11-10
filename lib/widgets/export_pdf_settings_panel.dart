@@ -39,11 +39,11 @@ class ExportPdfSettingsPanel extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           TextFormField(
-            initialValue: pageSetup.leftVerticalTitle,
+            initialValue: pageSetup.titleChinese,
             style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
             decoration: numberDecor(l10n.leftVerticalTitle),
             onChanged: (value) => onUpdateSetup(
-              (setup) => setup.copyWith(leftVerticalTitle: value),
+              (setup) => setup.copyWith(titleChinese: value),
             ),
           ),
           const SizedBox(height: 8),

@@ -146,5 +146,26 @@ void main() {
       expect(find.text(l10n.pageHeight), findsNothing);
       expect(find.text(l10n.showFrame), findsNothing);
     });
+
+    testWidgets('vertical title edits the project Chinese title', (
+      tester,
+    ) async {
+      PageSetup updated = PageSetup(titleChinese: '舊標題');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExportPdfSettingsPanel(
+              pageSetup: updated,
+              l10n: l10n,
+              onUpdateSetup: (updater) => updated = updater(updated),
+            ),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextFormField).first, '新標題');
+
+      expect(updated.titleChinese, '新標題');
+    });
   });
 }

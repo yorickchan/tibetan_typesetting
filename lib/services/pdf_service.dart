@@ -442,27 +442,34 @@ class PdfService {
         textAlign: textAlign,
       );
     }
-    return pw.Text(
-      text,
-      style: pw.TextStyle(
-        font: font,
-        fontFallback: fontFallback,
-        fontSize: fontSize,
-        color: PdfColors.black,
-        // `pdf` defaults wordSpacing to 1 em and adds it after every word,
-        // which pushed CJK lines past the column width and wrapped them early.
-        wordSpacing: 0,
-        lineSpacing: pdfLineSpacing(
-          ascent: built.ascent,
-          descent: built.descent,
+    // The rotated side panels lay this text out with the panel width as the
+    // available width, not the panel height, so an explicit width is needed
+    // for the title to stay on one line (the preview's RotatedBox swaps the
+    // constraints for us).
+    return pw.SizedBox(
+      width: maxWidth,
+      child: pw.Text(
+        text,
+        style: pw.TextStyle(
+          font: font,
+          fontFallback: fontFallback,
           fontSize: fontSize,
-          lineHeight: lineHeight,
+          color: PdfColors.black,
+          // `pdf` defaults wordSpacing to 1 em and adds it after every word,
+          // which pushed CJK lines past the column width and wrapped them early.
+          wordSpacing: 0,
+          lineSpacing: pdfLineSpacing(
+            ascent: built.ascent,
+            descent: built.descent,
+            fontSize: fontSize,
+            lineHeight: lineHeight,
+          ),
         ),
+        textAlign: textAlign,
+        // CJK has no spaces, so the default whitespace splitter can never wrap
+        // it; splitting per character allows wrapping anywhere.
+        lineSplitter: (line) => line.split(''),
       ),
-      textAlign: textAlign,
-      // CJK has no spaces, so the default whitespace splitter can never wrap
-      // it; splitting per character allows wrapping anywhere.
-      lineSplitter: (line) => line.split(''),
     );
   }
 
@@ -1111,7 +1118,7 @@ class PdfService {
     pw.Widget buildInner() {
       return pw.Row(
         children: [
-          sidePanel(ps.leftVerticalTitle),
+          sidePanel(ps.titleChinese),
           pw.Expanded(child: pw.Container(child: contentArea(cW, cH))),
           sidePanel(pageNumber),
         ],

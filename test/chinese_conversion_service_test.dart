@@ -95,7 +95,6 @@ void main() {
       pageSetup: PageSetup(
         titleTibetan: '漢字藏文標題',
         titleChinese: '漢字標題',
-        leftVerticalTitle: '漢字側題',
         headerCustomText: '漢字頁眉',
         footerCustomText: '漢字頁腳',
       ),
@@ -115,7 +114,6 @@ void main() {
     expect(converted.blocks[1].tibetan, '汉字自由文字');
     expect(converted.pageSetup.titleTibetan, '漢字藏文標題');
     expect(converted.pageSetup.titleChinese, '汉字标题');
-    expect(converted.pageSetup.leftVerticalTitle, '汉字侧题');
     expect(converted.pageSetup.headerCustomText, '汉字页眉');
     expect(converted.pageSetup.footerCustomText, '汉字页脚');
     expect(original.blocks[0].chineseTranslation, '漢字翻譯');
