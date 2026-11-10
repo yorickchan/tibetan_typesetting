@@ -1,5 +1,19 @@
 # Release Notes
 
+## [1.1.18] - 2026-11-11
+
+### 🔐 macOS Distribution
+- macOS releases are now signed with a Developer ID Application certificate and notarized by Apple. The DMG is stapled, so Gatekeeper accepts it without the unidentified-developer warning.
+- CI imports the certificate into a temporary keychain, signs the app with hardened runtime and the release entitlements, signs the DMG, and submits it to `notarytool`.
+
+### 📄 Included Fixes
+- The v1.1.17 PDF fixes are included: the left vertical title uses the project Chinese title, and rotated side titles stay on one line.
+
+### 🔧 Maintenance
+- Release workflow upgraded to `softprops/action-gh-release@v2`; macOS signing secrets are documented in `RELEASE_GUIDE.md`.
+
+---
+
 ## [1.1.17] - 2026-11-10
 
 ### 🐛 Fixes
