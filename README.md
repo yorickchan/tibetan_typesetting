@@ -1,6 +1,6 @@
 # Tibetan Typesetting
 
-[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.16**
+[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.17**
 
 <p align="center">
   <img src="assets/images/icon.png" width="128" alt="App Icon"/>
@@ -67,6 +67,7 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - Flow gap adjustment between text sections
 - Custom title page with Dharma Wheel symbol and configurable title fonts
 - **Custom SVG title page templates** managed from the Templates page and rendered as true vector graphics in PDF, with configurable insets for template and title text regions
+- **Left vertical title** — the side panel uses the project Chinese title; the Export PDF page setup field edits that same value, and Chinese titles stay on a single vertical line instead of wrapping into columns
 - **Content page templates** — apply an SVG background template to all content pages with configurable export margins
 - Opening mark blocks at the start of content
 - Optional row separator lines in editor preview and PDF export, with a configurable Y offset

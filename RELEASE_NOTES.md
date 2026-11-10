@@ -1,5 +1,16 @@
 # Release Notes
 
+## [1.1.17] - 2026-11-10
+
+### 🐛 Fixes
+- **Left vertical title uses the project Chinese title** — the Export PDF → Page Setup field now reads and writes `PageSetup.titleChinese` instead of a separate value, so the preview and PDF side panels show the project title. Existing `leftVerticalTitle` values are migrated into `titleChinese` when a project is loaded.
+- **Side title stays on one line** — the PDF side panel now lays rotated text out unconstrained with an explicit page-height width. A 12-character Chinese title renders as a single vertical line instead of wrapping into two columns; the preview already behaved this way.
+
+### 🔧 Maintenance
+- Added model migration and export-panel binding tests (246 tests total).
+
+---
+
 ## [1.1.16] - 2026-11-09
 
 ### ✨ New Features
