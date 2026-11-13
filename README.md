@@ -1,6 +1,6 @@
 # Tibetan Typesetting
 
-[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.18**
+[繁體中文](README.zh-TW.md) | English &nbsp;·&nbsp; **v1.1.19**
 
 <p align="center">
   <img src="assets/images/icon.png" width="128" alt="App Icon"/>
@@ -24,6 +24,7 @@ A Flutter desktop application for creating and exporting Tibetan text documents 
 - Red character highlight — mark selected words in heading text with red ink using range notation (e.g. `1-4,6-8`) while vowel marks, tshegs, and punctuation remain black
 - Red opening mark — render an opening-mark block entirely in red ink (including shad punctuation) with a checkbox in the block editor
 - **Chinese script switch** — convert all Chinese text in a project between Simplified and Traditional with one click; script is auto-detected from content when unset
+- Click a block in the preview to select it and focus its text input for quick edits
 
 ### 🧭 Workspace Navigation
 - Left sidebar with Projects, Dictionary, Templates, and Settings destinations

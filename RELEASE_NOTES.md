@@ -1,5 +1,15 @@
 # Release Notes
 
+## [1.1.19] - 2026-11-13
+
+### ✨ New Features
+- **Preview-to-editor selection** — click a text or opening-mark block in the preview to select it and focus the Tibetan/free-text field. Image blocks select and open the image editor. Selecting from the block strip remains focus-neutral.
+
+### 🔧 Maintenance
+- Refreshed `pubspec.lock` after the Flutter SDK update.
+
+---
+
 ## [1.1.18] - 2026-11-11
 
 ### 🔐 macOS Distribution
