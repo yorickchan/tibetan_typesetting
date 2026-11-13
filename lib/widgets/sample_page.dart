@@ -678,6 +678,19 @@ class _ContentGrid extends StatelessWidget {
                   ),
                 ),
               );
+              children.add(
+                Positioned(
+                  left: left,
+                  top: rowYs[ri],
+                  width: blockW,
+                  height: rowHs[ri],
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => onSelectBlock?.call(block.id),
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+              );
               continue;
             }
 
@@ -878,6 +891,19 @@ class _ContentGrid extends StatelessWidget {
                       ],
                     ),
                   ),
+                ),
+              ),
+            );
+            children.add(
+              Positioned(
+                left: left,
+                top: rowYs[ri],
+                width: blockW,
+                height: rowHs[ri],
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => onSelectBlock?.call(block.id),
+                  child: const SizedBox.expand(),
                 ),
               ),
             );

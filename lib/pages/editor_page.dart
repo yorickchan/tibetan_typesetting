@@ -71,6 +71,7 @@ class _EditorPageState extends State<EditorPage>
   double? _cachedFlowGap;
   double? _cachedContentWidthMm;
   final _undoService = UndoService();
+  final _blockTextFocusNode = FocusNode();
   bool _scriptBusy = false;
   double _zoom = 1.0;
 
@@ -91,6 +92,7 @@ class _EditorPageState extends State<EditorPage>
   @override
   void dispose() {
     _saveTimer?.cancel();
+    _blockTextFocusNode.dispose();
     super.dispose();
   }
 
@@ -564,6 +566,14 @@ class _EditorPageState extends State<EditorPage>
     }
   }
 
+  void _selectBlockFromPreview(String id) {
+    setState(() => _selectedId = id);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _blockTextFocusNode.requestFocus();
+    });
+  }
+
   void _selectPrev() {
     if (_project == null || _selectedIndex <= 0) return;
     setState(() => _selectedId = _project!.blocks[_selectedIndex - 1].id);
@@ -982,6 +992,7 @@ class _EditorPageState extends State<EditorPage>
                     onToggleOpeningMarkFormat: _toggleOpeningMarkFormat,
                     onSelectPrev: _selectPrev,
                     onSelectNext: _selectNext,
+                    textFocusNode: _blockTextFocusNode,
                     tibetanFontFamily: tibFont.fontFamily,
                     pronunciationFontFamily: pronFont.fontFamily,
                     translationFontFamily: transFont.fontFamily,
@@ -1009,7 +1020,7 @@ class _EditorPageState extends State<EditorPage>
                       onFloatImageMove: _onFloatImageMove,
                       onFloatImageResize: _onFloatImageResize,
                       onInlineImageResize: _onInlineImageResize,
-                      onSelectBlock: (id) => setState(() => _selectedId = id),
+                      onSelectBlock: _selectBlockFromPreview,
                       smallBlockFontSize: smallBlockFontSize,
                       isFirstContentPage: pageIdx == 0,
                       svgContent: _resolveContentTemplateSvg(

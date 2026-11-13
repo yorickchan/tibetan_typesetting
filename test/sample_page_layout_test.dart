@@ -131,4 +131,32 @@ void main() {
     final text = tester.widget<Text>(find.text('༄༅།།'));
     expect(text.style!.color, AppColors.rose600);
   });
+
+  testWidgets('tapping a preview text block reports its id', (tester) async {
+    String? selected;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SamplePageWidget(
+          project: Project(
+            id: 'project',
+            name: 'Project',
+            blocks: [const TextBlock(id: 'block', tibetan: 'ཀ')],
+            updatedAt: '',
+            createdAt: '',
+          ),
+          onSelectBlock: (id) => selected = id,
+        ),
+      ),
+    );
+
+    final tapTarget = find.descendant(
+      of: find.byType(SamplePageWidget),
+      matching: find.byType(GestureDetector),
+    );
+    expect(tapTarget, findsOneWidget);
+
+    await tester.tap(tapTarget);
+
+    expect(selected, 'block');
+  });
 }

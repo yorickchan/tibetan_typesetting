@@ -27,6 +27,7 @@ class BlockEditorWidget extends StatelessWidget {
   final VoidCallback onToggleOpeningMarkFormat;
   final VoidCallback onSelectPrev;
   final VoidCallback onSelectNext;
+  final FocusNode? textFocusNode;
   final String tibetanFontFamily;
   final String pronunciationFontFamily;
   final String translationFontFamily;
@@ -46,6 +47,7 @@ class BlockEditorWidget extends StatelessWidget {
     required this.onToggleOpeningMarkFormat,
     required this.onSelectPrev,
     required this.onSelectNext,
+    this.textFocusNode,
     this.tibetanFontFamily = fallbackTibetanFontFamily,
     this.pronunciationFontFamily = fallbackChineseFontFamily,
     this.translationFontFamily = fallbackChineseFontFamily,
@@ -107,6 +109,7 @@ class BlockEditorWidget extends StatelessWidget {
           _EditorFields(
             block: selectedBlock!,
             onUpdateBlock: onUpdateBlock,
+            textFocusNode: textFocusNode,
             tibetanFontFamily: tibetanFontFamily,
             pronunciationFontFamily: pronunciationFontFamily,
             translationFontFamily: translationFontFamily,
@@ -444,6 +447,7 @@ class _EditorFields extends StatefulWidget {
   final String pronunciationFontFamily;
   final String translationFontFamily;
   final AppLocalizations l10n;
+  final FocusNode? textFocusNode;
 
   const _EditorFields({
     required this.block,
@@ -452,6 +456,7 @@ class _EditorFields extends StatefulWidget {
     required this.pronunciationFontFamily,
     required this.translationFontFamily,
     required this.l10n,
+    this.textFocusNode,
   });
 
   @override
@@ -766,6 +771,7 @@ class _EditorFieldsState extends State<_EditorFields> {
 
   Widget _tibetanField() {
     return TextField(
+      focusNode: widget.textFocusNode,
       controller: _tibetanCtrl,
       onChanged: _onTibetanChanged,
       style: TextStyle(
@@ -784,6 +790,7 @@ class _EditorFieldsState extends State<_EditorFields> {
 
   Widget _freeTextField() {
     return TextField(
+      focusNode: widget.textFocusNode,
       controller: _tibetanCtrl,
       onChanged: (v) => widget.onUpdateBlock(BlockUpdate(tibetan: v)),
       style: TextStyle(
