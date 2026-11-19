@@ -337,14 +337,6 @@ double contentTibetanFontSize(
   return smallBlockFontSize ?? fontSize * 0.75;
 }
 
-double contentTibetanRasterBleed(double fontSize) {
-  return fontSize * 0.5;
-}
-
-double contentTibetanBottomBleed(double fontSize) {
-  return fontSize * 0.2;
-}
-
 const double contentTibetanPngTopPadding = 5 * 72 / 96;
 /// Extra room below Tibetan rasters so descenders (e.g. the ུ in ཧཱུྃ) are
 /// not clipped by the image canvas.

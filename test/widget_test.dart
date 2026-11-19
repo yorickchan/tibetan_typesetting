@@ -382,14 +382,6 @@ void main() {
       },
     );
 
-    test(
-      'content Tibetan raster bleed leaves room for tight line-height glyphs',
-      () {
-        expect(contentTibetanRasterBleed(12), 6);
-        expect(contentTibetanBottomBleed(12), closeTo(2.4, 0.0001));
-      },
-    );
-
     test('compact PDF rows use the Tibetan PNG top inset', () {
       expect(contentTibetanPngTopPadding, 5 * 72 / 96);
     });
