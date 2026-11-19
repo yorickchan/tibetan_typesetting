@@ -10,6 +10,12 @@ import '../services/pronunciation_service.dart';
 import '../utils/colors.dart';
 import '../widgets/app_shell.dart';
 
+/// Dictionary grid layout: three-ish columns of compact one-line cards.
+const double kDictionaryCardMaxCrossAxisExtent = 520;
+const double kDictionaryCardMainAxisExtent = 36;
+const double kDictionaryCardCrossAxisSpacing = 8;
+const double kDictionaryCardMainAxisSpacing = 6;
+
 class DictionaryPage extends StatefulWidget {
   const DictionaryPage({super.key});
 
@@ -377,10 +383,11 @@ class _DictionaryPageState extends State<DictionaryPage> {
                     padding: EdgeInsets.zero,
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 520,
-                          mainAxisExtent: 52,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
+                          maxCrossAxisExtent:
+                              kDictionaryCardMaxCrossAxisExtent,
+                          mainAxisExtent: kDictionaryCardMainAxisExtent,
+                          crossAxisSpacing: kDictionaryCardCrossAxisSpacing,
+                          mainAxisSpacing: kDictionaryCardMainAxisSpacing,
                         ),
                     itemCount: _filtered.length,
                     itemBuilder: (context, index) => _EntryCard(
