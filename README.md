@@ -211,17 +211,19 @@ lib/
 │   ├── pronunciation_service.dart  # Pronunciation dictionary CRUD
 │   ├── batch_import_service.dart   # CSV/TSV batch import
 │   ├── undo_service.dart           # Undo/Redo state management
-│   ├── image_cache_service.dart    # Rendered text image caching
 │   ├── image_storage_service.dart  # Block image file storage
+│   ├── window_appearance_service.dart # macOS window chrome theming
 │   ├── screen_dpi_service.dart     # Physical screen DPI for accurate preview
 │   └── title_page_template_service.dart # Title page template CRUD
 ├── utils/                           # Utilities
 │   ├── colors.dart                 # Color palette
+│   ├── font_fallbacks.dart         # Default preview font fallbacks
 │   ├── content_page_template_layout.dart # Content page template geometry
 │   ├── decorations.dart            # Input decoration helpers
 │   ├── font_constants.dart         # Default font constants
 │   ├── sample_layout.dart          # Pagination logic
-│   ├── text_renderer.dart          # Text to image rendering
+│   ├── shaped_text_core.dart       # HarfBuzz shaping, glyph outlines, line breaks (pure)
+│   ├── shaped_text_pdf.dart        # ShapedText widget: vector outlines + invisible text layer
 │   ├── font_utils.dart             # Font utilities
 │   ├── tibetan_segmenter.dart      # Tsheg-based syllable/range extraction
 │   ├── save_state_mixin.dart       # Save state UI mixin
@@ -289,14 +291,13 @@ flutter build linux
 - **DatabaseLocationService**: Selectable database location with security-scoped bookmark persistence and startup resolution
 - **DatabaseStartupController**: Guides the app through database open failures and recovery flows
 - **ChineseConversionService**: Converts all Chinese text in a project between Simplified and Traditional; auto-detects script from content
-- **PdfService**: Singleton handling PDF generation with Tibetan text pre-rendering
+- **PdfService**: Singleton handling PDF generation; Tibetan renders as HarfBuzz-shaped vector outlines with an invisible Unicode text layer
 - **HtmlExportService**: Generates standalone HTML documents from projects
 - **FontService**: System font discovery and management
 - **SettingsService**: Application settings persistence
 - **PronunciationService**: Singleton CRUD service for the local pronunciation dictionary
 - **BatchImportService**: Parses CSV/TSV files into text blocks
 - **UndoService**: Manages undo/redo state stack (max 50 states)
-- **ImageCacheService**: SHA-256 keyed cache for rendered text images
 - **ImageStorageService**: Manages block image files in app support directory
 - **ScreenDpiService**: Queries physical screen DPI via platform channel for accurate preview scaling
 - **TitlePageTemplateService**: CRUD singleton for custom SVG title page templates

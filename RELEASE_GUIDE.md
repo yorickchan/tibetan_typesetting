@@ -1,49 +1,27 @@
 # Release Guide
 
 This guide explains how to create and publish releases for Tibetan Typesetting.
+Publishing steps live in `PUBLISH.md`; this page covers the workflow, signing,
+and troubleshooting.
 
 ## Quick Release Process
 
-### Option 1: Automatic Multi-Platform Build (Recommended)
-
-The GitHub Actions workflow will automatically build for all platforms when you create a tag:
-
 ```bash
-# 1. Commit all changes
-git add .
-git commit -m "Prepare release v1.0.0"
-
-# 2. Create and push a version tag
-git tag v1.0.0
-git push origin main
-git push origin v1.0.0
+# 1. Bump the version in pubspec.yaml (e.g. 1.2.0+23)
+# 2. Add a "## [X.Y.Z] - YYYY-MM-DD" section at the top of RELEASE_NOTES.md
+# 3. Commit all changes, then tag and push
+git tag vX.Y.Z
+git push origin master vX.Y.Z
 ```
 
 The workflow will:
-- Build macOS, Windows, and Linux versions
-- Create a GitHub release automatically
+- Build macOS (signed + notarized DMG), Windows (ZIP), and Linux (tar.gz)
+- Extract the matching `## [X.Y.Z]` section of `RELEASE_NOTES.md` into the
+  GitHub Release body
 - Attach all build artifacts
 
-### Option 2: Manual Release (Current Platform Only)
-
-If you want to create a release manually for macOS only:
-
-```bash
-# 1. Build the macOS release
-flutter build macos --release
-
-# 2. Package as ZIP
-cd build/macos/Build/Products/Release
-zip -r ../../../../../tibetan-typesetting-macos-v1.0.0.zip tibetan_typesetting.app
-cd ../../../../../
-
-# 3. Create a GitHub release manually
-# - Go to your repository on GitHub
-# - Click "Releases" → "Create a new release"
-# - Create a new tag (e.g., v1.0.0)
-# - Upload the ZIP file
-# - Copy content from RELEASE_NOTES.md
-```
+CI (`.github/workflows/ci.yml`) runs `flutter analyze` and `flutter test` on
+every push to `master` and on pull requests.
 
 ## Version Numbering
 
@@ -71,7 +49,7 @@ The workflow file (`.github/workflows/release.yml`) handles:
 ### Triggering the Workflow
 
 The workflow runs when:
-- You push a tag starting with `v` (e.g., `v1.0.0`)
+- You push a tag starting with `v` (e.g., `v1.2.0`)
 - You manually trigger it from GitHub Actions tab
 
 ### Manual Workflow Trigger
@@ -133,7 +111,7 @@ DMG as before.
 ### macOS
 ```bash
 flutter build macos --release
-# Output: build/macos/Build/Products/Release/tibetan_typesetting.app
+# Output: build/macos/Build/Products/Release/Tibetan Typesetting.app
 ```
 
 ### Windows (Windows only)
@@ -179,11 +157,11 @@ See `RELEASE_NOTES.md` for the current release notes template. Update this file 
 ### Linux
 - **TAR.GZ**: Extract and run binary
 
-## Code Signing (Optional)
+## Code Signing
 
-For production releases, consider:
-- **macOS**: Sign with Apple Developer certificate, notarize for Gatekeeper
-- **Windows**: Sign with code signing certificate
+macOS signing and notarization run automatically when the secrets above are
+configured. Optional further hardening:
+- **Windows**: Sign with a code signing certificate
 - **Linux**: Create packages (.deb, .rpm, AppImage)
 
 ## Troubleshooting
@@ -198,5 +176,6 @@ For production releases, consider:
 - Use `flutter build --release --split-debug-info=./debug-info --obfuscate`
 
 ### Permission issues on macOS
-- Users may need to right-click → Open on first launch
-- Consider notarizing the app for smoother user experience
+- Signed and notarized DMGs open without warnings; verify with
+  `codesign --verify --verbose=2 app.dmg && xcrun stapler validate app.dmg`
+- Unsigned builds require right-click → Open on first launch

@@ -211,17 +211,19 @@ lib/
 │   ├── pronunciation_service.dart  # 讀音詞典 CRUD
 │   ├── batch_import_service.dart   # CSV/TSV 批次匯入
 │   ├── undo_service.dart           # 復原/重做狀態管理
-│   ├── image_cache_service.dart    # 渲染文字圖片快取
 │   ├── image_storage_service.dart  # 區塊圖片檔案儲存
+│   ├── window_appearance_service.dart # macOS 視窗外觀主題
 │   ├── screen_dpi_service.dart     # 實體螢幕 DPI（用於精確預覽縮放）
 │   └── title_page_template_service.dart # 封面頁模板 CRUD
 ├── utils/                           # 工具程式
 │   ├── colors.dart                 # 色彩配置
+│   ├── font_fallbacks.dart         # 預覽預設字型回退
 │   ├── content_page_template_layout.dart # 內容頁模板幾何工具
 │   ├── decorations.dart            # 輸入裝飾輔助
 │   ├── font_constants.dart         # 預設字型常數
 │   ├── sample_layout.dart          # 分頁邏輯
-│   ├── text_renderer.dart          # 文字轉圖片渲染
+│   ├── shaped_text_core.dart       # HarfBuzz 字形塑形、外框與斷行（純邏輯）
+│   ├── shaped_text_pdf.dart        # ShapedText 元件：向量外框加隱形文字層
 │   ├── font_utils.dart             # 字型工具
 │   ├── tibetan_segmenter.dart      # 藏文音節切分與範圍標記解析
 │   ├── save_state_mixin.dart       # 儲存狀態 UI mixin
@@ -289,14 +291,13 @@ flutter build linux
 - **DatabaseLocationService**：可選擇的資料庫位置，透過安全範圍書籤持久化並在啟動時解析
 - **DatabaseStartupController**：引導應用程式完成資料庫開啟失敗的還原流程
 - **ChineseConversionService**：將專案內所有中文在簡體與繁體之間轉換；自動從內容偵測字體
-- **PdfService**：處理 PDF 生成的單例服務，包含藏文文字預渲染
+- **PdfService**：處理 PDF 生成的單例服務；藏文以 HarfBuzz 塑形的向量外框加隱形 Unicode 文字層渲染
 - **HtmlExportService**：從專案產生獨立 HTML 文件
 - **FontService**：系統字型探測和管理
 - **SettingsService**：應用程式設定持久化
 - **PronunciationService**：本地讀音詞典的 CRUD 單例服務
 - **BatchImportService**：解析 CSV/TSV 檔案為文字區塊
 - **UndoService**：管理復原/重做狀態堆疊（最多 50 個狀態）
-- **ImageCacheService**：基於 SHA-256 金鑰的渲染文字圖片快取
 - **ImageStorageService**：管理應用程式支援目錄中的區塊圖片檔案
 - **ScreenDpiService**：透過平台通道查詢實體螢幕 DPI，用於精確的預覽縮放
 - **TitlePageTemplateService**：自訂 SVG 封面頁模板的 CRUD 單例服務

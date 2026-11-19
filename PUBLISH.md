@@ -1,90 +1,54 @@
 # Publishing a Release to GitHub
 
-## Current Status
+Releases are built and published automatically by
+`.github/workflows/release.yml` when a `v*` tag is pushed. The macOS DMG is
+signed with a Developer ID Application certificate and notarized (see
+`RELEASE_GUIDE.md` for the required secrets), and the release body is taken
+from the matching `## [X.Y.Z]` section of `RELEASE_NOTES.md`.
 
-✅ **macOS build ready**: `tibetan-typesetting-macos-v1.0.0.zip` (59MB)  
-✅ **GitHub Actions configured**: Automated multi-platform builds  
-✅ **Release notes prepared**: `RELEASE_NOTES.md`
-
-## Publishing Your Release
-
-### Method 1: Using GitHub CLI (Fastest)
-
-If you have GitHub CLI installed:
+## Standard Release Flow
 
 ```bash
-# Create a release with the macOS build
-gh release create v1.0.0 \
-  tibetan-typesetting-macos-v1.0.0.zip \
-  --title "Tibetan Typesetting v1.0.0" \
-  --notes-file RELEASE_NOTES.md
+# 1. Bump the version in pubspec.yaml (e.g. 1.2.0+23)
+# 2. Add a "## [X.Y.Z] - YYYY-MM-DD" section at the top of RELEASE_NOTES.md
+# 3. Update README.md / README.zh-TW.md version badges if needed
+# 4. Commit everything, then tag and push
+git tag vX.Y.Z
+git push origin master vX.Y.Z
 ```
 
-### Method 2: Using Git Tags + GitHub Actions (All Platforms)
+The workflow builds macOS (DMG), Windows (ZIP), and Linux (tar.gz), then
+creates the GitHub Release with the extracted notes. CI (`.github/workflows/ci.yml`)
+runs `flutter analyze` and `flutter test` on every push to `master` and on
+pull requests.
 
-This will automatically build all platforms:
+## Quick Manual Alternatives
+
+### GitHub CLI
 
 ```bash
-# 1. Make sure all changes are committed
-git add .
-git commit -m "Release v1.0.0"
-
-# 2. Create and push the tag
-git tag v1.0.0
-git push origin main
-git push origin v1.0.0
+gh release create vX.Y.Z \
+  tibetan-typesetting-macos.dmg \
+  --title "Tibetan Typesetting vX.Y.Z" \
+  --notes-file release_notes_body.md
 ```
 
-Then:
-1. Go to your repository: https://github.com/yorickchan/tibetan_typesetting
-2. Click "Actions" tab
-3. Wait for "Build and Release" workflow to complete (~10 minutes)
-4. Go to "Releases" and edit the auto-created release to add description
+### GitHub Web
 
-### Method 3: Manual Upload via GitHub Web
-
-1. Go to: https://github.com/yorickchan/tibetan_typesetting/releases/new
-2. Click "Choose a tag" → Type `v1.0.0` → "Create new tag"
-3. Set release title: `Tibetan Typesetting v1.0.0`
-4. Copy content from `RELEASE_NOTES.md` into description
-5. Drag and drop `tibetan-typesetting-macos-v1.0.0.zip`
-6. Click "Publish release"
+1. Go to <https://github.com/yorickchan/tibetan_typesetting/releases/new>
+2. Choose the existing `vX.Y.Z` tag (pushed above)
+3. Paste the `## [X.Y.Z]` section from `RELEASE_NOTES.md`
+4. Upload the artifacts and click **Publish release**
 
 ## After Publishing
 
-### Update README.md
-
-Add installation instructions linking to the latest release:
-
-```markdown
-## Download
-
-Download the latest release for your platform:
-- [macOS](https://github.com/yorickchan/tibetan_typesetting/releases/latest)
-- [Windows](https://github.com/yorickchan/tibetan_typesetting/releases/latest)
-- [Linux](https://github.com/yorickchan/tibetan_typesetting/releases/latest)
-```
-
-### Announce
-
-Consider announcing your release:
-- Repository README
-- Project website/blog
-- Social media
-- Relevant communities
-
-## Future Releases
-
-For subsequent releases:
-
-1. Update version in `pubspec.yaml`
-2. Update `RELEASE_NOTES.md` with changes
-3. Follow one of the methods above with new version number
-4. Consider keeping old releases available for users
+- Point users at the release page:
+  <https://github.com/yorickchan/tibetan_typesetting/releases/latest>
+- Verify the macOS DMG signature if signing secrets changed:
+  `codesign --verify --verbose=2 tibetan-typesetting-macos.dmg && xcrun stapler validate tibetan-typesetting-macos.dmg`
 
 ## Tips
 
-- Use **pre-releases** for beta testing: Add `--prerelease` flag to gh command
-- Create **draft releases** to prepare before publishing
-- Tag format matters: Always use `vX.Y.Z` format for auto-trigger
-- Keep release notes clear and user-focused
+- Tag format matters: always `vX.Y.Z`, matching the `pubspec.yaml` version.
+- Use `--prerelease` (CLI) or the pre-release checkbox (web) for betas.
+- Keep release notes user-focused; CI copies them verbatim into the release.
