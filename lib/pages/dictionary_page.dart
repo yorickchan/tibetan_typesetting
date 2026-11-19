@@ -11,7 +11,7 @@ import '../utils/colors.dart';
 import '../widgets/app_shell.dart';
 
 /// Dictionary grid layout: three-ish columns of compact one-line cards.
-const double kDictionaryCardMaxCrossAxisExtent = 520;
+const double kDictionaryCardMaxCrossAxisExtent = 260;
 const double kDictionaryCardMainAxisExtent = 36;
 const double kDictionaryCardCrossAxisSpacing = 8;
 const double kDictionaryCardMainAxisSpacing = 6;
@@ -427,8 +427,7 @@ class _EntryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          SizedBox(
-            width: 120,
+          Expanded(
             child: Text(
               entry.tibetanSyllable,
               maxLines: 1,
@@ -441,7 +440,7 @@ class _EntryCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Expanded(
+          Flexible(
             child: Text(
               entry.chinesePronunciation,
               maxLines: 1,
