@@ -6,6 +6,10 @@ on:
       - 'v*'
   workflow_dispatch:
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build-macos:
     runs-on: macos-latest
@@ -18,6 +22,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
 
       - name: Install dependencies
         run: flutter pub get
@@ -154,6 +159,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
           
       - name: Install dependencies
         run: flutter pub get
@@ -186,6 +192,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
           
       - name: Install dependencies
         run: flutter pub get
@@ -211,10 +218,34 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      
+
+      - name: Extract release notes
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+
+          text = open('RELEASE_NOTES.md', encoding='utf-8').read()
+          sections = re.split(r'^## ', text, flags=re.MULTILINE)[1:]
+          tag = os.environ['RELEASE_TAG'].lstrip('v')
+          body = ''
+          for section in sections:
+              version = section.split(']')[0].lstrip('[')
+              if version == tag:
+                  # Drop the " - YYYY-MM-DD" date that follows the version.
+                  rest = section.split(']', 1)[1]
+                  body = re.sub(r'^\s*-\s*\d{4}-\d{2}-\d{2}\s*', '', rest).lstrip()
+                  break
+          if not body:
+              raise SystemExit(f'No RELEASE_NOTES.md section for version {tag}')
+          open('release_notes_body.md', 'w', encoding='utf-8').write(body)
+          PY
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
-        
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -225,5 +256,6 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+          body_path: release_notes_body.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
